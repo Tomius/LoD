@@ -8,7 +8,7 @@
 std::string File2Str(const std::string& file) {
     std::ifstream shaderFile(file.c_str());
     if(!shaderFile.is_open())
-        shaderFile.open("data/" + file);
+        shaderFile.open("shaders/" + file);
     if(!shaderFile.is_open())
         throw std::runtime_error("File: " + file + " not found.");
     std::stringstream shaderString;

@@ -54,26 +54,6 @@ static inline Vec2f GetPos(int ring, char line, int segment, float distance = 1.
            );
 }
 
-static inline Vec2f GetBlockPos(int ring, char line, int segment, float distance = 1.0f) {
-#define cos30 0.866025404f
-#define sin30 0.5f
-    // Actually the distance to up is cos30, the 1 distance is towards
-    // the hexagon vertices. Even still it's easier to define a points
-    // like this, and multiply the distance with cos30 rather than
-    // multiplying every single point with cos30.
-    Vec2f points[] = {
-        {0.0f, 1.0}, {cos30, sin30}, {cos30, -sin30},
-        {0.0f, -1.0f}, {-cos30, -sin30}, {-cos30, sin30},
-    };
-    Vec2f prevPoint = points[size_t(line)]; // it's size_t to avoid compiler warning.
-    Vec2f nextPoint = points[size_t((line + 1) % 6)];
-
-    return cos30 * distance * (
-               (segment / (float)ring) * nextPoint +
-               ((ring - segment) / (float)ring) * prevPoint
-           );
-}
-
 static inline int GetIdx(int ring, char line, int segment) {
     if(ring == 0) {
         return 0;
@@ -102,7 +82,7 @@ Terrain::Terrain(const std::string& terrainFile,
     : terrain(terrainFile), w(terrain.w), h(terrain.h), image(diffusePicture) {
 
     for(int m = 0; m < mmLev; m++) {
-        const unsigned short ringCount = blockSize / (1 << m) + 1;
+        const unsigned short ringCount = blockSize / (1 << m);
 
         vao[m].Bind();
 
@@ -216,6 +196,110 @@ Terrain::Terrain(const std::string& terrainFile,
     }
 
     VertexArray::Unbind();
+}
+
+// -------======{[ Functions about creating the map from the blocks ]}======-------
+
+    /* A Hexagon is definitely needed here too to understand the code.
+                   (at least for me, it helped a lot)
+
+                            o-------o-------o
+                           / \     / \     / \
+                          /   \   /   \   /   \
+                         /     \ /     \ /     \
+                        o-------o-------o-------o
+                       / \     / \     / \     / \
+                      /   \   /   \   /   \   /   \
+                     /     \ /     \ /     \ /     \
+                    o-------o-------X-------o-------o
+                     \     / \     / \     / \     /
+                      \   /   \   /   \   /   \   /
+                       \ /     \ /     \ /     \ /
+                        o-------o-------o ------o
+                         \     / \     / \     /
+                          \   /   \   /   \   /
+                           \ /     \ /     \ /
+                            o-------o-------o                               */
+
+static inline Vec2f GetBlockPos(int ring, char line, int segment, float distance = 1.0f) {
+#define cos30 0.866025404f
+#define sin30 0.5f
+    // Actually the distance to up is cos30, the 1 distance is towards
+    // the hexagon vertices. Even still it's easier to define a points
+    // like this, and multiply the distance with cos30 rather than
+    // multiplying every single point with cos30.
+    Vec2f points[] = {
+        {0.0f, 1.0}, {cos30, sin30}, {cos30, -sin30},
+        {0.0f, -1.0f}, {-cos30, -sin30}, {-cos30, sin30},
+    };
+    Vec2f prevPoint = points[size_t(line)]; // it's size_t to avoid compiler warning.
+    Vec2f nextPoint = points[size_t((line + 1) % 6)];
+
+    return cos30 * distance * (
+               (segment / (float)ring) * nextPoint +
+               ((ring - segment) / (float)ring) * prevPoint
+           );
+}
+
+static char getLineFromAngle(float angleInRadians) {
+    float angleDegrees = fmod(angleInRadians * 180 / M_PI, 360);
+    float baseAngle = 30;
+    for(int i = 0; i < 6; i++) {
+        if(fabs(angleDegrees - (baseAngle + i * 60)) < 5){
+            return i;
+        }
+    }
+    // Shouldn't get here.
+    assert(0);
+}
+
+static void getLinePoints(std::vector<Vec2f>& data, int ringID, char lineID, size_t mLev) {
+    float distance = 0.0f;
+    for(int ring = 0; ring < ringID; ring++)
+        distIncr(mLev, distance, 0);
+    for(int segment = 0; segment < ringID; segment++)
+        data.push_back(GetPos(ringId, lineID, segment, distance));
+}
+
+static inline void CreateConnector(oglplus::LazyProgramUniform<Vec2f>& Offset,
+                                   Vec2f& center1, Vec2f& center2, size_t mLev1, size_t mLev2) {
+    Vec2f dist = center2 - center1;
+    float angle = atan2(dist.y(), dist.x());
+    char line1 = getLineFromAngle(angle);
+    char line2 = (line1 + 3) % 6;
+    short outerRing1 = blockSize / (1 << mLev1);
+    short outerRing2 = blockSize / (1 << mLev2);
+    std::vector<Vec2f> innerPoints1, innerPoints2; // the (outerRing - 1)'s points
+    std::vector<Vec2f> outerPoints; // we want both rings to use the smaller outer ring
+
+    getLinePoints(innerPoints1, outerRing1 - 1, line1, mLev1);
+    getLinePoints(innerPoints2, outerRing2 - 1, line2, mLev2);
+    if(mLev1 > mLev2) { // higher mipmap level means smaller ring (smaller in point number).
+        getLinePoints(outerPoints, outerRing1, line1, mLev1);
+        // We have to offset the other points, because they
+        // are at the opposite sides of the hexagon.
+        for(int i = 0; i < innerPoints2.size(); i++)
+            innerPoints2[i] += dist;
+        // The Gpu will offset all 3 point vector with center1,
+        // so they will all get at right place
+        Offset = center1;
+    } else { // do the exact same thing just replace the role of hexa1 and hexa2
+        getLinePoints(outerPoints, outerRing2, line2, mLev2);
+        for(int i = 0; i < innerPoints1.size(); i++)
+            innerPoints1[i] += dist;
+        Offset = center2;
+    }
+
+    VertexArray vao;
+    vao.Bind();
+
+    Buffer positions, indices;
+
+    positions.Bind(Buffer::Target::Array) {
+        Buffer::Data(Buffer::Target::Array, innerPoints1);
+        Buffer::SubData(Buffer::Target::Array, innerPoints1.size(), outerPoints);
+        Buffer::SubData(Buffer::Target::Array, innerPoints1.size() + outerPoints.size(), innerPoints2);
+    }
 }
 
 void Terrain::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgramUniform<Vec2f>& Offset) {

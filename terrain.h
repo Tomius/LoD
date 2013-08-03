@@ -10,7 +10,12 @@
 #include "terrainData.h"
 
 #define mmLev 6
-const int blockSize = 1 << mmLev; // Actually it's half the blocks' size
+// BlockSize is actually half the blocks' size
+// Also thanks to hexagonal tessellation, we have fractal coordinates
+// so at mmLev 0, the texture would actually get magnified, which we
+// really don't want as it creates really weird artifacts. So mipmaps
+// actually start from 1, not zero.
+const int blockSize = 1 << mmLev;
 
 class Terrain {
     oglplus::Context gl;

@@ -132,7 +132,7 @@ Terrain::Terrain(const std::string& terrainFile,
             int ring = ringCount - 1;
 
             // The normal ones
-            for(char line = 0; line < 6; line++) {
+            for(int line = 0; line < 6; line++) {
 
                 std::vector<unsigned int> indicesVector;
 
@@ -153,7 +153,7 @@ Terrain::Terrain(const std::string& terrainFile,
             // Idea: skip every odd vertex on the outer ring
             // It can't be easily done with triangle strip,
             // it's actually two sets of triangles
-            for(char line = 0; line < 6; line++) {
+            for(int line = 0; line < 6; line++) {
 
                 std::vector<unsigned int> indicesVector;
 
@@ -203,8 +203,10 @@ Terrain::Terrain(const std::string& terrainFile,
             PixelDataType::UnsignedByte,
             terrain.heightData.data()
         );
+
+        Texture::GenerateMipmap(Texture::Target::_2D);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-        Texture::MinFilter(Texture::Target::_2D, TextureMinFilter::Linear);
+        Texture::MinFilter(Texture::Target::_2D, TextureMinFilter::LinearMipmapLinear);
         Texture::MagFilter(Texture::Target::_2D, TextureMagFilter::Linear);
         Texture::WrapS(Texture::Target::_2D, TextureWrap::Repeat);
     }
@@ -224,10 +226,13 @@ Terrain::Terrain(const std::string& terrainFile,
             terrain.normalData.data()
         );
 
+        Texture::GenerateMipmap(Texture::Target::_2D);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-        Texture::MinFilter(Texture::Target::_2D, TextureMinFilter::Linear);
+        Texture::MinFilter(Texture::Target::_2D, TextureMinFilter::LinearMipmapLinear);
         Texture::MagFilter(Texture::Target::_2D, TextureMagFilter::Linear);
         Texture::WrapS(Texture::Target::_2D, TextureWrap::Repeat);
+        Texture::WrapT(Texture::Target::_2D, TextureWrap::Repeat);
+        Texture::WrapR(Texture::Target::_2D, TextureWrap::Repeat);
     }
 
     Texture::Active(2);
@@ -250,6 +255,8 @@ Terrain::Terrain(const std::string& terrainFile,
         Texture::MinFilter(Texture::Target::_2D, TextureMinFilter::LinearMipmapNearest);
         Texture::MagFilter(Texture::Target::_2D, TextureMagFilter::Linear);
         Texture::WrapS(Texture::Target::_2D, TextureWrap::Repeat);
+        Texture::WrapT(Texture::Target::_2D, TextureWrap::Repeat);
+        Texture::WrapR(Texture::Target::_2D, TextureWrap::Repeat);
     }
 
     VertexArray::Unbind();
@@ -302,7 +309,7 @@ static inline int GetBlockMipmapLevel(Vec2f pos, Vec2f camPos) {
     return std::min(
         std::max(
             int(log2(Length(pos - camPos)) - log2(2 * blockSize)),
-            mmLev - 1
+            1
         ), mmLev - 1
     );
 }
@@ -318,20 +325,23 @@ void Terrain::CreateConnectors(Vec2f& pos, Vec2f& camPos) {
 
     std::vector<Vec2f> innerVertices, outerVertices;
 
-    int outerRing = blockSize / (1 << own_mipmap);
     for(int line = 0; line < 6; line++) {
 
         if(own_mipmap > neighbour_mipmaps[line]) {
 
             borderIndices[own_mipmap][line][1].Bind(Buffer::Target::ElementArray);
-            size_t indicesNum = borderIndices[own_mipmap][line][1].Size(Buffer::Target::ElementArray);
+            size_t indicesNum =
+                borderIndices[own_mipmap][line][1].Size(Buffer::Target::ElementArray)
+                / sizeof(int);
 
             gl.DrawElements(PrimitiveType::Triangles, indicesNum, DataType::UnsignedInt);
 
         } else {
 
             borderIndices[own_mipmap][line][0].Bind(Buffer::Target::ElementArray);
-            int indicesNum = borderIndices[own_mipmap][line][0].Size(Buffer::Target::ElementArray);
+            int indicesNum =
+                borderIndices[own_mipmap][line][0].Size(Buffer::Target::ElementArray)
+                / sizeof(int);
 
             gl.DrawElements(PrimitiveType::TriangleStrip, indicesNum, DataType::UnsignedInt);
 

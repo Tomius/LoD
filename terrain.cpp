@@ -165,17 +165,27 @@ Terrain::Terrain(const std::string& terrainFile,
                         indicesVector.push_back(GetIdx(ring - 1, line, segment - 1));
                         indicesVector.push_back(GetIdx(ring - 1, line, segment));
                     }
-                    indicesVector.push_back(GetIdx(ring, line, segment));
-                    indicesVector.push_back(GetIdx(ring - 1, line, segment));
-                    indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
+                    if(segment != ring - 2) {
+                        indicesVector.push_back(GetIdx(ring, line, segment));
+                        indicesVector.push_back(GetIdx(ring - 1, line, segment));
+                        indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
+                    }
                 }
+                // The end is special -> loops to the next line
+                indicesVector.push_back(GetIdx(ring, line, ring - 2));
+                indicesVector.push_back(GetIdx(ring - 1, line, ring - 2));
+                indicesVector.push_back(GetIdx(ring - 1, line + 1, 0));
 
                 // The second set (this could be a triangle strip)
-                for(int segment = 0; segment < ring - 1; segment += 2) {
+                for(int segment = 0; segment < ring - 2; segment += 2) {
                     indicesVector.push_back(GetIdx(ring, line, segment));
                     indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
                     indicesVector.push_back(GetIdx(ring, line, segment + 2));
                 }
+                // The end is special -> loops to the next line
+                indicesVector.push_back(GetIdx(ring, line, ring - 2));
+                indicesVector.push_back(GetIdx(ring - 1, line + 1, 0));
+                indicesVector.push_back(GetIdx(ring, line + 1, 0));
 
                 borderIndices[m][line][1].Bind(Buffer::Target::ElementArray);
                 Buffer::Data(Buffer::Target::ElementArray, indicesVector);

@@ -3,10 +3,6 @@
 #include <iostream>
 #include <SFML/Window.hpp>
 #include <GL/glew.h>
-// Release mode + these might get you +5 fps
-//#define OGLPLUS_LOW_PROFILE 1
-//#define OGLPLUS_CHECK(x)
-//#define assert(x)
 #include "oglplus/gl.hpp"
 #include "oglplus/all.hpp"
 #include "skybox.h"
@@ -38,7 +34,6 @@ void FPS_Display(float time) {
     }
 }
 
-#include "terrainData.h"
 int main() {
     bool fixMouse = false;
     sf::Window window(sf::VideoMode(800, 600), "Land of Dreams");

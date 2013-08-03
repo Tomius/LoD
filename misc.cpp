@@ -23,29 +23,20 @@ void LoadTexture(const std::string& filename, oglplus::Texture::Target target) {
     try {
         Magick::Image image = Magick::Image(filename);
         Magick::Blob blob;
-        image.write(&blob, "RGB");
+        image.write(&blob, "RGBA");
 
         Texture::Image2D(
             target,
             0,
-            PixelDataInternalFormat::CompressedSRGB,
+            PixelDataInternalFormat::SRGB8Alpha8,
             image.columns(),
             image.rows(),
             0,
-            PixelDataFormat::RGB,
+            PixelDataFormat::RGBA,
             PixelDataType::UnsignedByte,
             blob.data()
         );
     } catch(Magick::Error& Error) {
-        Texture::Image2D(
-            target, 0, PixelDataInternalFormat::RGBA, 1, 1, 0,
-            PixelDataFormat::RGBA, PixelDataType::UnsignedByte, nullptr
-        );
-        Texture::BorderColor(target, Vec4f(1.0f, 1.0f, 1.0f, 1.0f));
-        Texture::WrapS(target, TextureWrap::ClampToBorder);
-        Texture::WrapT(target, TextureWrap::ClampToBorder);
-        Texture::WrapR(target, TextureWrap::ClampToBorder);
-
         std::cerr << "Error loading texture: " << Error.what() << std::endl;
     }
 }

@@ -33,10 +33,7 @@ Skybox::Skybox()
 
         for(int i = 0; i < 6; i++) {
             char c[2] = {char('0' + i), 0};
-            Texture::Image2D(
-                Texture::CubeMapFace(i),
-                images::LoadTexture("clouds01-cm_" + std::string(c), false, false)
-            );
+            LoadTexture("textures/skybox_" + std::string(c) + ".png", Texture::CubeMapFace(i));
         }
     }
 }

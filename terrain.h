@@ -16,6 +16,7 @@ class Terrain {
     oglplus::Context gl;
     oglplus::VertexArray vao[mmLev];
     oglplus::Buffer positions[mmLev], indices[mmLev];
+    oglplus::Buffer borderIndices[mmLev][6][2];
     size_t vertexNum[mmLev], indexNum[mmLev];
     oglplus::Texture colorMap, heightMap, normalMap;
 
@@ -26,6 +27,7 @@ class Terrain {
     void DrawBlocks(const oglplus::Vec3f& camPos,
                     oglplus::LazyProgramUniform<oglplus::Vec2f>& Offset
     );
+    void CreateConnectors(oglplus::Vec2f& pos, oglplus::Vec2f& camPos);
 public:
     Terrain(const std::string& terrainFile,
             const std::string& diffusePicture

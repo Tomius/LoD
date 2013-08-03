@@ -109,7 +109,7 @@ Terrain::Terrain(const std::string& terrainFile,
         indices[m].Bind(Buffer::Target::ElementArray);
         {
             std::vector<unsigned int> indicesVector;
-            for(int ring = 1; ring < ringCount; ring++) {
+            for(int ring = 1; ring < ringCount - 1; ring++) { // the border indices are separate
                 for(char line = 0; line < 6; line++) {
                     for(int segment = 0; segment < ring - 1; segment++) {
                         indicesVector.push_back(GetIdx(ring, line, segment));
@@ -124,7 +124,64 @@ Terrain::Terrain(const std::string& terrainFile,
 
             indexNum[m] = indicesVector.size();
             Buffer::Data(Buffer::Target::ElementArray, indicesVector);
+
         }
+
+        // create the border indices
+        {
+            int ring = ringCount - 1;
+
+            // The normal ones
+            for(char line = 0; line < 6; line++) {
+
+                std::vector<unsigned int> indicesVector;
+
+                for(int segment = 0; segment < ring - 1; segment++) {
+                    indicesVector.push_back(GetIdx(ring, line, segment));
+                    indicesVector.push_back(GetIdx(ring - 1, line, segment));
+                }
+                indicesVector.push_back(GetIdx(ring, line, ring - 1));
+                indicesVector.push_back(GetIdx(ring - 1, line + 1, 0));
+                indicesVector.push_back(GetIdx(ring, line + 1, 0));
+                indicesVector.push_back(RESTART);
+
+                borderIndices[m][line][0].Bind(Buffer::Target::ElementArray);
+                Buffer::Data(Buffer::Target::ElementArray, indicesVector);
+            }
+
+            // The ones that connect different mipmapLevel blocks
+            // Idea: skip every odd vertex on the outer ring
+            // It can't be easily done with triangle strip,
+            // it's actually two sets of triangles
+            for(char line = 0; line < 6; line++) {
+
+                std::vector<unsigned int> indicesVector;
+
+                // The first set (can't ascii art it, but get a paper and a pen,
+                // and draw, it's a must if you want to understand it)
+                for(int segment = 0; segment < ring - 1; segment += 2) {
+                    if(segment != 0) {
+                        indicesVector.push_back(GetIdx(ring, line, segment));
+                        indicesVector.push_back(GetIdx(ring - 1, line, segment - 1));
+                        indicesVector.push_back(GetIdx(ring - 1, line, segment));
+                    }
+                    indicesVector.push_back(GetIdx(ring, line, segment));
+                    indicesVector.push_back(GetIdx(ring - 1, line, segment));
+                    indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
+                }
+
+                // The second set (this could be a triangle strip)
+                for(int segment = 0; segment < ring - 1; segment += 2) {
+                    indicesVector.push_back(GetIdx(ring, line, segment));
+                    indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
+                    indicesVector.push_back(GetIdx(ring, line, segment + 2));
+                }
+
+                borderIndices[m][line][1].Bind(Buffer::Target::ElementArray);
+                Buffer::Data(Buffer::Target::ElementArray, indicesVector);
+            }
+        }
+
     }
 
 
@@ -245,44 +302,42 @@ static inline int GetBlockMipmapLevel(Vec2f pos, Vec2f camPos) {
     return std::min(
         std::max(
             int(log2(Length(pos - camPos)) - log2(2 * blockSize)),
-            0
+            mmLev - 1
         ), mmLev - 1
     );
 }
 
-//static void GetLinePoints(std::vector<Vec2f>& data, int ringID,
-//                          char lineID, size_t mLev, bool halfSegments = false) {
-//    float distance = 0.0f;
-//    for(int ring = 0; ring < ringID; ring++)
-//        distIncr(mLev, distance, 0);
-//    for(int segment = 0; segment < halfSegments ? ringID / 2 : ringID; segment++)
-//        data.push_back(GetPos(ringID, lineID, segment, distance));
-//}
-//
-//
-//static inline void CreateConnectors(Vec2f& pos, Vec2f& camPos) {
-//
-//    int own_mipmap = GetBlockMipmapLevel(pos, camPos);
-//    int neighbour_mipmaps[6];
-//    for(int i = 0; i < 6; i++) {
-//        Vec2f neighbour = GetBlockPos(1, i, 0, 2*blockSize);
-//        neighbour_mipmaps[i] = GetBlockMipmapLevel(pos + neighbour, camPos);
-//    }
-//
-//    std::vector<Vec2f> innerVertices, outerVertices;
-//
-//    int outerRing = blockSize / (1 << own_mipmap);
-//    for(int i = 0; i < 6; i++) {
-//
-//        if(own_mipmap > neighbour_mipmaps[i]) {
-//            GetLinePoints(innerVertices, outerRing - 1, i, own_mipmap);
-//            GetLinePoints(outerVertices, outerRing, i, own_mipmap, true);
-//        } else {
-//            GetLinePoints(innerVertices, outerRing - 1, i, own_mipmap);
-//            GetLinePoints(outerVertices, outerRing, i, own_mipmap);
-//        }
-//    }
-//}
+void Terrain::CreateConnectors(Vec2f& pos, Vec2f& camPos) {
+
+    int own_mipmap = GetBlockMipmapLevel(pos, camPos);
+    int neighbour_mipmaps[6];
+    for(int line = 0; line < 6; line++) {
+        Vec2f neighbour = GetBlockPos(1, line, 0, 2*blockSize);
+        neighbour_mipmaps[line] = GetBlockMipmapLevel(pos + neighbour, camPos);
+    }
+
+    std::vector<Vec2f> innerVertices, outerVertices;
+
+    int outerRing = blockSize / (1 << own_mipmap);
+    for(int line = 0; line < 6; line++) {
+
+        if(own_mipmap > neighbour_mipmaps[line]) {
+
+            borderIndices[own_mipmap][line][1].Bind(Buffer::Target::ElementArray);
+            size_t indicesNum = borderIndices[own_mipmap][line][1].Size(Buffer::Target::ElementArray);
+
+            gl.DrawElements(PrimitiveType::Triangles, indicesNum, DataType::UnsignedInt);
+
+        } else {
+
+            borderIndices[own_mipmap][line][0].Bind(Buffer::Target::ElementArray);
+            int indicesNum = borderIndices[own_mipmap][line][0].Size(Buffer::Target::ElementArray);
+
+            gl.DrawElements(PrimitiveType::TriangleStrip, indicesNum, DataType::UnsignedInt);
+
+        }
+    }
+}
 
 void Terrain::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgramUniform<Vec2f>& Offset) {
     // The center piece is special
@@ -293,7 +348,9 @@ void Terrain::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgramUnif
 
     // Draw
     vao[mipmapLevel].Bind();
+    indices[mipmapLevel].Bind(Buffer::Target::ElementArray);
     gl.DrawElements(PrimitiveType::TriangleStrip, indexNum[mipmapLevel], DataType::UnsignedInt);
+    CreateConnectors(pos, camPos);
 
     // All the other ones
     float distance = 2 * blockSize;
@@ -307,7 +364,9 @@ void Terrain::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgramUnif
 
                 // Draw
                 vao[mipmapLevel].Bind();
+                indices[mipmapLevel].Bind(Buffer::Target::ElementArray);
                 gl.DrawElements(PrimitiveType::TriangleStrip, indexNum[mipmapLevel], DataType::UnsignedInt);
+                CreateConnectors(pos, camPos);
             }
         }
         distance += 2 * blockSize;

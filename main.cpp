@@ -43,7 +43,7 @@ int main() {
 //    RawTerrainData terrain("terrain/mideu.rtd");
 //    terrain.Convert("terrain/mideu.terrain", 1.0f, 1.5f);
     bool fixMouse = false;
-    sf::Window window(sf::VideoMode(800, 600), "OpenGL");
+    sf::Window window(sf::VideoMode(800, 600), "Land of Dreams");
     window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame
     sf::Clock clock;
     if(glewInit() == GLEW_OK && GLEW_VERSION_3_3) try {
@@ -53,9 +53,10 @@ int main() {
             BloomEffect bloom;
             Camera cam(oglplus::Vec3f(0.0, 100.0, 0.0), oglplus::Vec3f(1.0, 99.0, 1.0), 50.0f);
 
+            sf::Event event;
             bool running = true;
             while(running) {
-                sf::Event event;
+
                 while(window.pollEvent(event)) {
                     if(event.type == sf::Event::Closed ||
                         (event.type == sf::Event::KeyPressed &&

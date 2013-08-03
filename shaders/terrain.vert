@@ -14,7 +14,7 @@ out vec2 texCoord;
 void main() {
     vec2 offsPos = Position + Offset;
     ivec2 texSize = textureSize(HeightMap, 0);
-    texCoord = ((ivec2(offsPos) + texSize / 2) % texSize) / vec2(texSize);
+    texCoord = ((ivec2(round(offsPos)) + texSize / 2) % texSize) / vec2(texSize);
 
     float height = texture(HeightMap, texCoord).r * 255;
     worldPos = Scales * vec3(offsPos.x, height, offsPos.y);

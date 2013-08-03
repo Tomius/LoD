@@ -318,7 +318,8 @@ static inline Vec2f GetBlockPos(int ring, char line, int segment, float distance
 static inline int GetBlockMipmapLevel(Vec2f pos, Vec2f camPos) {
     return std::min(
         std::max(
-            int(log2(Length(pos - camPos)) - log2(2 * blockSize)),
+                                // DEBUG
+            int(log2(Length(pos /*- camPos*/)) - log2(2 * blockSize)),
             1
         ), mmLev - 1
     );
@@ -337,7 +338,7 @@ void Terrain::CreateConnectors(Vec2f& pos, Vec2f& camPos) {
 
     for(int line = 0; line < 6; line++) {
 
-        if(own_mipmap > neighbour_mipmaps[line]) {
+        if(own_mipmap < neighbour_mipmaps[line]) {
 
             borderIndices[own_mipmap][line][1].Bind(Buffer::Target::ElementArray);
             size_t indicesNum =

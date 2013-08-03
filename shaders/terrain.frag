@@ -43,7 +43,7 @@ void main() {
         0.0, 1.0
     ) / 2;
 
-    fragColor = /*vec3(0.0, 1.0, 0.0) - 0.1 * */mix(Color, Fog, alpha);
+    fragColor = /*vec3(0.0, 1.0, 0.0) - 0.1 **/ mix(Color, Fog, alpha);
 
 }
 

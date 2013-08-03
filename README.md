@@ -10,7 +10,7 @@ Dependencies:
 -------------
 * OpenGL 3.3 + GLEW
 * SFML - for window handling
-* oglplus - header only c++ wrapper for OpenGL.
+* oglplus (*included*) - header only c++ wrapper for OpenGL.
 * Magick++ - for image loading.
 
 

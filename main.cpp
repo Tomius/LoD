@@ -40,8 +40,6 @@ void FPS_Display(float time) {
 
 #include "terrainData.h"
 int main() {
-//    RawTerrainData terrain("terrain/mideu.rtd");
-//    terrain.Convert("terrain/mideu.terrain", 1.0f, 1.5f);
     bool fixMouse = false;
     sf::Window window(sf::VideoMode(800, 600), "Land of Dreams");
     window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame

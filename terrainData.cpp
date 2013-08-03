@@ -7,17 +7,41 @@
 
 using namespace std;
 
+// -------======{[ Handling endianness ]}======-------
+
+// All the binary formats described here use little-endian encoding.
+
+bool IsLittleEndian() {
+    // The short value 1 has bytes (1, 0) in
+    // little-endian and (0, 1) in big-endian
+    short s = 1;
+    return (((char*)&s)[0]) == 1;
+}
+
+static bool littleEndian = IsLittleEndian();
+
+template <class T>
+void endianSwap(T& data) {
+    if(littleEndian)
+        return;
+    T swapped;
+    for(size_t i = 0; i < sizeof(T); i++) {
+        ((char *)&swapped)[i] = ((char*)&data)[sizeof(T) - i - 1];
+    }
+    data = swapped;
+}
+
 // -------======{[ RawImageData ]}======-------
 
 RawImageData::RawImageData(const std::string& filename, const std::string& colorString) {
     if(filename.find(".rtc") != string::npos) {
-        int num = 1;
-        assert(*(char *)&num == 1);
-
         ifstream ifs(filename, ios::binary);
         ifs.read((char *)&w, sizeof(size_t));
+        endianSwap(w);
         ifs.read((char *)&h, sizeof(size_t));
+        endianSwap(h);
         ifs.read((char *)&bpp, sizeof(size_t));
+        endianSwap(bpp);
         data.resize(w * h * bpp);
         ifs.read((char *)data.data(), data.size());
     } else {
@@ -32,8 +56,11 @@ RawImageData::RawImageData(const std::string& filename, const std::string& color
 
 void RawImageData::Save(const std::string& filename) {
     ofstream ofs(filename, ios::binary);
+    endianSwap(w);
     ofs.write((const char *)&w, sizeof(size_t));
+    endianSwap(h);
     ofs.write((const char *)&h, sizeof(size_t));
+    endianSwap(bpp);
     ofs.write((const char *)&bpp, sizeof(size_t));
     ofs.write((const char *)data.data(), data.size());
 }
@@ -54,7 +81,9 @@ RawTerrainData::RawTerrainData(const std::string& filename) {
 void RawTerrainData::Save(const std::string& filename) {
     ofstream ofs(filename, ios::binary);
 
+    endianSwap(w);
     ofs.write((const char *)&w, sizeof(size_t));
+    endianSwap(h);
     ofs.write((const char *)&h, sizeof(size_t));
     ofs.write((const char *)heightData.data(), heightData.size());
 
@@ -72,7 +101,9 @@ void RawTerrainData::InitFromRawTerrain(const std::string& filename) {
     assert(*(char *)&num == 1);
 
     ifs.read((char *)&w, sizeof(size_t));
+    endianSwap(w);
     ifs.read((char *)&h, sizeof(size_t));
+    endianSwap(h);
 
     heightData.resize(w * h);
     ifs.read((char *)heightData.data(), heightData.size());
@@ -197,9 +228,13 @@ void RawTerrainData::Convert(const std::string& filename, float xzScale, float y
 
     ofstream ofs(filename, ios::binary);
 
+    endianSwap(w);
     ofs.write((const char *)&w, sizeof(size_t));
+    endianSwap(h);
     ofs.write((const char *)&h, sizeof(size_t));
+    endianSwap(xzScale);
     ofs.write((const char *)&xzScale, sizeof(float));
+    endianSwap(yScale);
     ofs.write((const char *)&yScale, sizeof(float));
 
     ofs.write((const char *)heightData.data(), heightData.size() * sizeof(char));
@@ -215,10 +250,28 @@ void RawTerrainData::Convert(const std::string& filename, float xzScale, float y
 
 TerrainData::TerrainData(const std::string& datafile) {
 
-    ifstream ifs(datafile, ios::binary);
-
     assert(datafile.find(".terrain") != string::npos);
-    if(!ifs.good()) {
+
+    ifstream ifs(datafile, ios::binary);
+    if(!ifs.is_open()) {
+        // Try to find a raw terrain file
+        // with the same name and build it
+        std::string str(datafile);
+        str.erase(str.find(".terrain"));
+        str += ".rtd";
+        ifs.open(str);
+        if(ifs.good()) {
+            std::cout <<
+                "The raw terrain data file has to be preprocessed" <<
+                " before it can be used for rendering." << std::endl << std::endl;
+            RawTerrainData terrain(str);
+            terrain.Convert(datafile);
+            ifs.close();
+            ifs.open(datafile, ios::binary);
+        } else {
+            throw std::runtime_error("Error reading file: " + datafile);
+        }
+    } else if(!ifs.good()) {
         throw std::runtime_error("Error reading file: " + datafile);
     }
 
@@ -227,9 +280,13 @@ TerrainData::TerrainData(const std::string& datafile) {
     assert(*(char *)&num == 1);
 
     ifs.read((char *)&w, sizeof(size_t));
+    endianSwap(w);
     ifs.read((char *)&h, sizeof(size_t));
+    endianSwap(h);
     ifs.read((char *)&xzScale, sizeof(float));
+    endianSwap(xzScale);
     ifs.read((char *)&yScale, sizeof(float));
+    endianSwap(yScale);
 
     heightData.resize(w * h);
     normalData.resize(w * h);

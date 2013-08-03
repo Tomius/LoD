@@ -11,7 +11,7 @@
 #include <oglplus/all.hpp>
 #include "skybox.h"
 #include "camera.h"
-#include "hills.h"
+#include "terrain.h"
 #include "bloom.h"
 
 oglplus::Context gl;
@@ -49,7 +49,7 @@ int main() {
     if(glewInit() == GLEW_OK && GLEW_VERSION_3_3) try {
             GL_Init();
             Skybox skybox;
-            Hills hills(skybox);
+            Terrain terrain(skybox);
             BloomEffect bloom;
             Camera cam(oglplus::Vec3f(0.0, 100.0, 0.0), oglplus::Vec3f(1.0, 99.0, 1.0), 50.0f);
 
@@ -73,7 +73,7 @@ int main() {
                           10, 6000
                         );
                         skybox.Reshape(projMat);
-                        hills.Reshape(projMat);
+                        terrain.Reshape(projMat);
 
                     } else if(event.type == sf::Event::KeyPressed &&
                               event.key.code == sf::Keyboard::F11) {
@@ -91,7 +91,7 @@ int main() {
                 FPS_Display(time);
 
                 skybox.Render(time, camMatrix);
-                hills.Render(time, camMatrix, camPos);
+                terrain.Render(time, camMatrix, camPos);
                 bloom.Render();
 
                 window.display();

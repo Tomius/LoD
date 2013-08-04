@@ -22,18 +22,6 @@ class TerrainMesh {
     oglplus::Context gl;
     oglplus::VertexArray vao[blockMipmapLevel];
     oglplus::Buffer positions[blockMipmapLevel], indices[blockMipmapLevel];
-    // Hexagons at the change of mipmap levels has to have irregular edges
-    // or geometry cracks will happen. These edges could be drawn separately
-    // if the PCIE wasn't already the bottleneck. So unfortunately we have to
-    // have a fckload of IB that cover the full hexagon for every single possibility.
-    // Actually not all the blockMipmapLevel * 314, we can use geometry to greatly reduce the number
-    // of them. For example we know that a hexagon will have either exactly 6, or maximum 3
-    // irregular edges so already halved the number of IBs we need. Also the irregular
-    // edges are next to each other all the time, so that we only have to store let's say
-    // the rightmost irregular edge's line ID, so now we have blockMipmapLevel * (1 + 6 + 6 + 6 + 1)
-    // so blockMipmapLevel * 20 IB. And we also know that there won't be higher mipmap level than
-    // the highest mipmap level we have (genius idea isn't it ?) so don't need irregular
-    // edges for that mipmap level. So we actually need 20 * (blockMipmapLevel - 1) + 1 IB.
     oglplus::Buffer borderIndices[blockMipmapLevel][6][2];
     size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
     oglplus::Texture colorMap, heightMap, normalMap;

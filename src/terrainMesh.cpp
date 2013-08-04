@@ -318,7 +318,7 @@ static inline Vec2f GetBlockPos(int ring, char line, int segment, float distance
 static inline int GetBlockMipmapLevel(Vec2f pos, Vec2f camPos) {
     return std::min(
         std::max(
-            int(log2(Length(pos /*- camPos*/)) - log2(2 * blockRadius)),
+            int(log2(Length(pos - camPos)) - log2(2 * blockRadius)),
             0
         ), blockMipmapLevel - 1
     );
@@ -336,26 +336,14 @@ void TerrainMesh::CreateConnectors(Vec2f& pos, Vec2f& camPos) {
     std::vector<Vec2f> innerVertices, outerVertices;
 
     for(int line = 0; line < 6; line++) {
+        int irregular = own_mipmap < neighbour_mipmaps[line] ? 1 : 0;
 
-        if(own_mipmap < neighbour_mipmaps[line]) {
+        borderIndices[own_mipmap][line][irregular].Bind(Buffer::Target::ElementArray);
+        size_t indicesNum =
+            borderIndices[own_mipmap][line][irregular].Size(Buffer::Target::ElementArray)
+            / sizeof(int);
 
-            borderIndices[own_mipmap][line][1].Bind(Buffer::Target::ElementArray);
-            size_t indicesNum =
-                borderIndices[own_mipmap][line][1].Size(Buffer::Target::ElementArray)
-                / sizeof(int);
-
-            gl.DrawElements(PrimitiveType::TriangleStrip, indicesNum, DataType::UnsignedInt);
-
-        } else {
-
-            borderIndices[own_mipmap][line][0].Bind(Buffer::Target::ElementArray);
-            int indicesNum =
-                borderIndices[own_mipmap][line][0].Size(Buffer::Target::ElementArray)
-                / sizeof(int);
-
-            gl.DrawElements(PrimitiveType::TriangleStrip, indicesNum, DataType::UnsignedInt);
-
-        }
+        gl.DrawElements(PrimitiveType::TriangleStrip, indicesNum, DataType::UnsignedInt);
     }
 }
 

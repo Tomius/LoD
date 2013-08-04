@@ -61,9 +61,9 @@ int main() {
                         gl.Viewport(width, height);
                         bloom.Reshape(width, height);
                         auto projMat = oglplus::CamMatrixf::PerspectiveX(
-                          oglplus::Degrees(60),
+                          oglplus::Degrees(80),
                           float(width) / height,
-                          10, 6000
+                          5, 6000
                         );
                         skybox.Reshape(projMat);
                         terrain.Reshape(projMat);

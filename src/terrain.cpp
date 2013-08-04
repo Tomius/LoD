@@ -19,6 +19,9 @@ Terrain::Terrain(const Skybox& skybox)
     VertexShader vs;
     vs.Source(File2Str("terrain.vert")).Compile();
 
+    GeometryShader gs;
+    gs.Source(File2Str("terrain.geom")).Compile();
+
     FragmentShader fs;
     fs.Source(File2Str("terrain.frag")).Compile();
 

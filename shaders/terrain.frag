@@ -4,6 +4,7 @@ in vec3 normal;
 in vec3 camPos;
 in vec3 worldPos;
 in vec2 texCoord;
+in float invalid;
 uniform sampler2D ColorMap;
 uniform vec3 Scales;
 
@@ -19,6 +20,8 @@ vec3 fogColor = vec3(0.6);
 const float SpecularShininess = 50.0f;
 
 void main() {
+    if(invalid != 0.0)
+        discard;
     float d =  dot(
         normalize(normal),
         normalize(AmbientDirection())

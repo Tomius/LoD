@@ -54,18 +54,27 @@ static inline Vec2f GetPos(int ring, char line, int segment, float distance = 1.
            );
 }
 
-static inline int GetIdx(int ring, char line, int segment) {
+static inline int GetIdx(int ring, char _line, int _segment) {
     if(ring == 0) {
         return 0;
     }
     // Count of vertices in full rings: 1 + 1*6 + 2*6 + ... + (ring - 1)*6
     int smallerRings = 1 + (ring - 1) * (ring) / 2 * 6;
+    // When counting the current ring, i also let the segment num loop to the next line
+    // For example the second ring's 0th line's end point can be addressed as (2, 0, 2),
+    // not just (2, 1, 0). This simplifies the way the indicies are counted by a lot.
+    char line = _line;
+    int segment = _segment;
+    if(_segment >= ring) {
+        segment = ring - _segment;
+        line = _line + 1;
+    }
     int currentRing = (line % 6) * ring + segment;
     return smallerRings + currentRing;
 }
 
 static inline void distIncr(int mmlev, float& distance, int ring) {
-    distance += 1 << mmlev;
+    distance += 1 << (mmlev + 1);
 }
 
 void PrintTime(const std::string& text = "") {
@@ -85,8 +94,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
                          const std::string& diffusePicture)
     : terrain(terrainFile), w(terrain.w), h(terrain.h), image(diffusePicture) {
 
-    for(int m = 0; m < mmLev; m++) {
-        const unsigned short ringCount = blockSize / (1 << m) + 1;
+    for(int m = 0; m < blockMipmapLevel; m++) {
+        const unsigned short ringCount = blockRadius / (1 << (m + 1)) + 1;
 
         vao[m].Bind();
 
@@ -115,12 +124,11 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             std::vector<unsigned int> indicesVector;
             for(int ring = 1; ring < ringCount - 1; ring++) { // the border indices are separate
                 for(char line = 0; line < 6; line++) {
-                    for(int segment = 0; segment < ring - 1; segment++) {
+                    for(int segment = 0; segment < ring; segment++) {
                         indicesVector.push_back(GetIdx(ring, line, segment));
                         indicesVector.push_back(GetIdx(ring - 1, line, segment));
                     }
-                    indicesVector.push_back(GetIdx(ring, line, ring - 1));
-                    indicesVector.push_back(GetIdx(ring - 1, line + 1, 0));
+                    // There's one extra vertex at the end.
                     indicesVector.push_back(GetIdx(ring, line + 1, 0));
                     indicesVector.push_back(RESTART);
                 }
@@ -131,7 +139,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
         }
 
-        // create the border indices
+        // -------======{[ Create the border indices ]}======-------
+
         {
             int ring = ringCount - 1;
 
@@ -140,12 +149,11 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
                 std::vector<unsigned int> indicesVector;
 
-                for(int segment = 0; segment < ring - 1; segment++) {
+                for(int segment = 0; segment < ring; segment++) {
                     indicesVector.push_back(GetIdx(ring, line, segment));
                     indicesVector.push_back(GetIdx(ring - 1, line, segment));
                 }
-                indicesVector.push_back(GetIdx(ring, line, ring - 1));
-                indicesVector.push_back(GetIdx(ring - 1, line + 1, 0));
+                // There's one extra vertex at the end.
                 indicesVector.push_back(GetIdx(ring, line + 1, 0));
                 indicesVector.push_back(RESTART);
 
@@ -155,41 +163,29 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
             // The ones that connect different mipmapLevel blocks
             // Idea: skip every odd vertex on the outer ring
-            // It can't be easily done with triangle strip,
-            // it's actually two sets of triangles
             for(int line = 0; line < 6; line++) {
 
                 std::vector<unsigned int> indicesVector;
 
-                // The first set (can't ascii art it, but get a paper and a pen,
-                // and draw, it's a must if you want to understand it)
-                for(int segment = 0; segment < ring - 1; segment += 2) {
+                // The first set
+                for(int segment = 0; segment < ring; segment += 2) {
                     if(segment != 0) {
-                        indicesVector.push_back(GetIdx(ring, line, segment));
                         indicesVector.push_back(GetIdx(ring - 1, line, segment - 1));
-                        indicesVector.push_back(GetIdx(ring - 1, line, segment));
                     }
-                    if(segment != ring - 2) {
-                        indicesVector.push_back(GetIdx(ring, line, segment));
-                        indicesVector.push_back(GetIdx(ring - 1, line, segment));
-                        indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
-                    }
+                    indicesVector.push_back(GetIdx(ring, line, segment));
+                    indicesVector.push_back(GetIdx(ring - 1, line, segment));
+                    indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
+                    indicesVector.push_back(RESTART);
                 }
-                // The end is special -> loops to the next line
-                indicesVector.push_back(GetIdx(ring, line, ring - 2));
-                indicesVector.push_back(GetIdx(ring - 1, line, ring - 2));
-                indicesVector.push_back(GetIdx(ring - 1, line + 1, 0));
 
-                // The second set (this could be a triangle strip)
-                for(int segment = 0; segment < ring - 2; segment += 2) {
+
+                // The second set.
+                for(int segment = 0; segment < ring; segment += 2) {
                     indicesVector.push_back(GetIdx(ring, line, segment));
                     indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
                     indicesVector.push_back(GetIdx(ring, line, segment + 2));
+                    indicesVector.push_back(RESTART);
                 }
-                // The end is special -> loops to the next line
-                indicesVector.push_back(GetIdx(ring, line, ring - 2));
-                indicesVector.push_back(GetIdx(ring - 1, line + 1, 0));
-                indicesVector.push_back(GetIdx(ring, line + 1, 0));
 
                 borderIndices[m][line][1].Bind(Buffer::Target::ElementArray);
                 Buffer::Data(Buffer::Target::ElementArray, indicesVector);
@@ -322,9 +318,9 @@ static inline Vec2f GetBlockPos(int ring, char line, int segment, float distance
 static inline int GetBlockMipmapLevel(Vec2f pos, Vec2f camPos) {
     return std::min(
         std::max(
-            int(log2(Length(pos - camPos)) - log2(2 * blockSize)),
-            1
-        ), mmLev - 1
+            int(log2(Length(pos /*- camPos*/)) - log2(2 * blockRadius)),
+            0
+        ), blockMipmapLevel - 1
     );
 }
 
@@ -333,7 +329,7 @@ void TerrainMesh::CreateConnectors(Vec2f& pos, Vec2f& camPos) {
     int own_mipmap = GetBlockMipmapLevel(pos, camPos);
     int neighbour_mipmaps[6];
     for(int line = 0; line < 6; line++) {
-        Vec2f neighbour = GetBlockPos(1, line, 0, 2*blockSize);
+        Vec2f neighbour = GetBlockPos(1, line, 0, 2*blockRadius);
         neighbour_mipmaps[line] = GetBlockMipmapLevel(pos + neighbour, camPos);
     }
 
@@ -348,7 +344,7 @@ void TerrainMesh::CreateConnectors(Vec2f& pos, Vec2f& camPos) {
                 borderIndices[own_mipmap][line][1].Size(Buffer::Target::ElementArray)
                 / sizeof(int);
 
-            gl.DrawElements(PrimitiveType::Triangles, indicesNum, DataType::UnsignedInt);
+            gl.DrawElements(PrimitiveType::TriangleStrip, indicesNum, DataType::UnsignedInt);
 
         } else {
 
@@ -377,8 +373,8 @@ void TerrainMesh::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgram
     CreateConnectors(pos, camPos);
 
     // All the other ones
-    float distance = 2 * blockSize;
-    int ringCount = std::max(w, h) / (2 * blockSize) + 1;
+    float distance = 2 * blockRadius;
+    int ringCount = std::max(w, h) / (2 * blockRadius) + 1;
     for(int ring = 1; ring < ringCount; ring++) {
         for(char line = 0; line < 6; line++) {
             for(int segment = 0; segment < ring ; segment++) {
@@ -393,7 +389,7 @@ void TerrainMesh::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgram
                 CreateConnectors(pos, camPos);
             }
         }
-        distance += 2 * blockSize;
+        distance += 2 * blockRadius;
     }
 }
 

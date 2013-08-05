@@ -16,7 +16,7 @@ Dependencies:
 
 How to build (linux):
 --------------------
-* The oglplus is header-only, but have to be configured, so I can't just put it into 
+* The oglplus is header-only, but has to be configured, so I can't just put it into 
 include folder. You have to  
  * git clone https://github.com/matus-chochlik/oglplus.git
  * cd oglplus 
@@ -27,7 +27,7 @@ include folder. You have to
 
 How to build (Windows):
 ----------------------
-* The oglplus is header-only, but have to be configured, so I can't just put it into 
+* The oglplus is header-only, but has to be configured, so I can't just put it into 
 include folder. You have to dowload it from https://github.com/matus-chochlik/oglplus.git
 and run the configure.bat
 * Download the terrain files from [**here**](http://dsa11.fileflyer.com/d/c7c1dfe1-7fca-4c38-bcbe-15be87940f71/BFDBe/xLiwCBr/terrain.zip) and extract them into terrain/

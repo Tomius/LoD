@@ -3,6 +3,7 @@
 #include <iostream>
 #include <SFML/Window.hpp>
 #include <GL/glew.h>
+#define OGLPLUS_USE_GLEW
 #include "oglplus/gl.hpp"
 #include "oglplus/all.hpp"
 #include "skybox.h"

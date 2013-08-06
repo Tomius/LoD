@@ -1,7 +1,8 @@
 Land of Dreams
 ===
 
-Simple attempt of drawing big terrains in OpenGL with the geomipmapping level of detail algorithm.
+Simple attempt of drawing big terrains in OpenGL with the geomipmapping level of detail algorithm. This project also
+servers as a test subject for my C++ OpenGL wrapper, oglwrap.
 
 Here's a picture of the program's current capability:
 ![screenshot](http://oi41.tinypic.com/2cbnyb.jpg) 
@@ -15,7 +16,7 @@ Dependencies:
 
 How to build (linux):
 --------------------
-* Get the other dependencies: libsfml-dev libmagick++-dev libglew-dev
+* Get the dependencies: libsfml-dev libmagick++-dev libglew-dev
 * Download the terrain files from [**here**](http://dsa11.fileflyer.com/d/c7c1dfe1-7fca-4c38-bcbe-15be87940f71/BFDBe/xLiwCBr/terrain.zip) and extract them into terrain/
 * Use the given Makefile, or the prebuilt executeable.
 

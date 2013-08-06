@@ -2,29 +2,27 @@
 #define HEADER_16753D7B23630095
 
 #include <GL/glew.h>
-#include "oglplus/gl.hpp"
-#include "oglplus/all.hpp"
-#include "oglplus/shapes/wrapper.hpp"
+#include "oglwrap.hpp"
 
 class Skybox {
-    oglplus::Context gl;
+    oglwrap::VertexArray vao;
+    oglwrap::Buffer positions;
+    oglwrap::IndexBuffer indices;
 
-    oglplus::shapes::ShapeWrapper skybox;
+    oglwrap::VertexShader vs;
+    oglwrap::FragmentShader fs;
+    oglwrap::Program prog;
 
-    oglplus::VertexShader vs;
-    oglplus::FragmentShader fs;
-    oglplus::Program prog;
-
-    oglplus::LazyProgramUniform<oglplus::Mat4f> projectionMatrix, cameraMatrix;
-    oglplus::LazyProgramUniform<oglplus::Vec4f> sunData;
+    oglwrap::LazyUniform<glm::mat4> projectionMatrix, cameraMatrix;
+    oglwrap::LazyUniform<glm::vec4> sunData;
 public:
     Skybox();
-    void Reshape(const oglplus::CamMatrixf& projMat);
-    void Render(float time, const oglplus::CamMatrixf& camMatrix);
+    void Reshape(const glm::mat4& projMat);
+    void Render(float time, const glm::mat4& camMatrix);
 
-    oglplus::Texture envMap;
-    oglplus::FragmentShader sky_fs;
-    oglplus::Vec4f getSunData(float time) const;
+    oglwrap::TextureCube envMap;
+    oglwrap::FragmentShader sky_fs;
+    glm::vec4 getSunData(float time) const;
 };
 
 

@@ -5,8 +5,7 @@
 #include <string>
 #include <vector>
 #include <GL/glew.h>
-#include "oglplus/all.hpp"
-#include "oglplus/bound/texture.hpp"
+#include "oglwrap.hpp"
 #include "terrainData.h"
 
 // Selecting the Block's size (is 2 ^ (blockMipmapLevel + 1)) is really essential
@@ -19,28 +18,27 @@
 const int blockRadius = 1 << blockMipmapLevel;
 
 class TerrainMesh {
-    oglplus::Context gl;
-    oglplus::VertexArray vao[blockMipmapLevel];
-    oglplus::Buffer positions[blockMipmapLevel], indices[blockMipmapLevel];
-    oglplus::Buffer borderIndices[blockMipmapLevel][6][2];
+    oglwrap::VertexArray vao[blockMipmapLevel];
+    oglwrap::Buffer positions[blockMipmapLevel];
+    oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
     size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
-    oglplus::Texture colorMap, heightMap, normalMap;
+    oglwrap::Texture2D colorMap, heightMap, normalMap;
 
     TerrainData terrain;
     size_t w, h;
     RawImageData image;
 
-    void DrawBlocks(const oglplus::Vec3f& camPos,
-                    oglplus::LazyProgramUniform<oglplus::Vec2f>& Offset
+    void DrawBlocks(const glm::vec3& camPos,
+                    oglwrap::LazyUniform<glm::vec2>& Offset
     );
-    void CreateConnectors(oglplus::Vec2f& pos, oglplus::Vec2f& camPos);
+    void CreateConnectors(glm::vec2& pos, glm::vec2& camPos);
 public:
     TerrainMesh(const std::string& terrainFile,
                 const std::string& diffusePicture
     );
-    void Render(const oglplus::Vec3f& camPos,
-                oglplus::LazyProgramUniform<oglplus::Vec2f>& Offset,
-                oglplus::LazyProgramUniform<oglplus::Vec3f>& scales
+    void Render(const glm::vec3& camPos,
+                oglwrap::LazyUniform<glm::vec2>& Offset,
+                oglwrap::LazyUniform<glm::vec3>& scales
     );
 };
 

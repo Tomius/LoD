@@ -3,20 +3,19 @@
 
 #include <SFML/Window.hpp>
 #include <GL/glew.h>
-#include "oglplus/gl.hpp"
-#include "oglplus/all.hpp"
+#include "oglwrap.hpp"
 
 class Camera{
-    oglplus::Vec3f target, fwd;
+    glm::vec3 target, fwd;
     float rotx, roty; // rot angle relative to pos z axis
     const float speedPerSec;
 public:
-    Camera(oglplus::Vec3f pos, oglplus::Vec3f target = oglplus::Vec3f(), float speedPerSec = 5.0f);
+    Camera(const glm::vec3& pos, const glm::vec3& target = glm::vec3(), float speedPerSec = 5.0f);
     void Update(const sf::Window& window, bool fixMouse = false);
-    oglplus::CamMatrixf CameraMatrix();
-    oglplus::ModelMatrixf ModelMatrix();
-    oglplus::Vec3f getTarget();
-    oglplus::Vec3f getPos();
+    glm::mat4 CameraMatrix();
+    glm::mat4 ModelMatrix();
+    glm::vec3 getTarget();
+    glm::vec3 getPos();
 };
 
 

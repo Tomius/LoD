@@ -1,10 +1,12 @@
 #include "terrain.h"
 #include "misc.h"
 
-using namespace oglplus;
+using namespace oglwrap;
 
-Terrain::Terrain(const Skybox& skybox)
-    : projectionMatrix(prog, "ProjectionMatrix")
+Terrain::Terrain(Skybox& skybox)
+    : vs("terrain.vert")
+    , fs("terrain.frag")
+    , projectionMatrix(prog, "ProjectionMatrix")
     , cameraMatrix(prog, "CameraMatrix")
     , sunData(prog, "SunData")
     , scales(prog, "Scales")
@@ -16,28 +18,19 @@ Terrain::Terrain(const Skybox& skybox)
            "terrain/mideu.rtc")
     , skybox(skybox) {
 
-    VertexShader vs;
-    vs.Source(File2Str("terrain.vert")).Compile();
-
-    GeometryShader gs;
-    gs.Source(File2Str("terrain.geom")).Compile();
-
-    FragmentShader fs;
-    fs.Source(File2Str("terrain.frag")).Compile();
-
     prog << vs << fs << skybox.sky_fs;
-    prog.Link();
+    prog.Link().Use();
 
     heightMap.Set(0);
     normalMap.Set(1);
     colorMap.Set(2);
 }
 
-void Terrain::Reshape(const oglplus::Mat4f& projMat) {
-    projectionMatrix.Set(projMat);
+void Terrain::Reshape(const glm::mat4& projMat) {
+    projectionMatrix = projMat;
 }
 
-void Terrain::Render(float time, const oglplus::Mat4f& camMat, const oglplus::Vec3f& camPos) {
+void Terrain::Render(float time, const glm::mat4& camMat, const glm::vec3& camPos) {
     prog.Use();
     cameraMatrix.Set(camMat);
     sunData.Set(skybox.getSunData(time));

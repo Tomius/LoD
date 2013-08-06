@@ -3,7 +3,7 @@
 #include <SFML/System.hpp>
 #include <SFML/OpenGL.hpp>
 
-using namespace oglplus;
+using namespace oglwrap;
 #define RESTART 0xFFFFFFFF
 
 /* We want concentric rings made of hexagons like this, with increasing
@@ -38,15 +38,20 @@ using namespace oglplus;
    Every "coordinate" starts from 0 not 1. Working in this coordinate system gets
    easier with these utility functions: */
 
-static inline Vec2f GetPos(int ring, char line, int segment, float distance = 1.0f) {
+static inline glm::vec2 GetPos(int ring, char line, int segment, float distance = 1.0f) {
 #define sin60 0.866025404f
 #define cos60 0.5f
-    Vec2f points[] = {
-        {cos60, sin60}, {1.0f, 0.0f}, {cos60, -sin60},
-        {-cos60, -sin60}, {-1.0f, 0.0f}, {-cos60, sin60}
-    };
-    Vec2f prevPoint = points[size_t(line)]; // it's size_t to avoid compiler warning.
-    Vec2f nextPoint = points[size_t((line + 1) % 6)];
+    // Initializer lists doesn't work with glm :(
+    glm::vec2 points[6];
+    points[0] = glm::vec2(cos60, sin60);
+    points[1] = glm::vec2(1.0f, 0.0f);
+    points[2] = glm::vec2(cos60, -sin60);
+    points[3] = glm::vec2(-cos60, -sin60);
+    points[4] = glm::vec2(-1.0f, 0.0f);
+    points[5] = glm::vec2(-cos60, sin60);
+
+    glm::vec2 prevPoint = points[size_t(line)]; // it's size_t to avoid compiler warning.
+    glm::vec2 nextPoint = points[size_t((line + 1) % 6)];
 
     return distance * (
                (segment / (float)ring) * nextPoint +
@@ -77,15 +82,6 @@ static inline void distIncr(int mmlev, float& distance, int ring) {
     distance += 1 << (mmlev + 1);
 }
 
-void PrintTime(const std::string& text = "") {
-    static sf::Clock clock;
-    static float lastTime = 0.0f;
-    if(!text.empty()) {
-        std::cout << text << ": " << clock.getElapsedTime().asSeconds() - lastTime << std::endl;
-    }
-    lastTime = clock.getElapsedTime().asSeconds();
-}
-
 // Warning this function is nearly impossible to understand just from the code.
 // Grab a paper and a pen, and draw simple figures about it, I mean draw 1-2 ring
 // hexagons to understand the vertex positions part, and lines with max 6-8 segments
@@ -99,10 +95,10 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
         vao[m].Bind();
 
-        positions[m].Bind(Buffer::Target::Array);
+        positions[m].Bind();
         {
-            std::vector<oglplus::Vec2f> verticesVector;
-            verticesVector.push_back(Vec2f(0.0f, 0.0f));
+            std::vector<glm::vec2> verticesVector;
+            verticesVector.push_back(glm::vec2(0.0f, 0.0f));
             float distance = 0.0f;
             distIncr(m, distance, 0);
             for(int ring = 1; ring < ringCount; ring++) {
@@ -115,11 +111,11 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             }
 
             vertexNum[m] = verticesVector.size();
-            Buffer::Data(Buffer::Target::Array, verticesVector);
-            VertexAttribArray(0).Setup<Vec2f>().Enable();
+            positions[m].Data(verticesVector);
+            VertexAttribArray(0).Pointer(2).Enable();
         }
 
-        indices[m].Bind(Buffer::Target::ElementArray);
+        indices[m].Bind();
         {
             std::vector<unsigned int> indicesVector;
             for(int ring = 1; ring < ringCount - 1; ring++) { // the border indices are separate
@@ -135,7 +131,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             }
 
             indexNum[m] = indicesVector.size();
-            Buffer::Data(Buffer::Target::ElementArray, indicesVector);
+            indices[m].Data(indicesVector);
 
         }
 
@@ -157,8 +153,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
                 indicesVector.push_back(GetIdx(ring, line + 1, 0));
                 indicesVector.push_back(RESTART);
 
-                borderIndices[m][line][0].Bind(Buffer::Target::ElementArray);
-                Buffer::Data(Buffer::Target::ElementArray, indicesVector);
+                borderIndices[m][line][0].Bind();
+                borderIndices[m][line][0].Data(indicesVector);
             }
 
             // The ones that connect different mipmapLevel blocks
@@ -187,8 +183,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
                     indicesVector.push_back(RESTART);
                 }
 
-                borderIndices[m][line][1].Bind(Buffer::Target::ElementArray);
-                Buffer::Data(Buffer::Target::ElementArray, indicesVector);
+                borderIndices[m][line][1].Bind();
+                borderIndices[m][line][1].Data(indicesVector);
             }
         }
 
@@ -199,74 +195,65 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
     GLfloat maxAniso = 0.0f;
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
 
-    Texture::Active(0);
-    heightMap.Bind(Texture::Target::_2D);
+    heightMap.Active(0);
+    heightMap.Bind();
     {
-        Texture::Image2D(
-            Texture::Target::_2D,
-            0,
+        heightMap.Upload(
             PixelDataInternalFormat::R8,
             terrain.w,
             terrain.h,
-            0,
             PixelDataFormat::Red,
             PixelDataType::UnsignedByte,
             terrain.heightData.data()
         );
 
-        Texture::GenerateMipmap(Texture::Target::_2D);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-        Texture::MinFilter(Texture::Target::_2D, TextureMinFilter::LinearMipmapLinear);
-        Texture::MagFilter(Texture::Target::_2D, TextureMagFilter::Linear);
-        Texture::WrapS(Texture::Target::_2D, TextureWrap::Repeat);
+        heightMap.GenerateMipmap();
+        heightMap.Anisotropy(maxAniso);
+        heightMap.MinFilter(MinF::LinearMipmapLinear);
+        heightMap.MagFilter(MagF::Linear);
+        heightMap.WrapS(Wrap::Repeat);
     }
 
-    Texture::Active(1);
-    normalMap.Bind(Texture::Target::_2D);
+    normalMap.Active(1);
+    normalMap.Bind();
     {
-        Texture::Image2D(
-            Texture::Target::_2D,
-            0,
+        normalMap.Upload(
             PixelDataInternalFormat::RGB8,
             terrain.w,
             terrain.h,
-            0,
             PixelDataFormat::RGB,
             PixelDataType::Byte,
             terrain.normalData.data()
         );
 
-        Texture::GenerateMipmap(Texture::Target::_2D);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-        Texture::MinFilter(Texture::Target::_2D, TextureMinFilter::LinearMipmapLinear);
-        Texture::MagFilter(Texture::Target::_2D, TextureMagFilter::Linear);
-        Texture::WrapS(Texture::Target::_2D, TextureWrap::Repeat);
-        Texture::WrapT(Texture::Target::_2D, TextureWrap::Repeat);
-        Texture::WrapR(Texture::Target::_2D, TextureWrap::Repeat);
+        normalMap.GenerateMipmap();
+        normalMap.Anisotropy(maxAniso);
+        normalMap.MinFilter(MinF::LinearMipmapLinear);
+        normalMap.MagFilter(MagF::Linear);
+        normalMap.WrapS(Wrap::Repeat);
+        normalMap.WrapT(Wrap::Repeat);
+        normalMap.WrapR(Wrap::Repeat);
     }
 
-    Texture::Active(2);
-    colorMap.Bind(Texture::Target::_2D);
+    colorMap.Active(2);
+    colorMap.Bind();
     {
-        Texture::Image2D(
-            Texture::Target::_2D,
-            0,
+        colorMap.Upload(
             PixelDataInternalFormat::SRGB8,
             image.w,
             image.h,
-            0,
             PixelDataFormat::RGB,
             PixelDataType::UnsignedByte,
             image.data.data()
         );
 
-        Texture::GenerateMipmap(Texture::Target::_2D);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-        Texture::MinFilter(Texture::Target::_2D, TextureMinFilter::LinearMipmapNearest);
-        Texture::MagFilter(Texture::Target::_2D, TextureMagFilter::Linear);
-        Texture::WrapS(Texture::Target::_2D, TextureWrap::Repeat);
-        Texture::WrapT(Texture::Target::_2D, TextureWrap::Repeat);
-        Texture::WrapR(Texture::Target::_2D, TextureWrap::Repeat);
+        colorMap.GenerateMipmap();
+        colorMap.Anisotropy(maxAniso);
+        colorMap.MinFilter(MinF::LinearMipmapLinear);
+        colorMap.MagFilter(MagF::Linear);
+        colorMap.WrapS(Wrap::ClampToEdge);
+        colorMap.WrapT(Wrap::ClampToEdge);
+        colorMap.WrapR(Wrap::ClampToEdge);
     }
 
     VertexArray::Unbind();
@@ -295,19 +282,23 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
                            \ /     \ /     \ /
                             o-------o-------o                               */
 
-static inline Vec2f GetBlockPos(int ring, char line, int segment, float distance = 1.0f) {
+static inline glm::vec2 GetBlockPos(int ring, char line, int segment, float distance = 1.0f) {
 #define cos30 0.866025404f
 #define sin30 0.5f
     // Actually the distance to up is cos30, the 1 distance is towards
     // the hexagon vertices. Even still it's easier to define a points
     // like this, and multiply the distance with cos30 rather than
     // multiplying every single point with cos30.
-    Vec2f points[] = {
-        {cos30, sin30}, {cos30, -sin30}, {0.0f, -1.0f},
-        {-cos30, -sin30}, {-cos30, sin30}, {0.0f, 1.0},
-    };
-    Vec2f prevPoint = points[size_t(line)]; // it's size_t to avoid compiler warning.
-    Vec2f nextPoint = points[size_t((line + 1) % 6)];
+    glm::vec2 points[6];
+    points[0] = glm::vec2(cos30, sin30);
+    points[1] = glm::vec2(cos30, -sin30);
+    points[2] = glm::vec2(0.0f, -1.0f);
+    points[3] = glm::vec2(-cos30, -sin30);
+    points[4] = glm::vec2(-cos30, sin30);
+    points[5] = glm::vec2(0.0f, 1.0);
+
+    glm::vec2 prevPoint = points[size_t(line)]; // it's size_t to avoid compiler warning.
+    glm::vec2 nextPoint = points[size_t((line + 1) % 6)];
 
     return cos30 * distance * (
                (segment / (float)ring) * nextPoint +
@@ -315,49 +306,47 @@ static inline Vec2f GetBlockPos(int ring, char line, int segment, float distance
            );
 }
 
-static inline int GetBlockMipmapLevel(Vec2f pos, Vec2f camPos) {
+static inline int GetBlockMipmapLevel(glm::vec2 pos, glm::vec2 camPos) {
     return std::min(
         std::max(
-            int(log2(Length(pos - camPos)) - log2(2 * blockRadius)),
+            int(log2(glm::length(pos - camPos)) - log2(2 * blockRadius)),
             0
         ), blockMipmapLevel - 1
     );
 }
 
-void TerrainMesh::CreateConnectors(Vec2f& pos, Vec2f& camPos) {
+void TerrainMesh::CreateConnectors(glm::vec2& pos, glm::vec2& camPos) {
 
     int own_mipmap = GetBlockMipmapLevel(pos, camPos);
     int neighbour_mipmaps[6];
     for(int line = 0; line < 6; line++) {
-        Vec2f neighbour = GetBlockPos(1, line, 0, 2*blockRadius);
+        glm::vec2 neighbour = GetBlockPos(1, line, 0, 2*blockRadius);
         neighbour_mipmaps[line] = GetBlockMipmapLevel(pos + neighbour, camPos);
     }
 
-    std::vector<Vec2f> innerVertices, outerVertices;
+    std::vector<glm::vec2> innerVertices, outerVertices;
 
     for(int line = 0; line < 6; line++) {
         int irregular = own_mipmap < neighbour_mipmaps[line] ? 1 : 0;
 
-        borderIndices[own_mipmap][line][irregular].Bind(Buffer::Target::ElementArray);
-        size_t indicesNum =
-            borderIndices[own_mipmap][line][irregular].Size(Buffer::Target::ElementArray)
-            / sizeof(int);
+        borderIndices[own_mipmap][line][irregular].Bind();
+        size_t indicesNum = borderIndices[own_mipmap][line][irregular].Size() / sizeof(int);
 
-        gl.DrawElements(PrimitiveType::TriangleStrip, indicesNum, DataType::UnsignedInt);
+        glDrawElements(GL_TRIANGLE_STRIP, indicesNum, DataType::UnsignedInt, nullptr);
     }
 }
 
-void TerrainMesh::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgramUniform<Vec2f>& Offset) {
+void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm::vec2>& Offset) {
     // The center piece is special
-    Vec2f pos(0.0f, 0.0f);
+    glm::vec2 pos(0.0f, 0.0f);
     Offset = pos;
-    Vec2f camPos = Vec2f(_camPos.x(), _camPos.z());
+    glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
     int mipmapLevel = GetBlockMipmapLevel(pos, camPos);
 
     // Draw
     vao[mipmapLevel].Bind();
-    indices[mipmapLevel].Bind(Buffer::Target::ElementArray);
-    gl.DrawElements(PrimitiveType::TriangleStrip, indexNum[mipmapLevel], DataType::UnsignedInt);
+    indices[mipmapLevel].Bind();
+    glDrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr);
     CreateConnectors(pos, camPos);
 
     // All the other ones
@@ -372,8 +361,8 @@ void TerrainMesh::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgram
 
                 // Draw
                 vao[mipmapLevel].Bind();
-                indices[mipmapLevel].Bind(Buffer::Target::ElementArray);
-                gl.DrawElements(PrimitiveType::TriangleStrip, indexNum[mipmapLevel], DataType::UnsignedInt);
+                indices[mipmapLevel].Bind();
+                glDrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr);
                 CreateConnectors(pos, camPos);
             }
         }
@@ -381,33 +370,33 @@ void TerrainMesh::DrawBlocks(const oglplus::Vec3f& _camPos, oglplus::LazyProgram
     }
 }
 
-void TerrainMesh::Render(const oglplus::Vec3f& camPos,
-                         oglplus::LazyProgramUniform<oglplus::Vec2f>& Offset,
-                         oglplus::LazyProgramUniform<oglplus::Vec3f>& scales) {
+void TerrainMesh::Render(const glm::vec3& camPos,
+                         oglwrap::LazyUniform<glm::vec2>& Offset,
+                         oglwrap::LazyUniform<glm::vec3>& scales) {
 
     // Logically, this should into TerrainMesh constructor. However, the shader
     // program doesn't exist yet when the constructor runs, so I set this
     // uniform value at the first render call
     static bool firstExec = true;
     if(firstExec) {
-        scales.Set(Vec3f(terrain.xzScale, terrain.yScale, terrain.xzScale));
+        scales = glm::vec3(terrain.xzScale, terrain.yScale, terrain.xzScale);
         firstExec = false;
     }
 
-    Texture::Active(0);
-    heightMap.Bind(Texture::Target::_2D);
-    Texture::Active(1);
-    normalMap.Bind(Texture::Target::_2D);
-    Texture::Active(2);
-    colorMap.Bind(Texture::Target::_2D);
-    gl.Enable(Capability::PrimitiveRestart);
-    gl.PrimitiveRestartIndex(RESTART);
+    heightMap.Active(0);
+    heightMap.Bind();
+    normalMap.Active(1);
+    normalMap.Bind();
+    colorMap.Active(2);
+    colorMap.Bind();
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(RESTART);
 
-    //gl.PolygonMode(PolygonMode::Line);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     DrawBlocks(camPos, Offset);
-    //gl.PolygonMode(PolygonMode::Fill);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    gl.Disable(Capability::PrimitiveRestart);
+    glDisable(GL_PRIMITIVE_RESTART);
     VertexArray::Unbind();
 }
 

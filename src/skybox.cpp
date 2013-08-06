@@ -1,47 +1,70 @@
 #include <GL/glew.h>
-#include "oglplus/shapes/sky_box.hpp"
-#include "oglplus/bound/texture.hpp"
-#include "oglplus/opt/list_init.hpp"
 #include "skybox.h"
-#include "misc.h"
 
-using namespace oglplus;
+using namespace oglwrap;
+using namespace glm;
 
 Skybox::Skybox()
-    : skybox(List("Position").Get(), shapes::SkyBox())
-    , vs(ObjectDesc("Skybox"), File2Str("skybox.vert"))
-    , fs(ObjectDesc("Skybox"), File2Str("skybox.frag"))
-    , prog(ObjectDesc("Skybox"))
+    : vs("skybox.vert")
+    , fs("skybox.frag")
     , projectionMatrix(prog, "ProjectionMatrix")
     , cameraMatrix(prog, "CameraMatrix")
     , sunData(prog, "SunData")
-    , sky_fs(ObjectDesc("Sky"), File2Str("sky.frag")) {
+    , sky_fs("sky.frag") {
 
     prog << vs << fs << sky_fs;
     prog.Link();
-    skybox.UseInProgram(prog);
+
+    vao.Bind();
+
+    positions.Bind();
+    {
+         std::vector<vec3> corners;
+         for(int i = 0; i < 8; i++){
+            float x = i%2 < 1 ? -1.0f : +1.0f;
+            float y = i%4 < 2 ? -1.0f : +1.0f;
+            float z = i%8 < 4 ? -1.0f : +1.0f;
+            corners.push_back(vec3(x, y, z));
+         }
+         positions.Data(corners);
+         VertexAttribArray(prog, "Position").Pointer(3).Enable();
+    }
+
+    #define RESTART 0xFF
+    indices.Bind();
+    {
+        GLubyte indicesArray[] = {
+            1, 3, 5, 7, RESTART,
+            4, 6, 0, 2, RESTART,
+            2, 6, 3, 7, RESTART,
+            4, 0, 5, 1, RESTART,
+            5, 7, 4, 6, RESTART,
+            0, 2, 1, 3, RESTART
+        };
+        indices.Data(sizeof(indicesArray), indicesArray);
+    }
 
     {
-        auto btex = oglplus::Bind(envMap, Texture::Target::CubeMap);
-        btex.MinFilter(TextureMinFilter::Linear);
-        btex.MagFilter(TextureMagFilter::Linear);
-        btex.WrapS(TextureWrap::ClampToEdge);
-        btex.WrapT(TextureWrap::ClampToEdge);
-        btex.WrapR(TextureWrap::ClampToEdge);
+        envMap.Bind();
+        envMap.MinFilter(MinF::Linear);
+        envMap.MagFilter(MagF::Linear);
+        envMap.WrapS(Wrap::ClampToEdge);
+        envMap.WrapT(Wrap::ClampToEdge);
+        envMap.WrapR(Wrap::ClampToEdge);
 
-        for(int i = 0; i < 6; i++) {
+       for(int i = 0; i < 6; i++) {
             char c[2] = {char('0' + i), 0};
-            LoadTexture("textures/skybox_" + std::string(c) + ".png", Texture::CubeMapFace(i));
+            envMap.LoadTexture(i, "textures/skybox_" + std::string(c) + ".png");
         }
     }
 }
 
 // ~~~~~~<{ Reshape }>~~~~~~
-void Skybox::Reshape(const CamMatrixf& projMat) {
+void Skybox::Reshape(const glm::mat4& projMat) {
     projectionMatrix.Set(projMat);
 }
 
-oglplus::Vec4f Skybox::getSunData(float time) const {
+glm::vec4 Skybox::getSunData(float time) const {
     const float day_duration = 256.0f;
     float daytime = fmod(time, day_duration) / day_duration;
 
@@ -70,34 +93,33 @@ oglplus::Vec4f Skybox::getSunData(float time) const {
             dayLerp = 0.0f;
     }
 
-    Vec3f sun =
-        Vec3f(0.000, 1.000, 0.000) * 1e10 * SineWave(time / day_duration) +
-        Vec3f(0.000, 0.000, -1.000) * 1e10 * CosineWave(time / day_duration);
+    vec3 sun =
+        vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time * 2 * M_PI / day_duration)) +
+        vec3(0.f, 0.f, -1.f) * float(1e10 * cos(time * 2 * M_PI / day_duration));
 
-    return Vec4f(sun, dayLerp);
+    return vec4(sun, dayLerp);
 }
 
-#include <iostream>
-void Skybox::Render(float time, const CamMatrixf& cameraMat) {
+void Skybox::Render(float time, const glm::mat4& cameraMat) {
     // We don't need the camMat's translation part for the skybox
-    const float* f = Mat3f(cameraMat).Data();
-    Mat4f camRot = Mat4f(
+    const float* f = value_ptr(mat3(cameraMat));
+    mat4 camRot = mat4(
         f[0], f[1], f[2], 0.0f,
         f[3], f[4], f[5], 0.0f,
         f[6], f[7], f[8], 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     );
 
-    skybox.Use();
     prog.Use();
     cameraMatrix.Set(camRot);
     sunData.Set(getSunData(time));
 
     // The skybox looks better w/o gamma correction
-    bool srgb = gl.IsEnabled(oglplus::Capability::FramebufferSrgb);
-    if(srgb) { gl.Disable(oglplus::Capability::FramebufferSrgb); }
-    gl.DepthMask(false);
-    skybox.Draw();
-    gl.DepthMask(true);
-    if(srgb) { gl.Enable(oglplus::Capability::FramebufferSrgb); }
+    bool srgb = glIsEnabled(GL_FRAMEBUFFER_SRGB);
+    if(srgb) { glDisable(GL_FRAMEBUFFER_SRGB); }
+    glDepthMask(false);
+    vao.Bind();
+    glDrawElements(GL_TRIANGLE_STRIP, indices.Size(), DataType::UnsignedByte, nullptr);
+    glDepthMask(true);
+    if(srgb) { glEnable(GL_FRAMEBUFFER_SRGB); }
 }

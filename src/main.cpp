@@ -3,21 +3,17 @@
 #include <iostream>
 #include <SFML/Window.hpp>
 #include <GL/glew.h>
-#define OGLPLUS_USE_GLEW
-#include "oglplus/gl.hpp"
-#include "oglplus/all.hpp"
+#include "oglwrap.hpp"
 #include "skybox.h"
 #include "camera.h"
 #include "terrain.h"
 #include "bloom.h"
 
-oglplus::Context gl;
-
 void GL_Init(){
-    gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    gl.ClearDepth(1.0f);
-    gl.Enable(oglplus::Capability::DepthTest);
-    gl.Enable(oglplus::Capability::FramebufferSrgb);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearDepth(1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
 void FPS_Display(float time) {
@@ -45,7 +41,7 @@ int main() {
             Skybox skybox;
             Terrain terrain(skybox);
             BloomEffect bloom;
-            Camera cam(oglplus::Vec3f(0.0, 30.0, 0.0), oglplus::Vec3f(1.0, 29.0, 1.0), 50.0f);
+            Camera cam(glm::vec3(0.0f, 30.0f, 0.0f), glm::vec3(1.0f, 29.0f, 1.0f), 50.0f);
 
             sf::Event event;
             bool running = true;
@@ -59,12 +55,10 @@ int main() {
                     } else if(event.type == sf::Event::Resized) {
                         int width = event.size.width, height = event.size.height;
 
-                        gl.Viewport(width, height);
+                        glViewport(0, 0, width, height);
                         bloom.Reshape(width, height);
-                        auto projMat = oglplus::CamMatrixf::PerspectiveX(
-                          oglplus::Degrees(80),
-                          float(width) / height,
-                          5, 6000
+                        auto projMat = glm::perspectiveFov(
+                          60.0f, float(width), float(height), 5.0f, 6000.0f
                         );
                         skybox.Reshape(projMat);
                         terrain.Reshape(projMat);
@@ -76,11 +70,11 @@ int main() {
                     }
                 }
 
-                gl.Clear().ColorBuffer().DepthBuffer();
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 cam.Update(window, fixMouse);
-                oglplus::Mat4f camMatrix = cam.CameraMatrix();
-                oglplus::Vec3f camPos = cam.getPos();
+                glm::mat4 camMatrix = cam.CameraMatrix();
+                glm::vec3 camPos = cam.getPos();
                 float time = clock.getElapsedTime().asSeconds();
                 FPS_Display(time);
 
@@ -93,29 +87,9 @@ int main() {
 
             return 0;
 
-        } catch(oglplus::ProgramBuildError& err) {
-            using namespace std;
-            cerr <<
-                 "Error:          " << err.what() << endl <<
-                 "Function:       " << err.Func() << endl <<
-                 "Symbol:         " << err.GLSymbol() << endl <<
-                 "Class:          " << err.ClassName() << (err.ObjectDescription().empty() ? "" :
-                         " - '" + err.ObjectDescription() + "'") << endl <<
-                 "Bind Target:    " << err.BindTarget() << endl <<
-                 "File:           [" << err.File() << ":" << err.Line() << "]" <<
-                 endl << endl << err.Log() << endl;
-            err.Cleanup();
-        } catch(oglplus::Error& err) {
-            using namespace std;
-            cerr <<
-                 "Error:          " << err.what() << endl <<
-                 "Function:       " << err.Func() << endl <<
-                 "Symbol:         " << err.GLSymbol() << endl <<
-                 "Class:          " << err.ClassName() << (err.ObjectDescription().empty() ? "" :
-                         " - '" + err.ObjectDescription() + "'") << endl <<
-                 "Bind Target:    " << err.BindTarget() << endl <<
-                 "File:           [" << err.File() << ":" << err.Line() << "]" << endl;
-            err.Cleanup();
+        } catch(std::exception& err) {
+            std::cerr << err.what();
         }
+
     return 1;
 }

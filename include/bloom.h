@@ -2,19 +2,17 @@
 #define HEADER_89E445A7D2F5D160
 
 #include <GL/glew.h>
-#include "oglplus/gl.hpp"
-#include "oglplus/all.hpp"
+#include "oglwrap.hpp"
 
 class BloomEffect {
-    oglplus::Context gl;
-    oglplus::VertexShader vs;
-    oglplus::FragmentShader fs;
-    oglplus::Program prog;
+    oglwrap::VertexShader vs;
+    oglwrap::FragmentShader fs;
+    oglwrap::Program prog;
 
-    oglplus::Texture tex;
+    oglwrap::TextureRect tex;
 
-    oglplus::VertexArray vao;
-    oglplus::Buffer verts;
+    oglwrap::VertexArray vao;
+    oglwrap::Buffer verts;
 
     GLuint width, height;
 public:

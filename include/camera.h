@@ -3,7 +3,7 @@
 
 #include <SFML/Window.hpp>
 #include <GL/glew.h>
-#include "oglwrap.hpp"
+#include "oglwrap/oglwrap.hpp"
 
 class Camera{
     glm::vec3 target, fwd;

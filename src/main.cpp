@@ -3,7 +3,7 @@
 #include <iostream>
 #include <SFML/Window.hpp>
 #include <GL/glew.h>
-#include "oglwrap.hpp"
+#include "oglwrap/oglwrap.hpp"
 #include "skybox.h"
 #include "camera.h"
 #include "terrain.h"

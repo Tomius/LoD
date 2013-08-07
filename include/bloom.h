@@ -2,7 +2,7 @@
 #define HEADER_89E445A7D2F5D160
 
 #include <GL/glew.h>
-#include "oglwrap.hpp"
+#include "oglwrap/oglwrap.hpp"
 
 class BloomEffect {
     oglwrap::VertexShader vs;

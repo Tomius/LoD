@@ -2,7 +2,7 @@
 #define HEADER_16753D7B23630095
 
 #include <GL/glew.h>
-#include "oglwrap.hpp"
+#include "oglwrap/oglwrap.hpp"
 
 class Skybox {
     oglwrap::VertexArray vao;

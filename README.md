@@ -16,7 +16,7 @@ Dependencies:
 
 How to build (linux):
 --------------------
-* Get the dependencies: libsfml-dev libmagick++-dev libglew-dev
+* Get the dependencies: libsfml2-dev libmagick++-dev libglew-dev
 * Download the terrain files from [**here**](http://dsa11.fileflyer.com/d/c7c1dfe1-7fca-4c38-bcbe-15be87940f71/BFDBe/xLiwCBr/terrain.zip) and extract them into terrain/
 * Use the given Makefile, or the prebuilt executeable.
 

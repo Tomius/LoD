@@ -20,7 +20,7 @@ BloomEffect::BloomEffect()
             +1.0f, +1.0f
         };
         verts.Data(sizeof(screenCorners), screenCorners);
-        VertexAttribArray(prog, "Position").Pointer(2).Enable();
+        (prog | "Position").Setup<float>(2).Enable();
     }
     vao.Unbind();
 }

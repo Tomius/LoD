@@ -76,14 +76,24 @@ public:
     }
 
     // Setup functions
+    template <class GLtype>
+    /// Sets up an attribute. It can be templated with any OpenGL type or glm vector.
+    /// So you can write Setup<ivec3>(); instead of IPointer(3, WholeDataType::Int);
+    /// @param values_per_vertex - The dimension of the attribute data divided by the dimension of the template parameter.
+    /// @see glVertexAttribPointer, glVertexAttribIPointer, glVertexAttribLPointer
+    const VertexAttribArray& Setup(GLuint values_per_vertex = 1) const {
+        throw std::invalid_argument("Unrecognized OpenGL type for VertexAttribArray::Setup");
+        return *this;
+    }
+
     /// Sets up an attribute for arbitrary data type.
     /// @param values_per_vertex - The dimension of the attribute data. For example is 3 for a vec3. The initial value is 4.
     /// @param type - The data type of each component in the array.
     /// @param stride - Specifies the byte offset between consecutive generic vertex attributes. If stride is 0, the generic vertex attributes are understood to be tightly packed in the array. The initial value is 0.
     /// @param pointer - Specifies a offset of the first component of the first generic vertex attribute in the array in the data store of the buffer currently bound to the GL_ARRAY_BUFFER target. The initial value is 0.
     /// @see glVertexAttribPointer, glVertexAttribIPointer, glVertexAttribLPointer
-    const VertexAttribArray& Setup(GLuint values_per_vertex = 4,
-                                   DataType type = DataType::Float,
+    const VertexAttribArray& Setup(GLuint values_per_vertex,
+                                   DataType type,
                                    GLsizei stride = 0,
                                    void *offset_pointer = nullptr) const {
         switch (type) {
@@ -174,6 +184,109 @@ public:
         return *this;
     }
 };
+
+// -------======{[ VertexAttribArray::Setup specializations ]}======-------
+
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<float>(GLuint values_per_vertex) const{
+    Pointer(values_per_vertex, FloatDataType::Float);
+    return *this;
+}
+
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<char>(GLuint values_per_vertex) const {
+    IPointer(values_per_vertex, WholeDataType::Byte);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<unsigned char>(GLuint values_per_vertex) const {
+    IPointer(values_per_vertex, WholeDataType::UnsignedByte);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<short>(GLuint values_per_vertex) const {
+    IPointer(values_per_vertex, WholeDataType::Short);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<unsigned short>(GLuint values_per_vertex) const {
+    IPointer(values_per_vertex, WholeDataType::UnsignedShort);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<int>(GLuint values_per_vertex) const {
+    IPointer(values_per_vertex, WholeDataType::Int);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<unsigned int>(GLuint values_per_vertex) const {
+    IPointer(values_per_vertex, WholeDataType::UnsignedInt);
+    return *this;
+}
+
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::vec2>(GLuint) const {
+    Pointer(2, FloatDataType::Float);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::dvec2>(GLuint) const {
+    LPointer(2);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::ivec2>(GLuint) const {
+    IPointer(2, WholeDataType::Int);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::uvec2>(GLuint) const {
+    IPointer(2, WholeDataType::UnsignedInt);
+    return *this;
+}
+
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::vec3>(GLuint) const {
+    Pointer(3, FloatDataType::Float);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::dvec3>(GLuint) const {
+    LPointer(3);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::ivec3>(GLuint) const {
+    IPointer(3, WholeDataType::Int);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::uvec3>(GLuint) const {
+    IPointer(3, WholeDataType::UnsignedInt);
+    return *this;
+}
+
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::vec4>(GLuint) const {
+    Pointer(4, FloatDataType::Float);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::dvec4>(GLuint) const {
+    LPointer(4);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::ivec4>(GLuint) const {
+    IPointer(4, WholeDataType::Int);
+    return *this;
+}
+template<>
+inline const VertexAttribArray& VertexAttribArray::Setup<glm::uvec4>(GLuint) const {
+    IPointer(4, WholeDataType::UnsignedInt);
+    return *this;
+}
+
 
 } // namespace oglwrap
 

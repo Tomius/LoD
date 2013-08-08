@@ -112,7 +112,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
             vertexNum[m] = verticesVector.size();
             positions[m].Data(verticesVector);
-            VertexAttribArray(0).Pointer(2).Enable();
+            VertexAttribArray(0).Setup<float>(2).Enable();
         }
 
         indices[m].Bind();

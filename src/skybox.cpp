@@ -27,7 +27,7 @@ Skybox::Skybox()
             corners.push_back(vec3(x, y, z));
          }
          positions.Data(corners);
-         VertexAttribArray(prog, "Position").Pointer(3).Enable();
+         (prog | "Position").Pointer(3).Enable();
     }
 
     #define RESTART 0xFF

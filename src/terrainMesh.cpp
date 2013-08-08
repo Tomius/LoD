@@ -195,6 +195,10 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
     GLfloat maxAniso = 0.0f;
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
 
+    // Laziness level OVER 9000!!!
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
     heightMap.Active(0);
     heightMap.Bind();
     {
@@ -351,7 +355,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm:
 
     // All the other ones
     float distance = 2 * blockRadius;
-    int ringCount = std::max(w, h) / (2 * blockRadius) + 1;
+    int ringCount = std::max(w, h) / (2 * blockRadius);
     for(int ring = 1; ring < ringCount; ring++) {
         for(char line = 0; line < 6; line++) {
             for(int segment = 0; segment < ring ; segment++) {

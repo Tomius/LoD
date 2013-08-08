@@ -69,6 +69,17 @@ enum Enum{
 }
 typedef _BufferType::Enum BufferType;
 
+namespace _IndexedBufferType{
+enum Enum{
+    AtomicCounter = GL_ATOMIC_COUNTER_BUFFER,
+    ShaderStorage = GL_SHADER_STORAGE_BUFFER,
+    TransformFeedback = GL_TRANSFORM_FEEDBACK_BUFFER,
+    Uniform = GL_UNIFORM_BUFFER
+};
+}
+typedef _IndexedBufferType::Enum IndexedBufferType;
+
+
 namespace _BufferUsage{
 enum Enum{
     StreamDraw = GL_STREAM_DRAW,

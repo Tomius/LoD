@@ -27,7 +27,7 @@ public:
     std::vector<unsigned char> heightData;
     RawTerrainData(const std::string& filename);
     void Save(const std::string& filename);
-    void Convert(const std::string& filename, float xzScale = 1.0f, float yScale = 1.5f);
+    void Convert(const std::string& filename, float xzScale = 1.0f, float yScale = 1.0f);
 };
 
 class TerrainData {

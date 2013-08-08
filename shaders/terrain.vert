@@ -15,8 +15,8 @@ out float invalid;
 void main() {
     vec2 offsPos = Position + Offset;
     ivec2 texSize = textureSize(HeightMap, 0);
-    texCoord = (ivec2(round(offsPos)) + texSize / 2) / vec2(texSize);
-    if(1.0 <= abs(texCoord.x) || 1.0 <= abs(texCoord.y))
+    texCoord = (ivec2(round(offsPos)) + texSize / 2.0) / vec2(texSize);
+    if(abs(offsPos.x) >= (texSize.x - 1) / 2 || abs(offsPos.y) >= (texSize.x - 1) / 2)
         invalid = 1e10;
     else
         invalid = 0.0;

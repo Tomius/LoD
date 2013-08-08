@@ -41,7 +41,7 @@ int main() {
             Skybox skybox;
             Terrain terrain(skybox);
             BloomEffect bloom;
-            Camera cam(glm::vec3(0.0f, 30.0f, 0.0f), glm::vec3(1.0f, 29.0f, 1.0f), 50.0f);
+            Camera cam(glm::vec3(0.0f, 20.0f, 0.0f), glm::vec3(1.0f, 19.0f, 1.0f), 50.0f);
 
             sf::Event event;
             bool running = true;

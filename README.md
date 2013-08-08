@@ -9,6 +9,7 @@ Here's a picture of the program's current capability:
 
 Dependencies:
 -------------
+* C++11 compiler.
 * OpenGL 3.3+, GLEW
 * SFML - for window handling
 * Magick++ - for image loading.

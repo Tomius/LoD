@@ -1,5 +1,4 @@
 #include "bloom.h"
-#include "misc.h"
 
 using namespace oglwrap;
 

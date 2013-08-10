@@ -6,6 +6,8 @@
 #include <vector>
 #include <GL/glew.h>
 #include "oglwrap/oglwrap.hpp"
+#include "oglwrap/texture.hpp"
+
 #include "terrainData.h"
 
 // Selecting the Block's size (is 2 ^ (blockMipmapLevel + 1)) is really essential

@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include "oglwrap/oglwrap.hpp"
+#include "oglwrap/texture.hpp"
 
 class BloomEffect {
     oglwrap::VertexShader vs;

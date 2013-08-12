@@ -58,7 +58,7 @@ void Camera::Update(const sf::Window& window, bool fixMouse) {
               sin(roty),
               cos(roty) * sin(rotx)
           );
-    vec3 right = normalize(cross(fwd, vec3(0.0, 1.0f, 0.0)));
+    vec3 right = normalize(cross(fwd, vec3(0.0f, 1.0f, 0.0f)));
 
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         target += fwd * ds;
@@ -71,11 +71,11 @@ void Camera::Update(const sf::Window& window, bool fixMouse) {
 }
 
 glm::mat4 Camera::CameraMatrix() {
-    return lookAt(target - fwd, target, vec3(0.0, 1.0f, 0.0));
+    return lookAt(target - fwd, target, vec3(0.0f, 1.0f, 0.0f));
 }
 
 glm::mat4 Camera::ModelMatrix() {
-    return translate(mat4(1.0), target);
+    return translate(mat4(1.0f), target);
 }
 
 glm::vec3 Camera::getTarget() {

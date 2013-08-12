@@ -211,9 +211,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             terrain.heightData.data()
         );
 
-        heightMap.GenerateMipmap();
         heightMap.Anisotropy(maxAniso);
-        heightMap.MinFilter(MinF::LinearMipmapLinear);
+        heightMap.MinFilter(MinF::Linear);
         heightMap.MagFilter(MagF::Linear);
         heightMap.WrapS(Wrap::Repeat);
     }
@@ -230,9 +229,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             terrain.normalData.data()
         );
 
-        normalMap.GenerateMipmap();
         normalMap.Anisotropy(maxAniso);
-        normalMap.MinFilter(MinF::LinearMipmapLinear);
+        normalMap.MinFilter(MinF::Linear);
         normalMap.MagFilter(MagF::Linear);
         normalMap.WrapS(Wrap::Repeat);
         normalMap.WrapT(Wrap::Repeat);

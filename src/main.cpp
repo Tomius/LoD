@@ -58,7 +58,7 @@ int main() {
                         glViewport(0, 0, width, height);
                         bloom.Reshape(width, height);
                         auto projMat = glm::perspectiveFov(
-                          60.0f, float(width), float(height), 5.0f, 6000.0f
+                          60.0f, float(width), float(height), 1.0f, 6000.0f
                         );
                         skybox.Reshape(projMat);
                         terrain.Reshape(projMat);

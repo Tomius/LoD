@@ -15,34 +15,7 @@ Skybox::Skybox()
     prog << vs << fs << sky_fs;
     prog.Link();
 
-    vao.Bind();
-
-    positions.Bind();
-    {
-         std::vector<vec3> corners;
-         for(int i = 0; i < 8; i++){
-            float x = i%2 < 1 ? -1.0f : +1.0f;
-            float y = i%4 < 2 ? -1.0f : +1.0f;
-            float z = i%8 < 4 ? -1.0f : +1.0f;
-            corners.push_back(vec3(x, y, z));
-         }
-         positions.Data(corners);
-         (prog | "Position").Setup<vec3>().Enable();
-    }
-
-    #define RESTART 0xFF
-    indices.Bind();
-    {
-        GLubyte indicesArray[] = {
-            1, 3, 5, 7, RESTART,
-            4, 6, 0, 2, RESTART,
-            2, 6, 3, 7, RESTART,
-            4, 0, 5, 1, RESTART,
-            5, 7, 4, 6, RESTART,
-            0, 2, 1, 3, RESTART
-        };
-        indices.Data(sizeof(indicesArray), indicesArray);
-    }
+    makeCube.Position(prog | "Position");
 
     {
         envMap.Bind();
@@ -118,8 +91,7 @@ void Skybox::Render(float time, const glm::mat4& cameraMat) {
     bool srgb = glIsEnabled(GL_FRAMEBUFFER_SRGB);
     if(srgb) { glDisable(GL_FRAMEBUFFER_SRGB); }
     glDepthMask(false);
-    vao.Bind();
-    glDrawElements(GL_TRIANGLE_STRIP, indices.Size(), DataType::UnsignedByte, nullptr);
+    makeCube.Draw();
     glDepthMask(true);
     if(srgb) { glEnable(GL_FRAMEBUFFER_SRGB); }
 }

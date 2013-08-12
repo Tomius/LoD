@@ -4,11 +4,10 @@
 #include <GL/glew.h>
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/texture.hpp"
+#include "oglwrap/shapes/cube.hpp"
 
 class Skybox {
-    oglwrap::VertexArray vao;
-    oglwrap::Buffer positions;
-    oglwrap::IndexBuffer indices;
+    oglwrap::Cube makeCube;
 
     oglwrap::VertexShader vs;
     oglwrap::FragmentShader fs;

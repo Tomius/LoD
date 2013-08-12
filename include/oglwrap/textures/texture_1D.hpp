@@ -9,13 +9,6 @@
 #include "../general.hpp"
 #include "texture_base.hpp"
 
-#ifndef OGLWRAP_IMAGEMAGICK
-#define OGLWRAP_IMAGEMAGICK 0
-#endif
-#if OGLWRAP_IMAGEMAGICK
-#include <ImageMagick/Magick++.h>
-#endif
-
 namespace oglwrap {
 
 // -------======{[ Texture1D declaration ]}======-------
@@ -67,7 +60,7 @@ public:
     }
 
     /// Updates a part of the base image.
-    /// @param - XOffset - Specifies a texel offset in the x direction within the texture array.
+    /// @param - xOffset - Specifies a texel offset in the x direction within the texture array.
     /// @param width - Specifies the width of the texture subimage.
     /// @param format - Specifies the format of the pixel data.
     /// @param type - Specifies the data type of the pixel data.
@@ -88,7 +81,7 @@ public:
 
     /// Updates a part of a mipmap image.
     /// @param level - Specifies the level-of-detail number. Level 0 is the base image level. Level n is the nth mipmap reduction image.
-    /// @param - XOffset - Specifies a texel offset in the x direction within the texture array.
+    /// @param - xOffset - Specifies a texel offset in the x direction within the texture array.
     /// @param width - Specifies the width of the texture subimage.
     /// @param format - Specifies the format of the pixel data.
     /// @param type - Specifies the data type of the pixel data.
@@ -161,7 +154,7 @@ public:
         oglwrap_CheckError();
     }
 
-    /// Copy pixels from the current GL_READ_BUFFER into a mipmap of this texture.
+    /// Copies pixels from the current GL_READ_BUFFER and updates part of a mipmap of this texture with them.
     /// @param level - Specifies the level-of-detail number. Level 0 is the base image level. Level n is the nth mipmap reduction image.
     /// @param xOffset - Specifies the texel offset within the destination texture array.
     /// @param x, y - Specify the window coordinates of the left corner of the row of pixels to be copied.

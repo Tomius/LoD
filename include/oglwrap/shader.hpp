@@ -25,6 +25,8 @@ public:
     /// Creates the an empty shader object.
     /// @see glCreateShader
     Shader() : compiled(false) {
+        oglwrap_PreCheckError();
+
         shader = glCreateShader(shader_t);
     }
 
@@ -33,6 +35,8 @@ public:
     /// @see glCreateShader, glShaderSource
     Shader(const std::string& file)
             : compiled(false), filename(file) {
+        oglwrap_PreCheckError();
+
         shader = glCreateShader(shader_t);
         SourceFile(file);
     }
@@ -41,15 +45,18 @@ public:
     /// @param source - string containing the shader code.
     /// @see glShaderSource
     void Source(const std::string& source)  {
+        oglwrap_PreCheckError();
+
         const char *str = source.c_str();
         glShaderSource(shader, 1, &str, nullptr);
-        oglwrap_CheckError();
     }
 
     /// Loads a file and uploads it as shader source
     /// @param file - the shader file's path
     /// @see glShaderSource
     void SourceFile(const std::string& file)  {
+        oglwrap_PreCheckError();
+
         filename = file;
         std::ifstream shaderFile(file.c_str());
         if(!shaderFile.is_open()) {
@@ -68,7 +75,6 @@ public:
         // Add the shader source & compile
         const char *strFileData = fileData.c_str();
         glShaderSource(shader, 1, &strFileData, nullptr);
-        oglwrap_CheckError();
     }
 
     /// Compiles the shader code. If the compilation fails, it throws a std::runtime_error,
@@ -76,6 +82,8 @@ public:
     /// when the shader gets attached a program.
     /// @see glCompileShader
     void Compile()  {
+        oglwrap_PreCheckError();
+
         if(compiled) {
             return;
         }
@@ -121,22 +129,24 @@ public:
 
             throw std::runtime_error(str.str());
         }
-        oglwrap_CheckError();
     }
 
     /// If only one instance of this shader exists, marks the shader for deletion. The shader
     /// won't be deleted until the shader is attached to at least one program.
     /// @see glDeleteShader
     ~Shader() {
+        oglwrap_PreCheckError();
+
         if(!isDeletable()) {
             return;
         }
         glDeleteShader(shader);
-        oglwrap_CheckError();
     }
 
     /// Returns the C OpenGL handle for the shader.
     GLuint Expose() const  {
+        oglwrap_PreCheckError();
+
         return shader;
     }
 };
@@ -208,13 +218,15 @@ public:
     /// Generates an empty program object.
     /// @see glCreateProgram
     Program() : program(glCreateProgram()), linked(false) {
-        oglwrap_CheckError();
+        oglwrap_PreCheckError();
     }
 
     /// If only one instance of this program exists, detaches all the shader objects
     /// currently attached to this program, and deletes the program.
     /// @see glDetachShader, glDeleteShader
     ~Program() {
+        oglwrap_PreCheckError();
+
         if(!isDeletable()) {
             return;
         }
@@ -222,7 +234,6 @@ public:
             glDetachShader(program, shaders[i]);
         }
         glDeleteProgram(program);
-        oglwrap_CheckError();
     }
 
     template<ShaderType shader_t>
@@ -230,10 +241,16 @@ public:
     /// @param shader Specifies the shader object that is to be attached.
     /// @see glAttachShader
     void AttachShader(Shader<shader_t>& shader) {
+        oglwrap_PreCheckError();
+
         shader.Compile();
         shaders.push_back(shader.Expose());
         glAttachShader(program, shader.Expose());
         oglwrap_CheckError();
+        oglwrap_PrintError(
+            GL_INVALID_OPERATION,
+            "Program::AttachShader called on the same shader twice."
+        );
     }
 
     template<ShaderType shader_t>
@@ -249,6 +266,8 @@ public:
     /// a std::runtime_error containing the linking info.
     /// @see glLinkProgram
     Program& Link() {
+        oglwrap_PreCheckError();
+
         if(linked) {
             return *this;
         }
@@ -270,30 +289,46 @@ public:
             throw std::runtime_error(str.str());
         }
         oglwrap_CheckError();
+        oglwrap_PrintError(
+            GL_INVALID_OPERATION,
+            "Program::Link is called on the currently active program "
+            "object, and transform feedback mode is active."
+        );
         return *this;
     }
 
     /// Installs the program as a part of the current rendering state
     /// @see glUseProgram
     Program& Use() {
+        oglwrap_PreCheckError();
+
         if(!linked) {
             Link();
         }
         glUseProgram(program);
         oglwrap_CheckError();
+        oglwrap_PrintError(
+            GL_INVALID_OPERATION,
+            "Program::Use is called, but the program could not be made "
+            "part of current state. (Is transform feedback mode active?) "
+        );
+
         return *this;
     }
 
     /// Installs the default OpenGL shading program to the current rendering state
     /// @see glUseProgram
     Program& Unuse() {
+        oglwrap_PreCheckError();
+
         glUseProgram(0);
-        oglwrap_CheckError();
         return *this;
     }
 
     /// Returns the C OpenGL handle for the program.
     GLuint Expose() const {
+        oglwrap_PreCheckError();
+
         return program;
     }
 };

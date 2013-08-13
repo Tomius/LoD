@@ -15,7 +15,7 @@ Skybox::Skybox()
     prog << vs << fs << sky_fs;
     prog.Link();
 
-    makeCube.Position(prog | "Position");
+    makeCube.Positions(prog | "Position");
 
     {
         envMap.Bind();

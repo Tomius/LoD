@@ -13,7 +13,7 @@ class BloomEffect {
     oglwrap::TextureRect tex;
 
     oglwrap::VertexArray vao;
-    oglwrap::Buffer verts;
+    oglwrap::ArrayBuffer verts;
 
     GLuint width, height;
 public:

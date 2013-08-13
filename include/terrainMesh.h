@@ -21,7 +21,7 @@ const int blockRadius = 1 << blockMipmapLevel;
 
 class TerrainMesh {
     oglwrap::VertexArray vao[blockMipmapLevel];
-    oglwrap::Buffer positions[blockMipmapLevel];
+    oglwrap::ArrayBuffer positions[blockMipmapLevel];
     oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
     size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
     oglwrap::Texture2D colorMap, heightMap, normalMap;

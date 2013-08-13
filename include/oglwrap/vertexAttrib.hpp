@@ -8,9 +8,9 @@
 #include "enums.hpp"
 #include "general.hpp"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "glm/glm/glm.hpp"
+#include "glm/glm/gtc/type_ptr.hpp"
+#include "glm/glm/gtc/matrix_transform.hpp"
 
 namespace oglwrap {
 
@@ -19,7 +19,7 @@ namespace oglwrap {
 /// A Vertex Array Object (VAO) is an object that encapsulates all of the
 /// state needed to specify vertex data. They define the format of the vertex
 /// data as well as the sources for the vertex arrays. Note that VAOs do not
-/// contain the arrays themselves; the arrays are stored in Buffer Objects.
+/// contain the arrays themselves, the arrays are stored in ArrayBuffer Objects.
 /// The VAOs simply reference already existing buffer objects.
 class VertexArray : protected RefCounted {
     GLuint vao; ///< The C handle for the VAO

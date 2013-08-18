@@ -255,6 +255,24 @@ public:
 
         return texture;
     }
+
+    /// Sets the compare mode.
+    /// @param mode - The desired compare mode.
+    /// @see glTexParameteri, GL_TEXTURE_COMPARE_MODE
+    static void CompareMode (CompMode mode) {
+        oglwrap_PreCheckError();
+
+        glTexParameteri(texture_t, GL_TEXTURE_COMPARE_MODE, mode);
+    }
+
+    /// Sets the compare function.
+    /// @param mode - The desired compare function.
+    /// @see glTexParameteri, GL_TEXTURE_COMPARE_FUNC
+    static void CompareFunc (CompFunc func) {
+        oglwrap_PreCheckError();
+
+        glTexParameteri(texture_t, GL_TEXTURE_COMPARE_FUNC, func);
+    }
 };
 
 } // namespace oglwrap

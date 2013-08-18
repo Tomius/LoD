@@ -28,8 +28,8 @@ public:
         tex.MagFilter(MagF::Linear);
         tex.WrapS(Wrap::ClampToEdge);
         tex.WrapT(Wrap::ClampToEdge);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+        tex.CompareFunc(CompFunc::LEqual);
+        tex.CompareMode(CompMode::CompareRefToTexture);
 
         fbo.Bind();
         fbo.AttachTexture(FBO_Attachment::Depth, tex, 0);

@@ -38,7 +38,7 @@ int main() {
         sf::VideoMode(800, 600),
         "Land of Dreams",
         sf::Style::Default,
-        sf::ContextSettings(16, 0, 4, 3, 3)
+        sf::ContextSettings(32, 0, 4, 3, 3)
     );
     window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame
     sf::Clock clock;

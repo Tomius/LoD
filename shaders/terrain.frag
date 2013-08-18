@@ -68,6 +68,7 @@ float Visibility() {
 vec3 AmbientDirection();
 float SunPower();
 float AmbientPower();
+vec3 AmbientColor();
 
 float fogMin = max(Scales.x, Scales.z) * 256.0;
 float fogMax = max(Scales.x, Scales.z) * 2048.0;
@@ -81,7 +82,7 @@ void main() {
         normalize(normal),
         normalize(AmbientDirection())
     );
-    float DiffusePower = max(SunPower() * d, 0.0);
+    float DiffusePower = max(SunPower() * d, 0.01);
 
     vec3 refl = reflect(AmbientDirection(), -normal);
     float SpecularFactor = max(
@@ -92,7 +93,7 @@ void main() {
     float SpecularPower = SunPower() * pow(SpecularFactor, SpecularShininess) / 2;
 
     vec3 texColor = texture(ColorMap, texCoord).rgb;
-    vec3 Color = texColor * (AmbientPower() + Visibility() * (DiffusePower + SpecularPower));
+    vec3 Color = AmbientColor() * texColor * (AmbientPower() + Visibility() * (DiffusePower + SpecularPower));
     vec3 Fog = pow(Visibility(), 0.15) * fogColor * SunPower();
 
     float l = length(camPos);

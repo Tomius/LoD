@@ -157,6 +157,5 @@ float AmbientPower(){
 
 // FIXME
 vec3 AmbientColor(){
-    return AirColor;
-    //return sky_color(normalize(SunPosition));
+    return 0.5 * sky_color(normalize(SunPosition)) + vec3(0.5);
 }

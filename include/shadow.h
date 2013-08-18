@@ -7,7 +7,7 @@
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/texture.hpp"
 
-const int shadowMapSize = 2048;
+const int shadowMapSize = 1024;
 
 /// This class is so simple, that I implement it in the header
 class Shadow {
@@ -48,7 +48,7 @@ public:
     }
 
     glm::mat4 CameraMat(glm::vec3 _lightDir) const {
-        glm::vec3 lightDir = glm::normalize(_lightDir) * 6000.0f;
+        glm::vec3 lightDir = glm::normalize(_lightDir) * 8000.0f;
         return glm::lookAt(lightDir, glm::vec3(), glm::vec3(0, 1, 0));
     }
 

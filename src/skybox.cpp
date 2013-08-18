@@ -32,13 +32,19 @@ Skybox::Skybox()
     }
 }
 
-// ~~~~~~<{ Reshape }>~~~~~~
 void Skybox::Reshape(const glm::mat4& projMat) {
     projectionMatrix.Set(projMat);
 }
 
+const float day_duration = 256.0f;
+
+glm::vec3 Skybox::SunPos(float time) const {
+    return vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time * 2 * M_PI / day_duration)) +
+    vec3(0.f, 0.f, -1.f) * float(1e10 * cos(time * 2 * M_PI / day_duration));
+}
+
 glm::vec4 Skybox::getSunData(float time) const {
-    const float day_duration = 256.0f;
+
     float daytime = fmod(time, day_duration) / day_duration;
 
     static int day = true; // day/night
@@ -66,11 +72,7 @@ glm::vec4 Skybox::getSunData(float time) const {
             dayLerp = 0.0f;
     }
 
-    vec3 sun =
-        vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time * 2 * M_PI / day_duration)) +
-        vec3(0.f, 0.f, -1.f) * float(1e10 * cos(time * 2 * M_PI / day_duration));
-
-    return vec4(sun, dayLerp);
+    return vec4(SunPos(time), dayLerp);
 }
 
 void Skybox::Render(float time, const glm::mat4& cameraMat) {

@@ -20,11 +20,11 @@ template<BufferType buffer_t>
   * of unformatted memory allocated by the OpenGL context (aka: the GPU).
   * These can be used to store vertex data, pixel data retrieved from
   * images or the framebuffer, and a variety of other things. */
-class BufferObject : protected RefCounted {
+class BufferObject : public RefCounted {
 protected:
-    GLuint buffer; /// The C API handle for the buffer.
+    GLuint buffer; ///< The C API handle for the buffer.
 public:
-    /// Generates a buffer object.
+    /// @brief Generates a buffer object.
     /// @see glGenBuffers
     BufferObject() {
         oglwrap_PreCheckError();
@@ -32,7 +32,16 @@ public:
         glGenBuffers(1, &buffer);
     }
 
-    /// Deletes the buffer generated in the constructor.
+    template<BufferType another_buffer_t>
+    /// Creates a copy of the texture, or casts it to another type.
+    BufferObject(const BufferObject<another_buffer_t> src)
+        : RefCounted(src)
+        , buffer(src.Expose()) {
+
+        oglwrap_PreCheckError();
+    }
+
+    /// @brief Deletes the buffer generated in the constructor.
     /// @see glDeleteBuffers
     ~BufferObject() {
         oglwrap_PreCheckError();
@@ -42,7 +51,7 @@ public:
         glDeleteBuffers(1, &buffer);
     }
 
-    /// Bind a buffer object to its default target.
+    /// @brief Bind a buffer object to its default target.
     /// @see glBindBuffer
     void Bind() {
         oglwrap_PreCheckError();
@@ -50,7 +59,7 @@ public:
         glBindBuffer(buffer_t, buffer);
     }
 
-    /// Unbind a buffer object from its default target.
+    /// @brief Unbind a buffer object from its default target.
     /// @see glBindBuffer
     static void Unbind() {
         oglwrap_PreCheckError();
@@ -58,7 +67,7 @@ public:
         glBindBuffer(buffer_t, 0);
     }
 
-    /// Creates and initializes a buffer object's data store.
+    /// @brief Creates and initializes a buffer object's data store.
     /// @param size - Specifies the size in bytes of the buffer object's new data store.
     /// @param data - Specifies a pointer to data that will be copied into the data store for initialization, or NULL if no data is to be copied.
     /// @param usage - Specifies the expected usage pattern of the data store.
@@ -85,7 +94,7 @@ public:
         );
     }
 
-    /// Creates and initializes a buffer object's data store.
+    /// @brief Creates and initializes a buffer object's data store.
     /// @param data - Specifies a vector of data to upload.
     /// @param usage - Specifies the expected usage pattern of the data store.
     /// @see glBufferData
@@ -107,7 +116,7 @@ public:
         );
     }
 
-    /// Updates a subset of a buffer object's data store.
+    /// @brief Updates a subset of a buffer object's data store.
     /// @param offset - Specifies the offset into the buffer object's data store where data replacement will begin, measured in bytes.
     /// @param size - Specifies the size in bytes of the data store region being replaced.
     /// @param data - Specifies a pointer to the new data that will be copied into the data store.
@@ -130,7 +139,7 @@ public:
         );
     }
 
-    /// Updates a subset of a buffer object's data store.
+    /// @brief Updates a subset of a buffer object's data store.
     /// @param offset - Specifies the offset into the buffer object's data store where data replacement will begin, measured in bytes.
     /// @param data - Specifies a vector containing the new data that will be copied into the data store.
     /// @see glBufferSubData
@@ -152,7 +161,7 @@ public:
         );
     }
 
-    /// A getter for the buffer's size.
+    /// @brief A getter for the buffer's size.
     /// @return The size of the buffer currently bound to the buffer objects default target in bytes.
     /// @see glGetBufferParameteriv, GL_BUFFER_SIZE
     static size_t Size() {
@@ -177,34 +186,33 @@ public:
     }
 };
 
-typedef BufferObject<BufferType::Array> ArrayBuffer;
 /// A Buffer that stores vertex attribute data.
 /** The buffer will be used as a source for vertex data,
   * but only when VertexAttribArray::Pointer​ is called. */
 /// @see GL_ARRAY_BUFFER
+typedef BufferObject<BufferType::Array> ArrayBuffer;
 
-typedef BufferObject<BufferType::ElementArray> IndexBuffer;
 /// A buffer that stores the order of the vertices for a draw call.
 /** All rendering functions of the form gl*Draw*Elements*​ will use the pointer field as a byte offset from
   * the beginning of the buffer object bound to this target. The indices used for indexed rendering will be
   * taken from the buffer object. Note that this binding target is part of a Vertex Array Objects state, so a
   * VAO must be bound before binding a buffer here. */
 /// @see GL_ELEMENT_ARRAY_BUFFER
+typedef BufferObject<BufferType::ElementArray> IndexBuffer;
 
-typedef BufferObject<BufferType::Texture> TextureBuffer;
 /// A Buffer that stores texture pixels.
 /** This buffer has no special semantics, it is intended to use as a buffer object for Buffer Textures. */
 /// @see GL_TEXTURE_BUFFER
-
+typedef BufferObject<BufferType::Texture> TextureBuffer;
 
 template<IndexedBufferType buffer_t>
-/// Buffer objects that have an array of binding targets, like UniformBuffers
+/// Buffer objects that have an array of binding targets, like UniformBuffers.
 /** Buffer Objects are OpenGL Objects that store an array
   * of unformatted memory allocated by the OpenGL context (aka: the GPU).
   * IndexBufferObject is a buffer that is bound to an indexed target. */
 class IndexedBufferObject : public BufferObject<BufferType(buffer_t)> {
 public:
-    /// Bind a buffer object to an index.
+    /// @brief Bind a buffer object to an index.
     /// @param index - Specify the index of the binding point within the array.
     /// @see glBindBufferBase
     void BindBase(GLuint index) {
@@ -222,7 +230,7 @@ public:
         );
     }
 
-    /// Bind a range within a buffer object to an index.
+    /// @brief Bind a range within a buffer object to an index.
     /// @param index - Specify the index of the binding point within the array.
     /// @param offset - The starting offset in basic machine units into the buffer object.
     /// @param size - The amount of data in machine units that can be read from the buffet object while used as an indexed target.
@@ -242,7 +250,7 @@ public:
         );
     }
 
-    /// Unbind a buffer object from an index.
+    /// @brief Unbind a buffer object from an index.
     /// @param index - Specify the index of the binding point within the array.
     /// @see glBindBufferBase
     static void UnbindBase(GLuint index) {
@@ -252,14 +260,13 @@ public:
     }
 };
 
-typedef IndexedBufferObject<IndexedBufferType::Uniform> UniformBuffer;
-/// An indexed buffer binding for buffers used as storage for uniform blocks.
+/// @brief An indexed buffer binding for buffers used as storage for uniform blocks.
 /// @see GL_UNIFORM_BUFFER
+typedef IndexedBufferObject<IndexedBufferType::Uniform> UniformBuffer;
 
-typedef IndexedBufferObject<IndexedBufferType::TransformFeedback> TransformFeedbackBuffer;
-/// An indexed buffer binding for buffers used in Transform Feedback operations.
+/// @brief An indexed buffer binding for buffers used in Transform Feedback operations.
 /// @see GL_TRANSFORM_FEEDBACK_BUFFER
-
+typedef IndexedBufferObject<IndexedBufferType::TransformFeedback> TransformFeedbackBuffer;
 
 } // namespace oglwrap
 

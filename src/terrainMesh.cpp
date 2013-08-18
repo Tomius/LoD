@@ -379,13 +379,9 @@ void TerrainMesh::Render(const glm::vec3& camPos,
                          oglwrap::LazyUniform<glm::vec3>& scales) {
 
     // Logically, this should into TerrainMesh constructor. However, the shader
-    // program doesn't exist yet when the constructor runs, so I set this
-    // uniform value at the first render call
-    static bool firstExec = true;
-    if(firstExec) {
-        scales = glm::vec3(terrain.xzScale, terrain.yScale, terrain.xzScale);
-        firstExec = false;
-    }
+    // program doesn't exist yet when the constructor runs.
+
+    scales = glm::vec3(terrain.xzScale, terrain.yScale, terrain.xzScale);
 
     heightMap.Active(0);
     heightMap.Bind();

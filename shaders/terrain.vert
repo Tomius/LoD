@@ -4,12 +4,14 @@ layout(location = 0) in vec2 Position;
 uniform mat4 ProjectionMatrix, CameraMatrix;
 uniform vec2 Offset;
 uniform vec3 Scales;
+uniform mat4 ShadowMVP;
 uniform sampler2D HeightMap, NormalMap;
 
 out vec3 normal;
 out vec3 camPos;
 out vec3 worldPos;
 out vec2 texCoord;
+out vec4 shadowCoord;
 out float invalid;
 
 void main() {
@@ -26,6 +28,7 @@ void main() {
     float height = texture(HeightMap, texCoord).r * 255;
     worldPos = Scales * vec3(offsPos.x, height, offsPos.y);
     camPos = (CameraMatrix * vec4(worldPos, 1.0)).xyz;
+    shadowCoord = ShadowMVP * vec4(worldPos, 1.0);
 
     normal = texture(NormalMap, texCoord).rgb;
 

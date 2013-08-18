@@ -1,22 +1,31 @@
+/** @file texture_1D.hpp
+    @brief Implements one-dimensional textures.
+*/
+
 #ifndef TEXUTRE_1D_HPP
 #define TEXTURE_1D_HPP
 
-#include <string>
-#include <GL/glew.h>
-
-#include "../error.hpp"
-#include "../enums.hpp"
-#include "../general.hpp"
 #include "texture_base.hpp"
 
 namespace oglwrap {
 
 // -------======{[ Texture1D declaration ]}======-------
 
-/// A one dimensional texture class
+/// @brief A one dimensional texture class
 /// @see GL_TEXTURE_1D
 class Texture1D : public TextureBase<TexType::Tex1D> {
 public:
+
+    /// Generates an empty texture.
+    /// @see glGenTextures
+    Texture1D() {}
+
+    template <TexType texture_t>
+    /// Copies a 1D texture or changes the type of a texture to Texture1D
+    /// @param src - The texture to copy or cast to Texture1D
+    Texture1D(const TextureBase<texture_t>& src)
+        :TextureBase<TexType::Tex1D>(src) {}
+
     /// Uploads the base image.
     /// @param internalFormat - Specifies the number, order, and size of the color components in the texture.
     /// @param width - Specifies the width of the texture image. All implementations support texture images that are at least 1024 texels wide.
@@ -60,7 +69,7 @@ public:
     }
 
     /// Updates a part of the base image.
-    /// @param - xOffset - Specifies a texel offset in the x direction within the texture array.
+    /// @param xOffset - Specifies a texel offset in the x direction within the texture array.
     /// @param width - Specifies the width of the texture subimage.
     /// @param format - Specifies the format of the pixel data.
     /// @param type - Specifies the data type of the pixel data.
@@ -81,7 +90,7 @@ public:
 
     /// Updates a part of a mipmap image.
     /// @param level - Specifies the level-of-detail number. Level 0 is the base image level. Level n is the nth mipmap reduction image.
-    /// @param - xOffset - Specifies a texel offset in the x direction within the texture array.
+    /// @param xOffset - Specifies a texel offset in the x direction within the texture array.
     /// @param width - Specifies the width of the texture subimage.
     /// @param format - Specifies the format of the pixel data.
     /// @param type - Specifies the data type of the pixel data.

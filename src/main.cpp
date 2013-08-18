@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "terrain.h"
 #include "bloom.h"
+#include "shadow.h"
 
 void GL_Init(){
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -33,12 +34,18 @@ void FPS_Display(float time) {
 
 int main() {
     bool fixMouse = false;
-    sf::Window window(sf::VideoMode(800, 600), "Land of Dreams");
+    sf::Window window(
+        sf::VideoMode(800, 600),
+        "Land of Dreams",
+        sf::Style::Default,
+        sf::ContextSettings(16, 0, 4, 3, 3)
+    );
     window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame
     sf::Clock clock;
     if(glewInit() == GLEW_OK && GLEW_VERSION_3_3) try {
             GL_Init();
             Skybox skybox;
+            Shadow shadow;
             Terrain terrain(skybox);
             BloomEffect bloom;
             Camera cam(glm::vec3(0.0f, 20.0f, 0.0f), glm::vec3(1.0f, 19.0f, 1.0f), 50.0f);
@@ -57,6 +64,8 @@ int main() {
 
                         glViewport(0, 0, width, height);
                         bloom.Reshape(width, height);
+                        shadow.Resize(width, height);
+
                         auto projMat = glm::perspectiveFov(
                           60.0f, float(width), float(height), 1.0f, 6000.0f
                         );
@@ -78,8 +87,12 @@ int main() {
                 float time = clock.getElapsedTime().asSeconds();
                 FPS_Display(time);
 
+                shadow.ShadowRender();
+                terrain.ShadowRender(time, camPos, shadow);
+
+                shadow.Render();
                 skybox.Render(time, camMatrix);
-                terrain.Render(time, camMatrix, camPos);
+                terrain.Render(time, camMatrix, camPos, shadow);
                 bloom.Render();
 
                 window.display();

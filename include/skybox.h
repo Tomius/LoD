@@ -22,6 +22,7 @@ public:
 
     oglwrap::TextureCube envMap;
     oglwrap::FragmentShader sky_fs;
+    glm::vec3 SunPos(float time) const;
     glm::vec4 getSunData(float time) const;
 };
 

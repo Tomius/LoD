@@ -1,3 +1,7 @@
+/** @file oglwrap.hpp
+    @brief The main header, including the core files of the library.
+*/
+
 #ifndef OGLWRAP_HPP
 #define OGLWRAP_HPP
 
@@ -8,6 +12,8 @@
 #include "buffer.hpp"
 #include "vertexAttrib.hpp"
 #include "global.hpp"
+#include "framebuffer.hpp"
+#include "debugOutput.hpp"
 
 #endif // header guard
 

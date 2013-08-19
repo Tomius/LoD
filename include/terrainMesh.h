@@ -9,6 +9,7 @@
 #include "oglwrap/texture.hpp"
 
 #include "terrainData.h"
+#include "svec2.hpp"
 
 // Selecting the Block's size (is 2 ^ (blockMipmapLevel + 1)) is really essential
 // but not trivial. Selecting the good number can prove you about twice as much
@@ -31,15 +32,15 @@ class TerrainMesh {
     RawImageData image;
 
     void DrawBlocks(const glm::vec3& camPos,
-                    oglwrap::LazyUniform<glm::vec2>& Offset
+                    oglwrap::LazyUniform<glm::ivec2>& Offset
     );
-    void CreateConnectors(glm::vec2& pos, glm::vec2& camPos);
+    void CreateConnectors(glm::ivec2 pos, glm::vec2 camPos);
 public:
     TerrainMesh(const std::string& terrainFile,
                 const std::string& diffusePicture
     );
     void Render(const glm::vec3& camPos,
-                oglwrap::LazyUniform<glm::vec2>& Offset,
+                oglwrap::LazyUniform<glm::ivec2>& Offset,
                 oglwrap::LazyUniform<glm::vec3>& scales
     );
 };

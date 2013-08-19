@@ -7,7 +7,7 @@
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/texture.hpp"
 
-const int shadowMapSize = 1024;
+const int shadowMapSize = 4096;
 
 /// This class is so simple, that I implement it in the header
 class Shadow {

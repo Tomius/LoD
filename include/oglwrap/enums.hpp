@@ -128,6 +128,15 @@ enum BufferUsage {
 }
 typedef _BufferUsage::BufferUsage BufferUsage;
 
+namespace _BufferMapAccess {
+enum BufferMapAccess {
+    Read = GL_MAP_READ_BIT,
+    Write = GL_MAP_WRITE_BIT,
+    ReadWrite = GL_READ_WRITE
+};
+}
+typedef _BufferMapAccess::BufferMapAccess BufferMapAccess;
+
 // -------======{[ FrameBuffers ]}======-------
 
 namespace _FrameBufferTarget {
@@ -449,6 +458,16 @@ enum CompFunc {
 }
 typedef _CompFunc::CompFunc CompFunc;
 
+namespace _TransformFeedbackPrimitiveType {
+enum TransformFeedbackPrimitiveType {
+    Triangles = GL_TRIANGLES,
+    Lines = GL_LINES,
+    Points = GL_POINTS
+};
+}
+
+typedef _TransformFeedbackPrimitiveType::TransformFeedbackPrimitiveType TransformFeedbackPrimitiveType;
+typedef _TransformFeedbackPrimitiveType::TransformFeedbackPrimitiveType TFB_PrimType;
 
 } // Namespace oglwrap
 

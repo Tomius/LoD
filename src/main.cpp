@@ -45,7 +45,6 @@ int main() {
     if(glewInit() == GLEW_OK && GLEW_VERSION_3_3) try {
             GL_Init();
             Skybox skybox;
-            Shadow shadow;
             Terrain terrain(skybox);
             BloomEffect bloom;
             Camera cam(glm::vec3(0.0f, 20.0f, 0.0f), glm::vec3(1.0f, 19.0f, 1.0f), 50.0f);
@@ -64,7 +63,6 @@ int main() {
 
                         glViewport(0, 0, width, height);
                         bloom.Reshape(width, height);
-                        shadow.Resize(width, height);
 
                         auto projMat = glm::perspectiveFov(
                           60.0f, float(width), float(height), 1.0f, 6000.0f
@@ -87,12 +85,8 @@ int main() {
                 float time = clock.getElapsedTime().asSeconds();
                 FPS_Display(time);
 
-                shadow.ShadowRender();
-                terrain.ShadowRender(time, camPos, shadow);
-
-                shadow.Render();
                 skybox.Render(time, camMatrix);
-                terrain.Render(time, camMatrix, camPos, shadow);
+                terrain.Render(time, camMatrix, camPos);
                 bloom.Render();
 
                 window.display();

@@ -28,6 +28,15 @@ using namespace oglwrap;
                            \ /     \ /     \ /
                             o-------o-------o
 
+   Irregularness looks good with tessellation, but a normal hexagon is "too irregular".
+   The problem with it, is that I assume that it's width is 1, it's height will be
+   sqrt(3)/2, which isn't really a whole number, and the mesh can actually be pretty big,
+   and floats are not precise. Instead we can use a bit stretched hexagon, so that it's
+   width and height equals. With this we can use integral position coordinates, and
+   short is likely to be enough(which is half the size of a float :) ). There's also
+   another problem: The odd rows are shifted with a half texel compared to even rows.
+   To handle this, work with twice as big hexagons, but will fix this in the vs.
+
    Getting the coordinates for this in the normal XY coordinates can be tricky.
    Though you might notice that this is actually a very symmetrical fractal.
    Each ring is kinda alike of the previous one, just with more segments.
@@ -38,25 +47,37 @@ using namespace oglwrap;
    Every "coordinate" starts from 0 not 1. Working in this coordinate system gets
    easier with these utility functions: */
 
-static inline glm::vec2 GetPos(int ring, char line, int segment, float distance = 1.0f) {
-#define sin60 0.866025404f
-#define cos60 0.5f
+static inline svec2 GetPos(int ring, char line, int segment, int distance = 1) {
+    /*
+                5-------0
+               / \     / \
+              /   \   /   \
+             /     \ /     \
+            4-------X-------1
+             \     / \     /
+              \   /   \   /
+               \ /     \ /
+                3-------2
+                                        */
+
     // Initializer lists doesn't work with glm :(
-    glm::vec2 points[6];
-    points[0] = glm::vec2(cos60, sin60);
-    points[1] = glm::vec2(1.0f, 0.0f);
-    points[2] = glm::vec2(cos60, -sin60);
-    points[3] = glm::vec2(-cos60, -sin60);
-    points[4] = glm::vec2(-1.0f, 0.0f);
-    points[5] = glm::vec2(-cos60, sin60);
+    svec2 points[6];
+    points[0] = svec2(1, 2);
+    points[1] = svec2(2, 0);
+    points[2] = svec2(1, -2);
+    points[3] = svec2(-1, -2);
+    points[4] = svec2(-2, 0);
+    points[5] = svec2(-1, 2);
 
-    glm::vec2 prevPoint = points[size_t(line)]; // it's size_t to avoid compiler warning.
-    glm::vec2 nextPoint = points[size_t((line + 1) % 6)];
+    svec2 prevPoint = distance * points[size_t(line % 6)]; // it's size_t to avoid compiler warning.
+    svec2 nextPoint = distance * points[size_t((line + 1) % 6)];
 
-    return distance * (
-               (segment / (float)ring) * nextPoint +
-               ((ring - segment) / (float)ring) * prevPoint
-           );
+    return prevPoint + svec2(
+        // This could overflow if done with shorts, even if the result is a valid short
+        int(nextPoint.x - prevPoint.x) * segment / ring,
+        int(nextPoint.y - prevPoint.y) * segment / ring
+    );
+
 }
 
 static inline int GetIdx(int ring, char _line, int _segment) {
@@ -78,7 +99,7 @@ static inline int GetIdx(int ring, char _line, int _segment) {
     return smallerRings + currentRing;
 }
 
-static inline void distIncr(int mmlev, float& distance, int ring) {
+static inline void distIncr(int mmlev, int& distance, int ring) {
     distance += 1 << (mmlev + 1);
 }
 
@@ -97,14 +118,16 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
         positions[m].Bind();
         {
-            std::vector<glm::vec2> verticesVector;
-            verticesVector.push_back(glm::vec2(0.0f, 0.0f));
-            float distance = 0.0f;
+            std::vector<svec2> verticesVector;
+            verticesVector.push_back(svec2());
+            int distance = 0;
             distIncr(m, distance, 0);
             for(int ring = 1; ring < ringCount; ring++) {
                 for(char line = 0; line < 6; line++) {
                     for(int segment = 0; segment < ring; segment++) {
-                        verticesVector.push_back(GetPos(ring, line, segment, distance));
+                        verticesVector.push_back(
+                            GetPos(ring, line, segment, distance)
+                        );
                     }
                 }
                 distIncr(m, distance, ring);
@@ -112,7 +135,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
             vertexNum[m] = verticesVector.size();
             positions[m].Data(verticesVector);
-            VertexAttribArray(0).Setup<float>(2).Enable();
+            VertexAttribArray(0).Setup<short>(2).Enable();
         }
 
         indices[m].Bind();
@@ -211,33 +234,31 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             terrain.heightData.data()
         );
 
-        heightMap.GenerateMipmap();
         heightMap.Anisotropy(maxAniso);
-        heightMap.MinFilter(MinF::LinearMipmapLinear);
+        heightMap.MinFilter(MinF::Linear);
         heightMap.MagFilter(MagF::Linear);
         heightMap.WrapS(Wrap::Repeat);
     }
 
-    normalMap.Active(1);
-    normalMap.Bind();
-    {
-        normalMap.Upload(
-            PixelDataInternalFormat::RGB8,
-            terrain.w,
-            terrain.h,
-            PixelDataFormat::RGB,
-            PixelDataType::Byte,
-            terrain.normalData.data()
-        );
-
-        normalMap.GenerateMipmap();
-        normalMap.Anisotropy(maxAniso);
-        normalMap.MinFilter(MinF::LinearMipmapLinear);
-        normalMap.MagFilter(MagF::Linear);
-        normalMap.WrapS(Wrap::Repeat);
-        normalMap.WrapT(Wrap::Repeat);
-        normalMap.WrapR(Wrap::Repeat);
-    }
+//    normalMap.Active(1);
+//    normalMap.Bind();
+//    {
+//        normalMap.Upload(
+//            PixelDataInternalFormat::RGB8,
+//            terrain.w,
+//            terrain.h,
+//            PixelDataFormat::RGB,
+//            PixelDataType::Byte,
+//            terrain.normalData.data()
+//        );
+//
+//        normalMap.Anisotropy(maxAniso);
+//        normalMap.MinFilter(MinF::Linear);
+//        normalMap.MagFilter(MagF::Linear);
+//        normalMap.WrapS(Wrap::Repeat);
+//        normalMap.WrapT(Wrap::Repeat);
+//        normalMap.WrapR(Wrap::Repeat);
+//    }
 
     colorMap.Active(2);
     colorMap.Bind();
@@ -265,52 +286,45 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
 // -------======{[ Functions about creating the map from the blocks ]}======-------
 
-    /* A Hexagon is definitely needed here too to understand the code.
-                   (at least for me, it helped a lot)
-
-                            o-------o-------o
-                           / \     / \     / \
+// This works with ivec2 rather than svec2, as it's result is
+// uploaded as a uniform which have to an int anyway.
+static inline glm::ivec2 GetBlockPos(int ring, char line, int segment, int distance = 1) {
+   /*
+                            o----- (5) -----o
+                           / \             / \
                           /   \   /   \   /   \
-                         /     \ /     \ /     \
-                        o-------o-------o-------o
-                       / \     / \     / \     / \
+                               \ /     \ /
+                       (4) -----o-------o----- (0)
+                         \     / \     / \
                       /   \   /   \   /   \   /   \
                      /     \ /     \ /     \ /     \
                     o-------o-------X-------o-------o
                      \     / \     / \     / \     /
                       \   /   \   /   \   /   \   /
-                       \ /     \ /     \ /     \ /
-                        o-------o-------o ------o
-                         \     / \     / \     /
+                               \ /     \ /
+                       (3) -----o-------o ---- (1)
+                               / \     / \
                           \   /   \   /   \   /
-                           \ /     \ /     \ /
-                            o-------o-------o                               */
+                           \ /             \ /
+                            o----- (2) -----o                               */
 
-static inline glm::vec2 GetBlockPos(int ring, char line, int segment, float distance = 1.0f) {
-#define cos30 0.866025404f
-#define sin30 0.5f
-    // Actually the distance to up is cos30, the 1 distance is towards
-    // the hexagon vertices. Even still it's easier to define a points
-    // like this, and multiply the distance with cos30 rather than
-    // multiplying every single point with cos30.
-    glm::vec2 points[6];
-    points[0] = glm::vec2(cos30, sin30);
-    points[1] = glm::vec2(cos30, -sin30);
-    points[2] = glm::vec2(0.0f, -1.0f);
-    points[3] = glm::vec2(-cos30, -sin30);
-    points[4] = glm::vec2(-cos30, sin30);
-    points[5] = glm::vec2(0.0f, 1.0);
+    glm::ivec2 points[6];
+    points[0] = glm::ivec2(3, 2);
+    points[1] = glm::ivec2(3, -2);
+    points[2] = glm::ivec2(0, -4);
+    points[3] = glm::ivec2(-3, -2);
+    points[4] = glm::ivec2(-3, 2);
+    points[5] = glm::ivec2(0, 4);
 
-    glm::vec2 prevPoint = points[size_t(line)]; // it's size_t to avoid compiler warning.
-    glm::vec2 nextPoint = points[size_t((line + 1) % 6)];
+    glm::ivec2 prevPoint = distance * points[size_t(line % 6)]; // it's size_t to avoid compiler warning.
+    glm::ivec2 nextPoint = distance * points[size_t((line + 1) % 6)];
 
-    return cos30 * distance * (
-               (segment / (float)ring) * nextPoint +
-               ((ring - segment) / (float)ring) * prevPoint
-           );
+    return prevPoint + (nextPoint - prevPoint) * segment / ring;
 }
 
-static inline int GetBlockMipmapLevel(glm::vec2 pos, glm::vec2 camPos) {
+static inline int GetBlockMipmapLevel(glm::ivec2 _pos, glm::vec2 camPos) {
+    glm::vec2 pos(_pos.x / 2, _pos.y / 2);
+
     return std::min(
         std::max(
             int(log2(glm::length(pos - camPos)) - log2(2 * blockRadius)),
@@ -319,16 +333,14 @@ static inline int GetBlockMipmapLevel(glm::vec2 pos, glm::vec2 camPos) {
     );
 }
 
-void TerrainMesh::CreateConnectors(glm::vec2& pos, glm::vec2& camPos) {
+void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
 
     int own_mipmap = GetBlockMipmapLevel(pos, camPos);
     int neighbour_mipmaps[6];
     for(int line = 0; line < 6; line++) {
-        glm::vec2 neighbour = GetBlockPos(1, line, 0, 2*blockRadius);
+        glm::ivec2 neighbour = GetBlockPos(1, line, 0, blockRadius);
         neighbour_mipmaps[line] = GetBlockMipmapLevel(pos + neighbour, camPos);
     }
-
-    std::vector<glm::vec2> innerVertices, outerVertices;
 
     for(int line = 0; line < 6; line++) {
         int irregular = own_mipmap < neighbour_mipmaps[line] ? 1 : 0;
@@ -340,9 +352,9 @@ void TerrainMesh::CreateConnectors(glm::vec2& pos, glm::vec2& camPos) {
     }
 }
 
-void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm::vec2>& Offset) {
+void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm::ivec2>& Offset) {
     // The center piece is special
-    glm::vec2 pos(0.0f, 0.0f);
+    glm::ivec2 pos(0, 0);
     Offset = pos;
     glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
     int mipmapLevel = GetBlockMipmapLevel(pos, camPos);
@@ -353,8 +365,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm:
     glDrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr);
     CreateConnectors(pos, camPos);
 
+
     // All the other ones
-    float distance = 2 * blockRadius;
+    int distance = blockRadius;
     int ringCount = std::max(w, h) / (2 * blockRadius) + 1;
     for(int ring = 1; ring < ringCount; ring++) {
         for(char line = 0; line < 6; line++) {
@@ -370,12 +383,13 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm:
                 CreateConnectors(pos, camPos);
             }
         }
-        distance += 2 * blockRadius;
+        distance += blockRadius;
     }
+
 }
 
 void TerrainMesh::Render(const glm::vec3& camPos,
-                         oglwrap::LazyUniform<glm::vec2>& Offset,
+                         oglwrap::LazyUniform<glm::ivec2>& Offset,
                          oglwrap::LazyUniform<glm::vec3>& scales) {
 
     // Logically, this should into TerrainMesh constructor. However, the shader

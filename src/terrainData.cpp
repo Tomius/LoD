@@ -68,7 +68,6 @@ void RawImageData::Save(const std::string& filename) {
 // -------======{[ RawTerrainData ]}======-------
 
 RawTerrainData::RawTerrainData(const std::string& filename) {
-    std::cout << "Reading raw terrain data." << std::endl;
     if(filename.find(".rtd") != string::npos) {
         InitFromRawTerrain(filename);
     } else if(filename.find(".asc") != string::npos) {

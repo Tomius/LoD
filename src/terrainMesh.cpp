@@ -237,7 +237,6 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
         heightMap.Anisotropy(maxAniso);
         heightMap.MinFilter(MinF::Linear);
         heightMap.MagFilter(MagF::Linear);
-        heightMap.WrapS(Wrap::Repeat);
     }
 
     colorMap.Active(1);
@@ -252,13 +251,9 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             image.data.data()
         );
 
-        colorMap.GenerateMipmap();
         colorMap.Anisotropy(maxAniso);
-        colorMap.MinFilter(MinF::LinearMipmapLinear);
+        colorMap.MinFilter(MinF::Linear);
         colorMap.MagFilter(MagF::Linear);
-        colorMap.WrapS(Wrap::ClampToEdge);
-        colorMap.WrapT(Wrap::ClampToEdge);
-        colorMap.WrapR(Wrap::ClampToEdge);
     }
 
     VertexArray::Unbind();

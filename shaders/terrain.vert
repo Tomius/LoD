@@ -4,7 +4,7 @@ layout(location = 0) in ivec2 Position;
 uniform mat4 ProjectionMatrix, CameraMatrix;
 uniform ivec2 Offset;
 uniform vec3 Scales;
-uniform sampler2D HeightMap, NormalMap;
+uniform sampler2D HeightMap;
 
 out vec3 normal;
 out vec3 camPos;

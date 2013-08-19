@@ -13,7 +13,7 @@ Terrain::Terrain(Skybox& skybox)
     , heightMap(prog, "HeightMap")
     , normalMap(prog, "NormalMap")
     , colorMap(prog, "ColorMap")
-    , mesh("terrain/mideu.terrain",
+    , mesh("terrain/mideu.rtd",
            "terrain/mideu.rtc")
     , skybox(skybox) {
 
@@ -21,8 +21,7 @@ Terrain::Terrain(Skybox& skybox)
     prog.Link().Use();
 
     heightMap.Set(0);
-    //normalMap.Set(1);
-    colorMap.Set(2);
+    colorMap.Set(1);
 }
 
 void Terrain::Reshape(const glm::mat4& projMat) {

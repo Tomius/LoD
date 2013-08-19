@@ -53,7 +53,7 @@ public:
 
     /// @brief Bind a buffer object to its default target.
     /// @see glBindBuffer
-    void Bind() {
+    void Bind() const {
         oglwrap_PreCheckError();
 
         glBindBuffer(buffer_t, buffer);

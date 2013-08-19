@@ -240,27 +240,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
         heightMap.WrapS(Wrap::Repeat);
     }
 
-//    normalMap.Active(1);
-//    normalMap.Bind();
-//    {
-//        normalMap.Upload(
-//            PixelDataInternalFormat::RGB8,
-//            terrain.w,
-//            terrain.h,
-//            PixelDataFormat::RGB,
-//            PixelDataType::Byte,
-//            terrain.normalData.data()
-//        );
-//
-//        normalMap.Anisotropy(maxAniso);
-//        normalMap.MinFilter(MinF::Linear);
-//        normalMap.MagFilter(MagF::Linear);
-//        normalMap.WrapS(Wrap::Repeat);
-//        normalMap.WrapT(Wrap::Repeat);
-//        normalMap.WrapR(Wrap::Repeat);
-//    }
-
-    colorMap.Active(2);
+    colorMap.Active(1);
     colorMap.Bind();
     {
         colorMap.Upload(
@@ -394,14 +374,12 @@ void TerrainMesh::Render(const glm::vec3& camPos,
 
     // Logically, this should into TerrainMesh constructor. However, the shader
     // program doesn't exist yet when the constructor runs.
-
-    scales = glm::vec3(terrain.xzScale, terrain.yScale, terrain.xzScale);
+    // FIXME
+    scales = glm::vec3(1.0, 1.0, 1.0);
 
     heightMap.Active(0);
     heightMap.Bind();
-    normalMap.Active(1);
-    normalMap.Bind();
-    colorMap.Active(2);
+    colorMap.Active(1);
     colorMap.Bind();
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(RESTART);

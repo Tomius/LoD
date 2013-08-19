@@ -11,11 +11,11 @@
 #include "terrainData.h"
 #include "svec2.hpp"
 
-// Selecting the Block's size (is 2 ^ (blockMipmapLevel + 1)) is really essential
-// but not trivial. Selecting the good number can prove you about twice as much
-// performance as with selecting a number 1 higher or 1 lower number, and it won't
-// just be faster, but it will also look better. So everytime you try a new mesh,
-// tweak this value, the optimum should be near ceil(log2(texSize) / 2).
+// Selecting the Blocks' size is really essential but not trivial. Selecting the
+// good number can prove you about twice as much performance as with selecting a
+// number 1 higher or 1 lower number, and it won't just be faster, but it will
+// also look better. So everytime you try a new mesh, tweak this value, the
+// optimum should be near ceil(log2(texSize) / 2).
 
 #define blockMipmapLevel 7
 const int blockRadius = 1 << blockMipmapLevel;
@@ -25,9 +25,9 @@ class TerrainMesh {
     oglwrap::ArrayBuffer positions[blockMipmapLevel];
     oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
     size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
-    oglwrap::Texture2D colorMap, heightMap, normalMap;
+    oglwrap::Texture2D colorMap, heightMap;
 
-    TerrainData terrain;
+    RawTerrainData terrain;
     size_t w, h;
     RawImageData image;
 

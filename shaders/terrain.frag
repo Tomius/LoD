@@ -49,7 +49,7 @@ void main() {
         0.0, 1.0
     ) / 4;
 
-    fragColor = /*normalize(normal) + 0.01 **/ mix(Color, Fog, alpha);
+    fragColor = mix(Color, Fog, alpha);
 
 }
 

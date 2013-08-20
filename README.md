@@ -5,12 +5,12 @@ Simple attempt of drawing big terrains in OpenGL with the geomipmapping level of
 servers as a test subject for my C++ OpenGL wrapper, oglwrap.
 
 Here's a picture of the program's current capability:
-![screenshot](http://oi41.tinypic.com/2cbnyb.jpg) 
+![screenshot](http://oi40.tinypic.com/t71is5.jpg) 
 
 Dependencies:
 -------------
 * C++11 compiler.
-* OpenGL 3.3+, GLEW
+* OpenGL 3.1, GLEW
 * SFML - for window handling
 * Magick++ - for image loading.
 

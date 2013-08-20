@@ -33,16 +33,18 @@ void FPS_Display(float time) {
 }
 
 int main() {
-    bool fixMouse = false;
+
     sf::Window window(
         sf::VideoMode(800, 600),
         "Land of Dreams",
         sf::Style::Default,
-        sf::ContextSettings(32, 0, 4, 3, 3)
+        sf::ContextSettings(32, 0, 4, 3, 1)
     );
     window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame
+
     sf::Clock clock;
-    if(glewInit() == GLEW_OK && GLEW_VERSION_3_3) try {
+    bool fixMouse = false;
+    if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
             GL_Init();
             Skybox skybox;
             Terrain terrain(skybox);

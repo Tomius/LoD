@@ -14,6 +14,7 @@ class Terrain {
     oglwrap::LazyUniform<glm::vec4> sunData;
     oglwrap::LazyUniform<glm::vec3> scales;
     oglwrap::LazyUniform<glm::ivec2> offset;
+    oglwrap::LazyUniform<int> mipmapLevel;
     oglwrap::LazyUniformSampler heightMap, normalMap, colorMap;
     TerrainMesh mesh;
 

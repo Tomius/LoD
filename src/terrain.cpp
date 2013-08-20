@@ -10,6 +10,7 @@ Terrain::Terrain(Skybox& skybox)
     , sunData(prog, "SunData")
     , scales(prog, "Scales")
     , offset(prog, "Offset")
+    , mipmapLevel(prog, "MipmapLevel")
     , heightMap(prog, "HeightMap")
     , normalMap(prog, "NormalMap")
     , colorMap(prog, "ColorMap")
@@ -32,5 +33,5 @@ void Terrain::Render(float time, const glm::mat4& camMat, const glm::vec3& camPo
     prog.Use();
     cameraMatrix.Set(camMat);
     sunData.Set(skybox.getSunData(time));
-    mesh.Render(camPos, offset, scales);
+    mesh.Render(camPos, offset, scales, mipmapLevel);
 }

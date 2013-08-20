@@ -5,15 +5,13 @@ uniform mat4 ProjectionMatrix, CameraMatrix;
 uniform ivec2 Offset;
 uniform vec3 Scales;
 uniform sampler2D HeightMap;
+uniform int MipmapLevel;
 
 out vec3 normal;
 out vec3 camPos;
 out vec3 worldPos;
 out vec2 texCoord;
 out float invalid;
-
-// FIXME (Uniform)
-const int mmLev = 0;
 
 float Height(ivec2 texCoord) {
     return texelFetch(HeightMap, texCoord, 0).r * 255;
@@ -22,7 +20,7 @@ float Height(ivec2 texCoord) {
 void main() {
     ivec2 offsPos = (Position + Offset) / 2;
     ivec2 texSize = textureSize(HeightMap, 0);
-    if(abs(offsPos.x) >= (texSize.x - 1) / 2 || abs(offsPos.y) >= (texSize.x - 1) / 2)
+    if(abs(offsPos.x) - 1 >= texSize.x / 2 || abs(offsPos.y) - 1 >= texSize.x / 2)
         invalid = 1e10;
     else
         invalid = 0.0;
@@ -43,7 +41,7 @@ void main() {
 
     vec3 neighbours[6];
     for(int i = 0; i < 6; i++) {
-        ivec2 nPos = (Position + Offset + ((1 << (mmLev + 1)) * iNeighbours[i])) / 2;
+        ivec2 nPos = (Position + Offset + ((1 << (MipmapLevel + 1)) * iNeighbours[i])) / 2;
         ivec2 nTexCoord = nPos + texSize / 2;
         neighbours[i] = Scales * vec3(nPos.x, Height(nTexCoord), nPos.y) - worldPos;
     }

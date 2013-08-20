@@ -327,12 +327,15 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
     }
 }
 
-void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm::ivec2>& Offset) {
+void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
+                             oglwrap::LazyUniform<glm::ivec2>& offset,
+                             oglwrap::LazyUniform<int>& mipmapLevelUnif) {
     // The center piece is special
     glm::ivec2 pos(0, 0);
-    Offset = pos;
+    offset = pos;
     glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
     int mipmapLevel = GetBlockMipmapLevel(pos, camPos);
+    mipmapLevelUnif = mipmapLevel;
 
     // Draw
     vao[mipmapLevel].Bind();
@@ -348,8 +351,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm:
         for(char line = 0; line < 6; line++) {
             for(int segment = 0; segment < ring ; segment++) {
                 pos = GetBlockPos(ring, line, segment, distance);
-                Offset = pos;
+                offset = pos;
                 mipmapLevel = GetBlockMipmapLevel(pos, camPos);
+                mipmapLevelUnif = mipmapLevel;
 
                 // Draw
                 vao[mipmapLevel].Bind();
@@ -364,8 +368,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos, oglwrap::LazyUniform<glm:
 }
 
 void TerrainMesh::Render(const glm::vec3& camPos,
-                         oglwrap::LazyUniform<glm::ivec2>& Offset,
-                         oglwrap::LazyUniform<glm::vec3>& scales) {
+                         oglwrap::LazyUniform<glm::ivec2>& offset,
+                         oglwrap::LazyUniform<glm::vec3>& scales,
+                         oglwrap::LazyUniform<int>& mipmapLevel) {
 
     // FIXME
     // Logically, this should into TerrainMesh constructor. However, the shader
@@ -380,7 +385,7 @@ void TerrainMesh::Render(const glm::vec3& camPos,
     glPrimitiveRestartIndex(RESTART);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    DrawBlocks(camPos, Offset);
+    DrawBlocks(camPos, offset, mipmapLevel);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glDisable(GL_PRIMITIVE_RESTART);

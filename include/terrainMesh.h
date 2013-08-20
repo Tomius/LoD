@@ -32,7 +32,8 @@ class TerrainMesh {
     RawImageData image;
 
     void DrawBlocks(const glm::vec3& camPos,
-                    oglwrap::LazyUniform<glm::ivec2>& Offset
+                    oglwrap::LazyUniform<glm::ivec2>& Offset,
+                    oglwrap::LazyUniform<int>& mipmapLevelUnif
     );
     void CreateConnectors(glm::ivec2 pos, glm::vec2 camPos);
 public:
@@ -41,7 +42,8 @@ public:
     );
     void Render(const glm::vec3& camPos,
                 oglwrap::LazyUniform<glm::ivec2>& Offset,
-                oglwrap::LazyUniform<glm::vec3>& scales
+                oglwrap::LazyUniform<glm::vec3>& scales,
+                oglwrap::LazyUniform<int>& mipmapLevel
     );
 };
 

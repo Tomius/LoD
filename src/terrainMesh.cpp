@@ -367,9 +367,9 @@ void TerrainMesh::Render(const glm::vec3& camPos,
                          oglwrap::LazyUniform<glm::ivec2>& Offset,
                          oglwrap::LazyUniform<glm::vec3>& scales) {
 
+    // FIXME
     // Logically, this should into TerrainMesh constructor. However, the shader
     // program doesn't exist yet when the constructor runs.
-    // FIXME
     scales = glm::vec3(1.0, 1.0, 1.0);
 
     heightMap.Active(0);

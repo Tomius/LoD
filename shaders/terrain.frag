@@ -37,7 +37,7 @@ void main() {
            normalize(worldPos)
        ), 0.0
    );
-    float SpecularPower = SunPower() * pow(SpecularFactor, SpecularShininess) / 2;
+    float SpecularPower = SunPower() * pow(SpecularFactor, SpecularShininess);
 
     vec3 texColor = texture(ColorMap, texCoord).rgb;
     vec3 Color = AmbientColor() * texColor * (AmbientPower() + DiffusePower + SpecularPower);

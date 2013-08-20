@@ -12,6 +12,9 @@ out vec3 worldPos;
 out vec2 texCoord;
 out float invalid;
 
+// FIXME (Uniform)
+const int mmLev = 0;
+
 float Height(ivec2 texCoord) {
     return texelFetch(HeightMap, texCoord, 0).r * 255;
 }
@@ -24,7 +27,7 @@ void main() {
     else
         invalid = 0.0;
 
-    ivec2 iTexCoord = (ivec2(offsPos) + texSize / 2);
+    ivec2 iTexCoord = offsPos + texSize / 2;
     texCoord = iTexCoord / vec2(texSize);
 
     float height = Height(iTexCoord);
@@ -33,20 +36,25 @@ void main() {
 
     // -------======{[ Normals ]}======-------
 
-    // Horizontal slope
-    float sHoriz = Height(iTexCoord + ivec2(1, 0)) - Height(iTexCoord + ivec2(-1, 0));
-    // Slope along the main diagonal.
-    float sMainD = Height(iTexCoord + ivec2(1, -1)) - Height(iTexCoord + ivec2(-1, 1));
-    // Slope along the minor diagonal.
-    float sMinorD = Height(iTexCoord + ivec2(-1, -1)) - Height(iTexCoord + ivec2(1, 1));
-
-    normal = vec3(
-        (sHoriz + sMainD - sMinorD) * Scales.y,
-        // it should be multiplied by 3, but this way,
-        // it is less visible that my approximation actually sux.
-        12 * Scales.x,
-        (sMinorD + sMainD) * Scales.y
+    const ivec2 iNeighbours[6] = ivec2[6](
+        ivec2(1, 2),   ivec2(2, 0),  ivec2(1, -2),
+        ivec2(-1, -2), ivec2(-2, 0), ivec2(-1, 2)
     );
+
+    vec3 neighbours[6];
+    for(int i = 0; i < 6; i++) {
+        ivec2 nPos = (Position + Offset + ((1 << (mmLev + 1)) * iNeighbours[i])) / 2;
+        ivec2 nTexCoord = nPos + texSize / 2;
+        neighbours[i] = Scales * vec3(nPos.x, Height(nTexCoord), nPos.y) - worldPos;
+    }
+
+    vec3 tempNormal = vec3(0.0);
+    for(int i = 0; i < 6; i++) {
+        tempNormal += normalize(cross(neighbours[i], neighbours[(i+1) % 6]));
+    }
+
+    normal = tempNormal;
+
 
     gl_Position = ProjectionMatrix * vec4(camPos, 1.0);
 }

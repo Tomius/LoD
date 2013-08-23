@@ -167,7 +167,7 @@ typedef _FrameBufferStatus::FrameBufferStatus FBO_Status;
 
 namespace _FrameBufferAttachment {
 enum FrameBufferAttachment {
-    Color0 = GL_COLOR_ATTACHMENT0,
+    Color = GL_COLOR_ATTACHMENT0,
     Color1 = GL_COLOR_ATTACHMENT1,
     Color2 = GL_COLOR_ATTACHMENT2,
     Color3 = GL_COLOR_ATTACHMENT3,

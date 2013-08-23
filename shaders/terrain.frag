@@ -20,7 +20,7 @@ vec3 AmbientColor();
 float fogMin = max(Scales.x, Scales.z) * 256.0;
 float fogMax = max(Scales.x, Scales.z) * 2048.0;
 vec3 fogColor = vec3(0.6);
-const float SpecularShininess = 10.0f;
+const float SpecularShininess = 5.0f;
 
 void main() {
     if(invalid != 0.0)
@@ -29,14 +29,14 @@ void main() {
         normalize(normal),
         normalize(AmbientDirection())
     );
-    float DiffusePower = max(SunPower() * d, 0.01);
+    float DiffusePower = max(SunPower() * d, 0.002);
 
     vec3 refl = reflect(AmbientDirection(), normalize(normal));
     float SpecularFactor = max(
        dot(normalize(refl),
            normalize(worldPos)
        ), 0.0
-   );
+    );
     float SpecularPower = SunPower() * pow(SpecularFactor, SpecularShininess);
 
     vec3 texColor = texture(ColorMap, texCoord).rgb;

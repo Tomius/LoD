@@ -60,7 +60,6 @@ static inline svec2 GetPos(int ring, char line, int segment, int distance = 1) {
                 3-------2
                                         */
 
-    // Initializer lists doesn't work with glm :(
     svec2 points[6];
     points[0] = svec2(1, 2);
     points[1] = svec2(2, 0);

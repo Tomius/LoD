@@ -7,10 +7,10 @@ BloomEffect::BloomEffect()
     , fs("bloom.frag") {
 
     prog << vs << fs;
-    prog.Link();
+    prog.link().use();
 
-    vao.Bind();
-    verts.Bind();
+    vao.bind();
+    verts.bind();
     {
         GLfloat screenCorners[] = {
             -1.0f, -1.0f,
@@ -18,19 +18,19 @@ BloomEffect::BloomEffect()
             -1.0f, +1.0f,
             +1.0f, +1.0f
         };
-        verts.Data(sizeof(screenCorners), screenCorners);
-        (prog | "Position").Setup<float>(2).Enable();
+        verts.data(sizeof(screenCorners), screenCorners);
+        (prog | "Position").setup<float>(2).enable();
     }
-    vao.Unbind();
+    vao.unbind();
 }
 
 void BloomEffect::Reshape(GLuint w, GLuint h) {
     width = w;
     height = h;
 
-    tex.Active(0);
-    tex.Bind();
-    tex.Upload(
+    tex.active(0);
+    tex.bind();
+    tex.upload(
         PixelDataInternalFormat::RGB,
         width,
         height,
@@ -42,14 +42,14 @@ void BloomEffect::Reshape(GLuint w, GLuint h) {
 
 void BloomEffect::Render() {
     // Copy the backbuffer to the texture that our shader can fetch.
-    tex.Active(0);
-    tex.Bind();
-    tex.Copy(PixelDataInternalFormat::RGB, 0, 0, width, height);
+    tex.active(0);
+    tex.bind();
+    tex.copy(PixelDataInternalFormat::RGB, 0, 0, width, height);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl( Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
 
-    prog.Use();
-    vao.Bind();
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    vao.Unbind();
+    prog.use();
+    vao.bind();
+    gl( DrawArrays(GL_TRIANGLE_STRIP, 0, 4) );
+    vao.unbind();
 }

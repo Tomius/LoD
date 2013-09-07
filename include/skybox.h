@@ -3,7 +3,6 @@
 
 #include <GL/glew.h>
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/texture.hpp"
 #include "oglwrap/shapes/cube.hpp"
 
 class Skybox {

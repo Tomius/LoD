@@ -4,38 +4,38 @@
 #ifndef SHADOW_HPP
 #define SHADOW_HPP
 
+#include <GL/glew.h>
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/texture.hpp"
 
 const int shadowMapSize = 4096;
 
 /// This class is so simple, that I implement it in the header
 class Shadow {
     oglwrap::Texture2D tex;
-    oglwrap::FrameBuffer fbo;
+    oglwrap::Framebuffer fbo;
 
     size_t w, h;
 public:
     Shadow() {
         using namespace oglwrap;
         // Depth texture. Slower than a depth buffer, but you can sample it later in your shader
-        tex.Bind();
-        tex.Upload(
+        tex.bind();
+        tex.upload(
             PxDIntForm::DepthComponent, shadowMapSize, shadowMapSize,
             PxDForm::DepthComponent, PxDType::Float, nullptr
         );
-        tex.MinFilter(MinF::Linear);
-        tex.MagFilter(MagF::Linear);
-        tex.WrapS(Wrap::ClampToEdge);
-        tex.WrapT(Wrap::ClampToEdge);
-        tex.CompareFunc(CompFunc::LEqual);
-        tex.CompareMode(CompMode::CompareRefToTexture);
+        tex.minFilter(MinFilter::Linear);
+        tex.magFilter(MagFilter::Linear);
+        tex.wrapS(Wrap::ClampToEdge);
+        tex.wrapT(Wrap::ClampToEdge);
+        tex.compareFunc(CompFunc::LEqual);
+        tex.compareMode(CompMode::CompareRefToTexture);
 
-        fbo.Bind();
-        fbo.AttachTexture(FBO_Attachment::Depth, tex, 0);
-        glDrawBuffer(GL_NONE); // No color output in the bound framebuffer, only depth.
-        fbo.Validate();
-        fbo.Unbind();
+        fbo.bind();
+        fbo.attachTexture(FramebufferAttachment::Depth, tex, 0);
+        gl( DrawBuffer(GL_NONE) ); // No color output in the bound framebuffer, only depth.
+        fbo.validate();
+        fbo.unbind();
     }
 
     void Resize(size_t width, size_t height) {
@@ -73,15 +73,15 @@ public:
     }
 
     void ShadowRender() {
-        fbo.Bind();
-        glViewport(0, 0, shadowMapSize, shadowMapSize);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        fbo.bind();
+        gl( Viewport(0, 0, shadowMapSize, shadowMapSize) );
+        gl( Clear(GL_DEPTH_BUFFER_BIT) );
     }
 
     void Render() {
-        fbo.Unbind();
-        glViewport(0, 0, w, h);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        fbo.unbind();
+        gl( Viewport(0, 0, w, h) );
+        gl( Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
     }
 };
 

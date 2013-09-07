@@ -3,6 +3,8 @@
 #include <SFML/System.hpp>
 #include <SFML/OpenGL.hpp>
 
+#include "svec2.hpp"
+
 using namespace oglwrap;
 #define RESTART 0xFFFFFFFF
 
@@ -113,9 +115,9 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
     for(int m = 0; m < blockMipmapLevel; m++) {
         const unsigned short ringCount = blockRadius / (1 << (m + 1)) + 1;
 
-        vao[m].Bind();
+        vao[m].bind();
 
-        positions[m].Bind();
+        positions[m].bind();
         {
             std::vector<svec2> verticesVector;
             verticesVector.push_back(svec2());
@@ -133,11 +135,11 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             }
 
             vertexNum[m] = verticesVector.size();
-            positions[m].Data(verticesVector);
-            VertexAttribArray(0).Setup<short>(2).Enable();
+            positions[m].data(verticesVector);
+            VertexAttribArray(0).setup<short>(2).enable();
         }
 
-        indices[m].Bind();
+        indices[m].bind();
         {
             std::vector<unsigned int> indicesVector;
             for(int ring = 1; ring < ringCount - 1; ring++) { // the border indices are separate
@@ -153,7 +155,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             }
 
             indexNum[m] = indicesVector.size();
-            indices[m].Data(indicesVector);
+            indices[m].data(indicesVector);
 
         }
 
@@ -175,8 +177,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
                 indicesVector.push_back(GetIdx(ring, line + 1, 0));
                 indicesVector.push_back(RESTART);
 
-                borderIndices[m][line][0].Bind();
-                borderIndices[m][line][0].Data(indicesVector);
+                borderIndices[m][line][0].bind();
+                borderIndices[m][line][0].data(indicesVector);
             }
 
             // The ones that connect different mipmapLevel blocks
@@ -205,8 +207,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
                     indicesVector.push_back(RESTART);
                 }
 
-                borderIndices[m][line][1].Bind();
-                borderIndices[m][line][1].Data(indicesVector);
+                borderIndices[m][line][1].bind();
+                borderIndices[m][line][1].data(indicesVector);
             }
         }
 
@@ -215,16 +217,16 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
 
     // Upload the textures:
     GLfloat maxAniso = 0.0f;
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
+    gl( GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso) );
 
     // Laziness level OVER 9000!!!
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    gl( PixelStorei(GL_UNPACK_ALIGNMENT, 1) );
+    gl( PixelStorei(GL_PACK_ALIGNMENT, 1) );
 
-    heightMap.Active(0);
-    heightMap.Bind();
+    heightMap.active(0);
+    heightMap.bind();
     {
-        heightMap.Upload(
+        heightMap.upload(
             PixelDataInternalFormat::R8,
             terrain.w,
             terrain.h,
@@ -233,15 +235,15 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             terrain.heightData.data()
         );
 
-        heightMap.Anisotropy(maxAniso);
-        heightMap.MinFilter(MinF::Linear);
-        heightMap.MagFilter(MagF::Linear);
+        heightMap.anisotropy(maxAniso);
+        heightMap.minFilter(MinF::Linear);
+        heightMap.magFilter(MagF::Linear);
     }
 
-    colorMap.Active(1);
-    colorMap.Bind();
+    colorMap.active(1);
+    colorMap.bind();
     {
-        colorMap.Upload(
+        colorMap.upload(
             PixelDataInternalFormat::SRGB8,
             image.w,
             image.h,
@@ -250,12 +252,12 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
             image.data.data()
         );
 
-        colorMap.Anisotropy(maxAniso);
-        colorMap.MinFilter(MinF::Linear);
-        colorMap.MagFilter(MagF::Linear);
+        colorMap.anisotropy(maxAniso);
+        colorMap.minFilter(MinF::Linear);
+        colorMap.magFilter(MagF::Linear);
     }
 
-    VertexArray::Unbind();
+    VertexArray::unbind();
 }
 
 // -------======{[ Functions about creating the map from the blocks ]}======-------
@@ -319,10 +321,10 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
     for(int line = 0; line < 6; line++) {
         int irregular = own_mipmap < neighbour_mipmaps[line] ? 1 : 0;
 
-        borderIndices[own_mipmap][line][irregular].Bind();
-        size_t indicesNum = borderIndices[own_mipmap][line][irregular].Size() / sizeof(int);
+        borderIndices[own_mipmap][line][irregular].bind();
+        size_t indicesNum = borderIndices[own_mipmap][line][irregular].size() / sizeof(int);
 
-        glDrawElements(GL_TRIANGLE_STRIP, indicesNum, DataType::UnsignedInt, nullptr);
+        gl( DrawElements(GL_TRIANGLE_STRIP, indicesNum, DataType::UnsignedInt, nullptr) );
     }
 }
 
@@ -337,9 +339,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
     mipmapLevelUnif = mipmapLevel;
 
     // Draw
-    vao[mipmapLevel].Bind();
-    indices[mipmapLevel].Bind();
-    glDrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr);
+    vao[mipmapLevel].bind();
+    indices[mipmapLevel].bind();
+    gl( DrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr) );
     CreateConnectors(pos, camPos);
 
 
@@ -355,9 +357,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
                 mipmapLevelUnif = mipmapLevel;
 
                 // Draw
-                vao[mipmapLevel].Bind();
-                indices[mipmapLevel].Bind();
-                glDrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr);
+                vao[mipmapLevel].bind();
+                indices[mipmapLevel].bind();
+                gl( DrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr) );
                 CreateConnectors(pos, camPos);
             }
         }
@@ -376,18 +378,18 @@ void TerrainMesh::Render(const glm::vec3& camPos,
     // program doesn't exist yet when the constructor runs.
     scales = glm::vec3(1.0, 1.0, 1.0);
 
-    heightMap.Active(0);
-    heightMap.Bind();
-    colorMap.Active(1);
-    colorMap.Bind();
-    glEnable(GL_PRIMITIVE_RESTART);
-    glPrimitiveRestartIndex(RESTART);
+    heightMap.active(0);
+    heightMap.bind();
+    colorMap.active(1);
+    colorMap.bind();
+    gl( Enable(GL_PRIMITIVE_RESTART) );
+    gl( PrimitiveRestartIndex(RESTART) );
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     DrawBlocks(camPos, offset, mipmapLevel);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    glDisable(GL_PRIMITIVE_RESTART);
-    VertexArray::Unbind();
+    gl( Disable(GL_PRIMITIVE_RESTART) );
+    VertexArray::unbind();
 }
 

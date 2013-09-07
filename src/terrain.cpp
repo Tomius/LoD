@@ -19,19 +19,20 @@ Terrain::Terrain(Skybox& skybox)
     , skybox(skybox) {
 
     prog << vs << fs << skybox.sky_fs;
-    prog.Link().Use();
+    prog.link().use();
 
-    heightMap.Set(0);
-    colorMap.Set(1);
+    heightMap.set(0);
+    colorMap.set(1);
 }
 
 void Terrain::Reshape(const glm::mat4& projMat) {
+    prog.use();
     projectionMatrix = projMat;
 }
 
 void Terrain::Render(float time, const glm::mat4& camMat, const glm::vec3& camPos) {
-    prog.Use();
-    cameraMatrix.Set(camMat);
-    sunData.Set(skybox.getSunData(time));
+    prog.use();
+    cameraMatrix.set(camMat);
+    sunData.set(skybox.getSunData(time));
     mesh.Render(camPos, offset, scales, mipmapLevel);
 }

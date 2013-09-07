@@ -13,27 +13,28 @@ Skybox::Skybox()
     , sky_fs("sky.frag") {
 
     prog << vs << fs << sky_fs;
-    prog.Link();
+    prog.link().use();
 
-    makeCube.Positions(prog | "Position");
+    makeCube.setup_positions(prog | "Position");
 
     {
-        envMap.Bind();
-        envMap.MinFilter(MinF::Linear);
-        envMap.MagFilter(MagF::Linear);
-        envMap.WrapS(Wrap::ClampToEdge);
-        envMap.WrapT(Wrap::ClampToEdge);
-        envMap.WrapR(Wrap::ClampToEdge);
+        envMap.bind();
+        envMap.minFilter(MinF::Linear);
+        envMap.magFilter(MagF::Linear);
+        envMap.wrapS(Wrap::ClampToEdge);
+        envMap.wrapT(Wrap::ClampToEdge);
+        envMap.wrapR(Wrap::ClampToEdge);
 
        for(int i = 0; i < 6; i++) {
             char c[2] = {char('0' + i), 0};
-            envMap.LoadTexture(i, "textures/skybox_" + std::string(c) + ".png");
+            envMap.loadTexture(i, "textures/skybox_" + std::string(c) + ".png");
         }
     }
 }
 
 void Skybox::Reshape(const glm::mat4& projMat) {
-    projectionMatrix.Set(projMat);
+    prog.use();
+    projectionMatrix.set(projMat);
 }
 
 const float day_duration = 256.0f;
@@ -85,15 +86,15 @@ void Skybox::Render(float time, const glm::mat4& cameraMat) {
         0.0f, 0.0f, 0.0f, 1.0f
     );
 
-    prog.Use();
-    cameraMatrix.Set(camRot);
-    sunData.Set(getSunData(time));
+    prog.use();
+    cameraMatrix.set(camRot);
+    sunData.set(getSunData(time));
 
     // The skybox looks better w/o gamma correction
-    bool srgb = glIsEnabled(GL_FRAMEBUFFER_SRGB);
-    if(srgb) { glDisable(GL_FRAMEBUFFER_SRGB); }
-    glDepthMask(false);
-    makeCube.Draw();
-    glDepthMask(true);
-    if(srgb) { glEnable(GL_FRAMEBUFFER_SRGB); }
+    bool srgb = gl( IsEnabled(GL_FRAMEBUFFER_SRGB) );
+    if(srgb) { gl( Disable(GL_FRAMEBUFFER_SRGB) ); }
+    gl( DepthMask(false) );
+    makeCube.draw();
+    gl( DepthMask(true) );
+    if(srgb) { gl( Enable(GL_FRAMEBUFFER_SRGB) ); }
 }

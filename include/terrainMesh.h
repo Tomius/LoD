@@ -6,10 +6,9 @@
 #include <vector>
 #include <GL/glew.h>
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/texture.hpp"
 
 #include "terrainData.h"
-#include "svec2.hpp"
+//#include "svec2.hpp"
 
 // Selecting the Blocks' size is really essential but not trivial. Selecting the
 // good number can prove you about twice as much performance as with selecting a

@@ -17,7 +17,7 @@ class BloomEffect {
     GLuint width, height;
 public:
     BloomEffect();
-    void Reshape(GLuint width, GLuint height);
+    void reshape(GLuint width, GLuint height);
     void Render();
 };
 

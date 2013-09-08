@@ -393,3 +393,28 @@ void TerrainMesh::Render(const glm::vec3& camPos,
     VertexArray::unbind();
 }
 
+unsigned char TerrainMesh::FetchHeight(glm::ivec2 v) {
+    return terrain.heightData[(v.y + terrain.h/2) * terrain.w + (v.x + terrain.w/2)];
+}
+
+float TerrainMesh::getHeight(float x, float y) {
+    return FetchHeight(glm::ivec2(x, y));
+//    glm::vec2 diff = glm::vec2(x - int(x), y - int(y));
+//    glm::ivec2 diffSign = glm::ivec2(
+//        int(fabs(diff.x) < 1e-5 ? 0 : diff.x / fabs(diff.x)),
+//        int(fabs(diff.y) < 1e-5 ? 0 : diff.y / fabs(diff.y))
+//    );
+//    if(diffSign.x == 0 && diffSign.y == 0)
+//        return FetchHeight(glm::ivec2(x, y));
+//
+//    glm::ivec2 currTC = glm::ivec2(x, y);
+//    glm::ivec2 horizN = currTC + glm::ivec2(diffSign.x, 0);
+//    glm::ivec2 vertN = currTC + glm::ivec2(0, diffSign.y);
+//    glm::ivec2 diagN = currTC + glm::ivec2(diffSign.x, diffSign.y);
+//    float baseH = FetchHeight(currTC);
+//    float horizH = (1 - diff.x) * baseH + diff.x * FetchHeight(horizN);
+//    float vertH = (1 - diff.y) * baseH + diff.y * FetchHeight(vertN);
+//    float diagH = (2 - diff.x - diff.y) * baseH + (diff.x + diff.y) * FetchHeight(diagN);
+//    return (horizH + vertH + diagH) / 4;
+}
+

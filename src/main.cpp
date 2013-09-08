@@ -5,10 +5,12 @@
 #include <GL/glew.h>
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/utils/camera.hpp"
+#include "charmove.hpp"
 #include "skybox.h"
 #include "terrain.h"
 #include "bloom.h"
 #include "shadow.h"
+#include "ayumi.h"
 
 void GL_Init(){
     gl( ClearColor(0.0f, 0.0f, 0.0f, 0.0f) );
@@ -49,46 +51,69 @@ int main() {
             Skybox skybox;
             Terrain terrain(skybox);
             BloomEffect bloom;
-            oglwrap::FreeFlyCamera cam(glm::vec3(0.0f, 20.0f, 0.0f), glm::vec3(1.0f, 19.0f, 1.0f), 50.0f);
+            Ayumi ayumi;
+            oglwrap::CharacterMovement charmove(glm::vec3(0, 13, 0));
+            oglwrap::ThirdPersonalCamera cam(
+                ayumi.mesh.boundingSphere_Center() + glm::vec3(ayumi.mesh.boundingSphere_Radius() * 3),
+                ayumi.mesh.boundingSphere_Center(),
+                1.5f
+            );
 
             sf::Event event;
             bool running = true;
             while(running) {
 
                 while(window.pollEvent(event)) {
-                    if(event.type == sf::Event::Closed ||
-                        (event.type == sf::Event::KeyPressed &&
-                         event.key.code == sf::Keyboard::Escape)) {
-                        running = false;
-                    } else if(event.type == sf::Event::Resized) {
-                        int width = event.size.width, height = event.size.height;
+                     switch (event.type) {
+                        case sf::Event::Closed:
+                            running = false;
+                            break;
+                        case sf::Event::KeyPressed:
+                            if(event.key.code == sf::Keyboard::Escape) {
+                                running = false;
+                            } else if(event.key.code == sf::Keyboard::F11) {
+                                fixMouse = !fixMouse;
+                                window.setMouseCursorVisible(!fixMouse);
+                            }
+                            break;
+                        case sf::Event::Resized: {
+                            int width = event.size.width, height = event.size.height;
 
-                        glViewport(0, 0, width, height);
-                        bloom.Reshape(width, height);
+                            glViewport(0, 0, width, height);
+                            bloom.reshape(width, height);
 
-                        auto projMat = glm::perspectiveFov(
-                          60.0f, float(width), float(height), 1.0f, 6000.0f
-                        );
-                        skybox.Reshape(projMat);
-                        terrain.Reshape(projMat);
+                            auto projMat = glm::perspectiveFov(
+                              60.0f, float(width), float(height), 1.0f, 6000.0f
+                            );
 
-                    } else if(event.type == sf::Event::KeyPressed &&
-                              event.key.code == sf::Keyboard::F11) {
-                          fixMouse = !fixMouse;
-                          window.setMouseCursorVisible(!fixMouse);
+                            ayumi.reshape(projMat);
+                            skybox.reshape(projMat);
+                            terrain.reshape(projMat);
+                        }   break;
+                        case sf::Event::MouseWheelMoved:
+                            cam.scrolling(event.mouseWheel.delta);
+                            break;
+                        default:
+                            break;
                     }
                 }
 
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                cam.update(window, fixMouse);
+                float time = clock.getElapsedTime().asSeconds();
+
+                cam.updateRotation(time, window, fixMouse);
+                charmove.update(cam, ayumi.mesh.offset_since_last_frame());
+                cam.updateTarget(charmove.getPos() + ayumi.mesh.boundingSphere_Center());
+                charmove.updateHeight(terrain.getHeight(charmove.getPos().x, charmove.getPos().z));
+
                 glm::mat4 camMatrix = cam.cameraMatrix();
                 glm::vec3 camPos = cam.getPos();
-                float time = clock.getElapsedTime().asSeconds();
                 FPS_Display(time);
 
                 skybox.Render(time, camMatrix);
                 terrain.Render(time, camMatrix, camPos);
+                ayumi.render(time, cam, charmove);
                 bloom.Render();
 
                 window.display();

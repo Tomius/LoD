@@ -24,7 +24,7 @@ BloomEffect::BloomEffect()
     vao.unbind();
 }
 
-void BloomEffect::Reshape(GLuint w, GLuint h) {
+void BloomEffect::reshape(GLuint w, GLuint h) {
     width = w;
     height = h;
 

@@ -21,8 +21,9 @@ class Terrain {
     Skybox& skybox;
 public:
     Terrain(Skybox& skybox);
-    void Reshape(const glm::mat4& projMat);
+    void reshape(const glm::mat4& projMat);
     void Render(float time, const glm::mat4& camMat, const glm::vec3& camPos);
+    float getHeight(float x, float y);
 };
 
 #endif // header guard

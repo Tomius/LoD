@@ -25,7 +25,7 @@ Terrain::Terrain(Skybox& skybox)
     colorMap.set(1);
 }
 
-void Terrain::Reshape(const glm::mat4& projMat) {
+void Terrain::reshape(const glm::mat4& projMat) {
     prog.use();
     projectionMatrix = projMat;
 }
@@ -35,4 +35,8 @@ void Terrain::Render(float time, const glm::mat4& camMat, const glm::vec3& camPo
     cameraMatrix.set(camMat);
     sunData.set(skybox.getSunData(time));
     mesh.Render(camPos, offset, scales, mipmapLevel);
+}
+
+float Terrain::getHeight(float x, float y) {
+    return mesh.getHeight(x, y);
 }

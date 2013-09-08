@@ -16,7 +16,7 @@ class Skybox {
     oglwrap::LazyUniform<glm::vec4> sunData;
 public:
     Skybox();
-    void Reshape(const glm::mat4& projMat);
+    void reshape(const glm::mat4& projMat);
     void Render(float time, const glm::mat4& camMatrix);
 
     oglwrap::TextureCube envMap;

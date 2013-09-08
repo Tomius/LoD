@@ -39,11 +39,15 @@ public:
     TerrainMesh(const std::string& terrainFile,
                 const std::string& diffusePicture
     );
+
     void Render(const glm::vec3& camPos,
                 oglwrap::LazyUniform<glm::ivec2>& Offset,
                 oglwrap::LazyUniform<glm::vec3>& scales,
                 oglwrap::LazyUniform<int>& mipmapLevel
     );
+
+    unsigned char FetchHeight(glm::ivec2 v);
+    float getHeight(float x, float y);
 };
 
 

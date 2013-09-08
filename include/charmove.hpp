@@ -102,7 +102,9 @@ public:
 
     void updateHeight(float groundHeight) {
         const float diff = groundHeight - pos.y;
-        pos.y += diff/3 * fabs(diff/3) + 0.2f;
+        const float offs = std::max(fabs(diff) / 5.0, 0.05);
+        if(fabs(diff) > offs)
+            pos.y += diff / fabs(diff) * offs;
     }
 
 
@@ -113,7 +115,10 @@ public:
     // FIXME: pos.y
     glm::mat4 getModelMatrix() const {
         using namespace glm;
-        return rotate(translate(mat4(), pos), (float)fmod(currRot, 360), vec3(0,1,0));
+        glm::mat4 tXZ = glm::translate(glm::mat4(), glm::vec3(pos.x, 0, pos.z));
+        glm::mat4 tY = glm::translate(glm::mat4(), glm::vec3(0, pos.y, 0));
+        glm::mat4 rot = glm::rotate(glm::mat4(), (float)fmod(currRot, 360), vec3(0,1,0));
+        return tXZ * rot * tY;
     }
 
     glm::vec3 getPos() const {

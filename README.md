@@ -14,12 +14,13 @@ Dependencies:
 * [oglwrap](https://github.com/Tomius/oglwrap) - my c++ OpenGL wrapper.
 * SFML - for window handling
 * Magick++ - for image loading.
+* Assimp - for loading the character in.
 
 
 How to build (linux):
 --------------------
 * Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
-* Get the external dependencies: libsfml2-dev libmagick++-dev libglew-dev
+* Get the external dependencies: libsfml2-dev libmagick++-dev libglew-dev libassimp-dev
 * Download the terrain files from [**here**](http://dsa11.fileflyer.com/d/c7c1dfe1-7fca-4c38-bcbe-15be87940f71/BFDBe/xLiwCBr/terrain.zip) and extract them into terrain/
 * Use the given Makefile, or the prebuilt executeable.
 
@@ -33,6 +34,7 @@ How to build (Windows):
   * GLEW
   * SFML - system/window
   * Magick++
+  * Assimp
 
 ----------------------
 If you have any problem post in the issues tab or mail me at tomius1994@gmail.com.

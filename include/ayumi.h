@@ -24,12 +24,16 @@ public:
            aiProcessPreset_TargetRealtime_MaxQuality |
            aiProcess_FlipUVs
           )
-        , vs("ayumi.vert")
         , fs("ayumi.frag")
         , projectionMatrix(prog, "ProjectionMatrix")
         , cameraMatrix(prog, "CameraMatrix")
         , modelMatrix(prog, "ModelMatrix")
         , bones(prog, "Bones") {
+
+        oglwrap::ShaderSource vs_source("ayumi.vert");
+        vs_source.insert_macro_value("BONE_ATTRIB_NUM", mesh.get_bone_attrib_num());
+        vs_source.insert_macro_value("BONE_NUM", mesh.get_num_bones());
+        vs.source(vs_source);
 
         prog << vs << fs;
         prog.link().use();

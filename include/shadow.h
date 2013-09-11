@@ -78,7 +78,7 @@ public:
         gl( Clear(GL_DEPTH_BUFFER_BIT) );
     }
 
-    void Render() {
+    void render() {
         fbo.unbind();
         gl( Viewport(0, 0, w, h) );
         gl( Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );

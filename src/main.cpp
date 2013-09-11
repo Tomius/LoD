@@ -52,7 +52,7 @@ int main() {
             Terrain terrain(skybox);
             BloomEffect bloom;
             Ayumi ayumi;
-            oglwrap::CharacterMovement charmove(glm::vec3(0, 13, 0));
+            oglwrap::CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
             oglwrap::ThirdPersonalCamera cam(
                 ayumi.mesh.boundingSphere_Center() + glm::vec3(ayumi.mesh.boundingSphere_Radius() * 3),
                 ayumi.mesh.boundingSphere_Center(),
@@ -105,16 +105,22 @@ int main() {
                 cam.updateRotation(time, window, fixMouse);
                 charmove.update(cam, ayumi.mesh.offset_since_last_frame());
                 cam.updateTarget(charmove.getPos() + ayumi.mesh.boundingSphere_Center());
-                charmove.updateHeight(terrain.getHeight(charmove.getPos().x, charmove.getPos().z));
+                auto scales = terrain.getScales();
+                charmove.updateHeight(
+                    scales.y * terrain.getHeight(
+                        charmove.getPos().x / scales.x,
+                        charmove.getPos().z / scales.z
+                    )
+                );
 
                 glm::mat4 camMatrix = cam.cameraMatrix();
                 glm::vec3 camPos = cam.getPos();
                 FPS_Display(time);
 
-                skybox.Render(time, camMatrix);
-                terrain.Render(time, camMatrix, camPos);
+                skybox.render(time, camMatrix);
+                terrain.render(time, camMatrix, camPos);
                 ayumi.render(time, cam, charmove);
-                bloom.Render();
+                bloom.render();
 
                 window.display();
             }

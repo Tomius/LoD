@@ -24,7 +24,7 @@ class TerrainMesh {
     oglwrap::ArrayBuffer positions[blockMipmapLevel];
     oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
     size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
-    oglwrap::Texture2D colorMap, heightMap;
+    oglwrap::Texture2D colorMap, heightMap, grassMap, grassNormalMap;
 
     RawTerrainData terrain;
     size_t w, h;
@@ -40,9 +40,8 @@ public:
                 const std::string& diffusePicture
     );
 
-    void Render(const glm::vec3& camPos,
+    void render(const glm::vec3& camPos,
                 oglwrap::LazyUniform<glm::ivec2>& Offset,
-                oglwrap::LazyUniform<glm::vec3>& scales,
                 oglwrap::LazyUniform<int>& mipmapLevel
     );
 

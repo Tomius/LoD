@@ -15,14 +15,15 @@ class Terrain {
     oglwrap::LazyUniform<glm::vec3> scales;
     oglwrap::LazyUniform<glm::ivec2> offset;
     oglwrap::LazyUniform<int> mipmapLevel;
-    oglwrap::LazyUniformSampler heightMap, normalMap, colorMap;
+    oglwrap::LazyUniformSampler heightMap, normalMap, colorMap, grassMap, grassNormalMap;
     TerrainMesh mesh;
 
     Skybox& skybox;
 public:
     Terrain(Skybox& skybox);
     void reshape(const glm::mat4& projMat);
-    void Render(float time, const glm::mat4& camMat, const glm::vec3& camPos);
+    glm::vec3 getScales() const;
+    void render(float time, const glm::mat4& camMat, const glm::vec3& camPos);
     float getHeight(float x, float y);
 };
 

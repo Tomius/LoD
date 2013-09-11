@@ -40,7 +40,7 @@ void BloomEffect::reshape(GLuint w, GLuint h) {
     );
 }
 
-void BloomEffect::Render() {
+void BloomEffect::render() {
     // Copy the backbuffer to the texture that our shader can fetch.
     tex.active(0);
     tex.bind();

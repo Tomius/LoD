@@ -257,6 +257,28 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
         colorMap.magFilter(MagF::Linear);
     }
 
+    grassMap.active(2);
+    grassMap.bind();
+    {
+        grassMap.loadTexture("textures/grass.jpg");
+        grassMap.generateMipmap();
+        grassMap.minFilter(MinFilter::LinearMipmapLinear);
+        grassMap.magFilter(MagFilter::Linear);
+        grassMap.wrapS(Wrap::Repeat);
+        grassMap.wrapT(Wrap::Repeat);
+    }
+
+    grassNormalMap.active(3);
+    grassNormalMap.bind();
+    {
+        grassNormalMap.loadTexture("textures/grass_normal.jpg");
+        grassNormalMap.generateMipmap();
+        grassNormalMap.minFilter(MinFilter::LinearMipmapLinear);
+        grassNormalMap.magFilter(MagFilter::Linear);
+        grassNormalMap.wrapS(Wrap::Repeat);
+        grassNormalMap.wrapT(Wrap::Repeat);
+    }
+
     VertexArray::unbind();
 }
 
@@ -368,29 +390,33 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 
 }
 
-void TerrainMesh::Render(const glm::vec3& camPos,
+void TerrainMesh::render(const glm::vec3& camPos,
                          oglwrap::LazyUniform<glm::ivec2>& offset,
-                         oglwrap::LazyUniform<glm::vec3>& scales,
                          oglwrap::LazyUniform<int>& mipmapLevel) {
-
-    // FIXME
-    // Logically, this should into TerrainMesh constructor. However, the shader
-    // program doesn't exist yet when the constructor runs.
-    scales = glm::vec3(1.0, 1.0, 1.0);
 
     heightMap.active(0);
     heightMap.bind();
     colorMap.active(1);
     colorMap.bind();
+    grassMap.active(2);
+    grassMap.bind();
+    grassNormalMap.active(3);
+    grassNormalMap.bind();
     gl( Enable(GL_PRIMITIVE_RESTART) );
     gl( PrimitiveRestartIndex(RESTART) );
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     DrawBlocks(camPos, offset, mipmapLevel);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     gl( Disable(GL_PRIMITIVE_RESTART) );
     VertexArray::unbind();
+    grassNormalMap.active(3);
+    grassNormalMap.unbind();
+    grassMap.active(2);
+    grassMap.unbind();
+    colorMap.active(1);
+    colorMap.unbind();
+    heightMap.active(0);
+    heightMap.unbind();
 }
 
 unsigned char TerrainMesh::FetchHeight(glm::ivec2 v) {

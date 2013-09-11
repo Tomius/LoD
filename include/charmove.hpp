@@ -101,8 +101,8 @@ public:
     }
 
     void updateHeight(float groundHeight) {
-        const float diff = groundHeight - pos.y + 0.2f; // This +.2 is needed because my animation sux :(
-        const float offs = std::max(fabs(diff * diff / 5.0), 0.05);
+        const float diff = groundHeight - pos.y;
+        const float offs = std::max(fabs(diff / 5.0), 0.05);
         if(fabs(diff) > offs)
             pos.y += diff / fabs(diff) * offs;
     }

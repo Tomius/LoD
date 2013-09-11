@@ -140,7 +140,7 @@ vec3 AmbientDirection(){
 
 float SunPower(){
     return
-        max((Day + 0.03) * (normalize(SunPosition).y + 0.12), 0.002);
+        max(2 * (Day + 0.03) * (normalize(SunPosition).y + 0.12), 0.004);
 }
 
 float AmbientPower(){

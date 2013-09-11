@@ -17,7 +17,7 @@ class Skybox {
 public:
     Skybox();
     void reshape(const glm::mat4& projMat);
-    void Render(float time, const glm::mat4& camMatrix);
+    void render(float time, const glm::mat4& camMatrix);
 
     oglwrap::TextureCube envMap;
     oglwrap::FragmentShader sky_fs;

@@ -2,6 +2,8 @@
 
 using namespace oglwrap;
 
+static const glm::vec3 scale_vector(3, 2, 3);
+
 Terrain::Terrain(Skybox& skybox)
     : vs("terrain.vert")
     , fs("terrain.frag")
@@ -14,6 +16,8 @@ Terrain::Terrain(Skybox& skybox)
     , heightMap(prog, "HeightMap")
     , normalMap(prog, "NormalMap")
     , colorMap(prog, "ColorMap")
+    , grassMap(prog, "GrassMap")
+    , grassNormalMap(prog, "GrassNormalMap")
     , mesh("terrain/mideu.rtd",
            "terrain/mideu.rtc")
     , skybox(skybox) {
@@ -23,6 +27,14 @@ Terrain::Terrain(Skybox& skybox)
 
     heightMap.set(0);
     colorMap.set(1);
+    grassMap.set(2);
+    grassNormalMap.set(3);
+
+    scales = scale_vector;
+}
+
+glm::vec3 Terrain::getScales() const {
+    return scale_vector;
 }
 
 void Terrain::reshape(const glm::mat4& projMat) {
@@ -30,11 +42,11 @@ void Terrain::reshape(const glm::mat4& projMat) {
     projectionMatrix = projMat;
 }
 
-void Terrain::Render(float time, const glm::mat4& camMat, const glm::vec3& camPos) {
+void Terrain::render(float time, const glm::mat4& camMat, const glm::vec3& camPos) {
     prog.use();
     cameraMatrix.set(camMat);
     sunData.set(skybox.getSunData(time));
-    mesh.Render(camPos, offset, scales, mipmapLevel);
+    mesh.render(camPos, offset, mipmapLevel);
 }
 
 float Terrain::getHeight(float x, float y) {

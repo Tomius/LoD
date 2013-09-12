@@ -101,8 +101,9 @@ public:
     }
 
     void updateHeight(float groundHeight) {
+        //pos.y = groundHeight;
         const float diff = groundHeight - pos.y;
-        const float offs = std::max(fabs(diff / 5.0), 0.05);
+        const float offs = std::max(fabs(diff / 3.0), 0.02);
         if(fabs(diff) > offs)
             pos.y += diff / fabs(diff) * offs;
     }

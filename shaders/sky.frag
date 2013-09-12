@@ -135,12 +135,12 @@ vec3 sky_color(vec3 lookDir) {
 
 // Functions for other objects' lighting computations
 vec3 AmbientDirection(){
-    return SunPosition;
+    return normalize(SunPosition);
 }
 
 float SunPower(){
     return
-        max(2 * (Day + 0.03) * (normalize(SunPosition).y + 0.12), 0.004);
+        max((Day + 0.03) * (normalize(SunPosition).y + 0.22), 0.004);
 }
 
 float AmbientPower(){

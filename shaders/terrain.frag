@@ -6,7 +6,7 @@ in vec3 worldPos;
 in vec2 texCoord;
 in float invalid;
 
-uniform sampler2D ColorMap, GrassMap, GrassNormalMap;
+uniform sampler2D GrassMap, GrassNormalMap;
 uniform vec3 Scales;
 
 out vec3 fragColor;
@@ -26,29 +26,25 @@ void main() {
         discard;
 
     vec2 grassTexCoord = texCoord * 1000;
+    mat3 NormalMatrix;
+    vec3 n_normal = normalize(normal);
+    NormalMatrix[0] = cross(vec3(0.0, 0.0, 1.0), n_normal); // tangent - approximately (1, 0, 0)
+    NormalMatrix[1] = cross(n_normal, NormalMatrix[0]); // bitangent - approximately (0, 0, 1)
+    NormalMatrix[2] = normalize(normal); // normal - approximately (0, 1, 0)
     vec3 normalOffset = texture(GrassNormalMap, grassTexCoord).rgb;
 
-    vec3 finalNormal = (normalize(normal) + normalize(normalOffset)) / 2.0;
+    vec3 finalNormal = NormalMatrix * normalOffset;
 
     float d =  dot(
         finalNormal,
         normalize(AmbientDirection())
     );
-    float DiffusePower = max(SunPower() * d, 0.002);
 
-    vec3 refl = reflect(AmbientDirection(), finalNormal);
-    float SpecularFactor = max(
-       dot(normalize(refl),
-           normalize(worldPos)
-       ), 0.0
-    );
-    float SpecularPower = SunPower() * pow(SpecularFactor, SpecularShininess);
+    float DiffusePower = max(SunPower() * d, 0.0);
 
-    vec3 texColor = texture(ColorMap, texCoord).rgb;
     vec3 grass = texture(GrassMap, grassTexCoord).rgb;
-    vec3 materialColor = mix(texColor, grass, 1.0/3.0);
 
-    vec3 Color = AmbientColor() * materialColor * (AmbientPower() + DiffusePower + SpecularPower);
+    vec3 Color = AmbientColor() * grass * (AmbientPower() + DiffusePower);
     vec3 Fog = fogColor * SunPower();
 
     float l = length(camPos);

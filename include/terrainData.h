@@ -5,9 +5,11 @@
 #include <fstream>
 #include <vector>
 
-struct cvec3;
-struct ivec2;
-struct ivec3;
+namespace vectorMath {
+    struct cvec3;
+    struct ivec2;
+    struct ivec3;
+}
 
 class RawImageData {
 public:
@@ -35,10 +37,12 @@ public:
     float xzScale, yScale;
     size_t w, h;
     std::vector<unsigned char> heightData;
-    std::vector<cvec3> normalData;
+    std::vector<vectorMath::cvec3> normalData;
 
     TerrainData(const std::string& datafile);
 };
+
+namespace vectorMath {
 
 struct vec3 {
     float x, y, z;
@@ -58,6 +62,8 @@ struct ivec2 {
     ivec2();
     ivec2(int a, int b);
 };
+
+}
 
 
 #endif // header guard

@@ -240,24 +240,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
         heightMap.magFilter(MagF::Linear);
     }
 
-    colorMap.active(1);
-    colorMap.bind();
-    {
-        colorMap.upload(
-            PixelDataInternalFormat::SRGB8,
-            image.w,
-            image.h,
-            PixelDataFormat::RGB,
-            PixelDataType::UnsignedByte,
-            image.data.data()
-        );
-
-        colorMap.anisotropy(maxAniso);
-        colorMap.minFilter(MinF::Linear);
-        colorMap.magFilter(MagF::Linear);
-    }
-
-    grassMap.active(2);
+    grassMap.active(1);
     grassMap.bind();
     {
         grassMap.loadTexture("textures/grass.jpg");
@@ -268,7 +251,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
         grassMap.wrapT(Wrap::Repeat);
     }
 
-    grassNormalMap.active(3);
+    grassNormalMap.active(2);
     grassNormalMap.bind();
     {
         grassNormalMap.loadTexture("textures/grass_normal.jpg");
@@ -396,25 +379,23 @@ void TerrainMesh::render(const glm::vec3& camPos,
 
     heightMap.active(0);
     heightMap.bind();
-    colorMap.active(1);
-    colorMap.bind();
-    grassMap.active(2);
+    grassMap.active(1);
     grassMap.bind();
-    grassNormalMap.active(3);
+    grassNormalMap.active(2);
     grassNormalMap.bind();
     gl( Enable(GL_PRIMITIVE_RESTART) );
     gl( PrimitiveRestartIndex(RESTART) );
 
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     DrawBlocks(camPos, offset, mipmapLevel);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     gl( Disable(GL_PRIMITIVE_RESTART) );
     VertexArray::unbind();
-    grassNormalMap.active(3);
+    grassNormalMap.active(2);
     grassNormalMap.unbind();
-    grassMap.active(2);
+    grassMap.active(1);
     grassMap.unbind();
-    colorMap.active(1);
-    colorMap.unbind();
     heightMap.active(0);
     heightMap.unbind();
 }
@@ -423,7 +404,73 @@ unsigned char TerrainMesh::FetchHeight(glm::ivec2 v) {
     return terrain.heightData[(v.y + terrain.h/2) * terrain.w + (v.x + terrain.w/2)];
 }
 
-float TerrainMesh::getHeight(float x, float y) {
-    return FetchHeight(glm::ivec2(x, y));
+double TerrainMesh::getHeight(double x, double y) {
+    using namespace std;
+    using namespace glm;
+    ivec2 coord = ivec2(round(x), round(y));
+
+    /*    Neighbors in geometry:
+
+                5-------0         Neighbors in the texture:
+               / \     / \
+              /   \   /   \                5---0
+             /     \ /     \               |   |
+            4-------X-------1   ->         4---X---1
+             \     / \     /               |   |
+              \   /   \   /                3---2
+               \ /     \ /
+                3-------2
+                                        */
+    ivec2 neighbors[6];
+    neighbors[0] = ivec2( 0, +1);
+    neighbors[1] = ivec2(+1,  0);
+    neighbors[2] = ivec2( 0, -1);
+    neighbors[3] = ivec2(-1, -1);
+    neighbors[4] = ivec2(-1,  0);
+    neighbors[5] = ivec2(-1, +1);
+
+    // Try all the 6 six triangle, and chose the one,
+    // which generates valid barycentric co-ordinates.
+    for(int i = 0; i < 6; i ++) {
+
+        unsigned char neighbor_a = i;
+        unsigned char neighbor_b = (i + 1) % 6;
+
+        // Relative coordinates
+        const ivec2 a_coord = neighbors[neighbor_a];
+        const ivec2 b_coord = neighbors[neighbor_b];
+        const ivec2 c_coord = ivec2(0.0);
+
+        // Heights
+        double a_height = FetchHeight(coord + a_coord);
+        double b_height = FetchHeight(coord + b_coord);
+        double c_height = FetchHeight(coord + c_coord);
+
+        // Get the barycentric weights for this point
+        // see: http://en.wikipedia.org/wiki/Barycentric_coordinate_system
+        dvec2 a = dvec2(a_coord.x, a_coord.y);
+        dvec2 b = dvec2(b_coord.x, b_coord.y);
+        dvec2 c = dvec2(c_coord.x, c_coord.y);
+
+        double x_diff = x - coord.x, y_diff = y - coord.y;
+        double lambda_a_nom =  (b.y - c.y) * (x_diff - c.x) + (c.x - b.x) * (y_diff - c.y);
+        double lambda_b_nom =  (c.y - a.y) * (x_diff - c.x) + (a.x - c.x) * (y_diff - c.y);
+        double lambda_denom =  (b.y - c.y) * (a.x    - c.x) + (c.x - b.x) * (a.y    - c.y);
+
+        double a_lambda = lambda_a_nom / lambda_denom;
+        double b_lambda = lambda_b_nom / lambda_denom;
+        double c_lambda = 1 - a_lambda - b_lambda;
+
+        if(std::min(std::min(a_lambda, b_lambda), c_lambda) < 0.0)
+            continue;
+
+        return a_lambda * a_height +
+               b_lambda * b_height +
+               c_lambda * c_height;
+    }
+
+    // If all fails
+    return FetchHeight(coord);
 }
+
 

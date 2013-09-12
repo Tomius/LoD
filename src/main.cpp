@@ -35,7 +35,6 @@ void FPS_Display(float time) {
 }
 
 int main() {
-
     sf::Window window(
         sf::VideoMode(800, 600),
         "Land of Dreams",
@@ -108,8 +107,8 @@ int main() {
                 auto scales = terrain.getScales();
                 charmove.updateHeight(
                     scales.y * terrain.getHeight(
-                        charmove.getPos().x / scales.x,
-                        charmove.getPos().z / scales.z
+                        charmove.getPos().x / (double)scales.x,
+                        charmove.getPos().z / (double)scales.z
                     )
                 );
 

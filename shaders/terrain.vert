@@ -53,6 +53,5 @@ void main() {
 
     normal = tempNormal;
 
-
     gl_Position = ProjectionMatrix * vec4(camPos, 1.0);
 }

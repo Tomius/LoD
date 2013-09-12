@@ -7,6 +7,8 @@
 
 using namespace std;
 
+using namespace vectorMath;
+
 // -------======{[ Handling endianness ]}======-------
 
 // All the binary formats described here use little-endian encoding.

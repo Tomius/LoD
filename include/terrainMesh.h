@@ -28,7 +28,6 @@ class TerrainMesh {
 
     RawTerrainData terrain;
     size_t w, h;
-    RawImageData image;
 
     void DrawBlocks(const glm::vec3& camPos,
                     oglwrap::LazyUniform<glm::ivec2>& Offset,

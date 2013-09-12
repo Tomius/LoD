@@ -110,7 +110,7 @@ static inline void distIncr(int mmlev, int& distance, int ring) {
 // to see what happens with the indices, and with that, the code will look trivial.
 TerrainMesh::TerrainMesh(const std::string& terrainFile,
                          const std::string& diffusePicture)
-    : terrain(terrainFile), w(terrain.w), h(terrain.h), image(diffusePicture) {
+    : terrain(terrainFile), w(terrain.w), h(terrain.h) {
 
     for(int m = 0; m < blockMipmapLevel; m++) {
         const unsigned short ringCount = blockRadius / (1 << (m + 1)) + 1;

@@ -240,7 +240,6 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
         heightMap.magFilter(MagF::Linear);
     }
 
-    grassMap.active(1);
     grassMap.bind();
     {
         grassMap.loadTexture("textures/grass.jpg");
@@ -251,7 +250,6 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
         grassMap.wrapT(Wrap::Repeat);
     }
 
-    grassNormalMap.active(2);
     grassNormalMap.bind();
     {
         grassNormalMap.loadTexture("textures/grass_normal.jpg");
@@ -263,6 +261,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
     }
 
     VertexArray::unbind();
+    Texture2D::unbind();
 }
 
 // -------======{[ Functions about creating the map from the blocks ]}======-------
@@ -429,6 +428,14 @@ double TerrainMesh::getHeight(double x, double y) {
     neighbors[4] = ivec2(-1,  0);
     neighbors[5] = ivec2(-1, +1);
 
+    ivec2 geometry_neighbors[6];
+    geometry_neighbors[0] = ivec2(+1, +2);
+    geometry_neighbors[1] = ivec2(+2,  0);
+    geometry_neighbors[2] = ivec2(+1, -2);
+    geometry_neighbors[3] = ivec2(-1, -2);
+    geometry_neighbors[4] = ivec2(-2,  0);
+    geometry_neighbors[5] = ivec2(-1, +2);
+
     // Try all the 6 six triangle, and chose the one,
     // which generates valid barycentric co-ordinates.
     for(int i = 0; i < 6; i ++) {
@@ -448,11 +455,15 @@ double TerrainMesh::getHeight(double x, double y) {
 
         // Get the barycentric weights for this point
         // see: http://en.wikipedia.org/wiki/Barycentric_coordinate_system
-        dvec2 a = dvec2(a_coord.x, a_coord.y);
-        dvec2 b = dvec2(b_coord.x, b_coord.y);
-        dvec2 c = dvec2(c_coord.x, c_coord.y);
+        const ivec2 a_geom_coord = geometry_neighbors[neighbor_a];
+        const ivec2 b_geom_coord = geometry_neighbors[neighbor_b];
+        const ivec2 c_geom_coord = ivec2(0.0);
 
-        double x_diff = x - coord.x, y_diff = y - coord.y;
+        dvec2 a = dvec2(a_geom_coord.x, a_geom_coord.y);
+        dvec2 b = dvec2(b_geom_coord.x, b_geom_coord.y);
+        dvec2 c = dvec2(c_geom_coord.x, c_geom_coord.y);
+
+        double x_diff = 2 * (x - coord.x), y_diff = 2 * (y - coord.y);
         double lambda_a_nom =  (b.y - c.y) * (x_diff - c.x) + (c.x - b.x) * (y_diff - c.y);
         double lambda_b_nom =  (c.y - a.y) * (x_diff - c.x) + (a.x - c.x) * (y_diff - c.y);
         double lambda_denom =  (b.y - c.y) * (a.x    - c.x) + (c.x - b.x) * (a.y    - c.y);

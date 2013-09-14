@@ -7,7 +7,7 @@ in vec2 texCoord;
 in float invalid;
 
 uniform sampler2D GrassMap, GrassNormalMap;
-uniform vec3 Scales;
+uniform vec3 Scales = vec3(1.0, 1.0, 1.0);
 
 out vec3 fragColor;
 
@@ -16,10 +16,9 @@ float SunPower();
 float AmbientPower();
 vec3 AmbientColor();
 
-float fogMin = max(Scales.x, Scales.z) * 256.0;
+float fogMin = max(Scales.x, Scales.z) * 128.0;
 float fogMax = max(Scales.x, Scales.z) * 2048.0;
-vec3 fogColor = vec3(0.6);
-const float SpecularShininess = 5.0f;
+vec3 fogColor = vec3(0.4);
 
 void main() {
     if(invalid != 0.0)
@@ -40,12 +39,12 @@ void main() {
         normalize(AmbientDirection())
     );
 
-    float DiffusePower = max(SunPower() * d, 0.0);
+    float DiffusePower = max(SunPower() * d, 0.03);
 
     vec3 grass = texture(GrassMap, grassTexCoord).rgb;
 
     vec3 Color = AmbientColor() * grass * (AmbientPower() + DiffusePower);
-    vec3 Fog = fogColor * SunPower();
+    vec3 Fog = fogColor * (0.05 + 0.95 * SunPower());
 
     float l = length(camPos);
     float alpha = clamp(

@@ -81,8 +81,8 @@ int main() {
                             glViewport(0, 0, width, height);
                             bloom.reshape(width, height);
 
-                            auto projMat = glm::perspectiveFov(
-                              60.0f, float(width), float(height), 1.0f, 6000.0f
+                            auto projMat = glm::perspectiveFov<float>(
+                                60, width, height, 1, 6000
                             );
 
                             ayumi.reshape(projMat);

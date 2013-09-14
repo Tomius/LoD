@@ -145,12 +145,12 @@ float SunPower(){
 
 float AmbientPower(){
     return
-        0.4 * mix(
-            0.2 * 0.02, // night
-            0.2 * max(dot( // day
+        mix(
+            0.02, // night
+            0.1 * max(dot( // day
                 normalize(SunPosition) + vec3(0.0, 0.12, 0.0),
                 vec3(0.0, 1.0, 0.0)
-            ), 0.02),
+            ), 0.4),
             Day
         );
 }

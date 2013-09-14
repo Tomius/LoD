@@ -56,10 +56,14 @@ public:
             oglwrap::AnimFlag::Repeat | oglwrap::AnimFlag::Interruptable
         );
         mesh.add_animation(
-            "models/ayumi_jump.dae", "Jump",
-            oglwrap::AnimFlag::None
+            "models/ayumi_jump_rise.dae", "JumpRise",
+            oglwrap::AnimFlag::MirroredRepeat | oglwrap::AnimFlag::Interruptable
         );
-        mesh.set_default_animation("Stand", 0.2f);
+        mesh.add_animation(
+            "models/ayumi_jump_fall.dae", "JumpFall",
+            oglwrap::AnimFlag::MirroredRepeat | oglwrap::AnimFlag::Interruptable
+        );
+        mesh.set_default_animation("Stand", 0.3f);
         mesh.force_anim_to_default(0);
     }
 
@@ -74,14 +78,18 @@ public:
         cameraMatrix.set(cam.cameraMatrix());
         modelMatrix.set(charmove.getModelMatrix());
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-            mesh.set_current_animation("Jump", time, 0.2f);
+        if(charmove.is_jumping()) {
+            if(charmove.is_jumping_rise())
+                mesh.set_current_animation("JumpRise", time, 0.1f);
+            else
+                mesh.set_current_animation("JumpFall", time, 0.3f);
         } else if(charmove.isWalking()) {
             if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
                 mesh.set_current_animation("Run", time, 0.2f);
             else
                 mesh.set_current_animation("Walk", time, 0.3f);
         } else {
+
             mesh.set_anim_to_default(time);
         }
 

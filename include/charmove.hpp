@@ -1,9 +1,6 @@
-/** @file charmove.h
+/** @file charmove.hpp
     @brief Implements features related to character movement.
 */
-
-#ifndef HEADER_326DECDF70F7C91
-#define HEADER_326DECDF70F7C91
 
 #pragma once
 
@@ -18,9 +15,11 @@ class CharacterMovement {
     double currRot, destRot;
 
     // Moving speed per second in OpenGL units.
-    float rotSpeed;
+    float rotSpeed, vertSpeed;
 
-    bool walking, transition;
+    glm::vec2 horizSpeed;
+
+    bool walking, jumping, transition;
 
 public:
     CharacterMovement(glm::vec3 pos = glm::vec3(),
@@ -29,7 +28,9 @@ public:
         , currRot(0)
         , destRot(0)
         , rotSpeed(rotationSpeed_PerSec)
+        , vertSpeed(0)
         , walking(false)
+        , jumping(false)
         , transition(false)
     { }
 
@@ -66,6 +67,12 @@ public:
         transition = transition || (walking != lastWalking) || (lastMoveDir != moveDir);
         lastMoveDir = moveDir;
 
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && !jumping) {
+            jumping = true;
+            vertSpeed = 0.5f;
+        }
+
+
         if(walking) {
             double cameraRot = -cam.getRoty(); // -z is forward
             double moveRot = atan2(moveDir.y, moveDir.x); // +y is forward
@@ -98,16 +105,41 @@ public:
         }
 
         pos += mat3(rotate(mat4(), (float)fmod(currRot, 360), vec3(0,1,0))) * characterOffset;
+        if(jumping)
+            pos += mat3(rotate(mat4(), (float)fmod(currRot, 360), vec3(0,1,0))) * vec3(0, 0, 10.0f * dt);
     }
 
     void updateHeight(float groundHeight) {
-        //pos.y = groundHeight;
         const float diff = groundHeight - pos.y;
-        const float offs = std::max(fabs(diff / 3.0), 0.02);
-        if(fabs(diff) > offs)
-            pos.y += diff / fabs(diff) * offs;
+        if(diff >= 0 && jumping && vertSpeed < 0) {
+            jumping = false;
+            pos.y += diff;
+        }
+        if(!jumping) {
+            const float offs = std::max(fabs(diff / 2.0f), 0.05);
+            if(fabs(diff) > offs)
+                pos.y += diff / fabs(diff) * offs;
+        }
+        if(jumping) {
+            if(diff > 0)
+                pos.y += std::max(diff, vertSpeed);
+            else
+                pos.y += vertSpeed;
+            vertSpeed -= 0.03f;
+        }
     }
 
+    bool is_jumping() const {
+        return jumping;
+    }
+
+    bool is_jumping_rise() const {
+        return jumping && vertSpeed > 0;
+    }
+
+    bool is_jumping_fall() const {
+        return jumping && vertSpeed < 0;
+    }
 
     bool isWalking() const {
         return walking;
@@ -126,4 +158,3 @@ public:
 };
 
 }
-#endif // header guard

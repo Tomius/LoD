@@ -6,6 +6,7 @@ in vec3 worldPos;
 in vec2 texCoord;
 in float invalid;
 
+uniform mat4 CameraMatrix;
 uniform sampler2D GrassMap[2], GrassNormalMap;
 uniform vec3 Scales = vec3(1.0, 1.0, 1.0);
 
@@ -20,48 +21,55 @@ float fogMin = max(Scales.x, Scales.z) * 128.0;
 float fogMax = max(Scales.x, Scales.z) * 2048.0;
 vec3 fogColor = vec3(0.4);
 
-const float specular_shininess = 0.2f;
+const float specular_shininess = 20.0f;
 
 void main() {
-    if(invalid != 0.0)
+    if(invalid != 0.0) {
         discard;
+    }
 
     vec2 grassTexCoord = texCoord * 400;
     mat3 NormalMatrix;
     vec3 n_normal = normalize(normal);
     NormalMatrix[0] = cross(vec3(0.0, 0.0, 1.0), n_normal); // tangent - approximately (1, 0, 0)
     NormalMatrix[1] = cross(n_normal, NormalMatrix[0]); // bitangent - approximately (0, 0, 1)
-    NormalMatrix[2] = normalize(normal); // normal - approximately (0, 1, 0)
+    NormalMatrix[2] = n_normal; // normal - approximately (0, 1, 0)
     vec3 normalOffset = texture(GrassNormalMap, grassTexCoord).rgb;
 
-    vec3 finalNormal = NormalMatrix * normalOffset;
+    vec3 finalNormal = normalize(NormalMatrix * normalOffset);
+    vec3 cam_normal = (CameraMatrix * vec4(finalNormal, 0.0)).xyz;
 
-    vec3 lightDir = normalize(AmbientDirection());
+    vec3 lightDir = normalize((CameraMatrix * vec4(AmbientDirection(), 0)).xyz);
+    vec3 viewDirection = normalize(-(CameraMatrix * vec4(worldPos, 1)).xyz);
+    float diffuse_power = max(dot(cam_normal, lightDir), 0);
 
-    float cosAngIncidence = max(dot(finalNormal, lightDir), 0);
-    vec3 viewDirection = normalize(-worldPos);
-
-    vec3 halfAngle = normalize(lightDir + viewDirection);
-    float angleNormalHalf = acos(dot(halfAngle, finalNormal));
-    float exponent = angleNormalHalf / specular_shininess;
-    exponent = -(exponent * exponent);
-    float gaussianTerm = exp(exponent);
-    if(cosAngIncidence == 0)
-        gaussianTerm = 0;
+    float specular_power;
+    if(diffuse_power < 0.0) {
+        specular_power = 0.0;
+    } else {
+        specular_power = pow(
+            max(0.0,
+                dot(
+                    reflect(-lightDir, cam_normal),
+                    viewDirection)
+                ),
+            specular_shininess
+        );
+    }
 
     vec3 grass_0 = texture(GrassMap[0], grassTexCoord).rgb;
     vec3 grass_1 = texture(GrassMap[1], grassTexCoord).rgb;
     float height_factor = clamp(sqrt((worldPos.y - 15 * Scales.y) / 40.0f), 0.0f, 1.0f);
     vec3 grass = mix(grass_0, grass_1, height_factor);
 
-    vec3 Color = AmbientColor() * grass * (SunPower() * (gaussianTerm + cosAngIncidence) + AmbientPower());
+    vec3 Color = AmbientColor() * grass * (SunPower() * (specular_power + diffuse_power) + AmbientPower());
     vec3 Fog = fogColor * (0.05 + 0.95 * SunPower());
 
     float l = length(camPos);
     float alpha = clamp(
-        (l - fogMin) / (fogMax - fogMin),
-        0.0, 1.0
-    ) / 4;
+                      (l - fogMin) / (fogMax - fogMin),
+                      0.0, 1.0
+                  ) / 4;
 
     fragColor = mix(Color, Fog, alpha);
 }

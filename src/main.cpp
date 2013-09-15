@@ -48,9 +48,9 @@ int main() {
     if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
             GL_Init();
             Skybox skybox;
+            Ayumi ayumi(skybox);
             Terrain terrain(skybox);
             BloomEffect bloom;
-            Ayumi ayumi;
             oglwrap::CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
             oglwrap::ThirdPersonalCamera cam(
                 ayumi.mesh.boundingSphere_Center() + glm::vec3(ayumi.mesh.boundingSphere_Radius() * 3),

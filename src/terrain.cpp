@@ -25,8 +25,9 @@ Terrain::Terrain(Skybox& skybox)
     prog.link().use();
 
     heightMap.set(0);
-    grassMap.set(1);
-    grassNormalMap.set(2);
+    grassMap[0].set(1);
+    grassMap[1].set(2);
+    grassNormalMap.set(3);
 
     scales = scale_vector;
 }
@@ -44,7 +45,10 @@ void Terrain::render(float time, const glm::mat4& camMat, const glm::vec3& camPo
     prog.use();
     cameraMatrix.set(camMat);
     sunData.set(skybox.getSunData(time));
+    skybox.envMap.active(0);
+    skybox.envMap.bind();
     mesh.render(camPos, offset, mipmapLevel);
+    skybox.envMap.unbind();
 }
 
 double Terrain::getHeight(double x, double y) {

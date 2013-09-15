@@ -134,16 +134,16 @@ vec3 sky_color(vec3 lookDir) {
 }
 
 // Functions for other objects' lighting computations
-vec3 AmbientDirection(){
+vec3 AmbientDirection() {
     return normalize(SunPosition);
 }
 
-float SunPower(){
+float SunPower() {
     return
         max((Day + 0.03) * (normalize(SunPosition).y + 0.22), 0.004);
 }
 
-float AmbientPower(){
+float AmbientPower() {
     return
         mix(
             0.02, // night
@@ -155,7 +155,6 @@ float AmbientPower(){
         );
 }
 
-// FIXME
-vec3 AmbientColor(){
+vec3 AmbientColor() {
     return 0.5 * sky_color(normalize(SunPosition)) + vec3(0.5);
 }

@@ -240,14 +240,24 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile,
         heightMap.magFilter(MagF::Linear);
     }
 
-    grassMap.bind();
+    grassMaps[0].bind();
     {
-        grassMap.loadTexture("textures/grass.jpg");
-        grassMap.generateMipmap();
-        grassMap.minFilter(MinFilter::LinearMipmapLinear);
-        grassMap.magFilter(MagFilter::Linear);
-        grassMap.wrapS(Wrap::Repeat);
-        grassMap.wrapT(Wrap::Repeat);
+        grassMaps[0].loadTexture("textures/grass.jpg");
+        grassMaps[0].generateMipmap();
+        grassMaps[0].minFilter(MinFilter::LinearMipmapLinear);
+        grassMaps[0].magFilter(MagFilter::Linear);
+        grassMaps[0].wrapS(Wrap::Repeat);
+        grassMaps[0].wrapT(Wrap::Repeat);
+    }
+
+    grassMaps[1].bind();
+    {
+        grassMaps[1].loadTexture("textures/grass_2.jpg");
+        grassMaps[1].generateMipmap();
+        grassMaps[1].minFilter(MinFilter::LinearMipmapLinear);
+        grassMaps[1].magFilter(MagFilter::Linear);
+        grassMaps[1].wrapS(Wrap::Repeat);
+        grassMaps[1].wrapT(Wrap::Repeat);
     }
 
     grassNormalMap.bind();
@@ -378,9 +388,11 @@ void TerrainMesh::render(const glm::vec3& camPos,
 
     heightMap.active(0);
     heightMap.bind();
-    grassMap.active(1);
-    grassMap.bind();
-    grassNormalMap.active(2);
+    grassMaps[0].active(1);
+    grassMaps[0].bind();
+    grassMaps[1].active(2);
+    grassMaps[1].bind();
+    grassNormalMap.active(3);
     grassNormalMap.bind();
     gl( Enable(GL_PRIMITIVE_RESTART) );
     gl( PrimitiveRestartIndex(RESTART) );
@@ -391,10 +403,12 @@ void TerrainMesh::render(const glm::vec3& camPos,
 
     gl( Disable(GL_PRIMITIVE_RESTART) );
     VertexArray::unbind();
-    grassNormalMap.active(2);
+    grassNormalMap.active(3);
     grassNormalMap.unbind();
-    grassMap.active(1);
-    grassMap.unbind();
+    grassMaps[1].active(2);
+    grassMaps[1].unbind();
+    grassMaps[0].active(1);
+    grassMaps[0].unbind();
     heightMap.active(0);
     heightMap.unbind();
 }

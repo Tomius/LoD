@@ -24,7 +24,7 @@ class TerrainMesh {
     oglwrap::ArrayBuffer positions[blockMipmapLevel];
     oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
     size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
-    oglwrap::Texture2D heightMap, grassMap, grassNormalMap;
+    oglwrap::Texture2D heightMap, grassMaps[2], grassNormalMap;
 
     RawTerrainData terrain;
     size_t w, h;

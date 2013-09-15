@@ -17,6 +17,7 @@ Skybox::Skybox()
 
     makeCube.setup_positions(prog | "Position");
 
+    envMap.active(0);
     {
         envMap.bind();
         envMap.minFilter(MinF::Linear);
@@ -90,6 +91,9 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
     cameraMatrix.set(camRot);
     sunData.set(getSunData(time));
 
+    envMap.active(0);
+    envMap.bind();
+
     // The skybox looks better w/o gamma correction
     bool srgb = gl( IsEnabled(GL_FRAMEBUFFER_SRGB) );
     if(srgb) { gl( Disable(GL_FRAMEBUFFER_SRGB) ); }
@@ -97,4 +101,6 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
     makeCube.draw();
     gl( DepthMask(true) );
     if(srgb) { gl( Enable(GL_FRAMEBUFFER_SRGB) ); }
+
+    envMap.unbind();
 }

@@ -1,8 +1,4 @@
 #include "terrainMesh.h"
-#include <iostream>
-#include <SFML/System.hpp>
-#include <SFML/OpenGL.hpp>
-
 #include "svec2.hpp"
 
 using namespace oglwrap;

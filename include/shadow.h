@@ -4,7 +4,15 @@
 #ifndef SHADOW_HPP
 #define SHADOW_HPP
 
-#include <GL/glew.h>
+#if defined(__APPLE__)
+    #include <OpenGL/glew.h>
+#else
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+        #include <windows.h>
+    #endif
+    #include <GL/glew.h>
+#endif
+
 #include "oglwrap/oglwrap.hpp"
 
 const int shadowMapSize = 4096;

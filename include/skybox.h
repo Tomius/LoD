@@ -1,7 +1,15 @@
 #ifndef HEADER_16753D7B23630095
 #define HEADER_16753D7B23630095
 
-#include <GL/glew.h>
+#if defined(__APPLE__)
+    #include <OpenGL/glew.h>
+#else
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+        #include <windows.h>
+    #endif
+    #include <GL/glew.h>
+#endif
+
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/shapes/cube.hpp"
 

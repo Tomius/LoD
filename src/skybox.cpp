@@ -1,4 +1,3 @@
-#include <GL/glew.h>
 #include "skybox.h"
 
 using namespace oglwrap;
@@ -38,7 +37,7 @@ void Skybox::reshape(const glm::mat4& projMat) {
     projectionMatrix.set(projMat);
 }
 
-const float day_duration = 32.0f;
+const float day_duration = 256.0f;
 
 glm::vec3 Skybox::SunPos(float time) const {
     return vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time * 2 * M_PI / day_duration)) +

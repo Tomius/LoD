@@ -1,14 +1,17 @@
-#ifndef HEADER_A71A3471183A48FA
-#define HEADER_A71A3471183A48FA
+#pragma once
 
-#include <map>
-#include <string>
-#include <vector>
-#include <GL/glew.h>
+#if defined(__APPLE__)
+    #include <OpenGL/glew.h>
+#else
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+        #include <windows.h>
+    #endif
+    #include <GL/glew.h>
+#endif
+
 #include "oglwrap/oglwrap.hpp"
 
 #include "terrainData.h"
-//#include "svec2.hpp"
 
 // Selecting the Blocks' size is really essential but not trivial. Selecting the
 // good number can prove you about twice as much performance as with selecting a
@@ -47,6 +50,3 @@ public:
     unsigned char FetchHeight(glm::ivec2 v);
     double getHeight(double x, double y);
 };
-
-
-#endif // header guard

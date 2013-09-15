@@ -19,7 +19,7 @@ vec3 AmbientColor();
 
 float fogMin = max(Scales.x, Scales.z) * 128.0;
 float fogMax = max(Scales.x, Scales.z) * 2048.0;
-vec3 fogColor = vec3(0.4);
+vec3 fogColor = vec3(0.8);
 
 const float specular_shininess = 20.0f;
 
@@ -63,13 +63,10 @@ void main() {
     vec3 grass = mix(grass_0, grass_1, height_factor);
 
     vec3 Color = AmbientColor() * grass * (SunPower() * (specular_power + diffuse_power) + AmbientPower());
-    vec3 Fog = fogColor * (0.05 + 0.95 * SunPower());
+    vec3 Fog = AmbientColor() * fogColor * (0.005 + SunPower());
 
     float l = length(camPos);
-    float alpha = clamp(
-                      (l - fogMin) / (fogMax - fogMin),
-                      0.0, 1.0
-                  ) / 4;
+    float alpha = clamp((l - fogMin) / (fogMax - fogMin), 0.0, 1.0) / 4;
 
     fragColor = mix(Color, Fog, alpha);
 }

@@ -26,7 +26,7 @@ How to build (linux):
 How to build (Windows):
 ----------------------
 * Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
-* You will have to add #include <windows.h> into the cpp files.
+* You will have to add #include < windows.h > into the cpp files.
 * On Windows there's no uniform way to build, the setup depends on the IDE you use. You will have to link the following libraries:
   * GL
   * GLEW

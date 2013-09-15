@@ -28,7 +28,7 @@ void main() {
         discard;
     }
 
-    vec2 grassTexCoord = texCoord * 400;
+    vec2 grassTexCoord = texCoord * 200;
     mat3 NormalMatrix;
     vec3 n_normal = normalize(normal);
     NormalMatrix[0] = cross(vec3(0.0, 0.0, 1.0), n_normal); // tangent - approximately (1, 0, 0)

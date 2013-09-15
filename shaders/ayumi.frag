@@ -6,7 +6,7 @@ in VertexData {
     vec2 texCoord;
 } vert;
 
-uniform sampler2D tex;
+uniform sampler2D DiffuseTexture, SpecularTexture;
 uniform mat4 CameraMatrix;
 
 out vec3 fragColor;
@@ -16,7 +16,7 @@ float AmbientPower();
 float SunPower();
 vec3 AmbientColor();
 
-const float specular_shininess = 60.0f;
+const float specular_shininess = 20.0f;
 
 void main() {
     vec3 c_normal = normalize(vert.c_normal);
@@ -39,7 +39,8 @@ void main() {
         );
     }
 
-    vec3 color = texture(tex, vert.texCoord).rgb;
+    vec3 color = texture(DiffuseTexture, vert.texCoord).rgb;
+    float spec_mask = texture(SpecularTexture, vert.texCoord).r;
 
-    fragColor = color * AmbientColor() * (SunPower() * (diffuse_power + specular_power) + AmbientPower());
+    fragColor = color * AmbientColor() * (SunPower() * (diffuse_power + spec_mask * specular_power) + AmbientPower());
 }

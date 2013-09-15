@@ -20,7 +20,6 @@ private:
 
     oglwrap::LazyUniform<glm::mat4> projectionMatrix, cameraMatrix, modelMatrix, bones;
     oglwrap::LazyUniform<glm::vec4> sunData;
-    oglwrap::LazyUniformSampler envMap;
 
     Skybox& skybox;
 public:
@@ -35,7 +34,6 @@ public:
         , modelMatrix(prog, "ModelMatrix")
         , bones(prog, "Bones")
         , sunData(prog, "SunData")
-        , envMap(prog, "EnvMap")
         , skybox(skybox) {
 
         oglwrap::ShaderSource vs_source("ayumi.vert");
@@ -50,7 +48,11 @@ public:
         mesh.setup_texCoords(prog | "TexCoord");
         mesh.setup_normals(prog | "Normal");
         mesh.setup_bones(prog | "BoneIDs", prog | "Weights");
-        oglwrap::UniformSampler(prog, "EnvMap").set(1);
+        oglwrap::UniformSampler(prog, "EnvMap").set(0);
+        mesh.setup_diffuse_textures(1);
+        mesh.setup_specular_textures(2);
+        oglwrap::UniformSampler(prog, "DiffuseTexture").set(1);
+        oglwrap::UniformSampler(prog, "SpecularTexture").set(2);
 
         mesh.add_animation(
             "models/ayumi_idle.dae", "Stand",
@@ -86,7 +88,7 @@ public:
         cameraMatrix.set(cam.cameraMatrix());
         modelMatrix.set(charmove.getModelMatrix());
         sunData.set(skybox.getSunData(time));
-        skybox.envMap.active(1);
+        skybox.envMap.active(0);
         skybox.envMap.bind();
 
         if(charmove.is_jumping()) {
@@ -103,10 +105,9 @@ public:
             mesh.set_anim_to_default(time);
         }
 
-        oglwrap::Texture2D::active(0);
         mesh.boneTransform(time, bones);
         mesh.render();
-        skybox.envMap.active(1);
+        skybox.envMap.active(0);
         skybox.envMap.unbind();
     }
 };

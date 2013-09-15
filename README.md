@@ -5,7 +5,7 @@ Simple attempt of drawing big terrains in OpenGL with the geomipmapping level of
 servers as a test subject for my C++ OpenGL wrapper, oglwrap.
 
 Here's a picture of the program's current capability:
-![screenshot](http://oi39.tinypic.com/347g2ep.jpg) 
+![screenshot](http://oi41.tinypic.com/iqaqsz.jpg) 
 
 Dependencies:
 -------------

@@ -12,6 +12,7 @@ out vec3 camPos;
 out vec3 worldPos;
 out vec2 texCoord;
 out float invalid;
+out mat3 normalMatrix;
 
 float Height(ivec2 texCoord) {
     return texelFetch(HeightMap, texCoord, 0).r * 255;
@@ -52,7 +53,11 @@ void main() {
         tempNormal += normalize(cross(neighbours[i], neighbours[(i+1) % 6]));
     }
 
-    normal = tempNormal;
+    normal = normalize(tempNormal);
+
+    normalMatrix[0] = cross(vec3(0.0, 0.0, 1.0), normal); // tangent - approximately (1, 0, 0)
+    normalMatrix[1] = cross(normal, normalMatrix[0]); // bitangent - approximately (0, 0, 1)
+    normalMatrix[2] = normal; // normal - approximately (0, 1, 0)
 
     gl_Position = ProjectionMatrix * vec4(camPos, 1.0);
 }

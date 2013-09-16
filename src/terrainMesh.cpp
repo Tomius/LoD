@@ -409,11 +409,11 @@ void TerrainMesh::render(const glm::vec3& camPos,
     heightMap.unbind();
 }
 
-unsigned char TerrainMesh::FetchHeight(glm::ivec2 v) {
+unsigned char TerrainMesh::fetchHeight(glm::ivec2 v) const {
     return terrain.heightData[(v.y + terrain.h/2) * terrain.w + (v.x + terrain.w/2)];
 }
 
-double TerrainMesh::getHeight(double x, double y) {
+double TerrainMesh::getHeight(double x, double y) const {
     using namespace std;
     using namespace glm;
     ivec2 coord = ivec2(round(x), round(y));
@@ -459,9 +459,9 @@ double TerrainMesh::getHeight(double x, double y) {
         const ivec2 c_coord = ivec2(0.0);
 
         // Heights
-        double a_height = FetchHeight(coord + a_coord);
-        double b_height = FetchHeight(coord + b_coord);
-        double c_height = FetchHeight(coord + c_coord);
+        double a_height = fetchHeight(coord + a_coord);
+        double b_height = fetchHeight(coord + b_coord);
+        double c_height = fetchHeight(coord + c_coord);
 
         // Get the barycentric weights for this point
         // see: http://en.wikipedia.org/wiki/Barycentric_coordinate_system
@@ -491,7 +491,7 @@ double TerrainMesh::getHeight(double x, double y) {
     }
 
     // If all fails
-    return FetchHeight(coord);
+    return fetchHeight(coord);
 }
 
 

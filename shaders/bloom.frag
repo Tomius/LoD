@@ -2,9 +2,10 @@
 
 uniform sampler2DRect Tex;
 
-out vec3 FragColor;
+out vec4 FragColor;
 
 void main() {
+    vec3 color;
     vec3 sum = vec3(0.0);
     ivec2 texcoord = ivec2(gl_FragCoord.xy);
 
@@ -19,14 +20,14 @@ void main() {
 
     float texelIntensity = length(texel) / sqrt(3.0);
     if(texelIntensity < 0.3) {
-        FragColor = (sum * 0.006 + texel).rgb;
+        color = (sum * 0.006 + texel).rgb;
     } else {
         if(texelIntensity < 0.5) {
-            FragColor = (sum * 0.0045 + texel).rgb;
+            color = (sum * 0.0045 + texel).rgb;
         } else {
-            FragColor = (sum * 0.0035 + texel).rgb;
+            color = (sum * 0.0035 + texel).rgb;
         }
     }
     // The bloom effect makes everything way too bright, let's compensate that
-    FragColor = pow(FragColor, vec3(1.5));
+    FragColor = vec4(pow(color, vec3(1.5)), 1.0);
 }

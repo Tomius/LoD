@@ -21,12 +21,22 @@
 #include "bloom.h"
 #include "shadow.h"
 #include "ayumi.h"
+#include "tree.hpp"
+
+/* Todo:
+      - horizontal collision.
+      - grass/trees
+      - enemies (zombies?)
+      - attacks.
+*/
 
 void GL_Init(){
     gl( ClearColor(0.0f, 0.0f, 0.0f, 0.0f) );
     gl( ClearDepth(1.0f) );
     gl( Enable(GL_DEPTH_TEST) );
     gl( Enable(GL_FRAMEBUFFER_SRGB) );
+    gl( Enable(GL_BLEND) );
+    gl( BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) );
 }
 
 void FPS_Display(float time) {
@@ -60,6 +70,7 @@ int main() {
             Skybox skybox;
             Ayumi ayumi(skybox);
             Terrain terrain(skybox);
+            Tree tree(skybox, terrain);
             BloomEffect bloom;
             oglwrap::CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
             oglwrap::ThirdPersonalCamera cam(
@@ -92,12 +103,13 @@ int main() {
                             bloom.reshape(width, height);
 
                             auto projMat = glm::perspectiveFov<float>(
-                                60, width, height, 1, 6000
+                                60, width, height, 1, 3000
                             );
 
                             ayumi.reshape(projMat);
                             skybox.reshape(projMat);
                             terrain.reshape(projMat);
+                            tree.reshape(projMat);
                         }   break;
                         case sf::Event::MouseWheelMoved:
                             cam.scrolling(event.mouseWheel.delta);
@@ -129,6 +141,7 @@ int main() {
                 skybox.render(time, camMatrix);
                 terrain.render(time, camMatrix, camPos);
                 ayumi.render(time, cam, charmove);
+                tree.render(time, cam);
                 bloom.render();
 
                 window.display();

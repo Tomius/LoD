@@ -20,11 +20,14 @@ class Terrain {
 
     Skybox& skybox;
 public:
+    int w, h;
+
     Terrain(Skybox& skybox);
     void reshape(const glm::mat4& projMat);
     glm::vec3 getScales() const;
     void render(float time, const glm::mat4& camMat, const glm::vec3& camPos);
-    double getHeight(double x, double y);
+    unsigned char fetchHeight(glm::ivec2 v) const;
+    double getHeight(double x, double y) const;
 };
 
 #endif // header guard

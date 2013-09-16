@@ -27,17 +27,19 @@ class TerrainMesh {
     oglwrap::ArrayBuffer positions[blockMipmapLevel];
     oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
     size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
-    oglwrap::Texture2D heightMap, grassMaps[2], grassNormalMap;
+    oglwrap::Texture2D heightMap, grassMaps[2], grassNormalMap, grassBumpMap;
 
     RawTerrainData terrain;
-    size_t w, h;
 
     void DrawBlocks(const glm::vec3& camPos,
                     oglwrap::LazyUniform<glm::ivec2>& Offset,
                     oglwrap::LazyUniform<int>& mipmapLevelUnif
     );
     void CreateConnectors(glm::ivec2 pos, glm::vec2 camPos);
+
 public:
+    size_t w, h;
+
     TerrainMesh(const std::string& terrainFile,
                 const std::string& diffusePicture
     );
@@ -47,6 +49,6 @@ public:
                 oglwrap::LazyUniform<int>& mipmapLevel
     );
 
-    unsigned char FetchHeight(glm::ivec2 v);
-    double getHeight(double x, double y);
+    unsigned char fetchHeight(glm::ivec2 v) const;
+    double getHeight(double x, double y) const;
 };

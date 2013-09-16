@@ -19,7 +19,9 @@ Terrain::Terrain(Skybox& skybox)
     , grassNormalMap(prog, "GrassNormalMap")
     , mesh("terrain/mideu.rtd",
            "terrain/mideu.rtc")
-    , skybox(skybox) {
+    , skybox(skybox)
+    , w(mesh.w)
+    , h(mesh.h) {
 
     prog << vs << fs << skybox.sky_fs;
     prog.link().use();
@@ -51,6 +53,10 @@ void Terrain::render(float time, const glm::mat4& camMat, const glm::vec3& camPo
     skybox.envMap.unbind();
 }
 
-double Terrain::getHeight(double x, double y) {
+unsigned char Terrain::fetchHeight(glm::ivec2 v) const {
+    return mesh.fetchHeight(v);
+}
+
+double Terrain::getHeight(double x, double y) const {
     return mesh.getHeight(x, y);
 }

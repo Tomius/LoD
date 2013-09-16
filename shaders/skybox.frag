@@ -2,10 +2,10 @@
 
 in vec3 vertTexCoord;
 
-out vec3 fragColor;
+out vec4 fragColor;
 
 vec3 sky_color(vec3 lookDir);
 
 void main() {
-    fragColor = sky_color(normalize(vertTexCoord));
+    fragColor = vec4(sky_color(normalize(vertTexCoord)), 1.0);
 }

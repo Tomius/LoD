@@ -26,9 +26,9 @@ void main() {
     vert.texCoord = TexCoord;
     vec4 cam_space_pos =
         CameraMatrix *
-        ModelMatrix *
-        BoneTransform *
-        Position;
+        (ModelMatrix *
+        (BoneTransform *
+        Position));
     vert.c_pos = vec3(cam_space_pos);
 
     gl_Position = ProjectionMatrix * cam_space_pos;

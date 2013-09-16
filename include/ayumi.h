@@ -1,6 +1,3 @@
-#ifndef HEADER_80C5F5DB68DEED54
-#define HEADER_80C5F5DB68DEED54
-
 #pragma once
 
 #if defined(__APPLE__)
@@ -120,6 +117,3 @@ public:
         skybox.envMap.unbind();
     }
 };
-
-
-#endif // header guard

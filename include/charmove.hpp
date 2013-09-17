@@ -110,22 +110,28 @@ public:
     }
 
     void updateHeight(float groundHeight) {
+        static sf::Clock clock;
+        static float prevTime = 0;
+        float time = clock.getElapsedTime().asSeconds();
+        float dt =  time - prevTime;
+        prevTime = time;
+
         const float diff = groundHeight - pos.y;
         if(diff >= 0 && jumping && vertSpeed < 0) {
             jumping = false;
             pos.y += diff;
         }
         if(!jumping) {
-            const float offs = std::max(fabs(diff / 2.0f), 0.05);
+            const float offs = std::max(fabs(diff / 2.0f), 0.05) * dt * 20.0f;
             if(fabs(diff) > offs)
                 pos.y += diff / fabs(diff) * offs;
         }
         if(jumping) {
             if(diff > 0)
-                pos.y += std::max(diff, vertSpeed);
+                pos.y += std::max(diff, vertSpeed) * dt * 30.0f;
             else
-                pos.y += vertSpeed;
-            vertSpeed -= 0.03f;
+                pos.y += vertSpeed * dt * 30.0f;
+            vertSpeed -= dt * 0.6f;
         }
     }
 

@@ -121,7 +121,7 @@ int main() {
 
                 float time = clock.getElapsedTime().asSeconds();
 
-                cam.updateRotation(time, window, fixMouse);
+                cam.updateRotation(window, fixMouse);
                 charmove.update(cam, ayumi.mesh.offset_since_last_frame());
                 cam.updateTarget(charmove.getPos() + ayumi.mesh.boundingSphere_Center());
                 auto scales = terrain.getScales();

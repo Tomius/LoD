@@ -99,7 +99,7 @@ public:
 
         if(charmove.is_jumping()) {
             if(charmove.is_jumping_rise())
-                mesh.set_current_animation("JumpRise", time, 0.1f);
+                mesh.set_current_animation("JumpRise", time, 0.2f);
             else
                 mesh.set_current_animation("JumpFall", time, 0.3f);
         } else if(charmove.isWalking()) {

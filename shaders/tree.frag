@@ -34,5 +34,5 @@ void main() {
     vec4 color = texture(u_DiffuseTexture, vert.m_TexCoord);
     vec3 finalColor = color.rgb * AmbientColor() * (SunPower() * diffuse_power + AmbientPower());
 
-    fragColor = vec4(finalColor, color.a);
+    fragColor = vec4(pow(finalColor, vec3(1.5)), color.a);
 }

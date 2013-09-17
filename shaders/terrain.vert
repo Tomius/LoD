@@ -22,10 +22,13 @@ void main() {
     ivec2 iOffsPos = (Position + Offset) / 2;
     vec2 offsPos = (Position + Offset) / 2.0;
     ivec2 texSize = textureSize(HeightMap, 0);
-    if(abs(int(offsPos.x)) - 1 >= texSize.x / 2 || abs(int(offsPos.y)) - 1 >= texSize.x / 2)
+    if(abs(int(offsPos.x)) - 1 >= texSize.x / 2 || abs(int(offsPos.y)) - 1 >= texSize.x / 2) {
         invalid = 1e10;
-    else
+        gl_Position = vec4(0.0);
+        return;
+    } else {
         invalid = 0.0;
+    }
 
     ivec2 iTexCoord = ivec2(offsPos) + texSize / 2;
     texCoord = iTexCoord / vec2(texSize);

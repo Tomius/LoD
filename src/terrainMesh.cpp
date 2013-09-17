@@ -362,6 +362,8 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
         for(char line = 0; line < 6; line++) {
             for(int segment = 0; segment < ring ; segment++) {
                 pos = GetBlockPos(ring, line, segment, distance);
+                if(glm::length(camPos - glm::vec2(pos.x, pos.y)) > 3000)
+                    continue;
                 offset = pos;
                 mipmapLevel = GetBlockMipmapLevel(pos, camPos);
                 mipmapLevelUnif = mipmapLevel;

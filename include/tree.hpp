@@ -105,6 +105,9 @@ public:
         skybox.envMap.active(0);
         skybox.envMap.bind();
 
+        gl( Enable(GL_BLEND) );
+        gl( BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) );
+
         auto campos = cam.getPos();
         for(size_t i = 0; i < trees.size(); i++) {
             if(glm::length(campos - trees[i].pos) < std::max(scales.x, scales.z) * 600) {
@@ -112,6 +115,8 @@ public:
                 mesh.render();
             }
         }
+
+        gl( Disable(GL_BLEND) );
 
         skybox.envMap.active(0);
         skybox.envMap.unbind();

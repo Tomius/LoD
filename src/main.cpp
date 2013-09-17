@@ -35,8 +35,6 @@ void GL_Init(){
     gl( ClearDepth(1.0f) );
     gl( Enable(GL_DEPTH_TEST) );
     gl( Enable(GL_FRAMEBUFFER_SRGB) );
-    gl( Enable(GL_BLEND) );
-    gl( BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) );
 }
 
 void FPS_Display(float time) {

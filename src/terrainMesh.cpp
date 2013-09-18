@@ -104,8 +104,7 @@ static inline void distIncr(int mmlev, int& distance, int ring) {
 // Grab a paper and a pen, and draw simple figures about it, I mean draw 1-2 ring
 // hexagons to understand the vertex positions part, and lines with max 6-8 segments
 // to see what happens with the indices, and with that, the code will look trivial.
-TerrainMesh::TerrainMesh(const std::string& terrainFile,
-                         const std::string& diffusePicture)
+TerrainMesh::TerrainMesh(const std::string& terrainFile)
     : terrain(terrainFile), w(terrain.w), h(terrain.h) {
 
     for(int m = 0; m < blockMipmapLevel; m++) {
@@ -340,13 +339,15 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
 
 void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
                              oglwrap::LazyUniform<glm::ivec2>& offset,
-                             oglwrap::LazyUniform<int>& mipmapLevelUnif) {
+                             oglwrap::LazyUniform<int>& mipmapLevel_uniform,
+                             const glm::vec3& scales) {
+
     // The center piece is special
     glm::ivec2 pos(0, 0);
     offset = pos;
     glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
     int mipmapLevel = GetBlockMipmapLevel(pos, camPos);
-    mipmapLevelUnif = mipmapLevel;
+    mipmapLevel_uniform = mipmapLevel;
 
     // Draw
     vao[mipmapLevel].bind();
@@ -362,11 +363,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
         for(char line = 0; line < 6; line++) {
             for(int segment = 0; segment < ring ; segment++) {
                 pos = GetBlockPos(ring, line, segment, distance);
-                if(glm::length(camPos - glm::vec2(pos.x, pos.y)) > 3000)
-                    continue;
                 offset = pos;
                 mipmapLevel = GetBlockMipmapLevel(pos, camPos);
-                mipmapLevelUnif = mipmapLevel;
+                mipmapLevel_uniform = mipmapLevel;
 
                 // Draw
                 vao[mipmapLevel].bind();
@@ -382,7 +381,8 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 
 void TerrainMesh::render(const glm::vec3& camPos,
                          oglwrap::LazyUniform<glm::ivec2>& offset,
-                         oglwrap::LazyUniform<int>& mipmapLevel) {
+                         oglwrap::LazyUniform<int>& mipmapLevel_uniform,
+                         const glm::vec3& scales) {
 
     heightMap.active(0);
     heightMap.bind();
@@ -396,7 +396,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
     gl( PrimitiveRestartIndex(RESTART) );
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    DrawBlocks(camPos, offset, mipmapLevel);
+    DrawBlocks(camPos, offset, mipmapLevel_uniform, scales);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     gl( Disable(GL_PRIMITIVE_RESTART) );

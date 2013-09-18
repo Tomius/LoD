@@ -2,7 +2,7 @@
 
 using namespace oglwrap;
 
-static const glm::vec3 scale_vector(0.5, 0.5, 0.5);
+static const glm::vec3 scale_vector = glm::vec3(0.5, 0.5, 0.5);
 
 Terrain::Terrain(Skybox& skybox)
     : vs("terrain.vert")
@@ -17,8 +17,7 @@ Terrain::Terrain(Skybox& skybox)
     , normalMap(prog, "NormalMap")
     , grassMap(prog, "GrassMap")
     , grassNormalMap(prog, "GrassNormalMap")
-    , mesh("terrain/mideu.rtd",
-           "terrain/mideu.rtc")
+    , mesh("terrain/mideu.rtd")
     , skybox(skybox)
     , w(mesh.w)
     , h(mesh.h) {
@@ -49,7 +48,7 @@ void Terrain::render(float time, const glm::mat4& camMat, const glm::vec3& camPo
     sunData.set(skybox.getSunData(time));
     skybox.envMap.active(0);
     skybox.envMap.bind();
-    mesh.render(camPos, offset, mipmapLevel);
+    mesh.render(camPos, offset, mipmapLevel, scale_vector);
     skybox.envMap.unbind();
 }
 

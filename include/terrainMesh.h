@@ -33,20 +33,20 @@ class TerrainMesh {
 
     void DrawBlocks(const glm::vec3& camPos,
                     oglwrap::LazyUniform<glm::ivec2>& Offset,
-                    oglwrap::LazyUniform<int>& mipmapLevelUnif
+                    oglwrap::LazyUniform<int>& mipmapLevelUnif,
+                    const glm::vec3& scales
     );
     void CreateConnectors(glm::ivec2 pos, glm::vec2 camPos);
 
 public:
     size_t w, h;
 
-    TerrainMesh(const std::string& terrainFile,
-                const std::string& diffusePicture
-    );
+    TerrainMesh(const std::string& terrainFile);
 
     void render(const glm::vec3& camPos,
                 oglwrap::LazyUniform<glm::ivec2>& Offset,
-                oglwrap::LazyUniform<int>& mipmapLevel
+                oglwrap::LazyUniform<int>& mipmapLevel,
+                const glm::vec3& scales
     );
 
     unsigned char fetchHeight(glm::ivec2 v) const;

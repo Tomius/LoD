@@ -392,14 +392,16 @@ void TerrainMesh::render(const glm::vec3& camPos,
     grassMaps[1].bind();
     grassNormalMap.active(3);
     grassNormalMap.bind();
+
     gl( Enable(GL_PRIMITIVE_RESTART) );
     gl( PrimitiveRestartIndex(RESTART) );
+    //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     DrawBlocks(camPos, offset, mipmapLevel_uniform, scales);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
     gl( Disable(GL_PRIMITIVE_RESTART) );
+
     VertexArray::unbind();
     grassNormalMap.active(3);
     grassNormalMap.unbind();

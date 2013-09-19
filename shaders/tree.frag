@@ -14,14 +14,18 @@ float SunPower();
 float AmbientPower();
 vec3 AmbientColor();
 
-float maxDist = max(Scales.x, Scales.z) * 512.0;
+float maxVisibleDist = max(Scales.x, Scales.z) * 512.0;
+float maxOpaqueDist = max(Scales.x, Scales.z) * (512 - 128);
 
 out vec4 fragColor;
 
 void main() {
-    float l = length(vert.c_Pos);
-    if(l > maxDist)
+    float alpha = 1.0f, l = length(vert.c_Pos);
+    if(l > maxVisibleDist) {
         discard;
+    } else if (l > maxOpaqueDist) {
+        alpha = 1 - (l - maxOpaqueDist) / (maxVisibleDist - maxOpaqueDist);
+    }
 
     float diffuse_power =
         max(
@@ -34,5 +38,5 @@ void main() {
     vec4 color = texture(u_DiffuseTexture, vert.m_TexCoord);
     vec3 finalColor = color.rgb * AmbientColor() * (SunPower() * diffuse_power + AmbientPower());
 
-    fragColor = vec4(pow(finalColor, vec3(1.5)), color.a);
+    fragColor = vec4(pow(finalColor, vec3(1.5)), min(color.a, alpha));
 }

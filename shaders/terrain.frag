@@ -20,7 +20,7 @@ vec3 AmbientColor();
 
 float fogMin = max(Scales.x, Scales.z) * 128.0;
 float fogMax = max(Scales.x, Scales.z) * 2048.0;
-vec3 fogColor = vec3(0.8);
+vec3 fogColor = vec3(0.8f);
 
 const float specular_shininess = 20.0;
 
@@ -69,7 +69,7 @@ void main() {
     // Fog
     vec3 Fog = AmbientColor() * fogColor * (0.005 + SunPower());
     float l = length(camPos);
-    float alpha = clamp((l - fogMin) / (fogMax - fogMin), 0.0, 1.0) / 4;
+    float alpha = clamp((l - fogMin) / (fogMax - fogMin), 0.0, 1.0) / 12;
 
     fragColor = vec4(mix(Color, Fog, alpha), 1.0);
 }

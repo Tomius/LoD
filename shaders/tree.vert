@@ -13,7 +13,7 @@ out VertexData {
 } vert;
 
 void main() {
-    vert.w_Normal = mat3(u_ModelMatrix) * a_Normal;
+    vert.w_Normal = mat3(inverse(transpose(u_ModelMatrix))) * a_Normal;
     vert.m_TexCoord = a_TexCoord;
     vec4 cameraPos = u_CameraMatrix * (u_ModelMatrix * (a_Position * vec4(2, 2, 2, 1)));
     vert.c_Pos = vec3(cameraPos);

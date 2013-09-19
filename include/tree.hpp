@@ -69,11 +69,13 @@ public:
         oglwrap::UniformSampler(prog, "u_DiffuseTexture").set(1);
 
         // Get the trees' positions.
-        srand(time(nullptr));
+        srand(5);
         scales = terrain.getScales();
-        for(int i = -terrain.h / 2 + 500; i <= terrain.h / 2 - 500; i += 200) {
-            for(int j = -terrain.w / 2 + 500; j <= terrain.w / 2 - 500; j += 200) {
-                glm::ivec2 coord = glm::ivec2(i + rand()%60 - 30, j + rand()%60 - 30);
+        const int treeDist = 200;
+        for(int i = -terrain.h / 2; i <= terrain.h / 2; i += treeDist) {
+            for(int j = -terrain.w / 2; j <= terrain.w / 2; j += treeDist) {
+                glm::ivec2 coord = glm::ivec2(i + rand()%(treeDist/2) - treeDist/4,
+                                              j + rand()%(treeDist/2) - treeDist/4);
                 glm::vec3 pos = scales * glm::vec3(coord.x, terrain.fetchHeight(coord), coord.y);
                 glm::vec3 scale = glm::vec3(
                     0.5f + 0.5f * rand() / RAND_MAX,

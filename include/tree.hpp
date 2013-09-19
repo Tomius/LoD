@@ -112,7 +112,7 @@ public:
 
         auto campos = cam.getPos();
         for(size_t i = 0; i < trees.size(); i++) {
-            if(glm::length(campos - trees[i].pos) < std::max(scales.x, scales.z) * 600) {
+            if(glm::length(campos - trees[i].pos) < std::max(scales.x, scales.z) * 800) {
                 modelMatrix.set(trees[i].mat);
                 mesh.render();
             }

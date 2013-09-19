@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 in VertexData {
     vec3 c_normal;

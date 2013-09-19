@@ -25,7 +25,7 @@
 
 /* Todo:
       - horizontal collision.
-      - grass/trees
+      - grass
       - enemies (zombies?)
       - attacks.
 */

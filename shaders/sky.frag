@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 const float WorldRadius = 6371000;
 const float AtmThickness = 50000;

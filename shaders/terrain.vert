@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 layout(location = 0) in ivec2 Position;
 uniform mat4 ProjectionMatrix, CameraMatrix;

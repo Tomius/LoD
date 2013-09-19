@@ -14,13 +14,13 @@ float SunPower();
 float AmbientPower();
 vec3 AmbientColor();
 
-float maxVisibleDist = max(Scales.x, Scales.z) * 512.0;
-float maxOpaqueDist = max(Scales.x, Scales.z) * (512 - 128);
+float maxVisibleDist = max(Scales.x, Scales.z) * 800.0;
+float maxOpaqueDist = max(Scales.x, Scales.z) * 700.0;
 
 out vec4 fragColor;
 
 void main() {
-    float alpha = 1.0f, l = length(vert.c_Pos);
+    float alpha = 1.0, l = length(vert.c_Pos);
     if(l > maxVisibleDist) {
         discard;
     } else if (l > maxOpaqueDist) {

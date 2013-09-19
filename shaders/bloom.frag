@@ -28,5 +28,5 @@ void main() {
         }
     }
     // The bloom effect makes everything way too bright, let's compensate that
-    FragColor = vec4(pow(color, vec3(1.8)), 1.0);
+    FragColor = vec4(pow(color, vec3(1.5)), 1.0);
 }

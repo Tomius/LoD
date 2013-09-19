@@ -119,7 +119,8 @@ public:
         const float diff = groundHeight - pos.y;
         if(diff >= 0 && jumping && vertSpeed < 0) {
             jumping = false;
-            pos.y += diff;
+            pos.y = groundHeight;
+            return;
         }
         if(!jumping) {
             const float offs = std::max(fabs(diff / 2.0f), 0.05) * dt * 20.0f;

@@ -96,7 +96,7 @@ vec3 sky_color(vec3 lookDir) {
         float lookDir_Moon_dist = lookDir_Sun_dist;
 
         // The Moon itself
-        vec3 Moon = (lookDir_Moon_dist > 0.999 + 0.001 * moonPower ? vec3(0.4) : vec3(0.0));
+        vec3 Moon = (lookDir_Moon_dist > 1.006 - 0.005 * moonPower ? vec3(0.4) : vec3(0.0));
 
         vec3 Air =
             // The sky's base color.
@@ -106,7 +106,7 @@ vec3 sky_color(vec3 lookDir) {
             ) +
             // The scattering effect near the Moon
             vec3(0.6) * pow(
-                min(0.998 * lookDir_Sun_dist + 0.002 * moonPower, 1.0),
+                min(0.997 * lookDir_Sun_dist, 1.0),
                 1024.0 / pow(atmSize, 2.0)
             );
 

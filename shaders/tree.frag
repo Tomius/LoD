@@ -32,11 +32,11 @@ void main() {
             dot(
                 normalize(vert.w_Normal),
                 normalize(AmbientDirection())),
-            0
+            0.2
         );
 
     vec4 color = texture(u_DiffuseTexture, vert.m_TexCoord);
-    vec3 finalColor = color.rgb * AmbientColor() * (SunPower() * diffuse_power + AmbientPower());
+    vec3 finalColor = color.rgb * AmbientColor() * (SunPower() * diffuse_power + AmbientPower()) / 2;
 
-    fragColor = vec4(pow(finalColor, vec3(1.5)), min(color.a, alpha));
+    fragColor = vec4(pow(finalColor, vec3(1.3)), min(color.a, alpha));
 }

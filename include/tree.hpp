@@ -20,9 +20,7 @@
 #include <ctime>
 
 class Tree {
-public:
     oglwrap::Mesh mesh;
-private:
     oglwrap::Program prog;
     oglwrap::VertexShader vs;
     oglwrap::FragmentShader fs;
@@ -43,6 +41,8 @@ private:
     };
 
     std::vector<TreeInfo> trees;
+
+
 public:
     Tree(Skybox& skybox, const Terrain& terrain)
         : mesh("models/trees/trees_0/tree_1.obj",

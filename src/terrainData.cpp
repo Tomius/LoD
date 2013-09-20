@@ -97,10 +97,6 @@ void RawTerrainData::InitFromRawTerrain(const std::string& filename) {
         throw std::runtime_error("Error reading file: " + filename);
     }
 
-    // FIXME: Endianness
-    int num = 1;
-    assert(*(char *)&num == 1);
-
     ifs.read((char *)&w, sizeof(size_t));
     endianSwap(w);
     ifs.read((char *)&h, sizeof(size_t));
@@ -275,10 +271,6 @@ TerrainData::TerrainData(const std::string& datafile) {
     } else if(!ifs.good()) {
         throw std::runtime_error("Error reading file: " + datafile);
     }
-
-    // FIXME
-    int num = 1;
-    assert(*(char *)&num == 1);
 
     ifs.read((char *)&w, sizeof(size_t));
     endianSwap(w);

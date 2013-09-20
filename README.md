@@ -1,4 +1,4 @@
-<img src = "logo.jpg" alt = logo  width="60" height="60" />  Land of Dreams
+Land of Dreams
 ===
 
 Simple attempt of drawing big terrains in OpenGL with the geomipmapping level of detail algorithm. The project also heavily involves character animation with GPU skinning. It uses my c++ OpenGL wrapper: oglwrap. 

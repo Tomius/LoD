@@ -12,6 +12,7 @@
     #include <GL/glew.h>
 #endif
 
+//#define OGLWRAP_DEBUG 0
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/utils/camera.hpp"
 
@@ -25,7 +26,6 @@
 
 /* Todo:
       - horizontal collision.
-      - grass
       - enemies (zombies?)
       - attacks.
 */

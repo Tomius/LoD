@@ -12,19 +12,19 @@ void main() {
     const int n = 2; // max distance in which pixels also get fetched
     for(int dx = -n; dx <= n; dx++) {
         for(int dy = -n; dy <= n; dy++) {
-            sum += pow(texelFetch(Tex, texcoord + (3 * ivec2(dx, dy))).rgb, vec3(3.0)) / (n*n);
+            sum += pow(texelFetch(Tex, texcoord + (2 * ivec2(dx, dy))).rgb, vec3(3.0)) / (n*n);
         }
     }
     vec3 texel = texelFetch(Tex, texcoord).rgb;
 
     float texelIntensity = length(texel) / sqrt(3.0);
     if(texelIntensity < 0.3) {
-        color = (sum * 0.15 + texel).rgb;
+        color = (sum * 0.09 + texel).rgb;
     } else {
         if(texelIntensity < 0.5) {
-            color = (sum * 0.12 + texel).rgb;
+            color = (sum * 0.06 + texel).rgb;
         } else {
-            color = (sum * 0.09 + texel).rgb;
+            color = (sum * 0.04 + texel).rgb;
         }
     }
     // The bloom effect makes everything way too bright, let's compensate that

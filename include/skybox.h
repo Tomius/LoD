@@ -20,7 +20,8 @@ class Skybox {
     oglwrap::FragmentShader fs;
     oglwrap::Program prog;
 
-    oglwrap::LazyUniform<glm::mat4> projectionMatrix, cameraMatrix;
+    oglwrap::LazyUniform<glm::mat4> projectionMatrix;
+    oglwrap::LazyUniform<glm::mat3> cameraMatrix;
     oglwrap::LazyUniform<glm::vec4> sunData;
 public:
     Skybox();

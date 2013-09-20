@@ -77,13 +77,13 @@ glm::vec4 Skybox::getSunData(float time) const {
 }
 
 void Skybox::render(float time, const glm::mat4& cameraMat) {
+
     // We don't need the camMat's translation part for the skybox
-    const float* f = value_ptr(mat3(cameraMat));
-    mat4 camRot = mat4(
-        f[0], f[1], f[2], 0.0f,
-        f[3], f[4], f[5], 0.0f,
-        f[6], f[7], f[8], 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
+    const float* f = value_ptr(cameraMat);
+    mat3 camRot = mat3(
+        f[0], f[1], f[2],
+        f[4], f[5], f[6],
+        f[8], f[9], f[10]
     );
 
     prog.use();

@@ -80,13 +80,10 @@ vec3 sky_color(vec3 lookDir) {
             // The Sun makes the clouds brighter
             LightColor * 0.5 * min(sunPower + cloud.g * 0.4 + cloud.b * 0.1, 1.0) * sunPower;
 
-        dayColor = pow(
-            mix(Air,
-               Clouds,
-               cloud.a * (1.0 - 0.8 * cloud.r)
-            ) + vec3(1.0, 0.7, 0.5) * Sun * (1.0 - 0.99 * cloud.a),
-            vec3(1.3)
-        );
+        dayColor = mix(Air,
+                       Clouds,
+                       cloud.a * (1.0 - 0.8 * cloud.r)
+                   ) + vec3(1.0, 0.7, 0.5) * Sun * (1.0 - 0.99 * cloud.a);
 
     }
 

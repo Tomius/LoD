@@ -30,6 +30,8 @@
       - attacks.
 */
 
+using namespace oglwrap;
+
 void GL_Init(){
     gl( ClearColor(0.0f, 0.0f, 0.0f, 0.0f) );
     gl( ClearDepth(1.0f) );
@@ -70,8 +72,8 @@ int main() {
             Terrain terrain(skybox);
             Tree tree(skybox, terrain);
             BloomEffect bloom;
-            oglwrap::CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
-            oglwrap::ThirdPersonalCamera cam(
+            CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
+            ThirdPersonalCamera cam(
                 ayumi.mesh.boundingSphere_Center() + glm::vec3(ayumi.mesh.boundingSphere_Radius() * 3),
                 ayumi.mesh.boundingSphere_Center(),
                 1.5f

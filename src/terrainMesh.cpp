@@ -265,8 +265,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
         grassNormalMap.wrapT(Wrap::Repeat);
     }
 
-    VertexArray::unbind();
-    Texture2D::unbind();
+    VertexArray::Unbind();
+    Texture2D::Unbind();
 }
 
 // -------======{[ Functions about creating the map from the blocks ]}======-------
@@ -402,7 +402,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
     //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
     gl( Disable(GL_PRIMITIVE_RESTART) );
 
-    VertexArray::unbind();
+    VertexArray::Unbind();
     grassNormalMap.active(3);
     grassNormalMap.unbind();
     grassMaps[1].active(2);

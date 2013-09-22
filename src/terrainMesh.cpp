@@ -96,7 +96,7 @@ static inline int GetIdx(int ring, char _line, int _segment) {
     return smallerRings + currentRing;
 }
 
-static inline void distIncr(int mmlev, int& distance, int ring) {
+static inline void distIncr(int mmlev, int& distance) {
     distance += 1 << (mmlev + 1);
 }
 
@@ -117,7 +117,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
             std::vector<svec2> verticesVector;
             verticesVector.push_back(svec2());
             int distance = 0;
-            distIncr(m, distance, 0);
+            distIncr(m, distance);
             for(int ring = 1; ring < ringCount; ring++) {
                 for(char line = 0; line < 6; line++) {
                     for(int segment = 0; segment < ring; segment++) {
@@ -126,7 +126,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
                         );
                     }
                 }
-                distIncr(m, distance, ring);
+                distIncr(m, distance);
             }
 
             vertexNum[m] = verticesVector.size();
@@ -231,8 +231,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
         );
 
         heightMap.anisotropy(maxAniso);
-        heightMap.minFilter(MinF::Linear);
-        heightMap.magFilter(MagF::Linear);
+        heightMap.minFilter(MinFilter::Linear);
+        heightMap.magFilter(MagFilter::Linear);
     }
 
     grassMaps[0].bind();
@@ -339,8 +339,7 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
 
 void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
                              oglwrap::LazyUniform<glm::ivec2>& offset,
-                             oglwrap::LazyUniform<int>& mipmapLevel_uniform,
-                             const glm::vec3& scales) {
+                             oglwrap::LazyUniform<int>& mipmapLevel_uniform) {
 
     // The center piece is special
     glm::ivec2 pos(0, 0);
@@ -381,8 +380,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 
 void TerrainMesh::render(const glm::vec3& camPos,
                          oglwrap::LazyUniform<glm::ivec2>& offset,
-                         oglwrap::LazyUniform<int>& mipmapLevel_uniform,
-                         const glm::vec3& scales) {
+                         oglwrap::LazyUniform<int>& mipmapLevel_uniform) {
 
     heightMap.active(0);
     heightMap.bind();
@@ -397,7 +395,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
     gl( PrimitiveRestartIndex(RESTART) );
     //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );
 
-    DrawBlocks(camPos, offset, mipmapLevel_uniform, scales);
+    DrawBlocks(camPos, offset, mipmapLevel_uniform);
 
     //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
     gl( Disable(GL_PRIMITIVE_RESTART) );

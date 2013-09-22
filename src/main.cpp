@@ -145,6 +145,7 @@ int main() {
                 bloom.render();
 
                 window.display();
+
             }
 
             return 0;

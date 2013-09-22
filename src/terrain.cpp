@@ -48,7 +48,7 @@ void Terrain::render(float time, const glm::mat4& camMat, const glm::vec3& camPo
     sunData.set(skybox.getSunData(time));
     skybox.envMap.active(0);
     skybox.envMap.bind();
-    mesh.render(camPos, offset, mipmapLevel, scale_vector);
+    mesh.render(camPos, offset, mipmapLevel);
     skybox.envMap.unbind();
 }
 

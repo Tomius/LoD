@@ -19,8 +19,8 @@ Skybox::Skybox()
     envMap.active(0);
     {
         envMap.bind();
-        envMap.minFilter(MinF::Linear);
-        envMap.magFilter(MagF::Linear);
+        envMap.minFilter(MinFilter::Linear);
+        envMap.magFilter(MagFilter::Linear);
         envMap.wrapS(Wrap::ClampToEdge);
         envMap.wrapT(Wrap::ClampToEdge);
         envMap.wrapR(Wrap::ClampToEdge);

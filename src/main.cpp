@@ -12,7 +12,7 @@
     #include <GL/glew.h>
 #endif
 
-//#define OGLWRAP_DEBUG 0
+#define OGLWRAP_DEBUG 1
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/utils/camera.hpp"
 

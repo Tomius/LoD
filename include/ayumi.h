@@ -80,6 +80,11 @@ public:
             "models/ayumi_jump_fall.dae", "JumpFall",
             oglwrap::AnimFlag::MirroredRepeat | oglwrap::AnimFlag::Interruptable
         );
+        mesh.add_animation(
+            "models/ayumi_attack.dae", "Attack",
+            oglwrap::AnimFlag::None,
+            2.2f
+        );
         mesh.set_default_animation("Stand", 0.3f);
         mesh.force_anim_to_default(0);
     }
@@ -97,7 +102,9 @@ public:
         skybox.envMap.active(0);
         skybox.envMap.bind();
 
-        if(charmove.is_jumping()) {
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+            mesh.set_current_animation("Attack", time, 0.3f);
+        } else if(charmove.is_jumping()) {
             if(charmove.is_jumping_rise())
                 mesh.set_current_animation("JumpRise", time, 0.2f);
             else

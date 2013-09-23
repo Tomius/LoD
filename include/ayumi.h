@@ -83,7 +83,7 @@ public:
         mesh.add_animation(
             "models/ayumi_attack.dae", "Attack",
             oglwrap::AnimFlag::None,
-            2.0f
+            2.5f
         );
         mesh.set_default_animation("Stand", 0.3f);
         mesh.force_anim_to_default(0);
@@ -103,7 +103,11 @@ public:
         skybox.envMap.bind();
 
         if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            mesh.set_current_animation("Attack", time, 0.3f);
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+                mesh.set_current_animation("Attack", time, 0.3f, 1.5f);
+            } else {
+                mesh.set_current_animation("Attack", time, 0.3f);
+            }
         } else if(charmove.is_jumping()) {
             if(charmove.is_jumping_rise())
                 mesh.set_current_animation("JumpRise", time, 0.2f);

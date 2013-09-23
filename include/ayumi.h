@@ -83,7 +83,7 @@ public:
         mesh.add_animation(
             "models/ayumi_attack.dae", "Attack",
             oglwrap::AnimFlag::None,
-            2.2f
+            2.0f
         );
         mesh.set_default_animation("Stand", 0.3f);
         mesh.force_anim_to_default(0);

@@ -1,12 +1,12 @@
 #pragma once
 
 #if defined(__APPLE__)
-    #include <OpenGL/glew.h>
+#include <OpenGL/glew.h>
 #else
-    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-        #include <windows.h>
-    #endif
-    #include <GL/glew.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+#include <windows.h>
+#endif
+#include <GL/glew.h>
 #endif
 
 #include "oglwrap/oglwrap.hpp"
@@ -23,30 +23,30 @@
 const int blockRadius = 1 << blockMipmapLevel;
 
 class TerrainMesh {
-    oglwrap::VertexArray vao[blockMipmapLevel];
-    oglwrap::ArrayBuffer positions[blockMipmapLevel];
-    oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
-    size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
-    oglwrap::Texture2D heightMap, grassMaps[2], grassNormalMap, grassBumpMap;
+  oglwrap::VertexArray vao[blockMipmapLevel];
+  oglwrap::ArrayBuffer positions[blockMipmapLevel];
+  oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
+  size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
+  oglwrap::Texture2D heightMap, grassMaps[2], grassNormalMap, grassBumpMap;
 
-    RawTerrainData terrain;
+  RawTerrainData terrain;
 
-    void DrawBlocks(const glm::vec3& camPos,
-                    oglwrap::LazyUniform<glm::ivec2>& Offset,
-                    oglwrap::LazyUniform<int>& mipmapLevelUnif
-    );
-    void CreateConnectors(glm::ivec2 pos, glm::vec2 camPos);
+  void DrawBlocks(const glm::vec3& camPos,
+                  oglwrap::LazyUniform<glm::ivec2>& Offset,
+                  oglwrap::LazyUniform<int>& mipmapLevelUnif
+                 );
+  void CreateConnectors(glm::ivec2 pos, glm::vec2 camPos);
 
 public:
-    size_t w, h;
+  size_t w, h;
 
-    TerrainMesh(const std::string& terrainFile);
+  TerrainMesh(const std::string& terrainFile);
 
-    void render(const glm::vec3& camPos,
-                oglwrap::LazyUniform<glm::ivec2>& Offset,
-                oglwrap::LazyUniform<int>& mipmapLevel
-    );
+  void render(const glm::vec3& camPos,
+              oglwrap::LazyUniform<glm::ivec2>& Offset,
+              oglwrap::LazyUniform<int>& mipmapLevel
+             );
 
-    unsigned char fetchHeight(glm::ivec2 v) const;
-    double getHeight(double x, double y) const;
+  unsigned char fetchHeight(glm::ivec2 v) const;
+  double getHeight(double x, double y) const;
 };

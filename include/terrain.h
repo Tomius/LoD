@@ -1,5 +1,5 @@
-#ifndef HEADER_A891BD5159655394
-#define HEADER_A891BD5159655394
+#ifndef LOD_TERRAIN_H_
+#define LOD_TERRAIN_H_
 
 #include "terrainMesh.h"
 #include "skybox.h"
@@ -30,4 +30,4 @@ public:
   double getHeight(double x, double y) const;
 };
 
-#endif // header guard
+#endif // LOD_TERRAIN_H_

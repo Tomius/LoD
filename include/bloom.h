@@ -1,5 +1,5 @@
-#ifndef HEADER_89E445A7D2F5D160
-#define HEADER_89E445A7D2F5D160
+#ifndef LOD_BLOOM_H_
+#define LOD_BLOOM_H_
 
 #if defined(__APPLE__)
 #include <OpenGL/glew.h>
@@ -30,4 +30,4 @@ public:
 };
 
 
-#endif // header guard
+#endif // LOD_BLOOM_H_

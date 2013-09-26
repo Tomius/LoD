@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOD_SVEC2_HPP
+#define LOD_SVEC2_HPP
 
 struct svec2 {
   short x, y;
@@ -16,3 +17,5 @@ struct svec2 {
 inline svec2 operator*(short lhs, const svec2 rhs) {
   return svec2(lhs * rhs.x, lhs * rhs.y);
 }
+
+#endif // LOD_SVEC2_HPP

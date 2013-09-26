@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOD_TERRAINMESH_H_
+#define LOD_TERRAINMESH_H_
 
 #if defined(__APPLE__)
 #include <OpenGL/glew.h>
@@ -50,3 +51,5 @@ public:
   unsigned char fetchHeight(glm::ivec2 v) const;
   double getHeight(double x, double y) const;
 };
+
+#endif // LOD_TERRAINMESH_H_

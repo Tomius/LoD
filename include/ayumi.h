@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOD_AYUMI_H_
+#define LOD_AYUMI_H_
 
 #if defined(__APPLE__)
 #include <OpenGL/glew.h>
@@ -125,3 +126,5 @@ public:
     skybox.envMap.unbind();
   }
 };
+
+#endif // LOD_AYUMI_H_

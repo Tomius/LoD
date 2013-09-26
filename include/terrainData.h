@@ -1,5 +1,5 @@
-#ifndef HEADER_2D44B4B4C7E2D073
-#define HEADER_2D44B4B4C7E2D073
+#ifndef LOD_TERRAINDATA_H_
+#define LOD_TERRAINDATA_H_
 
 #include <string>
 #include <fstream>
@@ -65,5 +65,4 @@ struct ivec2 {
 
 }
 
-
-#endif // header guard
+#endif // LOD_TERRAINDATA_H_

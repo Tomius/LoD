@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOD_TREE_HPP_
+#define LOD_TREE_HPP_
 
 #if defined(__APPLE__)
 #include <OpenGL/glew.h>
@@ -124,3 +125,5 @@ public:
     skybox.envMap.unbind();
   }
 };
+
+#endif // LOD_TREE_HPP_

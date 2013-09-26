@@ -1,5 +1,5 @@
-#ifndef HEADER_16753D7B23630095
-#define HEADER_16753D7B23630095
+#ifndef LOD_SKYBOX_H_
+#define LOD_SKYBOX_H_
 
 #if defined(__APPLE__)
 #include <OpenGL/glew.h>
@@ -35,4 +35,4 @@ public:
 };
 
 
-#endif // header guard
+#endif // LOD_SKYBOX_H_

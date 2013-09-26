@@ -91,9 +91,7 @@ public:
       }
 
       if(transition) {
-        // an angle difference of 5 degree isn't noticeable, but without this,
-        // the character would continuously vibrate right to left.
-        if(fabs(diff) > 5) {
+        if(fabs(diff) > rotSpeed / 20.0f) {
           currRot += sign * dt * rotSpeed;
           currRot = fmod(currRot, 360);
         } else {

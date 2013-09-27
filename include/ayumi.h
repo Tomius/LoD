@@ -106,13 +106,13 @@ public:
       mesh.set_current_animation("Attack", time, 0.3f);
     } else if(charmove.is_jumping()) {
       if(charmove.is_jumping_rise()) {
-        mesh.set_current_animation("JumpRise", time, 0.2f);
+        mesh.set_current_animation("JumpRise", time, 0.3f);
       } else {
         mesh.set_current_animation("JumpFall", time, 0.3f);
       }
     } else if(charmove.isWalking()) {
       if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-        mesh.set_current_animation("Run", time, 0.5f);
+        mesh.set_current_animation("Run", time, 0.2f);
       } else {
         mesh.set_current_animation("Walk", time, 0.3f);
       }

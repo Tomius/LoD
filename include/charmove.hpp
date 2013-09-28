@@ -7,6 +7,8 @@
 
 #include "oglwrap/utils/camera.hpp"
 
+extern const float GRAVITY;
+
 namespace oglwrap {
 
 class CharacterMovement {
@@ -35,7 +37,7 @@ public:
     , transition(false)
   { }
 
-  void update(const Camera& cam, glm::vec3 characterOffset) {
+  void update(const Camera& cam, glm::vec2 character_offset) {
     using namespace glm;
 
     static sf::Clock clock;
@@ -103,9 +105,11 @@ public:
       }
     }
 
-    pos += mat3(rotate(mat4(), (float)fmod(currRot, 360), vec3(0,1,0))) * characterOffset;
+    mat3 transformation = mat3(rotate(mat4(), (float)fmod(currRot, 360), vec3(0,1,0)));
+
+    pos += transformation * vec3(character_offset.x, 0, character_offset.y);
     if(jumping) {
-      pos += mat3(rotate(mat4(), (float)fmod(currRot, 360), vec3(0,1,0))) * vec3(0, 0, 10.0f * dt);
+      pos += transformation * vec3(0, 0, 10.0f * dt);
     }
   }
 
@@ -134,7 +138,7 @@ public:
       } else {
         pos.y += vertSpeed * dt * 30.0f;
       }
-      vertSpeed -= dt * 0.6f;
+      vertSpeed -= dt * GRAVITY;
     }
   }
 

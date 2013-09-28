@@ -32,6 +32,8 @@
 
 using namespace oglwrap;
 
+const float GRAVITY = 0.6f;
+
 void GL_Init() {
   gl(ClearColor(0.0f, 0.0f, 0.0f, 0.0f));
   gl(ClearDepth(1.0f));

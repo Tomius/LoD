@@ -11,7 +11,7 @@
 #endif
 
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/shapes/animatedMesh.hpp"
+#include "oglwrap/mesh/animatedMesh.hpp"
 #include "oglwrap/utils/camera.hpp"
 
 #include "charmove.hpp"

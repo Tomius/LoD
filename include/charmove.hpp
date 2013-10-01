@@ -2,8 +2,8 @@
     @brief Implements features related to character movement.
 */
 
-#ifndef LOD_CHARMOVE_H_
-#define LOD_CHARMOVE_H_
+#ifndef LOD_CHARMOVE_HPP_
+#define LOD_CHARMOVE_HPP_
 
 #include "oglwrap/utils/camera.hpp"
 
@@ -172,4 +172,4 @@ public:
 
 }
 
-#endif // LOD_CHARMOVE_H_
+#endif // LOD_CHARMOVE_HPP_

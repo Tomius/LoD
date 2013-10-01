@@ -12,16 +12,14 @@
 #include <GL/glew.h>
 #endif
 
-#define OGLWRAP_DEBUG 1
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/utils/camera.hpp"
 
 #include "charmove.hpp"
-#include "skybox.h"
-#include "terrain.h"
-#include "bloom.h"
-#include "shadow.h"
-#include "ayumi.h"
+#include "skybox.hpp"
+#include "terrain.hpp"
+#include "bloom.hpp"
+#include "ayumi.hpp"
 #include "tree.hpp"
 
 /* Todo:
@@ -76,8 +74,8 @@ int main() {
       BloomEffect bloom;
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
       ThirdPersonalCamera cam(
-        ayumi.mesh.boundingSphere_Center() + glm::vec3(ayumi.mesh.boundingSphere_Radius() * 3),
-        ayumi.mesh.boundingSphere_Center(),
+        ayumi.mesh.bSphereCenter() + glm::vec3(ayumi.mesh.bSphereRadius() * 3),
+        ayumi.mesh.bSphereCenter(),
         1.5f
       );
 
@@ -122,13 +120,13 @@ int main() {
           }
         }
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gl( Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
 
         float time = clock.getElapsedTime().asSeconds();
 
         cam.updateRotation(window, fixMouse);
-        charmove.update(cam, ayumi.mesh.offset_since_last_frame());
-        cam.updateTarget(charmove.getPos() + ayumi.mesh.boundingSphere_Center());
+        charmove.update(cam, ayumi.mesh.offsetSinceLastFrame());
+        cam.updateTarget(charmove.getPos() + ayumi.mesh.bSphereCenter());
         auto scales = terrain.getScales();
         charmove.updateHeight(
           scales.y * terrain.getHeight(

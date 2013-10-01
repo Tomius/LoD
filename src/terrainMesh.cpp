@@ -1,5 +1,5 @@
-#include "terrainMesh.h"
 #include "svec2.hpp"
+#include "terrainMesh.hpp"
 
 using namespace oglwrap;
 #define RESTART 0xFFFFFFFF

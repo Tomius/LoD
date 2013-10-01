@@ -1,4 +1,4 @@
-#include "skybox.h"
+#include "skybox.hpp"
 
 using namespace oglwrap;
 using namespace glm;
@@ -14,7 +14,7 @@ Skybox::Skybox()
   prog << vs << fs << sky_fs;
   prog.link().use();
 
-  makeCube.setup_positions(prog | "Position");
+  makeCube.setupPositions(prog | "Position");
 
   envMap.active(0);
   {
@@ -99,7 +99,7 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
   bool srgb = gl(IsEnabled(GL_FRAMEBUFFER_SRGB));
   if(srgb) { gl(Disable(GL_FRAMEBUFFER_SRGB)); }
   gl(DepthMask(false));
-  makeCube.draw();
+  makeCube.render();
   gl(DepthMask(true));
   if(srgb) { gl(Enable(GL_FRAMEBUFFER_SRGB)); }
 

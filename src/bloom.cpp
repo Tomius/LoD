@@ -1,4 +1,4 @@
-#include "bloom.h"
+#include "bloom.hpp"
 
 using namespace oglwrap;
 

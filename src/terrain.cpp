@@ -1,4 +1,4 @@
-#include "terrain.h"
+#include "terrain.hpp"
 
 using namespace oglwrap;
 

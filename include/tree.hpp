@@ -10,15 +10,14 @@
 #include <GL/glew.h>
 #endif
 
+#include <cstdio>
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/mesh/mesh.hpp"
 #include "oglwrap/utils/camera.hpp"
 
 #include "charmove.hpp"
-#include "skybox.h"
-#include "terrain.h"
-#include <cstdio>
-#include <ctime>
+#include "skybox.hpp"
+#include "terrain.hpp"
 
 class Tree {
   oglwrap::Mesh mesh;
@@ -61,9 +60,9 @@ public:
     prog << vs << fs << skybox.sky_fs;
     prog.link().use();
 
-    mesh.setup_positions(prog | "a_Position");
-    mesh.setup_texCoords(prog | "a_TexCoord");
-    mesh.setup_normals(prog | "a_Normal");
+    mesh.setupPositions(prog | "a_Position");
+    mesh.setupTexCoords(prog | "a_TexCoord");
+    mesh.setupNormals(prog | "a_Normal");
     oglwrap::UniformSampler(prog, "EnvMap").set(0);
 
     mesh.setup_diffuse_textures(1);

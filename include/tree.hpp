@@ -65,7 +65,7 @@ public:
     mesh.setupNormals(prog | "a_Normal");
     oglwrap::UniformSampler(prog, "EnvMap").set(0);
 
-    mesh.setup_diffuse_textures(1);
+    mesh.setupDiffuseTextures(1);
     oglwrap::UniformSampler(prog, "u_DiffuseTexture").set(1);
 
     // Get the trees' positions.

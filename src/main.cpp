@@ -74,8 +74,8 @@ int main() {
       BloomEffect bloom;
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
       ThirdPersonalCamera cam(
-        ayumi.mesh.bSphereCenter() + glm::vec3(ayumi.mesh.bSphereRadius() * 3),
-        ayumi.mesh.bSphereCenter(),
+        ayumi.getMesh().bSphereCenter() + glm::vec3(ayumi.getMesh().bSphereRadius() * 3),
+        ayumi.getMesh().bSphereCenter(),
         1.5f
       );
 
@@ -125,8 +125,8 @@ int main() {
         float time = clock.getElapsedTime().asSeconds();
 
         cam.updateRotation(window, fixMouse);
-        charmove.update(cam, ayumi.mesh.offsetSinceLastFrame());
-        cam.updateTarget(charmove.getPos() + ayumi.mesh.bSphereCenter());
+        charmove.update(cam, ayumi.getMesh().offsetSinceLastFrame());
+        cam.updateTarget(charmove.getPos() + ayumi.getMesh().bSphereCenter());
         auto scales = terrain.getScales();
         charmove.updateHeight(
           scales.y * terrain.getHeight(

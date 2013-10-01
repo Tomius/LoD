@@ -4,17 +4,17 @@ using namespace oglwrap;
 using namespace glm;
 
 Skybox::Skybox()
-  : vs("skybox.vert")
-  , fs("skybox.frag")
-  , projectionMatrix(prog, "ProjectionMatrix")
-  , cameraMatrix(prog, "CameraMatrix")
-  , sunData(prog, "SunData")
+  : vs_("skybox.vert")
+  , fs_("skybox.frag")
+  , projectionMatrix_(prog_, "ProjectionMatrix")
+  , cameraMatrix_(prog_, "CameraMatrix")
+  , sunData_(prog_, "SunData")
   , sky_fs("sky.frag") {
 
-  prog << vs << fs << sky_fs;
-  prog.link().use();
+  prog_ << vs_ << fs_ << sky_fs;
+  prog_.link().use();
 
-  makeCube.setupPositions(prog | "Position");
+  make_cube_.setupPositions(prog_ | "Position");
 
   envMap.active(0);
   {
@@ -33,8 +33,8 @@ Skybox::Skybox()
 }
 
 void Skybox::reshape(const glm::mat4& projMat) {
-  prog.use();
-  projectionMatrix.set(projMat);
+  prog_.use();
+  projectionMatrix_.set(projMat);
 }
 
 const float day_duration = 256.0f;
@@ -88,9 +88,9 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
                   f[8], f[9], f[10]
                 );
 
-  prog.use();
-  cameraMatrix.set(camRot);
-  sunData.set(getSunData(time));
+  prog_.use();
+  cameraMatrix_.set(camRot);
+  sunData_.set(getSunData(time));
 
   envMap.active(0);
   envMap.bind();
@@ -99,7 +99,7 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
   bool srgb = gl(IsEnabled(GL_FRAMEBUFFER_SRGB));
   if(srgb) { gl(Disable(GL_FRAMEBUFFER_SRGB)); }
   gl(DepthMask(false));
-  makeCube.render();
+  make_cube_.render();
   gl(DepthMask(true));
   if(srgb) { gl(Enable(GL_FRAMEBUFFER_SRGB)); }
 

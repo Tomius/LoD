@@ -3,37 +3,25 @@
 using namespace oglwrap;
 
 BloomEffect::BloomEffect()
-  : vs("bloom.vert")
-  , fs("bloom.frag") {
+  : vs_("bloom.vert")
+  , fs_("bloom.frag") {
 
-  prog << vs << fs;
-  prog.link().use();
+  prog_ << vs_ << fs_;
+  prog_.link().use();
 
-  vao.bind();
-  verts.bind();
-  {
-    GLfloat screenCorners[] = {
-      -1.0f, -1.0f,
-      +1.0f, -1.0f,
-      -1.0f, +1.0f,
-      +1.0f, +1.0f
-    };
-    verts.data(sizeof(screenCorners), screenCorners);
-    (prog | "Position").setup<float>(2).enable();
-  }
-  vao.unbind();
+  rect_.setupPositions(prog_ | "Position");
 }
 
 void BloomEffect::reshape(GLuint w, GLuint h) {
-  width = w;
-  height = h;
+  width_ = w;
+  height_ = h;
 
-  tex.active(0);
-  tex.bind();
-  tex.upload(
+  tex_.active(0);
+  tex_.bind();
+  tex_.upload(
     PixelDataInternalFormat::RGB,
-    width,
-    height,
+    width_,
+    height_,
     PixelDataFormat::RGB,
     PixelDataType::Float,
     nullptr
@@ -42,14 +30,12 @@ void BloomEffect::reshape(GLuint w, GLuint h) {
 
 void BloomEffect::render() {
   // Copy the backbuffer to the texture that our shader can fetch.
-  tex.active(0);
-  tex.bind();
-  tex.copy(PixelDataInternalFormat::RGB, 0, 0, width, height);
+  tex_.active(0);
+  tex_.bind();
+  tex_.copy(PixelDataInternalFormat::RGB, 0, 0, width_, height_);
 
   gl( Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
 
-  prog.use();
-  vao.bind();
-  gl( DrawArrays(GL_TRIANGLE_STRIP, 0, 4) );
-  vao.unbind();
+  prog_.use();
+  rect_.render();
 }

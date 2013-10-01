@@ -14,15 +14,15 @@
 #include "oglwrap/shapes/cube.hpp"
 
 class Skybox {
-  oglwrap::Cube makeCube;
+  oglwrap::Cube make_cube_;
 
-  oglwrap::VertexShader vs;
-  oglwrap::FragmentShader fs;
-  oglwrap::Program prog;
+  oglwrap::VertexShader vs_;
+  oglwrap::FragmentShader fs_;
+  oglwrap::Program prog_;
 
-  oglwrap::LazyUniform<glm::mat4> projectionMatrix;
-  oglwrap::LazyUniform<glm::mat3> cameraMatrix;
-  oglwrap::LazyUniform<glm::vec4> sunData;
+  oglwrap::LazyUniform<glm::mat4> projectionMatrix_;
+  oglwrap::LazyUniform<glm::mat3> cameraMatrix_;
+  oglwrap::LazyUniform<glm::vec4> sunData_;
 public:
   Skybox();
   void reshape(const glm::mat4& projMat);

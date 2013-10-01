@@ -11,21 +11,21 @@
 #endif
 
 #include "oglwrap/oglwrap.hpp"
+#include "oglwrap/shapes/fullScreenRect.hpp"
 
 class BloomEffect {
-  oglwrap::VertexShader vs;
-  oglwrap::FragmentShader fs;
-  oglwrap::Program prog;
+  oglwrap::VertexShader vs_;
+  oglwrap::FragmentShader fs_;
+  oglwrap::Program prog_;
 
-  oglwrap::TextureRect tex;
+  oglwrap::TextureRect tex_;
 
-  oglwrap::VertexArray vao;
-  oglwrap::ArrayBuffer verts;
+  oglwrap::FullScreenRectangle rect_;
 
-  GLuint width, height;
+  GLuint width_, height_;
 public:
   BloomEffect();
-  void reshape(GLuint width, GLuint height);
+  void reshape(GLuint width_, GLuint height_);
   void render();
 };
 

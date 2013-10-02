@@ -15,10 +15,10 @@ class CharacterMovement {
   glm::vec3 pos_;
 
   // Current and destination rotation angles.
-  double currRot_, destRot_;
+  double curr_rot_, dest_rot_;
 
   // Moving speed per second in OpenGL units.
-  float rotSpeed_, vertSpeed_, horizSpeed_;
+  float rot_speed_, vert_speed_, horiz_speed_;
 
   bool walking_, jumping_, transition_;
 
@@ -27,11 +27,11 @@ public:
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f)
     : pos_(pos)
-    , currRot_(0)
-    , destRot_(0)
-    , rotSpeed_(rotationSpeed_PerSec)
-    , vertSpeed_(0)
-    , horizSpeed_(horizontal_speed)
+    , curr_rot_(0)
+    , dest_rot_(0)
+    , rot_speed_(rotationSpeed_PerSec)
+    , vert_speed_(0)
+    , horiz_speed_(horizontal_speed)
     , walking_(false)
     , jumping_(false)
     , transition_(false)
@@ -72,44 +72,44 @@ public:
 
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && !jumping_) {
       jumping_ = true;
-      vertSpeed_ = 0.5f;
+      vert_speed_ = 0.5f;
     }
 
 
     if(walking_) {
       double cameraRot = -cam.getRoty(); // -z is forward
       double moveRot = atan2(moveDir.y, moveDir.x); // +y is forward
-      destRot_ = ToDegree(cameraRot + moveRot);
-      destRot_ = fmod(destRot_, 360);
+      dest_rot_ = ToDegree(cameraRot + moveRot);
+      dest_rot_ = fmod(dest_rot_, 360);
 
-      double diff = destRot_ - currRot_;
+      double diff = dest_rot_ - curr_rot_;
       double sign = diff / fabs(diff);
 
       // Take the shorter path.
       while(fabs(diff) > 180) {
-        destRot_ -= sign * 360;
+        dest_rot_ -= sign * 360;
 
-        diff = destRot_ - currRot_;
+        diff = dest_rot_ - curr_rot_;
         sign = diff / fabs(diff);
       }
 
       if(transition_) {
-        if(fabs(diff) > rotSpeed_ / 20.0f) {
-          currRot_ += sign * dt * rotSpeed_;
-          currRot_ = fmod(currRot_, 360);
+        if(fabs(diff) > rot_speed_ / 20.0f) {
+          curr_rot_ += sign * dt * rot_speed_;
+          curr_rot_ = fmod(curr_rot_, 360);
         } else {
           transition_ = false;
         }
       } else {
-        currRot_ = fmod(destRot_, 360);
+        curr_rot_ = fmod(dest_rot_, 360);
       }
     }
 
-    mat3 transformation = mat3(rotate(mat4(), (float)fmod(currRot_, 360), vec3(0,1,0)));
+    mat3 transformation = mat3(rotate(mat4(), (float)fmod(curr_rot_, 360), vec3(0,1,0)));
 
     pos_ += transformation * vec3(character_offset.x, 0, character_offset.y);
     if(jumping_) {
-      pos_ += transformation * vec3(0, 0, horizSpeed_ * dt);
+      pos_ += transformation * vec3(0, 0, horiz_speed_ * dt);
     }
   }
 
@@ -121,7 +121,7 @@ public:
     prevTime = time;
 
     const float diff = groundHeight - pos_.y;
-    if(diff >= 0 && jumping_ && vertSpeed_ < 0) {
+    if(diff >= 0 && jumping_ && vert_speed_ < 0) {
       jumping_ = false;
       pos_.y = groundHeight;
       return;
@@ -134,11 +134,11 @@ public:
     }
     if(jumping_) {
       if(diff > 0) {
-        pos_.y += std::max(diff, vertSpeed_) * dt * 30.0f;
+        pos_.y += std::max(diff, vert_speed_) * dt * 30.0f;
       } else {
-        pos_.y += vertSpeed_ * dt * 30.0f;
+        pos_.y += vert_speed_ * dt * 30.0f;
       }
-      vertSpeed_ -= dt * GRAVITY;
+      vert_speed_ -= dt * GRAVITY;
     }
   }
 
@@ -147,11 +147,11 @@ public:
   }
 
   bool is_jumping_rise() const {
-    return jumping_ && vertSpeed_ > 0;
+    return jumping_ && vert_speed_ > 0;
   }
 
   bool is_jumping_fall() const {
-    return jumping_ && vertSpeed_ < 0;
+    return jumping_ && vert_speed_ < 0;
   }
 
   bool isWalking() const {
@@ -159,7 +159,7 @@ public:
   }
 
   glm::mat4 getModelMatrix() const {
-    glm::mat4 rot = glm::rotate(glm::mat4(), (float)fmod(currRot_, 360), glm::vec3(0,1,0));
+    glm::mat4 rot = glm::rotate(glm::mat4(), (float)fmod(curr_rot_, 360), glm::vec3(0,1,0));
     // The matrix's last column is responsible for the translation.
     rot[3] = glm::vec4(pos_, 1.0);
     return rot;

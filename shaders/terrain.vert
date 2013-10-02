@@ -1,41 +1,44 @@
 #version 330 core
 
-layout(location = 0) in ivec2 Position;
-uniform mat4 ProjectionMatrix, CameraMatrix;
-uniform ivec2 Offset;
-uniform vec3 Scales;
-uniform sampler2D HeightMap;
-uniform int MipmapLevel;
+layout(location = 0) in ivec2 vPosition;
 
-out vec3 normal;
-out vec3 camPos;
-out vec3 worldPos;
-out vec2 texCoord;
-out float invalid;
-out mat3 normalMatrix;
+uniform mat4 uProjectionMatrix, uCameraMatrix;
+uniform ivec2 uOffset;
+uniform vec3 uScales;
+uniform sampler2D uHeightMap;
+uniform int uMipmapLevel;
 
-float Height(ivec2 texCoord) {
-    return texelFetch(HeightMap, texCoord, 0).r * 255;
+out VertexData {
+  vec3  w_normal;
+  vec3  c_pos, w_pos;
+  vec2  m_texcoord;
+  float invalid;
+  mat3  NormalMatrix;
+} vout;
+
+
+float fetchHeight(ivec2 texCoord) {
+    return texelFetch(uHeightMap, texCoord, 0).r * 255;
 }
 
 void main() {
-    ivec2 iOffsPos = (Position + Offset) / 2;
-    vec2 offsPos = (Position + Offset) / 2.0;
-    ivec2 texSize = textureSize(HeightMap, 0);
-    if(abs(int(offsPos.x)) - 1 >= texSize.x / 2 || abs(int(offsPos.y)) - 1 >= texSize.x / 2) {
-        invalid = 1e10;
+    vec2 w_offsPos = (vPosition + uOffset) / 2.0;
+
+    ivec2 tex_size = textureSize(uHeightMap, 0);
+    if(abs(int(w_offsPos.x)) - 1 >= tex_size.x / 2 || abs(int(w_offsPos.y)) - 1 >= tex_size.x / 2) {
+        vout.invalid = 1e10;
         gl_Position = vec4(0.0);
         return;
     } else {
-        invalid = 0.0;
+        vout.invalid = 0.0;
     }
 
-    ivec2 iTexCoord = ivec2(offsPos) + texSize / 2;
-    texCoord = iTexCoord / vec2(texSize);
+    ivec2 iTexcoord = ivec2(w_offsPos) + tex_size / 2;
+    vout.m_texcoord = iTexcoord / vec2(tex_size);
 
-    float height = Height(iTexCoord);
-    worldPos = Scales * vec3(offsPos.x, height, offsPos.y);
-    camPos = (CameraMatrix * vec4(worldPos, 1.0)).xyz;
+    float height = fetchHeight(iTexcoord);
+    vout.w_pos = uScales * vec3(w_offsPos.x, height, w_offsPos.y);
+    vout.c_pos = (uCameraMatrix * vec4(vout.w_pos, 1.0)).xyz;
 
     // -------======{[ Normals ]}======-------
 
@@ -46,21 +49,21 @@ void main() {
 
     vec3 neighbours[6];
     for(int i = 0; i < 6; i++) {
-        ivec2 nPos = (Position + Offset + ((1 << (MipmapLevel + 1)) * iNeighbours[i])) / 2;
-        ivec2 nTexCoord = nPos + texSize / 2;
-        neighbours[i] = Scales * vec3(nPos.x, Height(nTexCoord), nPos.y) - worldPos;
+        ivec2 nPos = (vPosition + uOffset + ((1 << (uMipmapLevel + 1)) * iNeighbours[i])) / 2;
+        ivec2 nTexcoord = nPos + tex_size / 2;
+        neighbours[i] = uScales * vec3(nPos.x, fetchHeight(nTexcoord), nPos.y) - vout.w_pos;
     }
 
-    vec3 tempNormal = vec3(0.0);
+    vec3 temp_normal = vec3(0.0);
     for(int i = 0; i < 6; i++) {
-        tempNormal += normalize(cross(neighbours[i], neighbours[(i+1) % 6]));
+        temp_normal += normalize(cross(neighbours[i], neighbours[(i+1) % 6]));
     }
 
-    normal = normalize(tempNormal);
+    vout.w_normal = normalize(temp_normal);
 
-    normalMatrix[0] = cross(vec3(0.0, 0.0, 1.0), normal); // tangent - approximately (1, 0, 0)
-    normalMatrix[1] = cross(normal, normalMatrix[0]); // bitangent - approximately (0, 0, 1)
-    normalMatrix[2] = normal; // normal - approximately (0, 1, 0)
+    vout.NormalMatrix[0] = cross(vec3(0.0, 0.0, 1.0), vout.w_normal); // tangent - approximately (1, 0, 0)
+    vout.NormalMatrix[1] = cross(vout.w_normal, vout.NormalMatrix[0]); // bitangent - approximately (0, 0, 1)
+    vout.NormalMatrix[2] = vout.w_normal; // normal - approximately (0, 1, 0)
 
-    gl_Position = ProjectionMatrix * vec4(camPos, 1.0);
+    gl_Position = uProjectionMatrix * vec4(vout.c_pos, 1.0);
 }

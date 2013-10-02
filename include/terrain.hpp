@@ -5,21 +5,22 @@
 #include "skybox.hpp"
 
 class Terrain {
-  oglwrap::Program prog;
-  oglwrap::VertexShader vs;
-  oglwrap::FragmentShader fs;
+  oglwrap::Program prog_;
+  oglwrap::VertexShader vs_;
+  oglwrap::FragmentShader fs_;
 
-  oglwrap::LazyUniform<glm::mat4> projectionMatrix, cameraMatrix;
-  oglwrap::LazyUniform<glm::vec4> sunData;
-  oglwrap::LazyUniform<glm::vec3> scales;
-  oglwrap::LazyUniform<glm::ivec2> offset;
-  oglwrap::LazyUniform<int> mipmapLevel;
-  oglwrap::LazyUniformSampler heightMap, normalMap, grassMap, grassNormalMap;
-  TerrainMesh mesh;
+  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_;
+  oglwrap::LazyUniform<glm::vec4> uSunData_;
+  oglwrap::LazyUniform<glm::vec3> uScales_;
+  oglwrap::LazyUniform<glm::ivec2> uOffset_;
+  oglwrap::LazyUniform<int> uMipmapLevel_;
+  oglwrap::LazyUniformSampler uHeightMap_, uGrassMap_, uGrassNormalMap_;
+  TerrainMesh mesh_;
 
-  Skybox& skybox;
+  Skybox& skybox_;
+  int w_, h_;
 public:
-  int w, h;
+  const int& w, h;
 
   Terrain(Skybox& skybox);
   void reshape(const glm::mat4& projMat);

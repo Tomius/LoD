@@ -6,40 +6,42 @@ using namespace glm;
 Skybox::Skybox()
   : vs_("skybox.vert")
   , fs_("skybox.frag")
-  , projectionMatrix_(prog_, "ProjectionMatrix")
-  , cameraMatrix_(prog_, "CameraMatrix")
-  , sunData_(prog_, "SunData")
-  , sky_fs("sky.frag") {
+  , uProjectionMatrix_(prog_, "uProjectionMatrix")
+  , uCameraMatrix_(prog_, "uCameraMatrix")
+  , uSunData_(prog_, "uSunData")
+  , sky_fs_("sky.frag")
+  , env_map(env_map_)
+  , sky_fs(sky_fs_) {
 
-  prog_ << vs_ << fs_ << sky_fs;
+  prog_ << vs_ << fs_ << sky_fs_;
   prog_.link().use();
 
-  make_cube_.setupPositions(prog_ | "Position");
+  make_cube_.setupPositions(prog_ | "vPosition");
 
-  envMap.active(0);
+  env_map_.active(0);
   {
-    envMap.bind();
-    envMap.minFilter(MinFilter::Linear);
-    envMap.magFilter(MagFilter::Linear);
-    envMap.wrapS(Wrap::ClampToEdge);
-    envMap.wrapT(Wrap::ClampToEdge);
-    envMap.wrapR(Wrap::ClampToEdge);
+    env_map_.bind();
+    env_map_.minFilter(MinFilter::Linear);
+    env_map_.magFilter(MagFilter::Linear);
+    env_map_.wrapS(Wrap::ClampToEdge);
+    env_map_.wrapT(Wrap::ClampToEdge);
+    env_map_.wrapR(Wrap::ClampToEdge);
 
     for(int i = 0; i < 6; i++) {
       char c[2] = {char('0' + i), 0};
-      envMap.loadTexture(i, "textures/skybox_" + std::string(c) + ".png");
+      env_map_.loadTexture(i, "textures/skybox_" + std::string(c) + ".png");
     }
   }
 }
 
 void Skybox::reshape(const glm::mat4& projMat) {
   prog_.use();
-  projectionMatrix_.set(projMat);
+  uProjectionMatrix_.set(projMat);
 }
 
 const float day_duration = 256.0f;
 
-glm::vec3 Skybox::SunPos(float time) const {
+glm::vec3 Skybox::getSunPos(float time) const {
   return vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time * 2 * M_PI / day_duration)) +
          vec3(0.f, 0.f, -1.f) * float(1e10 * cos(time * 2 * M_PI / day_duration));
 }
@@ -75,7 +77,7 @@ glm::vec4 Skybox::getSunData(float time) const {
     }
   }
 
-  return vec4(SunPos(time), dayLerp);
+  return vec4(getSunPos(time), dayLerp);
 }
 
 void Skybox::render(float time, const glm::mat4& cameraMat) {
@@ -89,11 +91,11 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
                 );
 
   prog_.use();
-  cameraMatrix_.set(camRot);
-  sunData_.set(getSunData(time));
+  uCameraMatrix_.set(camRot);
+  uSunData_.set(getSunData(time));
 
-  envMap.active(0);
-  envMap.bind();
+  env_map_.active(0);
+  env_map_.bind();
 
   // The skybox looks better w/o gamma correction
   bool srgb = gl(IsEnabled(GL_FRAMEBUFFER_SRGB));
@@ -103,5 +105,5 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
   gl(DepthMask(true));
   if(srgb) { gl(Enable(GL_FRAMEBUFFER_SRGB)); }
 
-  envMap.unbind();
+  env_map_.unbind();
 }

@@ -1,11 +1,13 @@
 #version 330 core
 
-in vec3 vertTexCoord;
+in VertexData {
+  vec3 texcoord;
+};
 
-out vec4 fragColor;
+out vec4 frag_color;
 
-vec3 sky_color(vec3 lookDir);
+vec3 SkyColor(vec3 lookDir);
 
 void main() {
-    fragColor = vec4(sky_color(normalize(vertTexCoord)), 1.0);
+    frag_color = vec4(SkyColor(normalize(texcoord)), 1.0);
 }

@@ -23,8 +23,8 @@ class Ayumi {
   oglwrap::VertexShader vs_;
   oglwrap::FragmentShader fs_;
 
-  oglwrap::LazyUniform<glm::mat4> projectionMatrix_, cameraMatrix_, modelMatrix_, bones_;
-  oglwrap::LazyUniform<glm::vec4> sunData_;
+  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_;
+  oglwrap::LazyUniform<glm::vec4> uSunData_;
 
   Skybox& skybox_;
 public:
@@ -33,11 +33,11 @@ public:
             aiProcessPreset_TargetRealtime_MaxQuality |
             aiProcess_FlipUVs)
     , fs_("ayumi.frag")
-    , projectionMatrix_(prog_, "ProjectionMatrix")
-    , cameraMatrix_(prog_, "CameraMatrix")
-    , modelMatrix_(prog_, "ModelMatrix")
-    , bones_(prog_, "Bones")
-    , sunData_(prog_, "SunData")
+    , uProjectionMatrix_(prog_, "uProjectionMatrix")
+    , uCameraMatrix_(prog_, "uCameraMatrix")
+    , uModelMatrix_(prog_, "uModelMatrix")
+    , uBones_(prog_, "uBones")
+    , uSunData_(prog_, "uSunData")
     , skybox_(skybox) {
 
     oglwrap::ShaderSource vs_source("ayumi.vert");
@@ -48,15 +48,15 @@ public:
     prog_ << vs_ << fs_ << skybox_.sky_fs;
     prog_.link().use();
 
-    mesh_.setupPositions(prog_ | "Position");
-    mesh_.setupTexCoords(prog_ | "TexCoord");
-    mesh_.setupNormals(prog_ | "Normal");
-    mesh_.setupBones(prog_ | "BoneIDs", prog_ | "Weights");
-    oglwrap::UniformSampler(prog_, "EnvMap").set(0);
+    mesh_.setupPositions(prog_ | "vPosition");
+    mesh_.setupTexCoords(prog_ | "vTexCoord");
+    mesh_.setupNormals(prog_ | "vNormal");
+    mesh_.setupBones(prog_ | "vBoneIDs", prog_ | "vWeights");
+    oglwrap::UniformSampler(prog_, "uEnvMap").set(0);
     mesh_.setupDiffuseTextures(1);
     mesh_.setupSpecularTextures(2);
-    oglwrap::UniformSampler(prog_, "DiffuseTexture").set(1);
-    oglwrap::UniformSampler(prog_, "SpecularTexture").set(2);
+    oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
+    oglwrap::UniformSampler(prog_, "uSpecularTexture").set(2);
 
     mesh_.addAnimation("models/ayumi_idle.dae", "Stand",
                        oglwrap::AnimFlag::Repeat |
@@ -91,18 +91,18 @@ public:
 
   void reshape(glm::mat4 projMat) {
     prog_.use();
-    projectionMatrix_ = projMat;
+    uProjectionMatrix_ = projMat;
   }
 
   void render(float time,
               const oglwrap::Camera& cam,
               const oglwrap::CharacterMovement& charmove) {
     prog_.use();
-    cameraMatrix_.set(cam.cameraMatrix());
-    modelMatrix_.set(charmove.getModelMatrix());
-    sunData_.set(skybox_.getSunData(time));
-    skybox_.envMap.active(0);
-    skybox_.envMap.bind();
+    uCameraMatrix_.set(cam.cameraMatrix());
+    uModelMatrix_.set(charmove.getModelMatrix());
+    uSunData_.set(skybox_.getSunData(time));
+    skybox_.env_map.active(0);
+    skybox_.env_map.bind();
 
     if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
       mesh_.setCurrentAnimation("Attack", time, 0.3f);
@@ -122,10 +122,10 @@ public:
       mesh_.setAnimToDefault(time);
     }
 
-    mesh_.boneTransform(time, bones_);
+    mesh_.boneTransform(time, uBones_);
     mesh_.render();
-    skybox_.envMap.active(0);
-    skybox_.envMap.unbind();
+    skybox_.env_map.active(0);
+    skybox_.env_map.unbind();
   }
 };
 

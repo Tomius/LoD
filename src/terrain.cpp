@@ -5,32 +5,33 @@ using namespace oglwrap;
 static const glm::vec3 scale_vector = glm::vec3(0.5, 0.5, 0.5);
 
 Terrain::Terrain(Skybox& skybox)
-  : vs("terrain.vert")
-  , fs("terrain.frag")
-  , projectionMatrix(prog, "ProjectionMatrix")
-  , cameraMatrix(prog, "CameraMatrix")
-  , sunData(prog, "SunData")
-  , scales(prog, "Scales")
-  , offset(prog, "Offset")
-  , mipmapLevel(prog, "MipmapLevel")
-  , heightMap(prog, "HeightMap")
-  , normalMap(prog, "NormalMap")
-  , grassMap(prog, "GrassMap")
-  , grassNormalMap(prog, "GrassNormalMap")
-  , mesh("terrain/mideu.rtd")
-  , skybox(skybox)
-  , w(mesh.w)
-  , h(mesh.h) {
+  : vs_("terrain.vert")
+  , fs_("terrain.frag")
+  , uProjectionMatrix_(prog_, "uProjectionMatrix")
+  , uCameraMatrix_(prog_, "uCameraMatrix")
+  , uSunData_(prog_, "uSunData")
+  , uScales_(prog_, "uScales")
+  , uOffset_(prog_, "uOffset")
+  , uMipmapLevel_(prog_, "uMipmapLevel")
+  , uHeightMap_(prog_, "uHeightMap")
+  , uGrassMap_(prog_, "uGrassMap")
+  , uGrassNormalMap_(prog_, "uGrassNormalMap")
+  , mesh_("terrain/mideu.rtd")
+  , skybox_(skybox)
+  , w_(mesh_.w)
+  , h_(mesh_.h)
+  , w(w_)
+  , h(h_) {
 
-  prog << vs << fs << skybox.sky_fs;
-  prog.link().use();
+  prog_ << vs_ << fs_ << skybox_.sky_fs;
+  prog_.link().use();
 
-  heightMap.set(0);
-  grassMap[0].set(1);
-  grassMap[1].set(2);
-  grassNormalMap.set(3);
+  uHeightMap_.set(0);
+  uGrassMap_[0].set(1);
+  uGrassMap_[1].set(2);
+  uGrassNormalMap_.set(3);
 
-  scales = scale_vector;
+  uScales_ = scale_vector;
 }
 
 glm::vec3 Terrain::getScales() const {
@@ -38,24 +39,26 @@ glm::vec3 Terrain::getScales() const {
 }
 
 void Terrain::reshape(const glm::mat4& projMat) {
-  prog.use();
-  projectionMatrix = projMat;
+  prog_.use();
+  uProjectionMatrix_ = projMat;
 }
 
-void Terrain::render(float time, const glm::mat4& camMat, const glm::vec3& camPos) {
-  prog.use();
-  cameraMatrix.set(camMat);
-  sunData.set(skybox.getSunData(time));
-  skybox.envMap.active(0);
-  skybox.envMap.bind();
-  mesh.render(camPos, offset, mipmapLevel);
-  skybox.envMap.unbind();
+void Terrain::render(float time, const glm::mat4& cam_mat, const glm::vec3& cam_pos) {
+  prog_.use();
+  uCameraMatrix_.set(cam_mat);
+  uSunData_.set(skybox_.getSunData(time));
+  skybox_.env_map.active(0);
+  skybox_.env_map.bind();
+
+  mesh_.render(cam_pos, uOffset_, uMipmapLevel_);
+
+  skybox_.env_map.unbind();
 }
 
 unsigned char Terrain::fetchHeight(glm::ivec2 v) const {
-  return mesh.fetchHeight(v);
+  return mesh_.fetchHeight(v);
 }
 
 double Terrain::getHeight(double x, double y) const {
-  return mesh.getHeight(x, y);
+  return mesh_.getHeight(x, y);
 }

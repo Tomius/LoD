@@ -1,23 +1,23 @@
 #version 330 core
 
-in vec4 a_Position;
-in vec3 a_Normal;
-in vec2 a_TexCoord;
+in vec4 vPosition;
+in vec3 vNormal;
+in vec2 vTexCoord;
 
-uniform mat4 u_ProjectionMatrix, u_CameraMatrix, u_ModelMatrix;
+uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
 
 out VertexData {
-    vec3 c_Pos;
-    vec3 w_Normal;
-    vec2 m_TexCoord;
-} vert;
+    vec3 c_pos;
+    vec3 w_normal;
+    vec2 m_texcoord;
+} vout;
 
 void main() {
-    vert.w_Normal = mat3(inverse(transpose(u_ModelMatrix))) * a_Normal;
-    vert.m_TexCoord = a_TexCoord;
-    vec4 cameraPos = u_CameraMatrix * (u_ModelMatrix * (a_Position * vec4(2, 2, 2, 1)));
-    vert.c_Pos = vec3(cameraPos);
+    vout.w_normal = vNormal * mat3(inverse(transpose(uModelMatrix)));
+    vout.m_texcoord = vTexCoord;
 
-    gl_Position =
-        u_ProjectionMatrix * cameraPos;
+    vec4 c_pos = uCameraMatrix * (uModelMatrix * (vPosition * vec4(2, 2, 2, 1)));
+    vout.c_pos = vec3(c_pos);
+
+    gl_Position = uProjectionMatrix * c_pos;
 }

@@ -20,32 +20,33 @@
 // also look better. So everytime you try a new mesh, tweak this value, the
 // optimum should be near ceil(log2(texSize) / 2).
 
-#define blockMipmapLevel 7
-const int blockRadius = 1 << blockMipmapLevel;
+const int kBlockMipmapLevel = 7;
+const int kBlockRadius = 1 << kBlockMipmapLevel;
 
 class TerrainMesh {
-  oglwrap::VertexArray vao[blockMipmapLevel];
-  oglwrap::ArrayBuffer positions[blockMipmapLevel];
-  oglwrap::IndexBuffer indices[blockMipmapLevel], borderIndices[blockMipmapLevel][6][2];
-  size_t vertexNum[blockMipmapLevel], indexNum[blockMipmapLevel];
-  oglwrap::Texture2D heightMap, grassMaps[2], grassNormalMap, grassBumpMap;
+  oglwrap::VertexArray vao_[kBlockMipmapLevel];
+  oglwrap::ArrayBuffer positions_[kBlockMipmapLevel];
+  oglwrap::IndexBuffer indices_[kBlockMipmapLevel], border_indices_[kBlockMipmapLevel][6][2];
+  size_t index_num_[kBlockMipmapLevel];
+  oglwrap::Texture2D heightMap_, grassMaps_[2], grassNormalMap_, grassBumpMap_;
 
-  RawTerrainData terrain;
+  RawTerrainData terrain_;
 
   void DrawBlocks(const glm::vec3& camPos,
                   oglwrap::LazyUniform<glm::ivec2>& Offset,
-                  oglwrap::LazyUniform<int>& mipmapLevelUnif
+                  oglwrap::LazyUniform<int>& uMipmapLevel_
                  );
   void CreateConnectors(glm::ivec2 pos, glm::vec2 camPos);
 
+  int w_, h_;
 public:
-  size_t w, h;
+  const int& w, h;
 
   TerrainMesh(const std::string& terrainFile);
 
   void render(const glm::vec3& camPos,
               oglwrap::LazyUniform<glm::ivec2>& Offset,
-              oglwrap::LazyUniform<int>& mipmapLevel
+              oglwrap::LazyUniform<int>& uMipmapLevel_
              );
 
   unsigned char fetchHeight(glm::ivec2 v) const;

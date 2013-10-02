@@ -20,17 +20,17 @@
 #include "terrain.hpp"
 
 class Tree {
-  oglwrap::Mesh mesh;
-  oglwrap::Program prog;
-  oglwrap::VertexShader vs;
-  oglwrap::FragmentShader fs;
+  oglwrap::Mesh mesh_;
+  oglwrap::Program prog_;
+  oglwrap::VertexShader vs_;
+  oglwrap::FragmentShader fs_;
 
-  oglwrap::LazyUniform<glm::mat4> projectionMatrix, cameraMatrix, modelMatrix;
-  oglwrap::LazyUniform<glm::vec4> sunData;
+  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_;
+  oglwrap::LazyUniform<glm::vec4> uSunData_;
 
-  Skybox& skybox;
+  glm::vec3 scales_;
+  Skybox& skybox_;
 
-  glm::vec3 scales;
   struct TreeInfo {
     glm::vec3 pos;
     glm::mat4 mat;
@@ -40,43 +40,42 @@ class Tree {
     }
   };
 
-  std::vector<TreeInfo> trees;
-
+  std::vector<TreeInfo> trees_;
 
 public:
   Tree(Skybox& skybox, const Terrain& terrain)
-    : mesh("models/trees/trees_0/tree_1.obj",
+    : mesh_("models/trees/trees_0/tree_1.obj",
            aiProcessPreset_TargetRealtime_MaxQuality |
            aiProcess_FlipUVs
           )
-    , vs("tree.vert")
-    , fs("tree.frag")
-    , projectionMatrix(prog, "u_ProjectionMatrix")
-    , cameraMatrix(prog, "u_CameraMatrix")
-    , modelMatrix(prog, "u_ModelMatrix")
-    , sunData(prog, "SunData")
-    , skybox(skybox) {
+    , vs_("tree.vert")
+    , fs_("tree.frag")
+    , uProjectionMatrix_(prog_, "uProjectionMatrix")
+    , uCameraMatrix_(prog_, "uCameraMatrix")
+    , uModelMatrix_(prog_, "uModelMatrix")
+    , uSunData_(prog_, "uSunData")
+    , skybox_(skybox) {
 
-    prog << vs << fs << skybox.sky_fs;
-    prog.link().use();
+    prog_ << vs_ << fs_ << skybox_.sky_fs;
+    prog_.link().use();
 
-    mesh.setupPositions(prog | "a_Position");
-    mesh.setupTexCoords(prog | "a_TexCoord");
-    mesh.setupNormals(prog | "a_Normal");
-    oglwrap::UniformSampler(prog, "EnvMap").set(0);
+    mesh_.setupPositions(prog_ | "vPosition");
+    mesh_.setupTexCoords(prog_ | "vTexCoord");
+    mesh_.setupNormals(prog_ | "vNormal");
+    oglwrap::UniformSampler(prog_, "uEnvMap").set(0);
 
-    mesh.setupDiffuseTextures(1);
-    oglwrap::UniformSampler(prog, "u_DiffuseTexture").set(1);
+    mesh_.setupDiffuseTextures(1);
+    oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
 
     // Get the trees' positions.
     srand(5);
-    scales = terrain.getScales();
-    const int treeDist = 200;
-    for(int i = -terrain.h / 2; i <= terrain.h / 2; i += treeDist) {
-      for(int j = -terrain.w / 2; j <= terrain.w / 2; j += treeDist) {
-        glm::ivec2 coord = glm::ivec2(i + rand()%(treeDist/2) - treeDist/4,
-                                      j + rand()%(treeDist/2) - treeDist/4);
-        glm::vec3 pos = scales * glm::vec3(coord.x, terrain.fetchHeight(coord), coord.y);
+    scales_ = terrain.getScales();
+    const int kTreeDist = 200;
+    for(int i = -terrain.h/2; i <= terrain.h/2; i += kTreeDist) {
+      for(int j = -terrain.w / 2; j <= terrain.w / 2; j += kTreeDist) {
+        glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
+                                      j + rand()%(kTreeDist/2) - kTreeDist/4);
+        glm::vec3 pos = scales_ * glm::vec3(coord.x, terrain.fetchHeight(coord), coord.y);
         glm::vec3 scale = glm::vec3(
                             0.5f + 0.5f * rand() / RAND_MAX,
                             0.5f + 0.5f * rand() / RAND_MAX,
@@ -89,39 +88,39 @@ public:
         matrix[3] = glm::vec4(pos, 1);
         matrix = glm::scale(matrix, scale);
 
-        trees.push_back(TreeInfo(pos, matrix));
+        trees_.push_back(TreeInfo(pos, matrix));
       }
     }
 
   }
 
   void reshape(glm::mat4 projMat) {
-    prog.use();
-    projectionMatrix = projMat;
+    prog_.use();
+    uProjectionMatrix_ = projMat;
   }
 
   void render(float time, const oglwrap::Camera& cam) {
-    prog.use();
-    cameraMatrix.set(cam.cameraMatrix());
-    sunData.set(skybox.getSunData(time));
-    skybox.envMap.active(0);
-    skybox.envMap.bind();
+    prog_.use();
+    uCameraMatrix_.set(cam.cameraMatrix());
+    uSunData_.set(skybox_.getSunData(time));
+    skybox_.env_map.active(0);
+    skybox_.env_map.bind();
 
-    gl(Enable(GL_BLEND));
-    gl(BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    gl( Enable(GL_BLEND) );
+    gl( BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) );
 
     auto campos = cam.getPos();
-    for(size_t i = 0; i < trees.size(); i++) {
-      if(glm::length(campos - trees[i].pos) < std::max(scales.x, scales.z) * 800) {
-        modelMatrix.set(trees[i].mat);
-        mesh.render();
+    for(size_t i = 0; i < trees_.size(); i++) {
+      if(glm::length(campos - trees_[i].pos) < std::max(scales_.x, scales_.z) * 800) {
+        uModelMatrix_.set(trees_[i].mat);
+        mesh_.render();
       }
     }
 
-    gl(Disable(GL_BLEND));
+    gl( Disable(GL_BLEND) );
 
-    skybox.envMap.active(0);
-    skybox.envMap.unbind();
+    skybox_.env_map.active(0);
+    skybox_.env_map.unbind();
   }
 };
 

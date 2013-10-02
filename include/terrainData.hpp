@@ -5,15 +5,17 @@
 #include <fstream>
 #include <vector>
 
-class RawTerrainData {
+struct RawTerrainData {
+  size_t w, h;
+  std::vector<unsigned char> heightData;
+
+  RawTerrainData(const std::string& filename);
+  void Save(const std::string& filename);
+
+private:
   void InitFromRawTerrain(const std::string& filename);
   void InitFromAsc(const std::string& filename);
   void InitFromImage(const std::string& filename);
-public:
-  size_t w, h;
-  std::vector<unsigned char> heightData;
-  RawTerrainData(const std::string& filename);
-  void Save(const std::string& filename);
 };
 
 #endif // LOD_TERRAINDATA_HPP_

@@ -9,7 +9,7 @@ BloomEffect::BloomEffect()
   prog_ << vs_ << fs_;
   prog_.link().use();
 
-  rect_.setupPositions(prog_ | "Position");
+  rect_.setupPositions(prog_ | "vPosition");
 }
 
 void BloomEffect::reshape(GLuint w, GLuint h) {

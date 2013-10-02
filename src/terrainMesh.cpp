@@ -105,23 +105,23 @@ static inline void distIncr(int mmlev, int& distance) {
 // hexagons to understand the vertex positions part, and lines with max 6-8 segments
 // to see what happens with the indices, and with that, the code will look trivial.
 TerrainMesh::TerrainMesh(const std::string& terrainFile)
-  : terrain(terrainFile), w(terrain.w), h(terrain.h) {
+  : terrain_(terrainFile), w_(terrain_.w), h_(terrain_.h), w(w_), h(h_) {
 
-  for(int m = 0; m < blockMipmapLevel; m++) {
-    const unsigned short ringCount = blockRadius / (1 << (m + 1)) + 1;
+  for(int m = 0; m < kBlockMipmapLevel; m++) {
+    const unsigned short kRingCount = kBlockRadius / (1 << (m + 1)) + 1;
 
-    vao[m].bind();
+    vao_[m].bind();
 
-    positions[m].bind();
+    positions_[m].bind();
     {
-      std::vector<svec2> verticesVector;
-      verticesVector.push_back(svec2());
+      std::vector<svec2> vertices_vector;
+      vertices_vector.push_back(svec2());
       int distance = 0;
       distIncr(m, distance);
-      for(int ring = 1; ring < ringCount; ring++) {
+      for(int ring = 1; ring < kRingCount; ring++) {
         for(char line = 0; line < 6; line++) {
           for(int segment = 0; segment < ring; segment++) {
-            verticesVector.push_back(
+            vertices_vector.push_back(
               GetPos(ring, line, segment, distance)
             );
           }
@@ -129,81 +129,80 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
         distIncr(m, distance);
       }
 
-      vertexNum[m] = verticesVector.size();
-      positions[m].data(verticesVector);
+      positions_[m].data(vertices_vector);
       VertexAttribArray(0).setup<short>(2).enable();
     }
 
-    indices[m].bind();
+    indices_[m].bind();
     {
-      std::vector<unsigned int> indicesVector;
-      for(int ring = 1; ring < ringCount - 1; ring++) { // the border indices are separate
+      std::vector<unsigned int> indices_vector;
+      for(int ring = 1; ring < kRingCount - 1; ring++) { // the border indices are separate
         for(char line = 0; line < 6; line++) {
           for(int segment = 0; segment < ring; segment++) {
-            indicesVector.push_back(GetIdx(ring, line, segment));
-            indicesVector.push_back(GetIdx(ring - 1, line, segment));
+            indices_vector.push_back(GetIdx(ring, line, segment));
+            indices_vector.push_back(GetIdx(ring - 1, line, segment));
           }
           // There's one extra vertex at the end.
-          indicesVector.push_back(GetIdx(ring, line + 1, 0));
-          indicesVector.push_back(RESTART);
+          indices_vector.push_back(GetIdx(ring, line + 1, 0));
+          indices_vector.push_back(RESTART);
         }
       }
 
-      indexNum[m] = indicesVector.size();
-      indices[m].data(indicesVector);
+      index_num_[m] = indices_vector.size();
+      indices_[m].data(indices_vector);
 
     }
 
     // -------======{[ Create the border indices ]}======-------
 
     {
-      int ring = ringCount - 1;
+      int ring = kRingCount - 1;
 
       // The normal ones
       for(int line = 0; line < 6; line++) {
 
-        std::vector<unsigned int> indicesVector;
+        std::vector<unsigned int> indices_vector;
 
         for(int segment = 0; segment < ring; segment++) {
-          indicesVector.push_back(GetIdx(ring, line, segment));
-          indicesVector.push_back(GetIdx(ring - 1, line, segment));
+          indices_vector.push_back(GetIdx(ring, line, segment));
+          indices_vector.push_back(GetIdx(ring - 1, line, segment));
         }
         // There's one extra vertex at the end.
-        indicesVector.push_back(GetIdx(ring, line + 1, 0));
-        indicesVector.push_back(RESTART);
+        indices_vector.push_back(GetIdx(ring, line + 1, 0));
+        indices_vector.push_back(RESTART);
 
-        borderIndices[m][line][0].bind();
-        borderIndices[m][line][0].data(indicesVector);
+        border_indices_[m][line][0].bind();
+        border_indices_[m][line][0].data(indices_vector);
       }
 
       // The ones that connect different mipmapLevel blocks
       // Idea: skip every odd vertex on the outer ring
       for(int line = 0; line < 6; line++) {
 
-        std::vector<unsigned int> indicesVector;
+        std::vector<unsigned int> indices_vector;
 
         // The first set
         for(int segment = 0; segment < ring; segment += 2) {
           if(segment != 0) {
-            indicesVector.push_back(GetIdx(ring - 1, line, segment - 1));
+            indices_vector.push_back(GetIdx(ring - 1, line, segment - 1));
           }
-          indicesVector.push_back(GetIdx(ring, line, segment));
-          indicesVector.push_back(GetIdx(ring - 1, line, segment));
-          indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
-          indicesVector.push_back(RESTART);
+          indices_vector.push_back(GetIdx(ring, line, segment));
+          indices_vector.push_back(GetIdx(ring - 1, line, segment));
+          indices_vector.push_back(GetIdx(ring - 1, line, segment + 1));
+          indices_vector.push_back(RESTART);
         }
 
 
         // The second set.
         for(int segment = 0; segment < ring; segment += 2) {
-          indicesVector.push_back(GetIdx(ring, line, segment));
-          indicesVector.push_back(GetIdx(ring - 1, line, segment + 1));
-          indicesVector.push_back(GetIdx(ring, line, segment + 2));
-          indicesVector.push_back(RESTART);
+          indices_vector.push_back(GetIdx(ring, line, segment));
+          indices_vector.push_back(GetIdx(ring - 1, line, segment + 1));
+          indices_vector.push_back(GetIdx(ring, line, segment + 2));
+          indices_vector.push_back(RESTART);
         }
 
-        borderIndices[m][line][1].bind();
-        borderIndices[m][line][1].data(indicesVector);
+        border_indices_[m][line][1].bind();
+        border_indices_[m][line][1].data(indices_vector);
       }
     }
 
@@ -218,51 +217,50 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
   gl(PixelStorei(GL_UNPACK_ALIGNMENT, 1));
   gl(PixelStorei(GL_PACK_ALIGNMENT, 1));
 
-  heightMap.active(0);
-  heightMap.bind();
+  heightMap_.active(0);
+  heightMap_.bind();
   {
-    heightMap.upload(
+    heightMap_.upload(
       PixelDataInternalFormat::R8,
-      terrain.w,
-      terrain.h,
+      w, h,
       PixelDataFormat::Red,
       PixelDataType::UnsignedByte,
-      terrain.heightData.data()
+      terrain_.heightData.data()
     );
 
-    heightMap.anisotropy(maxAniso);
-    heightMap.minFilter(MinFilter::Linear);
-    heightMap.magFilter(MagFilter::Linear);
+    heightMap_.anisotropy(maxAniso);
+    heightMap_.minFilter(MinFilter::Linear);
+    heightMap_.magFilter(MagFilter::Linear);
   }
 
-  grassMaps[0].bind();
+  grassMaps_[0].bind();
   {
-    grassMaps[0].loadTexture("textures/grass.jpg");
-    grassMaps[0].generateMipmap();
-    grassMaps[0].minFilter(MinFilter::LinearMipmapLinear);
-    grassMaps[0].magFilter(MagFilter::Linear);
-    grassMaps[0].wrapS(Wrap::Repeat);
-    grassMaps[0].wrapT(Wrap::Repeat);
+    grassMaps_[0].loadTexture("textures/grass.jpg");
+    grassMaps_[0].generateMipmap();
+    grassMaps_[0].minFilter(MinFilter::LinearMipmapLinear);
+    grassMaps_[0].magFilter(MagFilter::Linear);
+    grassMaps_[0].wrapS(Wrap::Repeat);
+    grassMaps_[0].wrapT(Wrap::Repeat);
   }
 
-  grassMaps[1].bind();
+  grassMaps_[1].bind();
   {
-    grassMaps[1].loadTexture("textures/grass_2.jpg");
-    grassMaps[1].generateMipmap();
-    grassMaps[1].minFilter(MinFilter::LinearMipmapLinear);
-    grassMaps[1].magFilter(MagFilter::Linear);
-    grassMaps[1].wrapS(Wrap::Repeat);
-    grassMaps[1].wrapT(Wrap::Repeat);
+    grassMaps_[1].loadTexture("textures/grass_2.jpg");
+    grassMaps_[1].generateMipmap();
+    grassMaps_[1].minFilter(MinFilter::LinearMipmapLinear);
+    grassMaps_[1].magFilter(MagFilter::Linear);
+    grassMaps_[1].wrapS(Wrap::Repeat);
+    grassMaps_[1].wrapT(Wrap::Repeat);
   }
 
-  grassNormalMap.bind();
+  grassNormalMap_.bind();
   {
-    grassNormalMap.loadTexture("textures/grass_normal.jpg");
-    grassNormalMap.generateMipmap();
-    grassNormalMap.minFilter(MinFilter::LinearMipmapLinear);
-    grassNormalMap.magFilter(MagFilter::Linear);
-    grassNormalMap.wrapS(Wrap::Repeat);
-    grassNormalMap.wrapT(Wrap::Repeat);
+    grassNormalMap_.loadTexture("textures/grass_normal.jpg");
+    grassNormalMap_.generateMipmap();
+    grassNormalMap_.minFilter(MinFilter::LinearMipmapLinear);
+    grassNormalMap_.magFilter(MagFilter::Linear);
+    grassNormalMap_.wrapS(Wrap::Repeat);
+    grassNormalMap_.wrapT(Wrap::Repeat);
   }
 
   VertexArray::Unbind();
@@ -312,9 +310,9 @@ static inline int GetBlockMipmapLevel(glm::ivec2 _pos, glm::vec2 camPos) {
 
   return std::min(
            std::max(
-             int(log2(glm::length(pos - camPos)) - log2(2 * blockRadius)),
+             int(log2(glm::length(pos - camPos)) - log2(2 * kBlockRadius)),
              0
-           ), blockMipmapLevel - 1
+           ), kBlockMipmapLevel - 1
          );
 }
 
@@ -323,96 +321,96 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
   int own_mipmap = GetBlockMipmapLevel(pos, camPos);
   int neighbour_mipmaps[6];
   for(int line = 0; line < 6; line++) {
-    glm::ivec2 neighbour = GetBlockPos(1, line, 0, blockRadius);
+    glm::ivec2 neighbour = GetBlockPos(1, line, 0, kBlockRadius);
     neighbour_mipmaps[line] = GetBlockMipmapLevel(pos + neighbour, camPos);
   }
 
   for(int line = 0; line < 6; line++) {
     int irregular = own_mipmap < neighbour_mipmaps[line] ? 1 : 0;
 
-    borderIndices[own_mipmap][line][irregular].bind();
-    size_t indicesNum = borderIndices[own_mipmap][line][irregular].size() / sizeof(int);
+    border_indices_[own_mipmap][line][irregular].bind();
+    size_t indices_num = border_indices_[own_mipmap][line][irregular].size() / sizeof(int);
 
-    gl(DrawElements(GL_TRIANGLE_STRIP, indicesNum, DataType::UnsignedInt, nullptr));
+    gl(DrawElements(GL_TRIANGLE_STRIP, indices_num, DataType::UnsignedInt, nullptr));
   }
 }
 
 void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
-                             oglwrap::LazyUniform<glm::ivec2>& offset,
-                             oglwrap::LazyUniform<int>& mipmapLevel_uniform) {
+                             oglwrap::LazyUniform<glm::ivec2>& uOffset_,
+                             oglwrap::LazyUniform<int>& uMipmapLevel_) {
 
   // The center piece is special
   glm::ivec2 pos(0, 0);
-  offset = pos;
+  uOffset_ = pos;
   glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
-  int mipmapLevel = GetBlockMipmapLevel(pos, camPos);
-  mipmapLevel_uniform = mipmapLevel;
+  int mipmap_level = GetBlockMipmapLevel(pos, camPos);
+  uMipmapLevel_ = mipmap_level;
 
   // Draw
-  vao[mipmapLevel].bind();
-  indices[mipmapLevel].bind();
-  gl(DrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr));
+  vao_[mipmap_level].bind();
+  indices_[mipmap_level].bind();
+  gl( DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], DataType::UnsignedInt, nullptr) );
   CreateConnectors(pos, camPos);
 
 
   // All the other ones
-  int distance = blockRadius;
-  int ringCount = std::max(w, h) / (2 * blockRadius) + 1;
-  for(int ring = 1; ring < ringCount; ring++) {
+  int distance = kBlockRadius;
+  int kRingCount = std::max(w, h) / (2 * kBlockRadius) + 1;
+  for(int ring = 1; ring < kRingCount; ring++) {
     for(char line = 0; line < 6; line++) {
       for(int segment = 0; segment < ring ; segment++) {
         pos = GetBlockPos(ring, line, segment, distance);
-        offset = pos;
-        mipmapLevel = GetBlockMipmapLevel(pos, camPos);
-        mipmapLevel_uniform = mipmapLevel;
+        uOffset_ = pos;
+        mipmap_level = GetBlockMipmapLevel(pos, camPos);
+        uMipmapLevel_ = mipmap_level;
 
         // Draw
-        vao[mipmapLevel].bind();
-        indices[mipmapLevel].bind();
-        gl(DrawElements(GL_TRIANGLE_STRIP, indexNum[mipmapLevel], DataType::UnsignedInt, nullptr));
+        vao_[mipmap_level].bind();
+        indices_[mipmap_level].bind();
+        gl( DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], DataType::UnsignedInt, nullptr) );
         CreateConnectors(pos, camPos);
       }
     }
-    distance += blockRadius;
+    distance += kBlockRadius;
   }
 
 }
 
 void TerrainMesh::render(const glm::vec3& camPos,
-                         oglwrap::LazyUniform<glm::ivec2>& offset,
+                         oglwrap::LazyUniform<glm::ivec2>& uOffset_,
                          oglwrap::LazyUniform<int>& mipmapLevel_uniform) {
 
-  heightMap.active(0);
-  heightMap.bind();
-  grassMaps[0].active(1);
-  grassMaps[0].bind();
-  grassMaps[1].active(2);
-  grassMaps[1].bind();
-  grassNormalMap.active(3);
-  grassNormalMap.bind();
+  heightMap_.active(0);
+  heightMap_.bind();
+  grassMaps_[0].active(1);
+  grassMaps_[0].bind();
+  grassMaps_[1].active(2);
+  grassMaps_[1].bind();
+  grassNormalMap_.active(3);
+  grassNormalMap_.bind();
 
   gl(Enable(GL_PRIMITIVE_RESTART));
   gl(PrimitiveRestartIndex(RESTART));
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );
 
-  DrawBlocks(camPos, offset, mipmapLevel_uniform);
+  DrawBlocks(camPos, uOffset_, mipmapLevel_uniform);
 
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
   gl(Disable(GL_PRIMITIVE_RESTART));
 
   VertexArray::Unbind();
-  grassNormalMap.active(3);
-  grassNormalMap.unbind();
-  grassMaps[1].active(2);
-  grassMaps[1].unbind();
-  grassMaps[0].active(1);
-  grassMaps[0].unbind();
-  heightMap.active(0);
-  heightMap.unbind();
+  grassNormalMap_.active(3);
+  grassNormalMap_.unbind();
+  grassMaps_[1].active(2);
+  grassMaps_[1].unbind();
+  grassMaps_[0].active(1);
+  grassMaps_[0].unbind();
+  heightMap_.active(0);
+  heightMap_.unbind();
 }
 
 unsigned char TerrainMesh::fetchHeight(glm::ivec2 v) const {
-  return terrain.heightData[(v.y + terrain.h/2) * terrain.w + (v.x + terrain.w/2)];
+  return terrain_.heightData[(v.y + terrain_.h/2) * terrain_.w + (v.x + terrain_.w/2)];
 }
 
 double TerrainMesh::getHeight(double x, double y) const {

@@ -1,49 +1,50 @@
 #version 330 core
 
-in vec3 normal;
-in vec3 camPos;
-in vec3 worldPos;
-in vec2 texCoord;
-in float invalid;
-in mat3 normalMatrix;
+in VertexData {
+  vec3  w_normal;
+  vec3  c_pos, w_pos;
+  vec2  m_texcoord;
+  float invalid;
+  mat3  NormalMatrix;
+} vin;
 
-uniform mat4 CameraMatrix;
-uniform sampler2D GrassMap[2], GrassNormalMap;
-uniform vec3 Scales = vec3(1.0, 1.0, 1.0);
+uniform mat4 uCameraMatrix;
+uniform sampler2D uGrassMap[2], uGrassNormalMap;
+uniform vec3 uScales;
 
-out vec4 fragColor;
+out vec4 frag_color;
 
 vec3 AmbientDirection();
 float SunPower();
 float AmbientPower();
 vec3 AmbientColor();
 
-float fogMin = max(Scales.x, Scales.z) * 128.0;
-float fogMax = max(Scales.x, Scales.z) * 2048.0;
-vec3 fogColor = vec3(0.8f);
+float kFogMin = max(uScales.x, uScales.z) * 128.0;
+float kFogMax = max(uScales.x, uScales.z) * 2048.0;
+const vec3 kFogColor = vec3(0.8f);
 
-const float specular_shininess = 20.0;
+const float kSpecularShininess = 20.0;
 
 void main() {
-    if(invalid != 0.0) {
+    if(vin.invalid != 0.0) {
         discard;
     }
 
     // TexCoord
-    vec2 grassTexCoord = texCoord * 200;
+    vec2 grass_texcoord = vin.m_texcoord * 200;
 
     // Normals
-    vec3 n_normal = normalize(normal);
-    vec3 normalOffset = texture(GrassNormalMap, grassTexCoord).rgb;
-    vec3 finalNormal = normalize(normalMatrix * normalOffset);
-    vec3 cam_normal = (CameraMatrix * vec4(finalNormal, 0.0)).xyz;
+    vec3 w_normal = normalize(vin.w_normal);
+    vec3 normal_offset = texture(uGrassNormalMap, grass_texcoord).rgb;
+    vec3 w_final_normal = normalize(vin.NormalMatrix * normal_offset);
+    vec3 c_normal = (uCameraMatrix * vec4(w_final_normal, 0.0)).xyz;
 
     // Lighting directions.
-    vec3 lightDir = normalize((CameraMatrix * vec4(AmbientDirection(), 0)).xyz);
-    vec3 viewDirection = normalize(-(CameraMatrix * vec4(worldPos, 1)).xyz);
+    vec3 c_light_dir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
+    vec3 c_view_direction = normalize(-(uCameraMatrix * vec4(vin.w_pos, 1)).xyz);
 
     // Lighting values.
-    float diffuse_power = max(dot(cam_normal, lightDir), 0);
+    float diffuse_power = max(dot(c_normal, c_light_dir), 0);
     float specular_power;
     if(diffuse_power < 0.0) {
         specular_power = 0.0;
@@ -51,26 +52,26 @@ void main() {
         specular_power = pow(
             max(0.0,
                 dot(
-                    reflect(-lightDir, cam_normal),
-                    viewDirection)
+                    reflect(-c_light_dir, c_normal),
+                    c_view_direction)
                 ),
-            specular_shininess
+            kSpecularShininess
         );
     }
 
     // Colors.
-    vec3 grass_0 = texture(GrassMap[0], grassTexCoord).rgb;
-    vec3 grass_1 = texture(GrassMap[1], grassTexCoord).rgb;
-    float height_factor = clamp(sqrt((worldPos.y - 15 * Scales.y) / 40.0f), 0.0f, 1.0f);
-    vec3 grass = mix(grass_0, grass_1, height_factor);
+    vec3 grass0_color = texture(uGrassMap[0], grass_texcoord).rgb;
+    vec3 grass1_color = texture(uGrassMap[1], grass_texcoord).rgb;
+    float height_factor = clamp(sqrt((vin.w_pos.y - 15 * uScales.y) / 40.0f), 0.0f, 1.0f);
+    vec3 grass_color = mix(grass0_color, grass1_color, height_factor);
 
-    vec3 Color = AmbientColor() * grass * (SunPower() * (specular_power + diffuse_power) + AmbientPower());
+    vec3 final_color =
+        AmbientColor() * grass_color * (SunPower() * (specular_power + diffuse_power) + AmbientPower());
 
     // Fog
-    vec3 Fog = AmbientColor() * fogColor * (0.005 + SunPower());
-    float l = length(camPos);
-    float alpha = clamp((l - fogMin) / (fogMax - fogMin), 0.0, 1.0) / 12;
+    vec3 fog = AmbientColor() * kFogColor * (0.005 + SunPower());
+    float alpha = clamp((length(vin.c_pos) - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 12;
 
-    fragColor = vec4(mix(Color, Fog, alpha), 1.0);
+    frag_color = vec4(mix(final_color, fog, alpha), 1.0);
 }
 

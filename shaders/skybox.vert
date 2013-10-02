@@ -1,12 +1,15 @@
 #version 330 core
 
-in vec3 Position;
-uniform mat4 ProjectionMatrix;
-uniform mat3 CameraMatrix;
+in vec3 vPosition;
 
-out vec3 vertTexCoord;
+uniform mat4 uProjectionMatrix;
+uniform mat3 uCameraMatrix;
+
+out VertexData {
+  vec3 texcoord;
+};
 
 void main(void) {
-    gl_Position = ProjectionMatrix * vec4(CameraMatrix * vec3(10 * Position), 1.0);
-    vertTexCoord = Position;
+    gl_Position = uProjectionMatrix * vec4(uCameraMatrix * vec3(10 * vPosition), 1.0);
+    texcoord = vPosition;
 }

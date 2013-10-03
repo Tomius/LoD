@@ -18,24 +18,23 @@
 
 class Hair {
   struct HairSegment {
-    const aiNode* node;
+    oglwrap::ExternalBone node;
     glm::vec3 velocity, pos;
     float length;
 
     HairSegment* parent;
-    HairSegment** childs;
+    std::vector<HairSegment> child;
 
     HairSegment(HairSegment* _parent, const aiNode* _node, glm::vec3 parent_pos);
   };
 
   HairSegment* root_;
-  oglwrap::SkinningData& skinning_data_;
   const oglwrap::CharacterMovement& charmove_;
 
   void InitNode(HairSegment* parent, int id);
   void UpdateTree(HairSegment* node, float time, float gravity);
 public:
-  Hair(const std::string& name, oglwrap::SkinningData* skin_data, const oglwrap::CharacterMovement& charmove);
+  Hair(const std::string& name, oglwrap::ExternalBone& root_ebone, const oglwrap::CharacterMovement& charmove);
   void Update(glm::vec3 pinned_pos, float time, float gravity);
 };
 

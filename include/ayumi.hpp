@@ -58,6 +58,10 @@ public:
     oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
     oglwrap::UniformSampler(prog_, "uSpecularTexture").set(2);
 
+//    mesh_.markBoneExternal("L_Hair_Jnt_0");
+//    mesh_.markBoneExternal("M_Hair_Jnt_0");
+//    mesh_.markBoneExternal("R_Hair_JNT_0"); // don't ask me why I named it like that...
+
     mesh_.addAnimation("models/ayumi_idle.dae", "Stand",
                        oglwrap::AnimFlag::Repeat |
                        oglwrap::AnimFlag::Interruptable);

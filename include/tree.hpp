@@ -71,8 +71,8 @@ public:
     srand(5);
     scales_ = terrain.getScales();
     const int kTreeDist = 200;
-    for(int i = -terrain.h/2; i <= terrain.h/2; i += kTreeDist) {
-      for(int j = -terrain.w / 2; j <= terrain.w / 2; j += kTreeDist) {
+    for(int i = -terrain.h/2; i < terrain.h/2; i += kTreeDist) {
+      for(int j = -terrain.w / 2; j < terrain.w / 2; j += kTreeDist) {
         glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
                                       j + rand()%(kTreeDist/2) - kTreeDist/4);
         glm::vec3 pos = scales_ * glm::vec3(coord.x, terrain.fetchHeight(coord), coord.y);
@@ -91,7 +91,6 @@ public:
         trees_.push_back(TreeInfo(pos, matrix));
       }
     }
-
   }
 
   void reshape(glm::mat4 projMat) {

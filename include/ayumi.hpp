@@ -16,6 +16,9 @@
 
 #include "charmove.hpp"
 #include "skybox.hpp"
+#include "hair.hpp"
+
+extern const float GRAVITY;
 
 class Ayumi {
   oglwrap::AnimatedMesh mesh_;
@@ -26,9 +29,11 @@ class Ayumi {
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
 
+  Hair* hairs_[3];
+
   Skybox& skybox_;
 public:
-  Ayumi(Skybox& skybox)
+  Ayumi(Skybox& skybox, const oglwrap::CharacterMovement& charmove)
     : mesh_("models/ayumi.dae",
             aiProcessPreset_TargetRealtime_MaxQuality |
             aiProcess_FlipUVs)
@@ -58,9 +63,12 @@ public:
     oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
     oglwrap::UniformSampler(prog_, "uSpecularTexture").set(2);
 
-//    mesh_.markBoneExternal("L_Hair_Jnt_0");
-//    mesh_.markBoneExternal("M_Hair_Jnt_0");
-//    mesh_.markBoneExternal("R_Hair_JNT_0"); // don't ask me why I named it like that...
+    for(int i = 0; i < 3; ++i) {
+      hairs_[i] = nullptr;
+    }
+//    hairs_[0] = new Hair(mesh_.markBoneExternal("L_Hair_Jnt_0"), charmove);
+//    hairs_[1] = new Hair(mesh_.markBoneExternal("M_Hair_Jnt_0"), charmove);
+//    hairs_[2] = new Hair(mesh_.markBoneExternal("R_Hair_JNT_0"), charmove);
 
     mesh_.addAnimation("models/ayumi_idle.dae", "Stand",
                        oglwrap::AnimFlag::Repeat |
@@ -87,6 +95,11 @@ public:
 
     mesh_.setDefaultAnimation("Stand", 0.3f);
     mesh_.forceAnimToDefault(0);
+  }
+
+  ~Ayumi() {
+    for(int i = 0; i < 3; i++)
+      delete hairs_[i];
   }
 
   oglwrap::AnimatedMesh& getMesh() {
@@ -126,7 +139,10 @@ public:
       mesh_.setAnimToDefault(time);
     }
 
-    mesh_.boneTransform(time, uBones_);
+    mesh_.updateBoneInfo(time);
+//    for(int i = 0; i < 3; i++)
+//      hairs_[i]->update(time, GRAVITY);
+    mesh_.uploadBoneInfo(uBones_);
     mesh_.render();
     skybox_.env_map.active(0);
     skybox_.env_map.unbind();

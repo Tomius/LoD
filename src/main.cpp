@@ -68,11 +68,13 @@ int main() {
   if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
       GL_Init();
       Skybox skybox;
-      Ayumi ayumi(skybox);
+      BloomEffect bloom;
       Terrain terrain(skybox);
       Tree tree(skybox, terrain);
-      BloomEffect bloom;
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
+
+      Ayumi ayumi(skybox, charmove);
+
       ThirdPersonalCamera cam(
         ayumi.getMesh().bSphereCenter() + glm::vec3(ayumi.getMesh().bSphereRadius() * 3),
         ayumi.getMesh().bSphereCenter(),

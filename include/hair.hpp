@@ -15,27 +15,47 @@
 #include "charmove.hpp"
 #include "oglwrap/mesh/skinningData.hpp"
 
+const float kHairSimulationDrag = 0.1f;
 
 class Hair {
-  struct HairSegment {
-    oglwrap::ExternalBone node;
+  struct HairSegment;
+
+  struct BasicHairSegment {
+    glm::vec3 pos;
+    std::vector<HairSegment> child;
+  };
+
+  struct HairSegment : public BasicHairSegment {
+    oglwrap::ExternalBone bone;
     glm::vec3 velocity, pos;
     float length;
 
-    HairSegment* parent;
-    std::vector<HairSegment> child;
+    BasicHairSegment* parent;
 
-    HairSegment(HairSegment* _parent, const aiNode* _node, glm::vec3 parent_pos);
+    HairSegment(BasicHairSegment* _parent,
+                oglwrap::ExternalBone& ebone);
   };
 
-  HairSegment* root_;
-  const oglwrap::CharacterMovement& charmove_;
+  struct RootHairSegment : public BasicHairSegment {
+    oglwrap::ExternalBoneTree bone;
 
-  void InitNode(HairSegment* parent, int id);
-  void UpdateTree(HairSegment* node, float time, float gravity);
+    RootHairSegment(const oglwrap::ExternalBoneTree& root_ebone)
+      : bone(root_ebone)
+    { }
+  };
+
+  RootHairSegment root_;
+  const oglwrap::CharacterMovement& charmove_;
+  glm::mat4 inverse_model_matrix_;
+
+  void updateNode(HairSegment& node, float time, float gravity);
+
 public:
-  Hair(const std::string& name, oglwrap::ExternalBone& root_ebone, const oglwrap::CharacterMovement& charmove);
-  void Update(glm::vec3 pinned_pos, float time, float gravity);
+
+  Hair(const oglwrap::ExternalBoneTree& root_ebone,
+       const oglwrap::CharacterMovement& charmove);
+
+  void update(float time, float gravity);
 };
 
 #endif // LOD_HAIR_HPP_

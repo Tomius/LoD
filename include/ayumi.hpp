@@ -63,9 +63,11 @@ public:
     oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
     oglwrap::UniformSampler(prog_, "uSpecularTexture").set(2);
 
+    // FIXME
     for(int i = 0; i < 3; ++i) {
       hairs_[i] = nullptr;
     }
+
 //    hairs_[0] = new Hair(mesh_.markBoneExternal("L_Hair_Jnt_0"), charmove);
 //    hairs_[1] = new Hair(mesh_.markBoneExternal("M_Hair_Jnt_0"), charmove);
 //    hairs_[2] = new Hair(mesh_.markBoneExternal("R_Hair_JNT_0"), charmove);

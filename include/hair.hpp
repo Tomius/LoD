@@ -1,5 +1,5 @@
 #ifndef LOD_HAIR_HPP_
-#define LOD_HAIR_HPP__
+#define LOD_HAIR_HPP_
 
 #if defined(__APPLE__)
   #include <OpenGL/glew.h>
@@ -12,8 +12,8 @@
 
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/assimp.hpp"
-#include "charmove.hpp"
 #include "oglwrap/mesh/skinningData.hpp"
+#include "charmove.hpp"
 
 const float kHairSimulationDrag = 0.1f;
 
@@ -22,6 +22,7 @@ class Hair {
 
   struct BasicHairSegment {
     glm::vec3 pos;
+    glm::vec3 default_pos;
     std::vector<HairSegment> child;
   };
 

@@ -7,7 +7,8 @@ Hair::HairSegment::HairSegment(BasicHairSegment* _parent,
 
   glm::vec3 parent_pos = parent ? parent->pos : glm::vec3();
 
-  pos = glm::vec3(bone.offset * glm::vec4(parent_pos, 1));
+  pos = parent_pos + glm::vec3(bone.offset * glm::vec4(0, 0, 0, 1));
+  default_pos = pos;
   length = glm::length(pos - parent_pos);
 
   for(size_t i = 0; i != bone.child.size(); ++i) {
@@ -91,22 +92,29 @@ void Hair::updateNode(HairSegment& node, float delta_t, float gravity) {
 
   */
 
-  glm::vec3 g = glm::vec3(0, -gravity, 0);
-  glm::vec3 dr = glm::normalize(node.pos - node.parent->pos);
+  if(node.length > 0) {
+//    glm::vec3 g = glm::vec3(0, -gravity, 0);
+//    glm::vec3 dr = glm::normalize(node.pos - node.parent->pos);
+//
+//    // The tangential part of the velocity can be counted
+//    // as the whole velocity minus its radial part.
+//    float vt = glm::length(node.velocity - glm::dot(dr, node.velocity) * dr);
+//    float R = node.length;
+//
+//    glm::vec3 r = (glm::dot(dr, g) - vt*vt / R) * dr;
+//    glm::vec3 effective_acceleration = r + g;
+//
+//    effective_acceleration *= (1.0f - kHairSimulationDrag);
+//
+//    node.velocity += effective_acceleration * delta_t;
+//    node.pos += node.velocity * delta_t;
+//
+//    glm::vec3 offset_vector = glm::mat3(inverse_model_matrix_) * (node.pos - node.default_pos);
+//    node.bone.transform = glm::translate(glm::mat4(), offset_vector);
+  }
+    node.bone.transform = glm::mat4();
 
-  // The tangential part of the velocity can be counted
-  // as the whole velocity minus its radial part.
-  float vt = glm::length(node.velocity - glm::dot(dr, node.velocity) * dr);
-  float R = node.length;
-
-  glm::vec3 r = (glm::dot(dr, g) - vt*vt / R) * dr;
-  glm::vec3 effective_acceleration = r + g;
-
-  effective_acceleration *= (1.0f - kHairSimulationDrag);
-
-  node.velocity += effective_acceleration * delta_t;
-  node.pos += node.velocity * delta_t;
-
-  glm::vec3 offset_vector = glm::vec3(inverse_model_matrix_ * glm::vec4(node.pos, 1));
-  node.bone.transform = glm::translate(glm::mat4(), offset_vector);
+  for(size_t i = 0; i != node.child.size(); ++i) {
+    updateNode(node.child[i], delta_t, gravity);
+  }
 }

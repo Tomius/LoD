@@ -410,7 +410,11 @@ void TerrainMesh::render(const glm::vec3& camPos,
 }
 
 unsigned char TerrainMesh::fetchHeight(glm::ivec2 v) const {
-  return terrain_.heightData[(v.y + terrain_.h/2) * terrain_.w + (v.x + terrain_.w/2)];
+  // Don't let the user over or under-index.
+  glm::ivec2 texcoord = v + glm::ivec2(terrain_.w/2, terrain_.h/2);
+  texcoord = glm::clamp(texcoord, glm::ivec2(0, 0), glm::ivec2(terrain_.w - 1, terrain_.h - 1));
+
+  return terrain_.heightData[texcoord.y * terrain_.w + texcoord.x];
 }
 
 double TerrainMesh::getHeight(double x, double y) const {

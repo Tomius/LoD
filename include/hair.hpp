@@ -22,7 +22,6 @@ class Hair {
 
   struct BasicHairSegment {
     glm::vec3 pos;
-    glm::vec3 default_pos;
     std::vector<HairSegment> child;
   };
 
@@ -49,7 +48,10 @@ class Hair {
   const oglwrap::CharacterMovement& charmove_;
   glm::mat4 inverse_model_matrix_;
 
-  void updateNode(HairSegment& node, float time, float gravity);
+  void updateNode(HairSegment& node,
+                  float time,
+                  float gravity,
+                  const glm::mat4& parent_transform);
 
 public:
 

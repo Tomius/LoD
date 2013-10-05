@@ -7,8 +7,8 @@ Hair::HairSegment::HairSegment(BasicHairSegment* _parent,
 
   glm::vec3 parent_pos = parent ? parent->pos : glm::vec3();
 
-  pos = parent_pos + glm::vec3(bone.offset * glm::vec4(0, 0, 0, 1));
-  default_pos = pos;
+  // FIXME - counting the default pos should depend on parent transform matrix
+  pos = parent_pos + glm::vec3(bone.default_transform * glm::vec4(0, 0, 0, 1));
   length = glm::length(pos - parent_pos);
 
   for(size_t i = 0; i != bone.child.size(); ++i) {
@@ -33,17 +33,21 @@ void Hair::update(float time, float gravity) {
 
   glm::mat4 model_matrix = charmove_.getModelMatrix();
   inverse_model_matrix_ = glm::inverse(model_matrix);
+  glm::mat4 global_transform = *root_.bone.global_transform_ptr;
 
   root_.pos = glm::vec3(
-      model_matrix * root_.bone.transform * glm::vec4(0, 0, 0, 1)
+    model_matrix * global_transform * glm::vec4(0, 0, 0, 1)
   );
 
   for(size_t i = 0; i != root_.child.size(); ++i) {
-    updateNode(root_.child[i], dt, gravity);
+    updateNode(root_.child[i], dt, gravity, global_transform);
   }
 }
 
-void Hair::updateNode(HairSegment& node, float delta_t, float gravity) {
+void Hair::updateNode(HairSegment& node,
+                      float delta_t,
+                      float gravity,
+                      const glm::mat4& parent_transform) {
   /*
      A segments of the hair can be treated a pendulum.
      We need only to know it's effective force (acceleration), to simulate its movement.
@@ -93,28 +97,32 @@ void Hair::updateNode(HairSegment& node, float delta_t, float gravity) {
   */
 
   if(node.length > 0) {
-//    glm::vec3 g = glm::vec3(0, -gravity, 0);
-//    glm::vec3 dr = glm::normalize(node.pos - node.parent->pos);
-//
-//    // The tangential part of the velocity can be counted
-//    // as the whole velocity minus its radial part.
-//    float vt = glm::length(node.velocity - glm::dot(dr, node.velocity) * dr);
-//    float R = node.length;
-//
-//    glm::vec3 r = (glm::dot(dr, g) - vt*vt / R) * dr;
-//    glm::vec3 effective_acceleration = r + g;
-//
-//    effective_acceleration *= (1.0f - kHairSimulationDrag);
-//
-//    node.velocity += effective_acceleration * delta_t;
-//    node.pos += node.velocity * delta_t;
-//
-//    glm::vec3 offset_vector = glm::mat3(inverse_model_matrix_) * (node.pos - node.default_pos);
-//    node.bone.transform = glm::translate(glm::mat4(), offset_vector);
+    glm::vec3 g = glm::vec3(0, -gravity, 0);
+    glm::vec3 dr = glm::normalize(node.pos - node.parent->pos);
+
+    // The tangential part of the velocity can be counted
+    // as the whole velocity minus its radial part.
+    float vt = glm::length(node.velocity - glm::dot(dr, node.velocity) * dr);
+    float R = node.length;
+
+    glm::vec3 r = (glm::dot(dr, g) - vt*vt / R) * dr;
+    glm::vec3 effective_acceleration = r + g;
+
+    effective_acceleration *= (1.0f - kHairSimulationDrag);
+
+    node.velocity += effective_acceleration * delta_t;
+    node.pos += node.velocity * delta_t;
   }
-    node.bone.transform = glm::mat4();
+
+  glm::mat4 local_transform = node.bone.default_transform; // FIXME
+  glm::mat4 global_transform = parent_transform * local_transform;
+
+  node.bone.final_transform =
+    root_.bone.global_inverse_transform *
+    global_transform *
+    node.bone.offset;
 
   for(size_t i = 0; i != node.child.size(); ++i) {
-    updateNode(node.child[i], delta_t, gravity);
+    updateNode(node.child[i], delta_t, gravity, global_transform);
   }
 }

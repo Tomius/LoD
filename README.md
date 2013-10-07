@@ -20,7 +20,7 @@ How to build (linux):
 --------------------
 * Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
 * Get the external dependencies: libsfml2-dev libmagick++-dev libglew-dev libassimp-dev
-* Use the given Makefile, or the prebuilt executeable.
+* Use the given Makefile(it uses g++), or the prebuilt executeable.
 
 How to build (Windows):
 ----------------------

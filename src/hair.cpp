@@ -36,7 +36,11 @@ void Hair::update(float time, float gravity) {
   glm::mat4 global_transform = *root_.bone.global_transform_ptr;
 
   root_.pos = glm::vec3(
-    model_matrix * global_transform * glm::vec4(0, 0, 0, 1)
+    model_matrix *
+    root_.bone.global_inverse_transform *
+    global_transform *
+    root_.bone.offset *
+    glm::vec4(0, 0, 0, 1)
   );
 
   for(size_t i = 0; i != root_.child.size(); ++i) {

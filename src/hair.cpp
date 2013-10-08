@@ -100,23 +100,25 @@ void Hair::updateNode(HairSegment& node,
 
   */
 
-  if(node.length > 0) {
-    glm::vec3 g = glm::vec3(0, -gravity, 0);
-    glm::vec3 dr = glm::normalize(node.pos - node.parent->pos);
-
-    // The tangential part of the velocity can be counted
-    // as the whole velocity minus its radial part.
-    float vt = glm::length(node.velocity - glm::dot(dr, node.velocity) * dr);
-    float R = node.length;
-
-    glm::vec3 r = (glm::dot(dr, g) - vt*vt / R) * dr;
-    glm::vec3 effective_acceleration = r + g;
-
-    effective_acceleration *= (1.0f - kHairSimulationDrag);
-
-    node.velocity += effective_acceleration * delta_t;
-    node.pos += node.velocity * delta_t;
-  }
+//  if(node.length > 0) {
+//    glm::vec3 g = glm::vec3(0, -gravity, 0);
+//    glm::vec3 dr = glm::normalize(node.pos - node.parent->pos);
+//
+//    // The tangential part of the velocity can be counted
+//    // as the whole velocity minus its radial part.
+//    float vt = glm::length(node.velocity - glm::dot(dr, node.velocity) * dr);
+//    float R = node.length;
+//
+//    if(vt > 0) {
+//      glm::vec3 r = (glm::dot(dr, g) - vt*vt / R) * dr;
+//      glm::vec3 effective_acceleration = r + g;
+//
+//      effective_acceleration *= (1.0f - kHairSimulationDrag);
+//
+//      node.velocity += effective_acceleration * delta_t;
+//      node.pos += node.velocity * delta_t;
+//    }
+//  }
 
   glm::mat4 local_transform = node.bone.default_transform; // FIXME
   glm::mat4 global_transform = parent_transform * local_transform;

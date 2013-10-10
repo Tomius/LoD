@@ -29,7 +29,7 @@ class Ayumi {
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
 
-  Hair* hairs_[3];
+//  Hair* hairs_[3];
 
   Skybox& skybox_;
 public:
@@ -63,11 +63,6 @@ public:
     oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
     oglwrap::UniformSampler(prog_, "uSpecularTexture").set(2);
 
-    // FIXME
-    for(int i = 0; i < 3; ++i) {
-      hairs_[i] = nullptr;
-    }
-
 //    hairs_[0] = new Hair(mesh_.markBoneExternal("L_Hair_Jnt_0"), charmove);
 //    hairs_[1] = new Hair(mesh_.markBoneExternal("M_Hair_Jnt_0"), charmove);
 //    hairs_[2] = new Hair(mesh_.markBoneExternal("R_Hair_JNT_0"), charmove);
@@ -99,10 +94,10 @@ public:
     mesh_.forceAnimToDefault(0);
   }
 
-  ~Ayumi() {
-    for(int i = 0; i < 3; i++)
-      delete hairs_[i];
-  }
+//  ~Ayumi() {
+//    for(int i = 0; i < 3; i++)
+//      delete hairs_[i];
+//  }
 
   oglwrap::AnimatedMesh& getMesh() {
     return mesh_;

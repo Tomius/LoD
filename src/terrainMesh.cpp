@@ -349,7 +349,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   // Draw
   vao_[mipmap_level].bind();
   indices_[mipmap_level].bind();
-  gl( DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], DataType::UnsignedInt, nullptr) );
+  gl(Enable(GL_CULL_FACE));
+  gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], DataType::UnsignedInt, nullptr));
+  gl(Disable(GL_CULL_FACE));
   CreateConnectors(pos, camPos);
 
 
@@ -367,7 +369,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
         // Draw
         vao_[mipmap_level].bind();
         indices_[mipmap_level].bind();
-        gl( DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], DataType::UnsignedInt, nullptr) );
+        gl(Enable(GL_CULL_FACE));
+        gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], DataType::UnsignedInt, nullptr));
+        gl(Disable(GL_CULL_FACE));
         CreateConnectors(pos, camPos);
       }
     }
@@ -389,6 +393,8 @@ void TerrainMesh::render(const glm::vec3& camPos,
   grassNormalMap_.active(3);
   grassNormalMap_.bind();
 
+  gl(FrontFace(GL_CW));
+  gl(CullFace(GL_BACK));
   gl(Enable(GL_PRIMITIVE_RESTART));
   gl(PrimitiveRestartIndex(RESTART));
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );

@@ -16,7 +16,7 @@ Hair::HairSegment::HairSegment(BasicHairSegment* _parent,
   bind_pose_pos = glm::vec3(bone_space_to_model_space_mx * glm::vec4(0, 0, 0, 1));
 
   // But actually, we need the bone's position in world space, not model space.
-  pos = glm::vec3(hair->charmove_.getModelMatrix() * glm::vec4(bind_pose_pos, 1));
+  pos = bind_pose_pos; //glm::vec3(hair->charmove_.getModelMatrix() * glm::vec4(bind_pose_pos, 1));
 
   // Count the length of the bone (but only if the joint has a parent joint).
   if(parent)
@@ -51,7 +51,7 @@ void Hair::update(float time, float gravity) {
   glm::mat4 global_transform = *root_.bone.global_transform_ptr;
 
   root_.pos = glm::vec3(
-    model_matrix *
+    //model_matrix *
     global_transform *
     glm::vec4(0, 0, 0, 1)
   );
@@ -113,32 +113,29 @@ void Hair::updateNode(HairSegment& node,
 
   */
 
-//  if(node.length > 0) {
-//    glm::vec3 g = glm::vec3(0, -gravity, 0);
-//    glm::vec3 dr = glm::normalize(node.pos - node.parent->pos);
-//
-//    // The tangential part of the velocity can be counted
-//    // as the whole velocity minus its radial part.
-//    float vt = glm::length(node.velocity - glm::dot(dr, node.velocity) * dr);
-//    float R = node.length;
-//
-//    if(vt > 0) {
-//      glm::vec3 r = (glm::dot(dr, g) - vt*vt / R) * dr;
-//      glm::vec3 effective_acceleration = r + g;
-//
-//      effective_acceleration *= (1.0f - kHairSimulationDrag);
-//
-//      node.velocity += effective_acceleration * delta_t;
-//      node.pos += node.velocity * delta_t;
-//    }
-//  }
+  if(node.length > 0) {
+    glm::vec3 g = glm::vec3(0, -gravity, 0);
+    glm::vec3 dr = glm::normalize(node.pos - node.parent->pos);
 
-  glm::mat4 local_transform = node.bone.default_transform; // FIXME
+    // The tangential part of the velocity can be counted
+    // as the whole velocity minus its radial part.
+    float vt = glm::length(node.velocity - glm::dot(dr, node.velocity) * dr);
+    float R = node.length;
+
+    glm::vec3 r = (glm::dot(dr, g) - vt*vt / R) * dr;
+    glm::vec3 effective_acceleration = r + g;
+
+    effective_acceleration *= (1.0f - kHairSimulationDrag);
+
+    node.velocity += effective_acceleration * delta_t;
+    node.pos += node.velocity * delta_t;
+  }
+
+  glm::mat4 translate_mat = glm::translate(glm::mat4(), node.pos - node.bind_pose_pos);
+  glm::mat4 local_transform = translate_mat * node.bone.default_transform;
   glm::mat4 global_transform = parent_transform * local_transform;
 
-  node.bone.final_transform =
-    global_transform *
-    node.bone.offset;
+  node.bone.final_transform = global_transform * node.bone.offset;
 
   for(size_t i = 0; i != node.child.size(); ++i) {
     updateNode(node.child[i], delta_t, gravity, global_transform);

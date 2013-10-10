@@ -118,7 +118,7 @@ public:
               const oglwrap::CharacterMovement& charmove) {
     prog_.use();
     uCameraMatrix_.set(cam.cameraMatrix());
-    uModelMatrix_.set(charmove.getModelMatrix());
+    uModelMatrix_.set(charmove.getModelMatrix() * mesh_.worldTransform());
     uSunData_.set(skybox_.getSunData(time));
     skybox_.env_map.active(0);
     skybox_.env_map.bind();

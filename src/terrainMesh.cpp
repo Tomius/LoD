@@ -394,7 +394,6 @@ void TerrainMesh::render(const glm::vec3& camPos,
   grassNormalMap_.bind();
 
   gl(FrontFace(GL_CW));
-  gl(CullFace(GL_BACK));
   gl(Enable(GL_PRIMITIVE_RESTART));
   gl(PrimitiveRestartIndex(RESTART));
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );

@@ -140,7 +140,11 @@ public:
 //    for(int i = 0; i < 3; i++)
 //      hairs_[i]->update(time, GRAVITY);
     mesh_.uploadBoneInfo(uBones_);
+
+    gl(FrontFace(GL_CCW));
+    gl(Enable(GL_CULL_FACE));
     mesh_.render();
+    gl(Disable(GL_CULL_FACE));
     skybox_.env_map.active(0);
     skybox_.env_map.unbind();
   }

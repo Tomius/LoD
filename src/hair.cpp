@@ -1,18 +1,32 @@
 #include "hair.hpp"
 
 Hair::HairSegment::HairSegment(BasicHairSegment* _parent,
-                               oglwrap::ExternalBone& ebone)
+                               oglwrap::ExternalBone& ebone,
+                               const Hair* hair)
     : bone(ebone)
     , parent(_parent) {
 
-  glm::vec3 parent_pos = parent ? parent->pos : glm::vec3();
+  // The offset matrix transforms a model space position
+  // into the (bind-pose) bone's space. We need the inverse of this...
+  glm::mat4 bone_space_to_model_space_mx = glm::inverse(bone.offset);
 
-  // FIXME - counting the default pos should depend on parent transform matrix
-  pos = parent_pos + glm::vec3(bone.default_transform * glm::vec4(0, 0, 0, 1));
-  length = glm::length(pos - parent_pos);
+  // The joint is in the origin in its own bone space. Multiplying the vector
+  // of the origin with the inverse offset matrix, gives us the model-space
+  // coordinates of the joint in bind-pose.
+  bind_pose_pos = glm::vec3(bone_space_to_model_space_mx * glm::vec4(0, 0, 0, 1));
 
+  // But actually, we need the bone's position in world space, not model space.
+  pos = glm::vec3(hair->charmove_.getModelMatrix() * glm::vec4(bind_pose_pos, 1));
+
+  // Count the length of the bone (but only if the joint has a parent joint).
+  if(parent)
+    length = glm::length(pos - parent->pos);
+  else
+    length = 0;
+
+  // Initialize all the child recursively.
   for(size_t i = 0; i != bone.child.size(); ++i) {
-    child.push_back(HairSegment(this, bone.child[i]));
+    child.push_back(HairSegment(this, bone.child[i], hair));
   }
 }
 
@@ -21,8 +35,9 @@ Hair::Hair(const oglwrap::ExternalBoneTree& root_ebone,
      : root_(root_ebone)
      , charmove_(charmove) {
 
+  // Initialize the child (and their child recursively).
   for(size_t i = 0; i != root_.bone.child.size(); ++i) {
-    root_.child.push_back(HairSegment(&root_, root_.bone.child[i]));
+    root_.child.push_back(HairSegment(&root_, root_.bone.child[i], this));
   }
 }
 
@@ -37,9 +52,7 @@ void Hair::update(float time, float gravity) {
 
   root_.pos = glm::vec3(
     model_matrix *
-    root_.bone.global_inverse_transform *
     global_transform *
-    root_.bone.offset *
     glm::vec4(0, 0, 0, 1)
   );
 
@@ -124,7 +137,6 @@ void Hair::updateNode(HairSegment& node,
   glm::mat4 global_transform = parent_transform * local_transform;
 
   node.bone.final_transform =
-    root_.bone.global_inverse_transform *
     global_transform *
     node.bone.offset;
 

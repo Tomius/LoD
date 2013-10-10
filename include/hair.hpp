@@ -21,7 +21,7 @@ class Hair {
   struct HairSegment;
 
   struct BasicHairSegment {
-    glm::vec3 pos;
+    glm::vec3 pos, bind_pose_pos;
     std::vector<HairSegment> child;
   };
 
@@ -33,8 +33,11 @@ class Hair {
     BasicHairSegment* parent;
 
     HairSegment(BasicHairSegment* _parent,
-                oglwrap::ExternalBone& ebone);
+                oglwrap::ExternalBone& ebone,
+                const Hair* hair);
   };
+
+  friend HairSegment;
 
   struct RootHairSegment : public BasicHairSegment {
     oglwrap::ExternalBoneTree bone;

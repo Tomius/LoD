@@ -29,8 +29,6 @@ class Ayumi {
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
 
-//  Hair* hairs_[3];
-
   Skybox& skybox_;
 public:
   Ayumi(Skybox& skybox, const oglwrap::CharacterMovement& charmove)
@@ -63,10 +61,6 @@ public:
     oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
     oglwrap::UniformSampler(prog_, "uSpecularTexture").set(2);
 
-//    hairs_[0] = new Hair(mesh_.markBoneExternal("L_Hair_Jnt_0"), charmove);
-//    hairs_[1] = new Hair(mesh_.markBoneExternal("M_Hair_Jnt_0"), charmove);
-//    hairs_[2] = new Hair(mesh_.markBoneExternal("R_Hair_JNT_0"), charmove);
-
     mesh_.addAnimation("models/ayumi_idle.dae", "Stand",
                        oglwrap::AnimFlag::Repeat |
                        oglwrap::AnimFlag::Interruptable);
@@ -88,16 +82,11 @@ public:
                        oglwrap::AnimFlag::Interruptable);
 
     mesh_.addAnimation("models/ayumi_attack.dae", "Attack",
-                       oglwrap::AnimFlag::None, 2.0f);
+                       oglwrap::AnimFlag::None, 2.5f);
 
     mesh_.setDefaultAnimation("Stand", 0.3f);
     mesh_.forceAnimToDefault(0);
   }
-
-//  ~Ayumi() {
-//    for(int i = 0; i < 3; i++)
-//      delete hairs_[i];
-//  }
 
   oglwrap::AnimatedMesh& getMesh() {
     return mesh_;
@@ -137,8 +126,6 @@ public:
     }
 
     mesh_.updateBoneInfo(time);
-//    for(int i = 0; i < 3; i++)
-//      hairs_[i]->update(time, GRAVITY);
     mesh_.uploadBoneInfo(uBones_);
 
     gl(FrontFace(GL_CCW));

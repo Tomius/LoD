@@ -22,12 +22,6 @@
 #include "ayumi.hpp"
 #include "tree.hpp"
 
-/* Todo:
-      - horizontal collision.
-      - enemies (zombies?)
-      - attacks.
-*/
-
 using namespace oglwrap;
 
 const float GRAVITY = 0.6f;
@@ -36,6 +30,7 @@ void GL_Init() {
   gl(ClearColor(0.0f, 0.0f, 0.0f, 0.0f));
   gl(ClearDepth(1.0f));
   gl(Enable(GL_DEPTH_TEST));
+  gl(Enable(GL_DEPTH_CLAMP));
   gl(Enable(GL_FRAMEBUFFER_SRGB));
   gl(CullFace(GL_BACK));
 }
@@ -60,7 +55,7 @@ int main() {
     sf::VideoMode(800, 600),
     "Land of Dreams",
     sf::Style::Default,
-    sf::ContextSettings(32, 0, 4, 3, 1)
+    sf::ContextSettings(24, 8, 0, 3, 1)
   );
   window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame
 
@@ -105,9 +100,7 @@ int main() {
                 glViewport(0, 0, width, height);
                 bloom.reshape(width, height);
 
-                auto projMat = glm::perspectiveFov<float>(
-                                 60, width, height, 1, 3000
-                               );
+                auto projMat = glm::perspectiveFov<float>(60, width, height, 1, 3000);
 
                 ayumi.reshape(projMat);
                 skybox.reshape(projMat);

@@ -13,7 +13,7 @@ Dependencies:
 * [oglwrap](https://github.com/Tomius/oglwrap) - my c++ OpenGL wrapper.
 * SFML - for window handling
 * Magick++ - for image loading.
-* Assimp - for loading the character in.
+* Assimp - for loading the character in. (An up-to-date copy of assimp is prefered, or else Ayumi might not get loaded correctly.)
 
 
 How to build (linux):

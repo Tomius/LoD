@@ -21,6 +21,7 @@
 #include "bloom.hpp"
 #include "ayumi.hpp"
 #include "tree.hpp"
+#include "shadow.hpp"
 
 using namespace oglwrap;
 

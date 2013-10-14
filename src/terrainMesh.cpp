@@ -331,7 +331,7 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
     border_indices_[own_mipmap][line][irregular].bind();
     size_t indices_num = border_indices_[own_mipmap][line][irregular].size() / sizeof(int);
 
-    gl(DrawElements(GL_TRIANGLE_STRIP, indices_num, DataType::UnsignedInt, nullptr));
+    gl(DrawElements(GL_TRIANGLE_STRIP, indices_num, (GLenum)DataType::UnsignedInt, nullptr));
   }
 }
 
@@ -350,7 +350,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   vao_[mipmap_level].bind();
   indices_[mipmap_level].bind();
   gl(Enable(GL_CULL_FACE));
-  gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], DataType::UnsignedInt, nullptr));
+  gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
   gl(Disable(GL_CULL_FACE));
   CreateConnectors(pos, camPos);
 
@@ -370,7 +370,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
         vao_[mipmap_level].bind();
         indices_[mipmap_level].bind();
         gl(Enable(GL_CULL_FACE));
-        gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], DataType::UnsignedInt, nullptr));
+        gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
         gl(Disable(GL_CULL_FACE));
         CreateConnectors(pos, camPos);
       }

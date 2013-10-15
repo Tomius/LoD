@@ -136,17 +136,25 @@ int main() {
         );
         ayumi.updateStatus(time, charmove);
 
+        // Temp variables
         glm::mat4 camMatrix = cam.cameraMatrix();
         glm::vec3 camPos = cam.getPos();
+        glm::mat4 shadowMat = shadow.biasCamProjMat(
+          skybox.getSunPos(time),
+          ayumi.getMesh().bSphere(charmove.getModelMatrix())
+        );
+        const oglwrap::Texture2D& shadowTex = shadow.shadowTex();
         FPS_Display(time);
 
+        // Create shadow data
         shadow.startShadowRender();
-        ayumi.shadowRender(time, shadow, charmove);
+          ayumi.shadowRender(time, shadow, charmove);
         shadow.endShadowRender();
 
+        // Actual renders
         skybox.render(time, camMatrix);
-        terrain.render(time, camMatrix, camPos);
-        ayumi.render(time, shadow, cam, charmove);
+        terrain.render(time, camMatrix, camPos, shadowMat, shadowTex);
+        ayumi.render(time, cam, charmove, shadowMat, shadowTex);
         tree.render(time, cam);
         bloom.render();
 

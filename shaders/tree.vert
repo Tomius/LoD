@@ -9,12 +9,12 @@ uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
 out VertexData {
     vec3 c_pos;
     vec3 w_normal;
-    vec2 m_texcoord;
+    vec2 texcoord;
 } vout;
 
 void main() {
     vout.w_normal = vNormal * mat3(inverse(transpose(uModelMatrix)));
-    vout.m_texcoord = vTexCoord;
+    vout.texcoord = vTexCoord;
 
     vec4 c_pos = uCameraMatrix * (uModelMatrix * (vPosition * vec4(2, 2, 2, 1)));
     vout.c_pos = vec3(c_pos);

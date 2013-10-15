@@ -13,7 +13,7 @@ in vec4  vWeights[BONE_ATTRIB_NUM];
 in vec2 vTexCoord;
 in vec3 vNormal;
 
-uniform mat4 uShadowMCP, uProjectionMatrix, uCameraMatrix, uModelMatrix;
+uniform mat4 uShadowCP, uProjectionMatrix, uCameraMatrix, uModelMatrix;
 uniform mat4 uBones[BONE_NUM];
 
 out VertexData {
@@ -30,7 +30,7 @@ void main() {
             BoneMatrix += uBones[vBoneIDs[i][j]] * vWeights[i][j];
 
     vout.c_normal = vec3(uCameraMatrix * (uModelMatrix * (BoneMatrix * vec4(vNormal, 0.0))));
-    vout.shadowCoord = uShadowMCP * (BoneMatrix * vPosition);
+    vout.shadowCoord = uShadowCP * (uModelMatrix * (BoneMatrix * vPosition));
     vout.texCoord = vTexCoord;
 
     vec4 c_pos = uCameraMatrix * (uModelMatrix * (BoneMatrix * vPosition));

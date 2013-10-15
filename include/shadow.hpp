@@ -24,7 +24,7 @@ public:
         tex.magFilter(MagFilter::Linear);
         tex.wrapS(Wrap::ClampToEdge);
         tex.wrapT(Wrap::ClampToEdge);
-        tex.compareFunc(CompFunc::LEqual);
+        tex.compareFunc(Enums::CompFunc::LEqual);
         tex.compareMode(CompMode::CompareRefToTexture);
 
         fbo.bind();
@@ -43,16 +43,16 @@ public:
         return glm::ortho<float>(-size, size, -size, size, 0, 2*size);
     }
 
-    glm::mat4 camMat(glm::vec3 lightDir, glm::vec4 targetBSphere) const {
-        return glm::lookAt(glm::vec3(targetBSphere) + glm::normalize(lightDir) * targetBSphere.w,
+    glm::mat4 camMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const {
+        return glm::lookAt(glm::vec3(targetBSphere) + glm::normalize(lightSrcPos) * targetBSphere.w,
                            glm::vec3(targetBSphere), glm::vec3(0, 1, 0));
     }
 
-    glm::mat4 modelCamProjMat(glm::vec3 lightDir, glm::vec4 targetBSphere, glm::mat4 modelMatrix) const {
-        return projMat(targetBSphere.w) * camMat(lightDir, targetBSphere) * modelMatrix;
+    glm::mat4 modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere, glm::mat4 modelMatrix) const {
+        return projMat(targetBSphere.w) * camMat(lightSrcPos, targetBSphere) * modelMatrix;
     }
 
-    glm::mat4 biasModelCamProjMat(glm::vec3 lightDir, glm::vec4 targetBSphere, glm::mat4 modelMatrix) const {
+    glm::mat4 biasCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const {
         // [-1, 1] -> [0, 1] convert
         glm::mat4 biasMatrix(
             0.5, 0.0, 0.0, 0.0,
@@ -61,7 +61,7 @@ public:
             0.5, 0.5, 0.5, 1.0
         );
 
-        return biasMatrix * modelCamProjMat(lightDir, targetBSphere, modelMatrix);
+        return biasMatrix * projMat(targetBSphere.w) * camMat(lightSrcPos, targetBSphere);
     }
 
     const oglwrap::Texture2D& shadowTex() const {

@@ -3,7 +3,7 @@
 in VertexData {
     vec3 c_pos;
     vec3 w_normal;
-    vec2 m_texcoord;
+    vec2 texcoord;
 } vin;
 
 uniform sampler2D uDiffuseTexture;
@@ -35,7 +35,7 @@ void main() {
             0.2
         );
 
-    vec4 color = texture(uDiffuseTexture, vin.m_texcoord);
+    vec4 color = texture(uDiffuseTexture, vin.texcoord);
     vec3 final_color = color.rgb * AmbientColor() * (SunPower() * diffuse_power + AmbientPower()) / 2;
 
     frag_color = vec4(pow(final_color, vec3(1.3)), min(color.a, alpha));

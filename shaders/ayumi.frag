@@ -18,6 +18,8 @@ float AmbientPower();
 float SunPower();
 vec3 AmbientColor();
 
+const float kSpecularShininess = 20.0f;
+
 // -------======{[ Shadow ]}======-------
 
 // This should be between 1 and 16. The higher this value,
@@ -27,7 +29,7 @@ const int kShadowSoftness = 16;
 // The maximum potion of light that should be subtracted
 // if the object is in shadow. For ex. 0.8 means, object in
 // shadow is 20% as bright as a lit one.
-const float kMaxShadow = 0.8;
+const float kMaxShadow = 0.7;
 
 // Random numbers with nicer properties than true random.
 // Google "Poisson Disk Sampling".
@@ -68,8 +70,6 @@ float Visibility() {
 
 	return visibility;
 }
-
-const float kSpecularShininess = 20.0f;
 
 void main() {
     vec3 c_normal = normalize(vin.c_normal);

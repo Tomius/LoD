@@ -9,13 +9,11 @@ Terrain::Terrain(Skybox& skybox)
   , fs_("terrain.frag")
   , uProjectionMatrix_(prog_, "uProjectionMatrix")
   , uCameraMatrix_(prog_, "uCameraMatrix")
+  , uShadowCP_(prog_, "uShadowCP")
   , uSunData_(prog_, "uSunData")
   , uScales_(prog_, "uScales")
   , uOffset_(prog_, "uOffset")
   , uMipmapLevel_(prog_, "uMipmapLevel")
-  , uHeightMap_(prog_, "uHeightMap")
-  , uGrassMap_(prog_, "uGrassMap")
-  , uGrassNormalMap_(prog_, "uGrassNormalMap")
   , mesh_("terrain/mideu.rtd")
   , skybox_(skybox)
   , w_(mesh_.w)
@@ -26,10 +24,11 @@ Terrain::Terrain(Skybox& skybox)
   prog_ << vs_ << fs_ << skybox_.sky_fs;
   prog_.link().use();
 
-  uHeightMap_.set(0);
-  uGrassMap_[0].set(1);
-  uGrassMap_[1].set(2);
-  uGrassNormalMap_.set(3);
+  oglwrap::UniformSampler(prog_, "uHeightMap").set(0);
+  oglwrap::UniformSampler(prog_, "uGrassMap[0]").set(1);
+  oglwrap::UniformSampler(prog_, "uGrassMap[1]").set(2);
+  oglwrap::UniformSampler(prog_, "uGrassNormalMap").set(3);
+  oglwrap::UniformSampler(prog_, "uShadowMap").set(4);
 
   uScales_ = scale_vector;
 }
@@ -43,12 +42,16 @@ void Terrain::resize(const glm::mat4& projMat) {
   uProjectionMatrix_ = projMat;
 }
 
-void Terrain::render(float time, const glm::mat4& cam_mat, const glm::vec3& cam_pos) {
+void Terrain::render(float time, const glm::mat4& cam_mat, const glm::vec3& cam_pos,
+                     const glm::mat4& shadowCP, const oglwrap::Texture2D& shadowTex) {
   prog_.use();
   uCameraMatrix_.set(cam_mat);
   uSunData_.set(skybox_.getSunData(time));
+  uShadowCP_ = shadowCP;
   skybox_.env_map.active(0);
   skybox_.env_map.bind();
+  shadowTex.active(4);
+  shadowTex.bind();
 
   mesh_.render(cam_pos, uOffset_, uMipmapLevel_);
 

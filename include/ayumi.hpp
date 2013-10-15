@@ -25,7 +25,7 @@ class Ayumi {
   oglwrap::AnimatedMesh mesh_;
   oglwrap::Program prog_, shadow_prog_;
 
-  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_, uShadowMCP_;
+  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_, uShadowCP_;
   oglwrap::LazyUniform<glm::mat4> shadow_uMCP_, shadow_uBones_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
 
@@ -39,7 +39,7 @@ public:
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")
     , uBones_(prog_, "uBones")
-    , uShadowMCP_(prog_, "uShadowMCP")
+    , uShadowCP_(prog_, "uShadowCP")
     , shadow_uMCP_(shadow_prog_, "uMCP")
     , shadow_uBones_(shadow_prog_, "uBones")
     , uSunData_(prog_, "uSunData")
@@ -149,22 +149,19 @@ public:
   }
 
   void render(float time,
-              const Shadow& shadow,
               const oglwrap::Camera& cam,
-              const oglwrap::CharacterMovement& charmove) {
+              const oglwrap::CharacterMovement& charmove,
+              const glm::mat4& shadowCP,
+              const oglwrap::Texture2D& shadowTex) {
     prog_.use();
     uCameraMatrix_.set(cam.cameraMatrix());
     uModelMatrix_.set(charmove.getModelMatrix() * mesh_.worldTransform());
-    uShadowMCP_ = shadow.biasModelCamProjMat(
-      skybox_.getSunPos(time),
-      mesh_.bSphere(charmove.getModelMatrix()),
-      charmove.getModelMatrix()
-    );
+    uShadowCP_ = shadowCP;
     uSunData_.set(skybox_.getSunData(time));
     skybox_.env_map.active(0);
     skybox_.env_map.bind();
-    shadow.shadowTex().active(3);
-    shadow.shadowTex().bind();
+    shadowTex.active(3);
+    shadowTex.bind();
 
     mesh_.uploadBoneInfo(uBones_);
 

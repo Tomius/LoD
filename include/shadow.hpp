@@ -3,7 +3,7 @@
 
 #include "oglwrap/oglwrap.hpp"
 
-const int shadowMapSize = 1024;
+const int shadowMapSize = 512;
 
 /// This class is so simple, that I implement it in the header
 class Shadow {
@@ -43,16 +43,16 @@ public:
         return glm::ortho<float>(-size, size, -size, size, 0, 2*size);
     }
 
-    glm::mat4 cameraMat(glm::vec3 lightDir, glm::vec4 targetBSphere) const {
-        return glm::lookAt(glm::vec3(targetBSphere) - glm::normalize(lightDir) * targetBSphere.w,
+    glm::mat4 camMat(glm::vec3 lightDir, glm::vec4 targetBSphere) const {
+        return glm::lookAt(glm::vec3(targetBSphere) + glm::normalize(lightDir) * targetBSphere.w,
                            glm::vec3(targetBSphere), glm::vec3(0, 1, 0));
     }
 
-    glm::mat4 projCamMat(glm::vec3 lightDir, glm::vec4 targetBSphere) const {
-        return projMat(targetBSphere.w) * cameraMat(lightDir, targetBSphere);
+    glm::mat4 modelCamProjMat(glm::vec3 lightDir, glm::vec4 targetBSphere, glm::mat4 modelMatrix) const {
+        return projMat(targetBSphere.w) * camMat(lightDir, targetBSphere) * modelMatrix;
     }
 
-    glm::mat4 biasprojCamMat(glm::vec3 lightDir, glm::vec4 targetBSphere) const {
+    glm::mat4 biasModelCamProjMat(glm::vec3 lightDir, glm::vec4 targetBSphere, glm::mat4 modelMatrix) const {
         // [-1, 1] -> [0, 1] convert
         glm::mat4 biasMatrix(
             0.5, 0.0, 0.0, 0.0,
@@ -61,14 +61,14 @@ public:
             0.5, 0.5, 0.5, 1.0
         );
 
-        return biasMatrix * projCamMat(lightDir, targetBSphere);
+        return biasMatrix * modelCamProjMat(lightDir, targetBSphere, modelMatrix);
     }
 
-    const oglwrap::Texture2D& ShadowTex() const {
+    const oglwrap::Texture2D& shadowTex() const {
         return tex;
     }
 
-    void shadowRender() {
+    void startShadowRender() {
         fbo.bind();
         glViewport(0, 0, shadowMapSize, shadowMapSize);
         glClear(GL_DEPTH_BUFFER_BIT);

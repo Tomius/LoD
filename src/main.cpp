@@ -56,24 +56,25 @@ int main() {
     sf::VideoMode(800, 600),
     "Land of Dreams",
     sf::Style::Default,
-    sf::ContextSettings(24, 8, 0, 3, 1)
+    sf::ContextSettings(24, 8, 0, 3, 2)
   );
   window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame
 
   sf::Clock clock;
   bool fixMouse = false;
-  if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
+  if(glewInit() == GLEW_OK && GLEW_VERSION_3_2) try {
       GL_Init();
       Skybox skybox;
       BloomEffect bloom;
       Terrain terrain(skybox);
+      Shadow shadow;
       Tree tree(skybox, terrain);
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 
       Ayumi ayumi(skybox, charmove);
 
       ThirdPersonalCamera cam(
-        ayumi.getMesh().bSphereCenter() + glm::vec3(ayumi.getMesh().bSphereRadius() * 3),
+        ayumi.getMesh().bSphereCenter() + glm::vec3(ayumi.getMesh().bSphereRadius() * 2),
         ayumi.getMesh().bSphereCenter(),
         1.5f
       );
@@ -99,14 +100,15 @@ int main() {
                 int width = event.size.width, height = event.size.height;
 
                 glViewport(0, 0, width, height);
-                bloom.reshape(width, height);
+                bloom.resize(width, height);
+                shadow.resize(width, height);
 
-                auto projMat = glm::perspectiveFov<float>(60, width, height, 1, 3000);
+                auto projMat = glm::perspectiveFov<float>(60, width, height, 0.5, 3000);
 
-                ayumi.reshape(projMat);
-                skybox.reshape(projMat);
-                terrain.reshape(projMat);
-                tree.reshape(projMat);
+                ayumi.resize(projMat);
+                skybox.resize(projMat);
+                terrain.resize(projMat);
+                tree.resize(projMat);
               }
               break;
             case sf::Event::MouseWheelMoved:
@@ -121,6 +123,7 @@ int main() {
 
         float time = clock.getElapsedTime().asSeconds();
 
+        // Updates
         cam.updateRotation(window, fixMouse);
         charmove.update(cam, ayumi.getMesh().offsetSinceLastFrame());
         cam.updateTarget(charmove.getPos() + ayumi.getMesh().bSphereCenter());
@@ -131,14 +134,19 @@ int main() {
             charmove.getPos().z / (double)scales.z
           )
         );
+        ayumi.updateStatus(time, charmove);
 
         glm::mat4 camMatrix = cam.cameraMatrix();
         glm::vec3 camPos = cam.getPos();
         FPS_Display(time);
 
+        shadow.startShadowRender();
+        ayumi.shadowRender(time, shadow, charmove);
+        shadow.endShadowRender();
+
         skybox.render(time, camMatrix);
         terrain.render(time, camMatrix, camPos);
-        ayumi.render(time, cam, charmove);
+        ayumi.render(time, shadow, cam, charmove);
         tree.render(time, cam);
         bloom.render();
 

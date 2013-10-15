@@ -23,7 +23,7 @@ public:
   const int& w, h;
 
   Terrain(Skybox& skybox);
-  void reshape(const glm::mat4& projMat);
+  void resize(const glm::mat4& projMat);
   glm::vec3 getScales() const;
   void render(float time, const glm::mat4& camMat, const glm::vec3& camPos);
   unsigned char fetchHeight(glm::ivec2 v) const;

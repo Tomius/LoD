@@ -28,7 +28,7 @@ class Skybox {
   oglwrap::FragmentShader sky_fs_;
 public:
   Skybox();
-  void reshape(const glm::mat4& projMat);
+  void resize(const glm::mat4& projMat);
   void render(float time, const glm::mat4& camMatrix);
 
   const oglwrap::TextureCube& env_map;

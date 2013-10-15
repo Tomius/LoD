@@ -34,7 +34,7 @@ Skybox::Skybox()
   }
 }
 
-void Skybox::reshape(const glm::mat4& projMat) {
+void Skybox::resize(const glm::mat4& projMat) {
   prog_.use();
   uProjectionMatrix_.set(projMat);
 }

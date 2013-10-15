@@ -93,7 +93,7 @@ public:
     }
   }
 
-  void reshape(glm::mat4 projMat) {
+  void resize(glm::mat4 projMat) {
     prog_.use();
     uProjectionMatrix_ = projMat;
   }

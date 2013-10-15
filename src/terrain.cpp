@@ -38,7 +38,7 @@ glm::vec3 Terrain::getScales() const {
   return scale_vector;
 }
 
-void Terrain::reshape(const glm::mat4& projMat) {
+void Terrain::resize(const glm::mat4& projMat) {
   prog_.use();
   uProjectionMatrix_ = projMat;
 }

@@ -29,53 +29,18 @@ const float kSpecularShininess = 20.0;
 
 // -------======{[ Shadow ]}======-------
 
-// This should be between 1 and 16. The higher this value,
-// the softer shadow it results
-const int kShadowSoftness = 4;
-
 // The maximum potion of light that should be subtracted
 // if the object is in shadow. For ex. 0.8 means, object in
 // shadow is 20% as bright as a lit one.
 const float kMaxShadow = 0.8;
 
-// Random numbers with nicer properties than true random.
-// Google "Poisson Disk Sampling".
-vec2 kPoissonDisk[16] = vec2[](
-   vec2( -0.94201624, -0.39906216 ),
-   vec2( 0.94558609, -0.76890725 ),
-   vec2( -0.094184101, -0.92938870 ),
-   vec2( 0.34495938, 0.29387760 ),
-   vec2( -0.91588581, 0.45771432 ),
-   vec2( -0.81544232, -0.87912464 ),
-   vec2( -0.38277543, 0.27676845 ),
-   vec2( 0.97484398, 0.75648379 ),
-   vec2( 0.44323325, -0.97511554 ),
-   vec2( 0.53742981, -0.47373420 ),
-   vec2( -0.26496911, -0.41893023 ),
-   vec2( 0.79197514, 0.19090188 ),
-   vec2( -0.24188840, 0.99706507 ),
-   vec2( -0.81409955, 0.91437590 ),
-   vec2( 0.19984126, 0.78641367 ),
-   vec2( 0.14383161, -0.14100790 )
-);
-
 float Visibility() {
-  float visibility = 1.0;
   float bias = 0.01;
-  float alpha = kMaxShadow / kShadowSoftness; // Max shadow per sample
 
-	// Sample the shadow map kShadowSoftness times.
-	for(int i = 0; i < kShadowSoftness; i++) {
-		visibility -= alpha * (1.0 - texture(
-      uShadowMap,
-      vec3(
-        vin.shadowCoord.xy + kPoissonDisk[i] / 256.0,
-        (vin.shadowCoord.z - bias) / vin.shadowCoord.w)
-      )
-    );
-	}
-
-	return visibility;
+	return kMaxShadow * texture(
+    uShadowMap,
+    vec3(vin.shadowCoord.xy, (vin.shadowCoord.z - bias) / vin.shadowCoord.w)
+  );
 }
 
 void main() {

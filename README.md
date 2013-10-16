@@ -9,7 +9,7 @@ Here's a picture of the program's current capability:
 Dependencies:
 -------------
 * C++11 compiler.
-* OpenGL 3.2, GLEW
+* OpenGL 3.1, GLEW
 * [oglwrap](https://github.com/Tomius/oglwrap) - my c++ OpenGL wrapper.
 * SFML - for window handling
 * Magick++ - for image loading.

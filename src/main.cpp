@@ -56,13 +56,13 @@ int main() {
     sf::VideoMode(800, 600),
     "Land of Dreams",
     sf::Style::Default,
-    sf::ContextSettings(24, 8, 0, 3, 2)
+    sf::ContextSettings(24, 8, 0, 3, 1)
   );
   window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame
 
   sf::Clock clock;
   bool fixMouse = false;
-  if(glewInit() == GLEW_OK && GLEW_VERSION_3_2) try {
+  if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
       GL_Init();
       Skybox skybox;
       BloomEffect bloom;
@@ -148,7 +148,7 @@ int main() {
 
         // Create shadow data
         shadow.startShadowRender();
-          ayumi.shadowRender(time, shadow, charmove);
+            ayumi.shadowRender(time, shadow, charmove);
         shadow.endShadowRender();
 
         // Actual renders

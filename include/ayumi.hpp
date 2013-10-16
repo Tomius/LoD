@@ -16,7 +16,6 @@
 
 #include "charmove.hpp"
 #include "skybox.hpp"
-#include "hair.hpp"
 #include "shadow.hpp"
 
 extern const float GRAVITY;

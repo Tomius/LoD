@@ -43,7 +43,7 @@ void Terrain::resize(const glm::mat4& projMat) {
 }
 
 void Terrain::render(float time, const glm::mat4& cam_mat, const glm::vec3& cam_pos,
-                     const glm::mat4& shadowCP, const oglwrap::Texture2D& shadowTex) {
+                     const glm::mat4& shadowCP, const oglwrap::Texture2D_Array& shadowTex) {
   prog_.use();
   uCameraMatrix_.set(cam_mat);
   uSunData_.set(skybox_.getSunData(time));

@@ -151,7 +151,7 @@ public:
               const oglwrap::Camera& cam,
               const oglwrap::CharacterMovement& charmove,
               const glm::mat4& shadowCP,
-              const oglwrap::Texture2D& shadowTex) {
+              const oglwrap::Texture2D_Array& shadowTex) {
     prog_.use();
     uCameraMatrix_.set(cam.cameraMatrix());
     uModelMatrix_.set(charmove.getModelMatrix() * mesh_.worldTransform());

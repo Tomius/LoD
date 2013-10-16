@@ -11,7 +11,7 @@ in VertexData {
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap[2], uGrassNormalMap;
-uniform sampler2DShadow uShadowMap;
+uniform sampler2DArrayShadow uShadowMap;
 uniform vec3 uScales;
 
 out vec4 frag_color;
@@ -39,7 +39,7 @@ float Visibility() {
 
 	return kMaxShadow * texture(
     uShadowMap,
-    vec3(vin.shadowCoord.xy, (vin.shadowCoord.z - bias) / vin.shadowCoord.w)
+    vec4(vin.shadowCoord.xy, (vin.shadowCoord.z - bias) / vin.shadowCoord.w, 0)
   );
 }
 

@@ -8,7 +8,7 @@ in VertexData {
 } vin;
 
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
-uniform sampler2DShadow uShadowMap;
+uniform sampler2DArrayShadow uShadowMap;
 uniform mat4 uCameraMatrix;
 
 out vec4 frag_color;
@@ -61,11 +61,11 @@ float Visibility() {
 	for(int i = 0; i < kShadowSoftness; i++) {
 		visibility -= alpha * (1.0 - texture(
       uShadowMap,
-      vec3(
+      vec4(
         vin.shadowCoord.xy + kPoissonDisk[i] / 256.0,
-        (vin.shadowCoord.z - bias) / vin.shadowCoord.w)
+        (vin.shadowCoord.z - bias) / vin.shadowCoord.w, 0
       )
-    );
+    ));
 	}
 
 	return visibility;

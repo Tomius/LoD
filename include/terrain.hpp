@@ -25,7 +25,7 @@ public:
   void resize(const glm::mat4& projMat);
   glm::vec3 getScales() const;
   void render(float time, const glm::mat4& camMat, const glm::vec3& camPos,
-              const glm::mat4& shadowCP, const oglwrap::Texture2D& shadowTex);
+              const glm::mat4& shadowCP, const oglwrap::Texture2D_Array& shadowTex);
   unsigned char fetchHeight(glm::ivec2 v) const;
   double getHeight(double x, double y) const;
 };

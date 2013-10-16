@@ -67,7 +67,7 @@ int main() {
       Skybox skybox;
       BloomEffect bloom;
       Terrain terrain(skybox);
-      Shadow shadow;
+      Shadow shadow(512, 2);
       Tree tree(skybox, terrain);
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 
@@ -119,8 +119,6 @@ int main() {
           }
         }
 
-        gl( Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
-
         float time = clock.getElapsedTime().asSeconds();
 
         // Updates
@@ -143,13 +141,13 @@ int main() {
           skybox.getSunPos(time),
           ayumi.getMesh().bSphere(charmove.getModelMatrix())
         );
-        const oglwrap::Texture2D& shadowTex = shadow.shadowTex();
+        const oglwrap::Texture2D_Array& shadowTex = shadow.shadowTex();
         FPS_Display(time);
 
         // Create shadow data
-        shadow.startShadowRender();
-            ayumi.shadowRender(time, shadow, charmove);
-        shadow.endShadowRender();
+        shadow.begin();
+          ayumi.shadowRender(time, shadow, charmove);
+        shadow.end();
 
         // Actual renders
         skybox.render(time, camMatrix);

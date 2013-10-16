@@ -145,7 +145,7 @@ float AmbientPower() {
     return
         mix(
             0.02, // night
-            0.1 * max(dot( // day
+            0.05 * max(dot( // day
                 normalize(uSunPos) + vec3(0.0, 0.12, 0.0),
                 vec3(0.0, 1.0, 0.0)
             ), 0.4),

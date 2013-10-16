@@ -3,13 +3,15 @@
 in VertexData {
   vec3  w_normal;
   vec3  c_pos, w_pos;
-  vec2  m_texcoord;
+  vec2  texcoord;
+  vec4  shadowCoord;
   float invalid;
   mat3  NormalMatrix;
 } vin;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap[2], uGrassNormalMap;
+uniform sampler2DShadow uShadowMap;
 uniform vec3 uScales;
 
 out vec4 frag_color;
@@ -25,13 +27,29 @@ const vec3 kFogColor = vec3(0.8f);
 
 const float kSpecularShininess = 20.0;
 
+// -------======{[ Shadow ]}======-------
+
+// The maximum potion of light that should be subtracted
+// if the object is in shadow. For ex. 0.8 means, object in
+// shadow is 20% as bright as a lit one.
+const float kMaxShadow = 0.8;
+
+float Visibility() {
+  float bias = 0.01;
+
+	return kMaxShadow * texture(
+    uShadowMap,
+    vec3(vin.shadowCoord.xy, (vin.shadowCoord.z - bias) / vin.shadowCoord.w)
+  );
+}
+
 void main() {
     if(vin.invalid != 0.0) {
         discard;
     }
 
     // TexCoord
-    vec2 grass_texcoord = vin.m_texcoord * 200;
+    vec2 grass_texcoord = vin.texcoord * 200;
 
     // Normals
     vec3 w_normal = normalize(vin.w_normal);
@@ -65,12 +83,21 @@ void main() {
     float height_factor = clamp(sqrt((vin.w_pos.y - 15 * uScales.y) / 40.0f), 0.0f, 1.0f);
     vec3 grass_color = mix(grass0_color, grass1_color, height_factor);
 
-    vec3 final_color =
-        AmbientColor() * grass_color * (SunPower() * (specular_power + diffuse_power) + AmbientPower());
+    float length_from_camera = length(vin.c_pos);
+
+    vec3 final_color;
+    if(length_from_camera < 50) {
+      final_color = grass_color * AmbientColor() *
+          (Visibility() * SunPower() * (specular_power + diffuse_power) + AmbientPower());
+    } else {
+      final_color = grass_color * AmbientColor() *
+          (SunPower() * (specular_power + diffuse_power) + AmbientPower());
+    }
+
 
     // Fog
     vec3 fog = AmbientColor() * kFogColor * (0.005 + SunPower());
-    float alpha = clamp((length(vin.c_pos) - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 12;
+    float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 12;
 
     frag_color = vec4(mix(final_color, fog, alpha), 1.0);
 }

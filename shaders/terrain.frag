@@ -39,7 +39,7 @@ float Visibility() {
 
 	return kMaxShadow * texture(
     uShadowMap,
-    vec4(vin.shadowCoord.xy, (vin.shadowCoord.z - bias) / vin.shadowCoord.w, 0)
+    vec4(vin.shadowCoord.xy, 0, (vin.shadowCoord.z - bias) / vin.shadowCoord.w) // x, y, slice, depth
   );
 }
 

@@ -61,9 +61,9 @@ float Visibility() {
 	for(int i = 0; i < kShadowSoftness; i++) {
 		visibility -= alpha * (1.0 - texture(
       uShadowMap,
-      vec4(
+      vec4( // x, y, slice, depth
         vin.shadowCoord.xy + kPoissonDisk[i] / 256.0,
-        (vin.shadowCoord.z - bias) / vin.shadowCoord.w, 0
+        0, (vin.shadowCoord.z - bias) / vin.shadowCoord.w
       )
     ));
 	}

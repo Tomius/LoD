@@ -27,6 +27,7 @@ class Ayumi {
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_, uShadowCP_;
   oglwrap::LazyUniform<glm::mat4> shadow_uMCP_, shadow_uBones_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
+  oglwrap::LazyUniform<int> uNumUsedShadowMaps_;
 
   Skybox& skybox_;
 public:
@@ -42,6 +43,7 @@ public:
     , shadow_uMCP_(shadow_prog_, "uMCP")
     , shadow_uBones_(shadow_prog_, "uBones")
     , uSunData_(prog_, "uSunData")
+    , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , skybox_(skybox) {
 
     oglwrap::ShaderSource vs_source("ayumi.vert");
@@ -131,13 +133,11 @@ public:
   }
 
   void shadowRender(float time,
-                    const Shadow& shadow,
+                    Shadow& shadow,
                     const oglwrap::CharacterMovement& charmove) {
     shadow_prog_.use();
     shadow_uMCP_ = shadow.modelCamProjMat(
-      skybox_.getSunPos(time),
-      mesh_.bSphere(charmove.getModelMatrix()),
-      charmove.getModelMatrix()
+      skybox_.getSunPos(time), mesh_.bSphere(), charmove.getModelMatrix()
     );
     mesh_.uploadBoneInfo(shadow_uBones_);
 
@@ -145,22 +145,26 @@ public:
     gl(Enable(GL_CULL_FACE));
     mesh_.render();
     gl(Disable(GL_CULL_FACE));
+
+    shadow.push();
   }
 
   void render(float time,
               const oglwrap::Camera& cam,
               const oglwrap::CharacterMovement& charmove,
-              const glm::mat4& shadowCP,
-              const oglwrap::Texture2D_Array& shadowTex) {
+              const Shadow& shadow) {
     prog_.use();
     uCameraMatrix_.set(cam.cameraMatrix());
     uModelMatrix_.set(charmove.getModelMatrix() * mesh_.worldTransform());
-    uShadowCP_ = shadowCP;
+    for(int i = 0; i < shadow.getDepth(); ++i) {
+      uShadowCP_[i] = shadow.shadowCPs()[i];
+    }
+    uNumUsedShadowMaps_ = shadow.getDepth();
     uSunData_.set(skybox_.getSunData(time));
     skybox_.env_map.active(0);
     skybox_.env_map.bind();
-    shadowTex.active(3);
-    shadowTex.bind();
+    shadow.shadowTex().active(3);
+    shadow.shadowTex().bind();
 
     mesh_.uploadBoneInfo(uBones_);
 

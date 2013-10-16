@@ -1,10 +1,13 @@
 #version 330 core
 
+#define SHADOW_MAP_NUM 4
+
 in VertexData {
   vec3  w_normal;
   vec3  c_pos, w_pos;
   vec2  texcoord;
-  vec4  shadowCoord;
+  vec4  shadowCoord[SHADOW_MAP_NUM];
+  float scInvalid[SHADOW_MAP_NUM];
   float invalid;
   mat3  NormalMatrix;
 } vin;
@@ -13,6 +16,7 @@ uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap[2], uGrassNormalMap;
 uniform sampler2DArrayShadow uShadowMap;
 uniform vec3 uScales;
+uniform int uNumUsedShadowMaps;
 
 out vec4 frag_color;
 
@@ -36,11 +40,23 @@ const float kMaxShadow = 0.8;
 
 float Visibility() {
   float bias = 0.01;
+  float visiblity = 1.0;
 
-	return kMaxShadow * texture(
-    uShadowMap,
-    vec4(vin.shadowCoord.xy, 0, (vin.shadowCoord.z - bias) / vin.shadowCoord.w) // x, y, slice, depth
-  );
+  // For every shadow casters
+  for(int i = 0; i < max(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+      if(vin.scInvalid[i] != 0.0) // If it doesn't cast any shadow then skip it.
+          continue;
+
+      visiblity -= kMaxShadow * (1 - texture(
+          uShadowMap,
+          vec4( // x, y, slice, depth
+              vin.shadowCoord[i].xy, i,
+              (vin.shadowCoord[i].z - bias) / vin.shadowCoord[i].w
+          )
+      ));
+  }
+
+	return max(visiblity, 0.0);
 }
 
 void main() {
@@ -85,15 +101,8 @@ void main() {
 
     float length_from_camera = length(vin.c_pos);
 
-    vec3 final_color;
-    if(length_from_camera < 50) {
-      final_color = grass_color * AmbientColor() *
+    vec3 final_color = grass_color * AmbientColor() *
           (Visibility() * SunPower() * (specular_power + diffuse_power) + AmbientPower());
-    } else {
-      final_color = grass_color * AmbientColor() *
-          (SunPower() * (specular_power + diffuse_power) + AmbientPower());
-    }
-
 
     // Fog
     vec3 fog = AmbientColor() * kFogColor * (0.005 + SunPower());

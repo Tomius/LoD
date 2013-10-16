@@ -1,4 +1,6 @@
-#version 330
+#version 330 core
+
+// DEPRECATED!! DON'T USE
 
 layout(location = 0) in vec2 Position;
 uniform mat4 MVP;

@@ -6,11 +6,14 @@
 class Shadow {
     oglwrap::Texture2D_Array tex_;
     std::vector<oglwrap::Framebuffer> fbo_;
+    std::vector<glm::mat4> cp_matrices_;
 
-    size_t w_, h_, size_, curr_depth_;
+    size_t w_, h_, size_, curr_depth_, max_depth_;
 public:
+
     Shadow(size_t shadowMapSize, size_t depth)
-        : fbo_(depth), size_(shadowMapSize), curr_depth_(0) {
+        : fbo_(depth), cp_matrices_(depth), size_(shadowMapSize)
+        , curr_depth_(0), max_depth_(depth) {
       using namespace oglwrap;
 
       // Setup the texture array that will serve as storage.
@@ -53,11 +56,7 @@ public:
                          glm::vec3(targetBSphere), glm::vec3(0, 1, 0));
     }
 
-    glm::mat4 modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere, glm::mat4 modelMatrix) const {
-      return projMat(targetBSphere.w) * camMat(lightSrcPos, targetBSphere) * modelMatrix;
-    }
-
-    glm::mat4 biasCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const {
+    glm::mat4 modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere, glm::mat4 modelMatrix) {
       // [-1, 1] -> [0, 1] convert
       glm::mat4 biasMatrix(
           0.5, 0.0, 0.0, 0.0,
@@ -66,7 +65,18 @@ public:
           0.5, 0.5, 0.5, 1.0
       );
 
-      return biasMatrix * projMat(targetBSphere.w) * camMat(lightSrcPos, targetBSphere);
+      glm::mat4 projMatrix = projMat(targetBSphere.w);
+
+      cp_matrices_[curr_depth_] = biasMatrix * projMatrix * camMat(lightSrcPos, targetBSphere);
+
+      glm::vec4 offseted_targetBSphere =
+        glm::vec4(glm::vec3(modelMatrix * glm::vec4(glm::vec3(targetBSphere), 1)), targetBSphere.w);
+
+      return projMatrix * camMat(lightSrcPos, offseted_targetBSphere) * modelMatrix;
+    }
+
+    const std::vector<glm::mat4>& shadowCPs() const {
+      return cp_matrices_;
     }
 
     const oglwrap::Texture2D_Array& shadowTex() const {
@@ -75,16 +85,29 @@ public:
 
     void begin() {
       fbo_[0].bind();
+      curr_depth_ = 0;
       glViewport(0, 0, size_, size_);
       glClear(GL_DEPTH_BUFFER_BIT);
     }
 
     void push() {
-      fbo_[++curr_depth_].bind();
+      if(curr_depth_ + 1 < max_depth_) {
+        fbo_[++curr_depth_].bind();
+        glClear(GL_DEPTH_BUFFER_BIT);
+      } else {
+        throw std::overflow_error("ShadowMap stack overflow.");
+      }
+    }
+
+    size_t getDepth() const {
+      return curr_depth_;
+    }
+
+    size_t getMaxDepth() const {
+      return max_depth_;
     }
 
     void end() {
-      curr_depth_ = 0;
       oglwrap::Framebuffer::Unbind();
       glViewport(0, 0, w_, h_);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

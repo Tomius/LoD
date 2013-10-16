@@ -14,6 +14,7 @@ Terrain::Terrain(Skybox& skybox)
   , uScales_(prog_, "uScales")
   , uOffset_(prog_, "uOffset")
   , uMipmapLevel_(prog_, "uMipmapLevel")
+  , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
   , mesh_("terrain/mideu.rtd")
   , skybox_(skybox)
   , w_(mesh_.w)
@@ -42,16 +43,18 @@ void Terrain::resize(const glm::mat4& projMat) {
   uProjectionMatrix_ = projMat;
 }
 
-void Terrain::render(float time, const glm::mat4& cam_mat, const glm::vec3& cam_pos,
-                     const glm::mat4& shadowCP, const oglwrap::Texture2D_Array& shadowTex) {
+void Terrain::render(float time, const glm::mat4& cam_mat, const glm::vec3& cam_pos, const Shadow& shadow) {
   prog_.use();
   uCameraMatrix_.set(cam_mat);
   uSunData_.set(skybox_.getSunData(time));
-  uShadowCP_ = shadowCP;
+  for(int i = 0; i < shadow.getDepth(); ++i) {
+    uShadowCP_[i] = shadow.shadowCPs()[i];
+  }
+  uNumUsedShadowMaps_ = shadow.getDepth();
   skybox_.env_map.active(0);
   skybox_.env_map.bind();
-  shadowTex.active(4);
-  shadowTex.bind();
+  shadow.shadowTex().active(4);
+  shadow.shadowTex().bind();
 
   mesh_.render(cam_pos, uOffset_, uMipmapLevel_);
 

@@ -1,18 +1,24 @@
 #version 330 core
 
+#define SHADOW_MAP_NUM 4
+
 layout(location = 0) in ivec2 vPosition;
 
-uniform mat4 uShadowCP, uProjectionMatrix, uCameraMatrix;
+uniform mat4 uProjectionMatrix, uCameraMatrix;
 uniform ivec2 uOffset;
 uniform vec3 uScales;
 uniform sampler2D uHeightMap;
 uniform int uMipmapLevel;
 
+uniform mat4 uShadowCP[SHADOW_MAP_NUM];
+uniform int  uNumUsedShadowMaps;
+
 out VertexData {
   vec3  w_normal;
   vec3  c_pos, w_pos;
   vec2  texcoord;
-  vec4  shadowCoord;
+  vec4 shadowCoord[SHADOW_MAP_NUM];
+  float scInvalid[SHADOW_MAP_NUM];
   float invalid;
   mat3  NormalMatrix;
 } vout;
@@ -40,7 +46,22 @@ void main() {
     float height = fetchHeight(iTexcoord);
     vout.w_pos = uScales * vec3(w_offsPos.x, height, w_offsPos.y);
     vout.c_pos = (uCameraMatrix * vec4(vout.w_pos, 1.0)).xyz;
-    vout.shadowCoord = uShadowCP * vec4(vout.w_pos, 1.0);
+
+    vec4 w_pos = vec4(vout.w_pos, 1.0);
+        for(int i = 0; i < max(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+        vec4 sc = uShadowCP[i] * w_pos;
+        vout.shadowCoord[i] = sc;
+        if(sc.w == 0) {
+            vout.scInvalid[i] = 1e10;
+        } else {
+            sc.xyz /= sc.w;
+            if(abs(sc.x) > 1.0 || abs(sc.y) > 1.0 || abs(sc.z) > 1.0) {
+                vout.scInvalid[i] = 1e10;
+            } else {
+                vout.scInvalid[i] = 0.0;
+            }
+        }
+    }
 
     // -------======{[ Normals ]}======-------
 

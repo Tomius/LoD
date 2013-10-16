@@ -1,15 +1,19 @@
 #version 330 core
 
+#define SHADOW_MAP_NUM 4
+
 in VertexData {
     vec3 c_normal;
     vec3 c_pos;
     vec2 texCoord;
-    vec4 shadowCoord;
+    vec4 shadowCoord[SHADOW_MAP_NUM];
+    float scInvalid[SHADOW_MAP_NUM];
 } vin;
 
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
 uniform sampler2DArrayShadow uShadowMap;
 uniform mat4 uCameraMatrix;
+uniform int uNumUsedShadowMaps;
 
 out vec4 frag_color;
 
@@ -57,18 +61,25 @@ float Visibility() {
   float bias = 0.01;
   float alpha = kMaxShadow / kShadowSoftness; // Max shadow per sample
 
-	// Sample the shadow map kShadowSoftness times.
-	for(int i = 0; i < kShadowSoftness; i++) {
-		visibility -= alpha * (1.0 - texture(
-      uShadowMap,
-      vec4( // x, y, slice, depth
-        vin.shadowCoord.xy + kPoissonDisk[i] / 256.0,
-        0, (vin.shadowCoord.z - bias) / vin.shadowCoord.w
-      )
-    ));
-	}
+  // For every shadow casters
+  for(int i = 0; i < max(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+    if(vin.scInvalid[i] != 0.0) // If it doesn't cast any shadow then skip it.
+      continue;
 
-	return visibility;
+    // Sample the shadow map kShadowSoftness times.
+    for(int j = 0; j < kShadowSoftness; ++j) {
+      visibility -= alpha * (1.0 - texture(
+        uShadowMap,
+        vec4( // x, y, slice, depth
+          vin.shadowCoord[i].xy + kPoissonDisk[j] / 256.0,
+          i, (vin.shadowCoord[i].z - bias) / vin.shadowCoord[i].w
+        )
+      ));
+    }
+  }
+
+  // The visibility shouldn't go negative.
+	return max(visibility, 0.0);
 }
 
 void main() {

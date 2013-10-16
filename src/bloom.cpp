@@ -12,7 +12,7 @@ BloomEffect::BloomEffect()
   rect_.setupPositions(prog_ | "vPosition");
 }
 
-void BloomEffect::reshape(GLuint w, GLuint h) {
+void BloomEffect::resize(GLuint w, GLuint h) {
   width_ = w;
   height_ = h;
 

@@ -4,19 +4,23 @@
 #define BONE_NUM
 #define BONE_ATTRIB_NUM
 
+// If you reorder or change the layout of these,
+// remember to that to ayumi_shadow.vert too!
 in vec4  vPosition;
-in vec2  vTexCoord;
-in vec3  vNormal;
 in ivec4 vBoneIDs[BONE_ATTRIB_NUM];
 in vec4  vWeights[BONE_ATTRIB_NUM];
 
-uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
+in vec2 vTexCoord;
+in vec3 vNormal;
+
+uniform mat4 uShadowCP, uProjectionMatrix, uCameraMatrix, uModelMatrix;
 uniform mat4 uBones[BONE_NUM];
 
 out VertexData {
     vec3 c_normal;
     vec3 c_pos;
-    vec2 m_texCoord;
+    vec2 texCoord;
+    vec4 shadowCoord;
 } vout;
 
 void main() {
@@ -26,7 +30,8 @@ void main() {
             BoneMatrix += uBones[vBoneIDs[i][j]] * vWeights[i][j];
 
     vout.c_normal = vec3(uCameraMatrix * (uModelMatrix * (BoneMatrix * vec4(vNormal, 0.0))));
-    vout.m_texCoord = vTexCoord;
+    vout.shadowCoord = uShadowCP * (uModelMatrix * (BoneMatrix * vPosition));
+    vout.texCoord = vTexCoord;
 
     vec4 c_pos = uCameraMatrix * (uModelMatrix * (BoneMatrix * vPosition));
     vout.c_pos = vec3(c_pos);

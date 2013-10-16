@@ -2,7 +2,7 @@
 
 layout(location = 0) in ivec2 vPosition;
 
-uniform mat4 uProjectionMatrix, uCameraMatrix;
+uniform mat4 uShadowCP, uProjectionMatrix, uCameraMatrix;
 uniform ivec2 uOffset;
 uniform vec3 uScales;
 uniform sampler2D uHeightMap;
@@ -11,7 +11,8 @@ uniform int uMipmapLevel;
 out VertexData {
   vec3  w_normal;
   vec3  c_pos, w_pos;
-  vec2  m_texcoord;
+  vec2  texcoord;
+  vec4  shadowCoord;
   float invalid;
   mat3  NormalMatrix;
 } vout;
@@ -34,11 +35,12 @@ void main() {
     }
 
     ivec2 iTexcoord = ivec2(w_offsPos) + tex_size / 2;
-    vout.m_texcoord = iTexcoord / vec2(tex_size);
+    vout.texcoord = iTexcoord / vec2(tex_size);
 
     float height = fetchHeight(iTexcoord);
     vout.w_pos = uScales * vec3(w_offsPos.x, height, w_offsPos.y);
     vout.c_pos = (uCameraMatrix * vec4(vout.w_pos, 1.0)).xyz;
+    vout.shadowCoord = uShadowCP * vec4(vout.w_pos, 1.0);
 
     // -------======{[ Normals ]}======-------
 

@@ -32,15 +32,15 @@ const float kSpecularShininess = 20.0;
 // The maximum potion of light that should be subtracted
 // if the object is in shadow. For ex. 0.8 means, object in
 // shadow is 20% as bright as a lit one.
-const float kMaxShadow = 0.8;
+const float kMaxShadow = 0.9;
 
 float Visibility() {
   float bias = 0.01;
 
-	return kMaxShadow * texture(
+	return 1 - kMaxShadow * (1 - texture(
     uShadowMap,
     vec3(vin.shadowCoord.xy, (vin.shadowCoord.z - bias) / vin.shadowCoord.w)
-  );
+  ));
 }
 
 void main() {

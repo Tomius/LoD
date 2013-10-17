@@ -3,6 +3,8 @@ Land of Dreams
 
 Simple attempt of drawing big terrains in OpenGL with the geomipmapping level of detail algorithm. The project also heavily involves character animation with GPU skinning. It uses my c++ OpenGL wrapper: oglwrap. 
 
+**This is just an educational project.** I don't own the rights for every media in the application.
+
 Here's a picture of the program's current capability:
 ![screenshot](screenshot.png) 
 

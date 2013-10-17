@@ -110,7 +110,6 @@ public:
     void end() {
       oglwrap::Framebuffer::Unbind();
       glViewport(0, 0, w_, h_);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 };
 

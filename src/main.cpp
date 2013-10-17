@@ -119,10 +119,13 @@ int main() {
           }
         }
 
-        float time = clock.getElapsedTime().asSeconds();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
 
         // Updates
         cam.updateRotation(window, fixMouse);
+        float time = clock.getElapsedTime().asSeconds();
         charmove.update(cam, ayumi.getMesh().offsetSinceLastFrame());
         cam.updateTarget(charmove.getPos() + ayumi.getMesh().bSphereCenter());
         auto scales = terrain.getScales();

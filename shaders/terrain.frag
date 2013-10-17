@@ -43,7 +43,7 @@ float Visibility() {
   float visiblity = 1.0;
 
   // For every shadow casters
-  for(int i = 0; i < max(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+  for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
       if(vin.scInvalid[i] != 0.0) // If it doesn't cast any shadow then skip it.
           continue;
 

@@ -78,6 +78,7 @@ public:
 
     mesh_.addAnimation("models/ayumi_walk.dae", "Walk",
                        oglwrap::AnimFlag::Repeat |
+                       oglwrap::AnimFlag::Mirrored |
                        oglwrap::AnimFlag::Interruptable);
 
     mesh_.addAnimation("models/ayumi_run.dae", "Run",

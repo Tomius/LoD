@@ -3,9 +3,9 @@
 #define SHADOW_MAP_NUM 64
 
 in VertexData {
-    vec3 c_normal;
-    vec3 w_pos, c_pos;
-    vec2 texCoord;
+  vec3 c_normal;
+  vec3 w_pos, c_pos;
+  vec2 texCoord;
 } vin;
 
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
@@ -98,31 +98,31 @@ float Visibility() {
 }
 
 void main() {
-    vec3 c_normal = normalize(vin.c_normal);
-    vec3 c_viewDir = normalize(-vin.c_pos);
+  vec3 c_normal = normalize(vin.c_normal);
+  vec3 c_viewDir = normalize(-vin.c_pos);
 
-    vec3 c_lightDir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
-    float diffuse_power = max(dot(c_normal, c_lightDir), 0);
+  vec3 c_lightDir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
+  float diffuse_power = max(dot(c_normal, c_lightDir), 0);
 
-    float specular_power;
-    if(diffuse_power < 0.0) {
-      specular_power = 0.0;
-    } else {
-      specular_power = pow(
-        max(
-          dot(
-            reflect(-c_lightDir, c_normal),
-            c_viewDir
-          ), 0.0
-        ), kSpecularShininess
-      );
-    }
+  float specular_power;
+  if(diffuse_power < 0.0) {
+    specular_power = 0.0;
+  } else {
+    specular_power = pow(
+      max(
+        dot(
+          reflect(-c_lightDir, c_normal),
+          c_viewDir
+        ), 0.0
+      ), kSpecularShininess
+    );
+  }
 
-    vec3 color = texture(uDiffuseTexture, vin.texCoord).rgb;
-    float spec_mask = texture(uSpecularTexture, vin.texCoord).r;
+  vec3 color = texture(uDiffuseTexture, vin.texCoord).rgb;
+  float spec_mask = texture(uSpecularTexture, vin.texCoord).r;
 
-    vec3 final_color = color * AmbientColor() *
-        (Visibility() * SunPower() * (diffuse_power + spec_mask * specular_power) + AmbientPower());
+  vec3 final_color = color * AmbientColor() *
+      (Visibility() * SunPower() * (diffuse_power + spec_mask * specular_power) + AmbientPower());
 
-    frag_color = vec4(final_color, 1.0);
+  frag_color = vec4(final_color, 1.0);
 }

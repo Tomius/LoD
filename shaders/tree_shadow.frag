@@ -1,7 +1,7 @@
 #version 330 core
 
 in VertexData {
-    vec2 texcoord;
+  vec2 texcoord;
 } vin;
 
 uniform sampler2D uDiffuseTexture;

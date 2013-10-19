@@ -10,6 +10,6 @@ out VertexData {
 };
 
 void main(void) {
-    gl_Position = uProjectionMatrix * vec4(uCameraMatrix * vec3(10 * vPosition), 1.0);
-    texcoord = vPosition;
+  gl_Position = uProjectionMatrix * vec4(uCameraMatrix * vec3(10 * vPosition), 1.0);
+  texcoord = vPosition;
 }

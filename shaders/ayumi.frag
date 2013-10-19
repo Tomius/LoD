@@ -1,15 +1,19 @@
 #version 330 core
 
+#define SHADOW_MAP_NUM 64
+
 in VertexData {
     vec3 c_normal;
-    vec3 c_pos;
+    vec3 w_pos, c_pos;
     vec2 texCoord;
-    vec4 shadowCoord;
 } vin;
 
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
-uniform sampler2DShadow uShadowMap;
+uniform sampler2DArrayShadow uShadowMap;
 uniform mat4 uCameraMatrix;
+
+uniform mat4 uShadowCP[SHADOW_MAP_NUM];
+uniform int  uNumUsedShadowMaps;
 
 out vec4 frag_color;
 
@@ -22,8 +26,8 @@ const float kSpecularShininess = 20.0f;
 
 // -------======{[ Shadow ]}======-------
 
-// This should be between 1 and 16. The higher this value,
-// the softer shadow it results
+// Multi-sampling rate for the shadows. This should be between 1 and 16.
+// The higher this value is, the softer shadow it results.
 const int kShadowSoftness = 16;
 
 // The maximum potion of light that should be subtracted
@@ -52,23 +56,45 @@ vec2 kPoissonDisk[16] = vec2[](
    vec2( 0.14383161, -0.14100790 )
 );
 
+bool isValidShadowCoord(vec4 s) {
+  if(s.w == 0)
+    return false;
+  else {
+    vec3 p = s.xyz / s.w;
+    if(abs(p.x) > 1 || abs(p.y) > 1 || abs(p.z) > 1)
+      return false;
+  }
+  return true;
+}
+
 float Visibility() {
   float visibility = 1.0;
   float bias = 0.01;
-  float alpha = kMaxShadow / kShadowSoftness; // Max shadow per sample
 
-	// Sample the shadow map kShadowSoftness times.
-	for(int i = 0; i < kShadowSoftness; i++) {
-		visibility -= alpha * (1.0 - texture(
-      uShadowMap,
-      vec3(
-        vin.shadowCoord.xy + kPoissonDisk[i] / 256.0,
-        (vin.shadowCoord.z - bias) / vin.shadowCoord.w)
-      )
-    );
-	}
+  // For every shadow casters
+  for(int i = 0; i < max(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+    vec4 shadowCoord = uShadowCP[i] * vec4(vin.w_pos, 1.0);
+    // Check for shadowCoord validity.
+    if(!isValidShadowCoord(shadowCoord))
+      break;
 
-	return visibility;
+    int shadow_softness = (i == 0) ? kShadowSoftness : 1; // Only self-shadow needs MSA.
+    float alpha = kMaxShadow / shadow_softness; // Max shadow per sample
+
+    // Sample the shadow map kShadowSoftness times.
+    for(int j = 0; j < shadow_softness; ++j) {
+      visibility -= alpha * (1.0 - texture(
+        uShadowMap,
+        vec4( // x, y, slice, depth
+          shadowCoord.xy + kPoissonDisk[j] / 256.0,
+          i, (shadowCoord.z - bias) / shadowCoord.w
+        )
+      ));
+    }
+  }
+
+  // The visibility shouldn't go negative.
+	return max(visibility, 0.0);
 }
 
 void main() {

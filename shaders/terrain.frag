@@ -1,18 +1,22 @@
 #version 330 core
 
+#define SHADOW_MAP_NUM 64
+
 in VertexData {
   vec3  w_normal;
   vec3  c_pos, w_pos;
   vec2  texcoord;
-  vec4  shadowCoord;
   float invalid;
   mat3  NormalMatrix;
 } vin;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap[2], uGrassNormalMap;
-uniform sampler2DShadow uShadowMap;
+uniform sampler2DArrayShadow uShadowMap;
 uniform vec3 uScales;
+
+uniform mat4 uShadowCP[SHADOW_MAP_NUM];
+uniform int uNumUsedShadowMaps;
 
 out vec4 frag_color;
 
@@ -32,15 +36,26 @@ const float kSpecularShininess = 20.0;
 // The maximum potion of light that should be subtracted
 // if the object is in shadow. For ex. 0.8 means, object in
 // shadow is 20% as bright as a lit one.
-const float kMaxShadow = 0.9;
+const float kMaxShadow = 0.8;
 
 float Visibility() {
   float bias = 0.01;
+  float visiblity = 1.0;
 
-	return 1 - kMaxShadow * (1 - texture(
-    uShadowMap,
-    vec3(vin.shadowCoord.xy, (vin.shadowCoord.z - bias) / vin.shadowCoord.w)
-  ));
+  // For every shadow casters
+  for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+      vec4 shadowCoord = uShadowCP[i] * vec4(vin.w_pos, 1.0);
+
+      visiblity -= kMaxShadow * (1 - texture(
+          uShadowMap,
+          vec4( // x, y, slice, depth
+              shadowCoord.xy, i,
+              (shadowCoord.z - bias) / shadowCoord.w
+          )
+      ));
+  }
+
+        return max(visiblity, 0.0);
 }
 
 void main() {
@@ -85,15 +100,8 @@ void main() {
 
     float length_from_camera = length(vin.c_pos);
 
-    vec3 final_color;
-    if(length_from_camera < 50) {
-      final_color = grass_color * AmbientColor() *
+    vec3 final_color = grass_color * AmbientColor() *
           (Visibility() * SunPower() * (specular_power + diffuse_power) + AmbientPower());
-    } else {
-      final_color = grass_color * AmbientColor() *
-          (SunPower() * (specular_power + diffuse_power) + AmbientPower());
-    }
-
 
     // Fog
     vec3 fog = AmbientColor() * kFogColor * (0.005 + SunPower());
@@ -101,4 +109,3 @@ void main() {
 
     frag_color = vec4(mix(final_color, fog, alpha), 1.0);
 }
-

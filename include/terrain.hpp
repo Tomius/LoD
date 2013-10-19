@@ -3,6 +3,7 @@
 
 #include "terrainMesh.hpp"
 #include "skybox.hpp"
+#include "shadow.hpp"
 
 class Terrain {
   oglwrap::Program prog_;
@@ -13,7 +14,7 @@ class Terrain {
   oglwrap::LazyUniform<glm::vec4> uSunData_;
   oglwrap::LazyUniform<glm::vec3> uScales_;
   oglwrap::LazyUniform<glm::ivec2> uOffset_;
-  oglwrap::LazyUniform<int> uMipmapLevel_;
+  oglwrap::LazyUniform<int> uMipmapLevel_, uNumUsedShadowMaps_;
   TerrainMesh mesh_;
 
   Skybox& skybox_;
@@ -24,8 +25,7 @@ public:
   Terrain(Skybox& skybox);
   void resize(const glm::mat4& projMat);
   glm::vec3 getScales() const;
-  void render(float time, const glm::mat4& camMat, const glm::vec3& camPos,
-              const glm::mat4& shadowCP, const oglwrap::Texture2D& shadowTex);
+  void render(float time, const glm::mat4& camMat, const glm::vec3& camPos, const Shadow& shadow);
   unsigned char fetchHeight(glm::ivec2 v) const;
   double getHeight(double x, double y) const;
 };

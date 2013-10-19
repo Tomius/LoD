@@ -67,7 +67,7 @@ int main() {
       Skybox skybox;
       BloomEffect bloom;
       Terrain terrain(skybox);
-      Shadow shadow;
+      Shadow shadow(512, 64);
       Tree tree(skybox, terrain);
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 
@@ -119,12 +119,11 @@ int main() {
           }
         }
 
-        gl( Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
-
-        float time = clock.getElapsedTime().asSeconds();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Updates
         cam.updateRotation(window, fixMouse);
+        float time = clock.getElapsedTime().asSeconds();
         charmove.update(cam, ayumi.getMesh().offsetSinceLastFrame());
         cam.updateTarget(charmove.getPos() + ayumi.getMesh().bSphereCenter());
         auto scales = terrain.getScales();
@@ -139,22 +138,18 @@ int main() {
         // Temp variables
         glm::mat4 camMatrix = cam.cameraMatrix();
         glm::vec3 camPos = cam.getPos();
-        glm::mat4 shadowMat = shadow.biasCamProjMat(
-          skybox.getSunPos(time),
-          ayumi.getMesh().bSphere(charmove.getModelMatrix())
-        );
-        const oglwrap::Texture2D& shadowTex = shadow.shadowTex();
         FPS_Display(time);
 
         // Create shadow data
-        shadow.startShadowRender();
-            ayumi.shadowRender(time, shadow, charmove);
-        shadow.endShadowRender();
+        shadow.begin();
+          ayumi.shadowRender(time, shadow, charmove);
+          tree.shadowRender(time, cam, shadow);
+        shadow.end();
 
         // Actual renders
         skybox.render(time, camMatrix);
-        terrain.render(time, camMatrix, camPos, shadowMat, shadowTex);
-        ayumi.render(time, cam, charmove, shadowMat, shadowTex);
+        terrain.render(time, camMatrix, camPos, shadow);
+        ayumi.render(time, cam, charmove, shadow);
         tree.render(time, cam);
         bloom.render();
 

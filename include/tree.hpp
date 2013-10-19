@@ -18,14 +18,14 @@
 #include "charmove.hpp"
 #include "skybox.hpp"
 #include "terrain.hpp"
+#include "shadow.hpp"
 
 class Tree {
   oglwrap::Mesh mesh_;
-  oglwrap::Program prog_;
-  oglwrap::VertexShader vs_;
-  oglwrap::FragmentShader fs_;
+  oglwrap::Program prog_, shadow_prog_;
 
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_;
+  oglwrap::LazyUniform<glm::mat4> shadow_uMCP_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
 
   glm::vec3 scales_;
@@ -48,23 +48,29 @@ public:
            aiProcessPreset_TargetRealtime_MaxQuality |
            aiProcess_FlipUVs
           )
-    , vs_("tree.vert")
-    , fs_("tree.frag")
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")
+    , shadow_uMCP_(shadow_prog_, "uMCP")
     , uSunData_(prog_, "uSunData")
     , skybox_(skybox) {
 
-    prog_ << vs_ << fs_ << skybox_.sky_fs;
+    shadow_prog_.attachShader(oglwrap::VertexShader("tree_shadow.vert"));
+    shadow_prog_.attachShader(oglwrap::FragmentShader("tree_shadow.frag"));
+    shadow_prog_.link().use();
+
+    mesh_.setupDiffuseTextures(1);
+    oglwrap::UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
+
+    prog_.attachShader(oglwrap::VertexShader("tree.vert"));
+    prog_.attachShader(oglwrap::FragmentShader("tree.frag"));
+    prog_.attachShader(skybox_.sky_fs);
     prog_.link().use();
 
     mesh_.setupPositions(prog_ | "vPosition");
     mesh_.setupTexCoords(prog_ | "vTexCoord");
     mesh_.setupNormals(prog_ | "vNormal");
     oglwrap::UniformSampler(prog_, "uEnvMap").set(0);
-
-    mesh_.setupDiffuseTextures(1);
     oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
 
     // Get the trees' positions.
@@ -77,9 +83,9 @@ public:
                                       j + rand()%(kTreeDist/2) - kTreeDist/4);
         glm::vec3 pos = scales_ * glm::vec3(coord.x, terrain.fetchHeight(coord), coord.y);
         glm::vec3 scale = glm::vec3(
-                            0.5f + 0.5f * rand() / RAND_MAX,
-                            0.5f + 0.5f * rand() / RAND_MAX,
-                            0.5f + 0.5f * rand() / RAND_MAX
+                            1.0f + rand() / RAND_MAX,
+                            1.0f + rand() / RAND_MAX,
+                            1.0f + rand() / RAND_MAX
                           );
 
         float rotation = 360.0f * rand() / RAND_MAX;
@@ -96,6 +102,20 @@ public:
   void resize(glm::mat4 projMat) {
     prog_.use();
     uProjectionMatrix_ = projMat;
+  }
+
+  void shadowRender(float time, const oglwrap::Camera& cam, Shadow& shadow) {
+    shadow_prog_.use();
+
+    auto campos = cam.getPos();
+    for(size_t i = 0; i < trees_.size() && shadow.getDepth() + 1 < shadow.getMaxDepth(); i++) {
+      if(glm::length(campos - trees_[i].pos) < std::max(scales_.x, scales_.z) * 300) {
+        const glm::mat4& modelMat = trees_[i].mat * mesh_.worldTransform();
+        shadow_uMCP_ = shadow.modelCamProjMat(skybox_.getSunPos(time), mesh_.bSphere(), modelMat);
+        mesh_.render();
+        shadow.push();
+      }
+    }
   }
 
   void render(float time, const oglwrap::Camera& cam) {

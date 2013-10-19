@@ -130,6 +130,10 @@ vec3 AmbientDirection() {
   return normalize(uSunPos);
 }
 
+float isDay() {
+  return uDay;
+}
+
 float SunPower() {
   return max((uDay + 0.03) * (normalize(uSunPos).y + 0.22), 0.004);
 }

@@ -20,14 +20,15 @@ uniform int uNumUsedShadowMaps;
 
 out vec4 frag_color;
 
+// External functions
 vec3 AmbientDirection();
 float SunPower();
 float AmbientPower();
 vec3 AmbientColor();
+float isDay();
 
 float kFogMin = max(uScales.x, uScales.z) * 128.0;
 float kFogMax = max(uScales.x, uScales.z) * 2048.0;
-const vec3 kFogColor = vec3(0.8f);
 
 const float kSpecularShininess = 20.0;
 
@@ -103,8 +104,9 @@ void main() {
     (Visibility() * SunPower() * (specular_power + diffuse_power) + AmbientPower());
 
   // Fog
-  vec3 fog = AmbientColor() * kFogColor * (0.005 + SunPower());
-  float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 12;
+  vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));
+  vec3 fog = AmbientColor() * fog_color * (0.005 + SunPower());
+  float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 8;
 
-  frag_color = vec4(mix(final_color, fog, alpha), 1.0);
+  frag_color = vec4(clamp(mix(final_color, fog, alpha), 0, 1), 1.0);
 }

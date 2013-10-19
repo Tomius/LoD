@@ -1,13 +1,11 @@
 #version 330 core
 
-#define SHADOW_MAP_NUM 4
+#define SHADOW_MAP_NUM 64
 
 in VertexData {
   vec3  w_normal;
   vec3  c_pos, w_pos;
   vec2  texcoord;
-  vec4  shadowCoord[SHADOW_MAP_NUM];
-  float scInvalid[SHADOW_MAP_NUM];
   float invalid;
   mat3  NormalMatrix;
 } vin;
@@ -16,6 +14,8 @@ uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap[2], uGrassNormalMap;
 uniform sampler2DArrayShadow uShadowMap;
 uniform vec3 uScales;
+
+uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;
 
 out vec4 frag_color;
@@ -44,14 +44,13 @@ float Visibility() {
 
   // For every shadow casters
   for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
-      if(vin.scInvalid[i] != 0.0) // If it doesn't cast any shadow then skip it.
-          continue;
+      vec4 shadowCoord = uShadowCP[i] * vec4(vin.w_pos, 1.0);
 
       visiblity -= kMaxShadow * (1 - texture(
           uShadowMap,
           vec4( // x, y, slice, depth
-              vin.shadowCoord[i].xy, i,
-              (vin.shadowCoord[i].z - bias) / vin.shadowCoord[i].w
+              shadowCoord.xy, i,
+              (shadowCoord.z - bias) / shadowCoord.w
           )
       ));
   }

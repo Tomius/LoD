@@ -146,7 +146,9 @@ public:
     mesh_.render();
     gl(Disable(GL_CULL_FACE));
 
-    shadow.push();
+    if(shadow.getDepth() < shadow.getMaxDepth()) {
+      shadow.push();
+    }
   }
 
   void render(float time,

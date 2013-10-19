@@ -66,13 +66,14 @@ public:
       );
 
       glm::mat4 projMatrix = projMat(targetBSphere.w);
-
-      cp_matrices_[curr_depth_] = biasMatrix * projMatrix * camMat(lightSrcPos, targetBSphere);
-
       glm::vec4 offseted_targetBSphere =
         glm::vec4(glm::vec3(modelMatrix * glm::vec4(glm::vec3(targetBSphere), 1)), targetBSphere.w);
 
-      return projMatrix * camMat(lightSrcPos, offseted_targetBSphere) * modelMatrix;
+      glm::mat4 pc = projMatrix * camMat(lightSrcPos, offseted_targetBSphere);
+
+      cp_matrices_[curr_depth_] = biasMatrix * pc;
+
+      return pc * modelMatrix;
     }
 
     const std::vector<glm::mat4>& shadowCPs() const {

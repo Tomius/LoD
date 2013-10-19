@@ -67,7 +67,7 @@ int main() {
       Skybox skybox;
       BloomEffect bloom;
       Terrain terrain(skybox);
-      Shadow shadow(512, 16);
+      Shadow shadow(512, 64);
       Tree tree(skybox, terrain);
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 
@@ -120,8 +120,6 @@ int main() {
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
 
         // Updates
         cam.updateRotation(window, fixMouse);

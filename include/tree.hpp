@@ -109,7 +109,7 @@ public:
 
     auto campos = cam.getPos();
     for(size_t i = 0; i < trees_.size() && shadow.getDepth() + 1 < shadow.getMaxDepth(); i++) {
-      if(glm::length(campos - trees_[i].pos) < std::max(scales_.x, scales_.z) * 800) {
+      if(glm::length(campos - trees_[i].pos) < std::max(scales_.x, scales_.z) * 300) {
         const glm::mat4& modelMat = trees_[i].mat * mesh_.worldTransform();
         shadow_uMCP_ = shadow.modelCamProjMat(skybox_.getSunPos(time), mesh_.bSphere(), modelMat);
         mesh_.render();

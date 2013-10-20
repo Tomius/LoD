@@ -26,6 +26,9 @@
 using namespace oglwrap;
 
 const float GRAVITY = 0.6f;
+/* 0 -> max quality
+   4 -> max performance */
+extern const int PERFORMANCE = 0;
 
 void GL_Init() {
   gl(ClearColor(0.0f, 0.0f, 0.0f, 0.0f));
@@ -67,7 +70,7 @@ int main() {
       Skybox skybox;
       BloomEffect bloom;
       Terrain terrain(skybox);
-      Shadow shadow(512, 32);
+      Shadow shadow(PERFORMANCE ? 256 : 512, 32);
       Tree tree(skybox, terrain);
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 

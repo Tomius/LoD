@@ -4,6 +4,10 @@
 using namespace oglwrap;
 #define RESTART 0xFFFFFFFF
 
+/* 0 -> max quality
+   4 -> max performance */
+extern const int PERFORMANCE;
+
 /* We want concentric rings made of hexagons like this, with increasing
    distance between two rings. This makes a great LOD effect if the viewer
    is near the center.
@@ -311,7 +315,7 @@ static inline int GetBlockMipmapLevel(glm::ivec2 _pos, glm::vec2 camPos) {
   return std::min(
            std::max(
              int(log2(glm::length(pos - camPos)) - log2(2 * kBlockRadius)),
-             0
+             PERFORMANCE
            ), kBlockMipmapLevel - 1
          );
 }
@@ -346,13 +350,16 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   int mipmap_level = GetBlockMipmapLevel(pos, camPos);
   uMipmapLevel_ = mipmap_level;
 
-  // Draw
-  vao_[mipmap_level].bind();
-  indices_[mipmap_level].bind();
-  gl(Enable(GL_CULL_FACE));
-  gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
-  gl(Disable(GL_CULL_FACE));
-  CreateConnectors(pos, camPos);
+  // Draw the center piece
+  if(glm::length(pos - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
+    vao_[mipmap_level].bind();
+    indices_[mipmap_level].bind();
+    gl(Enable(GL_CULL_FACE));
+    gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
+    gl(Disable(GL_CULL_FACE));
+    CreateConnectors(pos, camPos);
+  }
+
 
 
   // All the other ones
@@ -361,6 +368,8 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   for(int ring = 1; ring < kRingCount; ring++) {
     for(char line = 0; line < 6; line++) {
       for(int segment = 0; segment < ring ; segment++) {
+        if(glm::length(pos - glm::ivec2(camPos.x, camPos.y)) > terrain_.w - PERFORMANCE * 500)
+          continue;
         pos = GetBlockPos(ring, line, segment, distance);
         uOffset_ = pos;
         mipmap_level = GetBlockMipmapLevel(pos, camPos);
@@ -426,6 +435,11 @@ double TerrainMesh::getHeight(double x, double y) const {
   using namespace std;
   using namespace glm;
   ivec2 coord = ivec2(round(x), round(y));
+
+  // If speed is required than just approximate.
+  if(PERFORMANCE >= 2) {
+    return fetchHeight(coord);
+  }
 
   /*    Neighbors in geometry:
 

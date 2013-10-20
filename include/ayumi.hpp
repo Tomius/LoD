@@ -19,6 +19,9 @@
 #include "shadow.hpp"
 
 extern const float GRAVITY;
+/* 0 -> max quality
+   4 -> max performance */
+extern const int PERFORMANCE;
 
 class Ayumi {
   oglwrap::AnimatedMesh mesh_;
@@ -27,7 +30,7 @@ class Ayumi {
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_, uShadowCP_;
   oglwrap::LazyUniform<glm::mat4> shadow_uMCP_, shadow_uBones_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
-  oglwrap::LazyUniform<int> uNumUsedShadowMaps_;
+  oglwrap::LazyUniform<int> uNumUsedShadowMaps_, uShadowSoftness_;
 
   Skybox& skybox_;
 public:
@@ -44,6 +47,7 @@ public:
     , shadow_uBones_(shadow_prog_, "uBones")
     , uSunData_(prog_, "uSunData")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
+    , uShadowSoftness_(prog_, "uShadowSoftness")
     , skybox_(skybox) {
 
     oglwrap::ShaderSource vs_source("ayumi.vert");
@@ -73,6 +77,7 @@ public:
     oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
     oglwrap::UniformSampler(prog_, "uSpecularTexture").set(2);
     oglwrap::UniformSampler(prog_, "uShadowMap").set(3);
+    uShadowSoftness_ = 1 << clamp(4 - PERFORMANCE, 0, 4);
 
     mesh_.addAnimation("models/ayumi_idle.dae", "Stand",
                        oglwrap::AnimFlag::Repeat |

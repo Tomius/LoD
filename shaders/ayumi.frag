@@ -28,7 +28,7 @@ const float kSpecularShininess = 20.0f;
 
 // Multi-sampling rate for the shadows. This should be between 1 and 16.
 // The higher this value is, the softer shadow it results.
-const int kShadowSoftness = 16;
+uniform int uShadowSoftness = 16;
 
 // The maximum potion of light that should be subtracted
 // if the object is in shadow. For ex. 0.8 means, object in
@@ -64,7 +64,7 @@ float Visibility() {
   for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(vin.w_pos, 1.0);
 
-    float softness = (i == 0) ? kShadowSoftness : 1; // Only self-shadow needs MSA
+    float softness = (i == 0) ? uShadowSoftness : 1; // Only self-shadow needs MSA
     float alpha = kMaxShadow / softness; // Max shadow per sample
 
     // Sample the shadow map kShadowSoftness times.

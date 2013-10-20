@@ -1,6 +1,6 @@
 #version 330 core
 
-#define SHADOW_MAP_NUM 64
+#define SHADOW_MAP_NUM 32
 
 in VertexData {
   vec3 c_normal;
@@ -56,33 +56,19 @@ vec2 kPoissonDisk[16] = vec2[](
    vec2( 0.14383161, -0.14100790 )
 );
 
-bool isValidShadowCoord(vec4 s) {
-  if(s.w == 0)
-    return false;
-  else {
-    vec3 p = s.xyz / s.w;
-    if(abs(p.x) > 1 || abs(p.y) > 1 || abs(p.z) > 1)
-      return false;
-  }
-  return true;
-}
-
 float Visibility() {
   float visibility = 1.0;
   float bias = 0.01;
 
   // For every shadow casters
-  for(int i = 0; i < max(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+  for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(vin.w_pos, 1.0);
-    // Check for shadowCoord validity.
-    if(!isValidShadowCoord(shadowCoord))
-      break;
 
-    int shadow_softness = (i == 0) ? kShadowSoftness : 1; // Only self-shadow needs MSA.
-    float alpha = kMaxShadow / shadow_softness; // Max shadow per sample
+    float softness = (i == 0) ? kShadowSoftness : 1; // Only self-shadow needs MSA
+    float alpha = kMaxShadow / softness; // Max shadow per sample
 
     // Sample the shadow map kShadowSoftness times.
-    for(int j = 0; j < shadow_softness; ++j) {
+    for(int j = 0; j < softness; ++j) {
       visibility -= alpha * (1.0 - texture(
         uShadowMap,
         vec4( // x, y, slice, depth
@@ -91,6 +77,9 @@ float Visibility() {
         )
       ));
     }
+
+    if(visibility < 0)
+      return 0;
   }
 
   // The visibility shouldn't go negative.

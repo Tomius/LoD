@@ -50,7 +50,7 @@ glm::vec4 Skybox::getSunData(float time) const {
 
   float daytime = fmod(time, day_duration) / day_duration;
 
-  static int day = true; // day/night
+  static bool day = true; // day/night
   static float lastSwitch = 0.0f;
   if(0.7f < daytime && daytime < 0.8f && 0.5f < (time - lastSwitch) / day_duration) {
     day = !day;

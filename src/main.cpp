@@ -67,7 +67,7 @@ int main() {
       Skybox skybox;
       BloomEffect bloom;
       Terrain terrain(skybox);
-      Shadow shadow(512, 64);
+      Shadow shadow(512, 32);
       Tree tree(skybox, terrain);
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 

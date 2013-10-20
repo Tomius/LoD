@@ -1,6 +1,6 @@
 #version 330 core
 
-#define SHADOW_MAP_NUM 64
+#define SHADOW_MAP_NUM 32
 
 in VertexData {
   vec3  w_normal;
@@ -41,13 +41,13 @@ const float kMaxShadow = 0.8;
 
 float Visibility() {
   float bias = 0.01;
-  float visiblity = 1.0;
+  float visibility = 1.0;
 
   // For every shadow casters
   for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(vin.w_pos, 1.0);
 
-    visiblity -= kMaxShadow * (1 - texture(
+    visibility -= kMaxShadow * (1 - texture(
       uShadowMap,
       vec4( // x, y, slice, depth
         shadowCoord.xy, i,
@@ -55,11 +55,11 @@ float Visibility() {
       )
     ));
 
-    if(visiblity < 0)
+    if(visibility < 0)
       return 0;
   }
 
-  return max(visiblity, 0.0);
+  return max(visibility, 0.0);
 }
 
 void main() {

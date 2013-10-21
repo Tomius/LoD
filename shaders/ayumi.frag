@@ -64,7 +64,8 @@ float Visibility() {
   for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(vin.w_pos, 1.0);
 
-    float softness = (i == 0) ? uShadowSoftness : 1; // Only self-shadow needs MSA
+    // Self-shadow needs better MSA
+    float softness = (i == 0) ? uShadowSoftness : max(uShadowSoftness/2, 1);
     float alpha = kMaxShadow / softness; // Max shadow per sample
 
     // Sample the shadow map kShadowSoftness times.

@@ -314,9 +314,9 @@ static inline int GetBlockMipmapLevel(glm::ivec2 _pos, glm::vec2 camPos) {
 
   return std::min(
            std::max(
-             int(log2(glm::length(pos - camPos)) - log2(2 * kBlockRadius)),
-             PERFORMANCE
-           ), kBlockMipmapLevel - 1
+             int(log2(glm::length(pos - camPos)) - log2((2.0 - 0.25*PERFORMANCE) * kBlockRadius)),
+             0
+           ) + PERFORMANCE, kBlockMipmapLevel - 1
          );
 }
 
@@ -359,8 +359,6 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
     gl(Disable(GL_CULL_FACE));
     CreateConnectors(pos, camPos);
   }
-
-
 
   // All the other ones
   int distance = kBlockRadius;

@@ -28,7 +28,7 @@ using namespace oglwrap;
 const float GRAVITY = 0.6f;
 /* 0 -> max quality
    4 -> max performance */
-extern const int PERFORMANCE = 0;
+extern const int PERFORMANCE = 1;
 
 void GL_Init() {
   gl(ClearColor(0.0f, 0.0f, 0.0f, 0.0f));

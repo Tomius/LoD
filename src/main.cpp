@@ -3,15 +3,7 @@
 #include <iostream>
 #include <SFML/Window.hpp>
 
-#if defined(__APPLE__)
-#include <OpenGL/glew.h>
-#else
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-#include <windows.h>
-#endif
-#include <GL/glew.h>
-#endif
-
+#include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/utils/camera.hpp"
 
@@ -30,7 +22,7 @@ const float GRAVITY = 0.6f;
    4 -> max performance */
 extern const int PERFORMANCE = 1;
 
-void GL_Init() {
+void glInit() {
   gl(ClearColor(0.0f, 0.0f, 0.0f, 0.0f));
   gl(ClearDepth(1.0f));
   gl(Enable(GL_DEPTH_TEST));
@@ -39,18 +31,18 @@ void GL_Init() {
   gl(CullFace(GL_BACK));
 }
 
-void FPS_Display(float time) {
-  static float accumTime = 0.0f;
-  static float lastCall = time;
-  float dt = time - lastCall;
-  lastCall = time;
+void FpsDisplay(float time) {
+  static float accum_time = 0.0f;
+  static float last_call = time;
+  float dt = time - last_call;
+  last_call = time;
   static int calls = 0;
 
   calls++;
-  accumTime += dt;
-  if(accumTime > 1.0f) {
+  accum_time += dt;
+  if(accum_time > 1.0f) {
     std::cout << "FPS: " << calls << std::endl;
-    accumTime = calls = 0;
+    accum_time = calls = 0;
   }
 }
 
@@ -66,7 +58,7 @@ int main() {
   sf::Clock clock;
   bool fixMouse = false;
   if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
-      GL_Init();
+      glInit();
       Skybox skybox;
       BloomEffect bloom;
       Terrain terrain(skybox);
@@ -141,7 +133,7 @@ int main() {
         // Temp variables
         glm::mat4 camMatrix = cam.cameraMatrix();
         glm::vec3 camPos = cam.getPos();
-        FPS_Display(time);
+        FpsDisplay(time);
 
         // Create shadow data
         shadow.begin();

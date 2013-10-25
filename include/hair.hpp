@@ -1,15 +1,7 @@
 #ifndef LOD_HAIR_HPP_
 #define LOD_HAIR_HPP_
 
-#if defined(__APPLE__)
-  #include <OpenGL/glew.h>
-#else
-  #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-    #include <windows.h>
-  #endif
-    #include <GL/glew.h>
-#endif
-
+#include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/assimp.hpp"
 #include "oglwrap/mesh/skinningData.hpp"
@@ -48,7 +40,7 @@ class Hair {
   };
 
   RootHairSegment root_;
-  const oglwrap::CharacterMovement& charmove_;
+  const CharacterMovement& charmove_;
   glm::mat4 inverse_model_matrix_;
 
   void updateNode(HairSegment& node,
@@ -59,7 +51,7 @@ class Hair {
 public:
 
   Hair(const oglwrap::ExternalBoneTree& root_ebone,
-       const oglwrap::CharacterMovement& charmove);
+       const CharacterMovement& charmove);
 
   void update(float time, float gravity);
 };

@@ -31,7 +31,7 @@ Hair::HairSegment::HairSegment(BasicHairSegment* _parent,
 }
 
 Hair::Hair(const oglwrap::ExternalBoneTree& root_ebone,
-           const oglwrap::CharacterMovement& charmove)
+           const CharacterMovement& charmove)
      : root_(root_ebone)
      , charmove_(charmove) {
 

@@ -1,5 +1,7 @@
 #include "charmove.hpp"
 
+#define SPEED_HACK 1.0f
+
 using namespace oglwrap;
 
 CharacterMovement::CharacterMovement(glm::vec3 pos,
@@ -86,9 +88,9 @@ void CharacterMovement::update(const Camera& cam, glm::vec2 character_offset) {
 
   mat3 transformation = mat3(rotate(mat4(), (float)fmod(curr_rot_, 360), vec3(0,1,0)));
 
-  pos_ += transformation * vec3(character_offset.x, 0, character_offset.y);
+  pos_ += transformation * SPEED_HACK * vec3(character_offset.x, 0, character_offset.y);
   if(jumping_) {
-    pos_ += transformation * vec3(0, 0, horiz_speed_ * dt);
+    pos_ += transformation * SPEED_HACK * vec3(0, 0, horiz_speed_ * dt);
   }
 }
 

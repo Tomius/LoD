@@ -363,7 +363,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   uMipmapLevel_ = mipmap_level;
 
   // Draw the center piece
-  if(glm::length(pos - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
+  if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
     vao_[mipmap_level].bind();
     indices_[mipmap_level].bind();
     gl(Enable(GL_CULL_FACE));
@@ -378,7 +378,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   for(int ring = 1; ring < kRingCount; ring++) {
     for(char line = 0; line < 6; line++) {
       for(int segment = 0; segment < ring ; segment++) {
-        if(glm::length(pos - glm::ivec2(camPos.x, camPos.y)) > terrain_.w - PERFORMANCE * 500)
+        if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) > terrain_.w - PERFORMANCE * 500)
           continue;
         pos = GetBlockPos(ring, line, segment, distance);
         uOffset_ = pos;

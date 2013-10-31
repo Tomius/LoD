@@ -51,13 +51,14 @@ int main() {
     sf::VideoMode(800, 600),
     "Land of Dreams",
     sf::Style::Default,
-    sf::ContextSettings(24, 8, 0, 3, 1)
+    sf::ContextSettings(24, 8, 0, 3, 3)
   );
-  window.setVerticalSyncEnabled(false); // bloom -> i want to draw twice per frame
+  // No V-sync needed because of multiple draw calls per frame.
+  window.setVerticalSyncEnabled(false);
 
   sf::Clock clock;
   bool fixMouse = false;
-  if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
+  if(glewInit() == GLEW_OK && GLEW_VERSION_3_3) try {
       glInit();
       Skybox skybox;
       BloomEffect bloom;

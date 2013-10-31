@@ -1,4 +1,5 @@
-#version 330 core
+#version 140
+#extension GL_ARB_gpu_shader5 : enable
 
 in vec4 vPosition;
 in vec2 vTexCoord;

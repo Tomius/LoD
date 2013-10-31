@@ -1,8 +1,9 @@
-#version 330 core
+#version 140
+#extension GL_ARB_gpu_shader5 : enable
 
 in VertexData {
   vec3 texcoord;
-};
+}
 
 out vec4 frag_color;
 

@@ -1,6 +1,7 @@
-#version 330 core
+#version 140
+#extension GL_ARB_gpu_shader5 : enable
 
-layout(location = 0) in ivec2 vPosition;
+in ivec2 vPosition;
 
 uniform mat4 uProjectionMatrix, uCameraMatrix;
 uniform ivec2 uOffset;

@@ -33,10 +33,10 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
   shadow_prog_.attachShader(oglwrap::FragmentShader("shadow.frag"));
   shadow_prog_.link();
 
-  mesh_.setupPositions(prog_ | "vPosition");
-  mesh_.setupTexCoords(prog_ | "vTexCoord");
-  mesh_.setupNormals(prog_ | "vNormal");
-  mesh_.setupBones(prog_ | "vBoneIDs", prog_ | "vWeights");
+  mesh_.setupPositions(prog_ | "aPosition");
+  mesh_.setupTexCoords(prog_ | "aTexCoord");
+  mesh_.setupNormals(prog_ | "aNormal");
+  mesh_.setupBones(prog_ | "aBoneIDs", prog_ | "aWeights");
   oglwrap::UniformSampler(prog_, "uEnvMap").set(0);
   mesh_.setupDiffuseTextures(1);
   mesh_.setupSpecularTextures(2);

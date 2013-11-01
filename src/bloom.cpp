@@ -9,7 +9,7 @@ BloomEffect::BloomEffect()
   prog_ << vs_ << fs_;
   prog_.link().use();
 
-  rect_.setupPositions(prog_ | "vPosition");
+  rect_.setupPositions(prog_ | "aPosition");
 }
 
 void BloomEffect::resize(GLuint w, GLuint h) {

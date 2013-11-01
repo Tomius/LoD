@@ -1,5 +1,4 @@
 #version 140
-#extension GL_ARB_gpu_shader5 : enable
 
 // External macros
 #define BONE_NUM
@@ -7,36 +6,34 @@
 
 // If you reorder or change the layout of these,
 // remember to that to ayumi_shadow.vert too!
-in vec4  vPosition;
-in ivec4 vBoneIDs[BONE_ATTRIB_NUM];
-in vec4  vWeights[BONE_ATTRIB_NUM];
+in vec4  aPosition;
+in ivec4 aBoneIDs[BONE_ATTRIB_NUM];
+in vec4  aWeights[BONE_ATTRIB_NUM];
 
-in vec2 vTexCoord;
-in vec3 vNormal;
+in vec2 aTexCoord;
+in vec3 aNormal;
 
 uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
 uniform mat4 uBones[BONE_NUM];
 
-out VertexData {
-  vec3 c_normal;
-  vec3 w_pos, c_pos;
-  vec2 texCoord;
-} vout;
+out vec3 c_vNormal;
+out vec3 w_vPos, c_vPos;
+out vec2 vTexCoord;
 
 void main() {
   mat4 BoneMatrix = mat4(0);
   for(int i = 0; i < BONE_ATTRIB_NUM; i++)
     for(int j = 0; j < 4; j++)
-      BoneMatrix += uBones[vBoneIDs[i][j]] * vWeights[i][j];
+      BoneMatrix += uBones[aBoneIDs[i][j]] * aWeights[i][j];
 
-  vout.c_normal = vec3(uCameraMatrix * (uModelMatrix * (BoneMatrix * vec4(vNormal, 0.0))));
-  vout.texCoord = vTexCoord;
+  c_vNormal = vec3(uCameraMatrix * (uModelMatrix * (BoneMatrix * vec4(aNormal, 0.0))));
+  vTexCoord = aTexCoord;
 
-  vec4 w_pos = uModelMatrix * (BoneMatrix * vPosition);
+  vec4 w_pos = uModelMatrix * (BoneMatrix * aPosition);
   vec4 c_pos = uCameraMatrix * w_pos;
 
-  vout.c_pos = vec3(c_pos);
-  vout.w_pos = vec3(w_pos);
+  c_vPos = vec3(c_pos);
+  w_vPos = vec3(w_pos);
 
   gl_Position = uProjectionMatrix * c_pos;
 }

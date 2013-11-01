@@ -3,6 +3,7 @@
 #include <iostream>
 #include <SFML/Window.hpp>
 
+#include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/utils/camera.hpp"

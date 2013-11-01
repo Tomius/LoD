@@ -1,9 +1,8 @@
 #version 140
-#extension GL_ARB_gpu_shader5 : enable
 
 uniform sampler2DRect uTex;
 
-out vec4 frag_color;
+out vec4 vFragColor;
 
 void main() {
   vec3 color;
@@ -30,5 +29,5 @@ void main() {
   }
 
   // The bloom effect makes everything way too bright, let's compensate that
-  frag_color = vec4(pow(color, vec3(1.5)), 1.0);
+  vFragColor = vec4(pow(color, vec3(1.5)), 1.0);
 }

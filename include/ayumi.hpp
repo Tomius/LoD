@@ -1,15 +1,8 @@
 #ifndef LOD_AYUMI_HPP_
 #define LOD_AYUMI_HPP_
 
-#if defined(__APPLE__)
-#include <OpenGL/glew.h>
-#else
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-#include <windows.h>
-#endif
-#include <GL/glew.h>
-#endif
-
+#include "oglwrap_config.hpp"
+#include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/mesh/animatedMesh.hpp"
 #include "oglwrap/utils/camera.hpp"

@@ -1,6 +1,7 @@
 #ifndef LOD_SKYBOX_HPP_
 #define LOD_SKYBOX_HPP_
 
+#include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/shapes/cube.hpp"

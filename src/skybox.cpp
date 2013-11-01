@@ -16,7 +16,7 @@ Skybox::Skybox()
   prog_ << vs_ << fs_ << sky_fs_;
   prog_.link().use();
 
-  make_cube_.setupPositions(prog_ | "vPosition");
+  make_cube_.setupPositions(prog_ | "aPosition");
 
   env_map_.active(0);
   {

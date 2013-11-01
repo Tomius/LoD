@@ -1,8 +1,7 @@
 #version 140
-#extension GL_ARB_gpu_shader5 : enable
 
-in vec4 vPosition;
+in vec4 aPosition;
 
 void main() {
-  gl_Position = vPosition;
+  gl_Position = aPosition;
 }

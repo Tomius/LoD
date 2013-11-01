@@ -1,6 +1,7 @@
 #ifndef LOD_SHADOW_HPP_
 #define LOD_SHADOW_HPP_
 
+#include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 

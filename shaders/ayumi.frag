@@ -1,13 +1,10 @@
 #version 140
-#extension GL_ARB_gpu_shader5 : enable
 
-#define SHADOW_MAP_NUM 32
+#define SHADOW_MAP_NUM 32 // The maximum number of shadow maps
 
-in VertexData {
-  vec3 c_normal;
-  vec3 w_pos, c_pos;
-  vec2 texCoord;
-} vin;
+in vec3 c_vNormal;
+in vec3 w_vPos, c_vPos;
+in vec2 vTexCoord;
 
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
 uniform sampler2DArrayShadow uShadowMap;
@@ -16,7 +13,7 @@ uniform mat4 uCameraMatrix;
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int  uNumUsedShadowMaps;
 
-out vec4 frag_color;
+out vec4 vFragColor;
 
 vec3 AmbientDirection();
 float AmbientPower();
@@ -39,22 +36,22 @@ const float kMaxShadow = 0.7;
 // Random numbers with nicer properties than true random.
 // Google "Poisson Disk Sampling".
 vec2 kPoissonDisk[16] = vec2[](
-   vec2( -0.94201624, -0.39906216 ),
-   vec2( 0.94558609, -0.76890725 ),
-   vec2( -0.094184101, -0.92938870 ),
-   vec2( 0.34495938, 0.29387760 ),
-   vec2( -0.91588581, 0.45771432 ),
-   vec2( -0.81544232, -0.87912464 ),
-   vec2( -0.38277543, 0.27676845 ),
-   vec2( 0.97484398, 0.75648379 ),
-   vec2( 0.44323325, -0.97511554 ),
-   vec2( 0.53742981, -0.47373420 ),
-   vec2( -0.26496911, -0.41893023 ),
-   vec2( 0.79197514, 0.19090188 ),
-   vec2( -0.24188840, 0.99706507 ),
-   vec2( -0.81409955, 0.91437590 ),
-   vec2( 0.19984126, 0.78641367 ),
-   vec2( 0.14383161, -0.14100790 )
+  vec2( -0.94201624, -0.39906216 ),
+  vec2( 0.94558609, -0.76890725 ),
+  vec2( -0.094184101, -0.92938870 ),
+  vec2( 0.34495938, 0.29387760 ),
+  vec2( -0.91588581, 0.45771432 ),
+  vec2( -0.81544232, -0.87912464 ),
+  vec2( -0.38277543, 0.27676845 ),
+  vec2( 0.97484398, 0.75648379 ),
+  vec2( 0.44323325, -0.97511554 ),
+  vec2( 0.53742981, -0.47373420 ),
+  vec2( -0.26496911, -0.41893023 ),
+  vec2( 0.79197514, 0.19090188 ),
+  vec2( -0.24188840, 0.99706507 ),
+  vec2( -0.81409955, 0.91437590 ),
+  vec2( 0.19984126, 0.78641367 ),
+  vec2( 0.14383161, -0.14100790 )
 );
 
 float Visibility() {
@@ -63,7 +60,7 @@ float Visibility() {
 
   // For every shadow casters
   for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
-    vec4 shadowCoord = uShadowCP[i] * vec4(vin.w_pos, 1.0);
+    vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
     // Self-shadow needs better MSA
     float softness = (i == 0) ? uShadowSoftness : max(uShadowSoftness/2, 1);
@@ -89,8 +86,8 @@ float Visibility() {
 }
 
 void main() {
-  vec3 c_normal = normalize(vin.c_normal);
-  vec3 c_viewDir = normalize(-vin.c_pos);
+  vec3 c_normal = normalize(c_vNormal);
+  vec3 c_viewDir = normalize(-c_vPos);
 
   vec3 c_lightDir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
   float diffuse_power = max(dot(c_normal, c_lightDir), 0);
@@ -109,11 +106,11 @@ void main() {
     );
   }
 
-  vec3 color = texture(uDiffuseTexture, vin.texCoord).rgb;
-  float spec_mask = texture(uSpecularTexture, vin.texCoord).r;
+  vec3 color = texture(uDiffuseTexture, vTexCoord).rgb;
+  float spec_mask = texture(uSpecularTexture, vTexCoord).r;
 
   vec3 final_color = color * AmbientColor() *
       (Visibility() * SunPower() * (diffuse_power + spec_mask * specular_power) + AmbientPower());
 
-  frag_color = vec4(final_color, 1.0);
+  vFragColor = vec4(final_color, 1.0);
 }

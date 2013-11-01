@@ -1,16 +1,13 @@
 #version 140
-#extension GL_ARB_gpu_shader5 : enable
 
-in vec3 vPosition;
+in vec3 aPosition;
 
 uniform mat4 uProjectionMatrix;
 uniform mat3 uCameraMatrix;
 
-out VertexData {
-  vec3 texcoord;
-}
+out vec3 vTexcoord;
 
 void main(void) {
-  gl_Position = uProjectionMatrix * vec4(uCameraMatrix * vec3(10 * vPosition), 1.0);
-  texcoord = vPosition;
+  gl_Position = uProjectionMatrix * vec4(uCameraMatrix * vec3(10 * aPosition), 1.0);
+  vTexcoord = aPosition;
 }

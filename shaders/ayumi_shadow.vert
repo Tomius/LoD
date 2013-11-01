@@ -1,13 +1,12 @@
 #version 140
-#extension GL_ARB_gpu_shader5 : enable
 
 // External macros
 #define BONE_NUM
 #define BONE_ATTRIB_NUM
 
-in vec4  vPosition;
-in ivec4 vBoneIDs[BONE_ATTRIB_NUM];
-in vec4  vWeights[BONE_ATTRIB_NUM];
+in vec4  aPosition;
+in ivec4 aBoneIDs[BONE_ATTRIB_NUM];
+in vec4  aWeights[BONE_ATTRIB_NUM];
 
 uniform mat4 uMCP;
 uniform mat4 uBones[BONE_NUM];
@@ -16,7 +15,7 @@ void main() {
   mat4 BoneMatrix = mat4(0);
   for(int i = 0; i < BONE_ATTRIB_NUM; i++)
     for(int j = 0; j < 4; j++)
-      BoneMatrix += uBones[vBoneIDs[i][j]] * vWeights[i][j];
+      BoneMatrix += uBones[aBoneIDs[i][j]] * aWeights[i][j];
 
-  gl_Position = uMCP * (BoneMatrix * vPosition);
+  gl_Position = uMCP * (BoneMatrix * aPosition);
 }

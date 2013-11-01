@@ -24,9 +24,9 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   prog_.attachShader(skybox_.sky_fs);
   prog_.link().use();
 
-  mesh_.setupPositions(prog_ | "vPosition");
-  mesh_.setupTexCoords(prog_ | "vTexCoord");
-  mesh_.setupNormals(prog_ | "vNormal");
+  mesh_.setupPositions(prog_ | "aPosition");
+  mesh_.setupTexCoords(prog_ | "aTexCoord");
+  mesh_.setupNormals(prog_ | "aNormal");
   oglwrap::UniformSampler(prog_, "uEnvMap").set(0);
   oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
 

@@ -1,5 +1,4 @@
 #version 140
-#extension GL_ARB_gpu_shader5 : enable
 
 const float kWorldRadius = 6371000;
 const float kAtmThickness = 50000;

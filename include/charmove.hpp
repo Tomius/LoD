@@ -5,6 +5,7 @@
 #ifndef LOD_CHARMOVE_HPP_
 #define LOD_CHARMOVE_HPP_
 
+#include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/utils/camera.hpp"

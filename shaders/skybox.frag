@@ -1,14 +1,11 @@
 #version 140
-#extension GL_ARB_gpu_shader5 : enable
 
-in VertexData {
-  vec3 texcoord;
-}
+in vec3 vTexcoord;
 
-out vec4 frag_color;
+out vec4 vFragColor;
 
 vec3 SkyColor(vec3 lookDir);
 
 void main() {
-  frag_color = vec4(SkyColor(normalize(texcoord)), 1.0);
+  vFragColor = vec4(SkyColor(normalize(vTexcoord)), 1.0);
 }

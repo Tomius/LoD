@@ -1,6 +1,7 @@
 #ifndef LOD_TREE_HPP_
 #define LOD_TREE_HPP_
 
+#include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/mesh/mesh.hpp"

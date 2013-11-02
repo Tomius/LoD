@@ -52,7 +52,7 @@ int main() {
     sf::VideoMode(800, 600),
     "Land of Dreams",
     sf::Style::Default,
-    sf::ContextSettings(24, 8, 0, 3, 1)
+    sf::ContextSettings(0, 0, 0, 3, 1)
   );
   // No V-sync needed because of multiple draw calls per frame.
   window.setVerticalSyncEnabled(false);

@@ -48,13 +48,10 @@ void FpsDisplay(float time) {
 }
 
 int main() {
-  sf::Window window(
-    sf::VideoMode(800, 600),
-    "Land of Dreams",
-    sf::Style::Default,
-    sf::ContextSettings(0, 0, 0, 3, 1)
-  );
+  sf::Window window(sf::VideoMode(800, 600), "Land of Dreams");
+
   // No V-sync needed because of multiple draw calls per frame.
+  window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(false);
 
   sf::Clock clock;

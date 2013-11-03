@@ -47,8 +47,27 @@ void FpsDisplay(float time) {
   }
 }
 
+sf::Clock dbg_clock;
+
+void PrintDebugText(const std::string& str) {
+  std::cout << str << ": ";
+}
+
+void PrintDebugTime() {
+  std::cout << dbg_clock.getElapsedTime().asMilliseconds() << " ms" << std::endl;
+  dbg_clock.restart();
+}
+
 int main() {
+  PrintDebugText("Creating the OpenGL context");
   sf::Window window(sf::VideoMode(800, 600), "Land of Dreams");
+  PrintDebugTime();
+
+  sf::ContextSettings settings = window.getSettings();
+  std::cout << " - Depth bits: " << settings.depthBits << std::endl;
+  std::cout << " - Stencil bits: " << settings.stencilBits << std::endl;
+  std::cout << " - Anti-aliasing level: " << settings.antialiasingLevel << std::endl;
+  std::cout << " - OpenGL version: " << settings.majorVersion << "." << settings.minorVersion << std::endl;
 
   // No V-sync needed because of multiple draw calls per frame.
   window.setFramerateLimit(60);
@@ -58,20 +77,41 @@ int main() {
   bool fixMouse = false;
   if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
       glInit();
-      Skybox skybox;
-      BloomEffect bloom;
-      Terrain terrain(skybox);
-      Shadow shadow(PERFORMANCE ? 256 : 512, 32);
-      Tree tree(skybox, terrain);
+
+      dbg_clock.restart();
+      PrintDebugText("Initializing the skybox");
+        Skybox skybox;
+      PrintDebugTime();
+
+      PrintDebugText("Initializing the resources for the bloom effect");
+        BloomEffect bloom;
+      PrintDebugTime();
+
+      PrintDebugText("Initializing the terrain");
+        Terrain terrain(skybox);
+      PrintDebugTime();
+
+      PrintDebugText("Initializing the shadow maps");
+        Shadow shadow(PERFORMANCE ? 256 : 512, 32);
+      PrintDebugTime();
+
+      PrintDebugText("Initializing the trees");
+        Tree tree(skybox, terrain);
+      PrintDebugTime();
+
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 
-      Ayumi ayumi(skybox, charmove);
+      PrintDebugText("Initializing the Ayumi");
+        Ayumi ayumi(skybox, charmove);
+      PrintDebugTime();
 
       ThirdPersonalCamera cam(
         ayumi.getMesh().bSphereCenter() + glm::vec3(ayumi.getMesh().bSphereRadius() * 2),
         ayumi.getMesh().bSphereCenter(),
         1.5f
       );
+
+      std::cout << "\nStarting the main loop.\n" << std::endl;
 
       sf::Event event;
       bool running = true;

@@ -60,7 +60,12 @@ void PrintDebugTime() {
 
 int main() {
   PrintDebugText("Creating the OpenGL context");
-  sf::Window window(sf::VideoMode(800, 600), "Land of Dreams");
+  sf::Window window(
+    sf::VideoMode(800, 600),
+    "Land of Dreams",
+    sf::Style::Default,
+    sf::ContextSettings(24, 0, 0, 3, 1)
+  );
   PrintDebugTime();
 
   sf::ContextSettings settings = window.getSettings();

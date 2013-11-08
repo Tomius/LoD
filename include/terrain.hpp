@@ -4,6 +4,7 @@
 #include "terrainMesh.hpp"
 #include "skybox.hpp"
 #include "shadow.hpp"
+#include "oglwrap/utils/camera.hpp"
 
 class Terrain {
   oglwrap::Program prog_;
@@ -25,7 +26,7 @@ public:
   Terrain(Skybox& skybox);
   void resize(const glm::mat4& projMat);
   glm::vec3 getScales() const;
-  void render(float time, const glm::mat4& camMat, const glm::vec3& camPos, const Shadow& shadow);
+  void render(float time, const oglwrap::Camera& cam, const Shadow& shadow);
   unsigned char fetchHeight(glm::ivec2 v) const;
   double getHeight(double x, double y) const;
 };

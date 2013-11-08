@@ -26,6 +26,7 @@ class TerrainMesh {
   RawTerrainData terrain_;
 
   void DrawBlocks(const glm::vec3& camPos,
+                  const glm::vec3& _camFwd,
                   oglwrap::LazyUniform<glm::ivec2>& Offset,
                   oglwrap::LazyUniform<int>& uMipmapLevel_
                  );
@@ -38,6 +39,7 @@ public:
   TerrainMesh(const std::string& terrainFile);
 
   void render(const glm::vec3& camPos,
+              const glm::vec3& camFwd,
               oglwrap::LazyUniform<glm::ivec2>& Offset,
               oglwrap::LazyUniform<int>& uMipmapLevel_
              );

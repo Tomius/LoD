@@ -87,7 +87,14 @@ void Tree::render(float time, const oglwrap::Camera& cam) {
 
   auto campos = cam.getPos();
   for(size_t i = 0; i < trees_.size(); i++) {
-    if(glm::length(campos - trees_[i].pos) < std::max(scales_.x, scales_.z) * (800 - PERFORMANCE * 100)) {
+    // Check for visibility (is it behind to camera?)
+    glm::vec3 diff = trees_[i].pos - cam.getPos();
+    float len_diff = glm::length(diff);
+    if(len_diff > 10 && glm::dot(cam.getForward(), diff) < 0)
+        continue;
+
+    // Render only if its in range.
+    if(len_diff < std::max(scales_.x, scales_.z) * (800 - PERFORMANCE * 100)) {
       uModelMatrix_.set(trees_[i].mat * mesh_.worldTransform());
       mesh_.render();
     }

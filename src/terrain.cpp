@@ -43,9 +43,9 @@ void Terrain::resize(const glm::mat4& projMat) {
   uProjectionMatrix_ = projMat;
 }
 
-void Terrain::render(float time, const glm::mat4& cam_mat, const glm::vec3& cam_pos, const Shadow& shadow) {
+void Terrain::render(float time, const Camera& cam, const Shadow& shadow) {
   prog_.use();
-  uCameraMatrix_.set(cam_mat);
+  uCameraMatrix_.set(cam.cameraMatrix());
   uSunData_.set(skybox_.getSunData(time));
   for(int i = 0; i < shadow.getDepth(); ++i) {
     uShadowCP_[i] = shadow.shadowCPs()[i];
@@ -56,7 +56,7 @@ void Terrain::render(float time, const glm::mat4& cam_mat, const glm::vec3& cam_
   shadow.shadowTex().active(4);
   shadow.shadowTex().bind();
 
-  mesh_.render(cam_pos, uOffset_, uMipmapLevel_);
+  mesh_.render(cam.getPos(), cam.getForward(), uOffset_, uMipmapLevel_);
 
   skybox_.env_map.unbind();
 }

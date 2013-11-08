@@ -1,20 +1,20 @@
 #include "ayumi.hpp"
 
 Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
-  : mesh_("models/ayumi.dae",
-          aiProcessPreset_TargetRealtime_MaxQuality |
-          aiProcess_FlipUVs)
-  , uProjectionMatrix_(prog_, "uProjectionMatrix")
-  , uCameraMatrix_(prog_, "uCameraMatrix")
-  , uModelMatrix_(prog_, "uModelMatrix")
-  , uBones_(prog_, "uBones")
-  , uShadowCP_(prog_, "uShadowCP")
-  , shadow_uMCP_(shadow_prog_, "uMCP")
-  , shadow_uBones_(shadow_prog_, "uBones")
-  , uSunData_(prog_, "uSunData")
-  , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
-  , uShadowSoftness_(prog_, "uShadowSoftness")
-  , skybox_(skybox) {
+    : mesh_("models/ayumi.dae",
+            aiProcessPreset_TargetRealtime_MaxQuality |
+            aiProcess_FlipUVs)
+    , uProjectionMatrix_(prog_, "uProjectionMatrix")
+    , uCameraMatrix_(prog_, "uCameraMatrix")
+    , uModelMatrix_(prog_, "uModelMatrix")
+    , uBones_(prog_, "uBones")
+    , uShadowCP_(prog_, "uShadowCP")
+    , shadow_uMCP_(shadow_prog_, "uMCP")
+    , shadow_uBones_(shadow_prog_, "uBones")
+    , uSunData_(prog_, "uSunData")
+    , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
+    , uShadowSoftness_(prog_, "uShadowSoftness")
+    , skybox_(skybox) {
 
   oglwrap::ShaderSource vs_source("ayumi.vert");
   vs_source.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
@@ -38,6 +38,7 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
   mesh_.setupNormals(prog_ | "aNormal");
   mesh_.setupBones(prog_ | "aBoneIDs", prog_ | "aWeights");
   oglwrap::UniformSampler(prog_, "uEnvMap").set(0);
+
   mesh_.setupDiffuseTextures(1);
   mesh_.setupSpecularTextures(2);
   oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);

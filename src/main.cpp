@@ -47,13 +47,13 @@ void FpsDisplay(float time) {
   }
 }
 
-sf::Clock dbg_clock;
+static sf::Clock dbg_clock;
 
-void PrintDebugText(const std::string& str) {
+static void PrintDebugText(const std::string& str) {
   std::cout << str << ": ";
 }
 
-void PrintDebugTime() {
+static void PrintDebugTime() {
   std::cout << dbg_clock.getElapsedTime().asMilliseconds() << " ms" << std::endl;
   dbg_clock.restart();
 }
@@ -173,10 +173,6 @@ int main() {
           )
         );
         ayumi.updateStatus(time, charmove);
-
-        // Temp variables
-        glm::mat4 camMatrix = cam.cameraMatrix();
-        glm::vec3 camPos = cam.getPos();
         FpsDisplay(time);
 
         // Create shadow data
@@ -186,8 +182,8 @@ int main() {
         shadow.end();
 
         // Actual renders
-        skybox.render(time, camMatrix);
-        terrain.render(time, camMatrix, camPos, shadow);
+        skybox.render(time, cam.cameraMatrix());
+        terrain.render(time, cam, shadow);
         ayumi.render(time, cam, charmove, shadow);
         tree.render(time, cam);
         bloom.render();

@@ -352,24 +352,32 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
 }
 
 void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
-                             oglwrap::LazyUniform<glm::ivec2>& uOffset_,
-                             oglwrap::LazyUniform<int>& uMipmapLevel_) {
+                             const glm::vec3& _camFwd,
+                             oglwrap::LazyUniform<glm::ivec2>& uOffset,
+                             oglwrap::LazyUniform<int>& uMipmapLevel) {
 
-  // The center piece is special
+  // Predeclarations
   glm::ivec2 pos(0, 0);
-  uOffset_ = pos;
   glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
-  int mipmap_level = GetBlockMipmapLevel(pos, camPos);
-  uMipmapLevel_ = mipmap_level;
+  glm::vec2 camFwd = glm::vec2(_camFwd.x, _camFwd.z);
+  int mipmap_level;
 
-  // Draw the center piece
-  if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
-    vao_[mipmap_level].bind();
-    indices_[mipmap_level].bind();
-    gl(Enable(GL_CULL_FACE));
-    gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
-    gl(Disable(GL_CULL_FACE));
-    CreateConnectors(pos, camPos);
+  // The center piece is special. Check for its visibility first.
+  glm::vec2 diff = glm::vec2(pos.x, pos.y) - camPos;
+  mipmap_level = GetBlockMipmapLevel(pos, camPos);
+  if(glm::dot(camFwd, diff) >= 0 || mipmap_level == PERFORMANCE) {
+      uOffset = pos;
+      uMipmapLevel = mipmap_level;
+
+    // Draw the center piece
+    if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
+      vao_[mipmap_level].bind();
+      indices_[mipmap_level].bind();
+      gl(Enable(GL_CULL_FACE));
+      gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
+      gl(Disable(GL_CULL_FACE));
+      CreateConnectors(pos, camPos);
+    }
   }
 
   // All the other ones
@@ -380,10 +388,17 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
       for(int segment = 0; segment < ring ; segment++) {
         if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) > terrain_.w - PERFORMANCE * 500)
           continue;
+
         pos = GetBlockPos(ring, line, segment, distance);
-        uOffset_ = pos;
         mipmap_level = GetBlockMipmapLevel(pos, camPos);
-        uMipmapLevel_ = mipmap_level;
+
+        // Check visibility
+        glm::vec2 diff = glm::normalize(glm::vec2(pos.x, pos.y) - camPos);
+        if(glm::dot(camFwd, diff) < 0 && mipmap_level != PERFORMANCE)
+          continue;
+
+        uOffset = pos;
+        uMipmapLevel = mipmap_level;
 
         // Draw
         vao_[mipmap_level].bind();
@@ -400,8 +415,9 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 }
 
 void TerrainMesh::render(const glm::vec3& camPos,
-                         oglwrap::LazyUniform<glm::ivec2>& uOffset_,
-                         oglwrap::LazyUniform<int>& mipmapLevel_uniform) {
+                         const glm::vec3& camFwd,
+                         oglwrap::LazyUniform<glm::ivec2>& uOffset,
+                         oglwrap::LazyUniform<int>& uMipmapLevel) {
 
   heightMap_.active(0);
   heightMap_.bind();
@@ -417,7 +433,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
   gl(PrimitiveRestartIndex(RESTART));
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );
 
-  DrawBlocks(camPos, uOffset_, mipmapLevel_uniform);
+  DrawBlocks(camPos, camFwd, uOffset, uMipmapLevel);
 
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
   gl(Disable(GL_PRIMITIVE_RESTART));

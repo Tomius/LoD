@@ -138,6 +138,7 @@ float SunPower() {
   return max((uDay + 0.03) * (normalize(uSunPos).y + 0.22), 0.004);
 }
 
+
 float AmbientPower() {
   return mix(
     0.02, // night

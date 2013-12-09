@@ -5,8 +5,8 @@ Simple attempt of drawing big terrains in OpenGL with the geomipmapping level of
 
 **This is just an educational project.** I don't own the rights for every media in the application.
 
-Here's a picture of the program's current capability:
-![screenshot](screenshot.png) 
+Here's a picture of the program's current capability (click on it, to see a short video):
+[![screenshot](screenshot.png)](https://www.youtube.com/watch?v=ef93WR3KzaE)
 
 Dependencies:
 -------------

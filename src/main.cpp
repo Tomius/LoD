@@ -176,10 +176,10 @@ int main() {
         FpsDisplay(time);
 
         // Create shadow data
-        shadow.begin();
+        shadow.begin(); {
           ayumi.shadowRender(time, shadow, charmove);
           tree.shadowRender(time, cam, shadow);
-        shadow.end();
+        } shadow.end();
 
         // Actual renders
         skybox.render(time, cam.cameraMatrix());

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cassert>
 #include <stdexcept>
-#include <ImageMagick/Magick++.h>
+#include <Magick++.h>
 #include "terrainData.hpp"
 
 using namespace std;

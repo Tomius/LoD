@@ -24,13 +24,13 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
   shadow_vs_source.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
   shadow_vs_source.insertMacroValue("BONE_NUM", mesh_.getNumBones());
 
-  prog_.attachShader(oglwrap::VertexShader(vs_source));
-  prog_.attachShader(oglwrap::FragmentShader("ayumi.frag"));
-  prog_.attachShader(skybox_.sky_fs);
+  oglwrap::VertexShader vs(vs_source), shadow_vs(shadow_vs_source);
+  oglwrap::FragmentShader fs("ayumi.frag"), shadow_fs("shadow.frag");
+
+  prog_ << vs << fs << skybox_.sky_fs;
   prog_.link().use();
 
-  shadow_prog_.attachShader(oglwrap::VertexShader(shadow_vs_source));
-  shadow_prog_.attachShader(oglwrap::FragmentShader("shadow.frag"));
+  shadow_prog_ << shadow_vs << shadow_fs;
   shadow_prog_.link();
 
   mesh_.setupPositions(prog_ | "aPosition");

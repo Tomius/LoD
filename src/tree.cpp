@@ -5,6 +5,10 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
           aiProcessPreset_TargetRealtime_MaxQuality |
           aiProcess_FlipUVs
          )
+  , vs_("tree.vert")
+  , shadow_vs_("tree_shadow.vert")
+  , fs_("tree.frag")
+  , shadow_fs_("tree_shadow.frag")
   , uProjectionMatrix_(prog_, "uProjectionMatrix")
   , uCameraMatrix_(prog_, "uCameraMatrix")
   , uModelMatrix_(prog_, "uModelMatrix")
@@ -12,16 +16,13 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   , uSunData_(prog_, "uSunData")
   , skybox_(skybox) {
 
-  shadow_prog_.attachShader(oglwrap::VertexShader("tree_shadow.vert"));
-  shadow_prog_.attachShader(oglwrap::FragmentShader("tree_shadow.frag"));
+  shadow_prog_ << shadow_vs_ << shadow_fs_;
   shadow_prog_.link().use();
 
   mesh_.setupDiffuseTextures(1);
   oglwrap::UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
 
-  prog_.attachShader(oglwrap::VertexShader("tree.vert"));
-  prog_.attachShader(oglwrap::FragmentShader("tree.frag"));
-  prog_.attachShader(skybox_.sky_fs);
+  prog_ << vs_ << fs_ << skybox_.sky_fs;
   prog_.link().use();
 
   mesh_.setupPositions(prog_ | "aPosition");

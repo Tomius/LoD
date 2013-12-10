@@ -20,6 +20,9 @@ class Tree {
   oglwrap::Mesh mesh_;
   oglwrap::Program prog_, shadow_prog_;
 
+  oglwrap::VertexShader vs_, shadow_vs_;
+  oglwrap::FragmentShader fs_, shadow_fs_;
+
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_;
   oglwrap::LazyUniform<glm::mat4> shadow_uMCP_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;

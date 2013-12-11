@@ -17,17 +17,20 @@ void main() {
   }
   vec3 texel = texelFetch(uTex, texcoord).rgb;
 
-  float texel_intensity = length(texel) / sqrt(3.0);
-  if(texel_intensity < 0.3) {
+  float lumiosity = length(texel) / sqrt(3.0);
+  if(lumiosity < 0.3) {
     color = (sum * 0.09 + texel).rgb;
   } else {
-    if(texel_intensity < 0.5) {
+    if(lumiosity < 0.5) {
       color = (sum * 0.06 + texel).rgb;
     } else {
       color = (sum * 0.04 + texel).rgb;
     }
   }
 
-  // The bloom effect makes everything way too bright, let's compensate that
-  vFragColor = vec4(pow(color, vec3(1.5)), 1.0);
+  // Apply a simple HDR
+  lumiosity = length(color);
+  color *= lumiosity / (lumiosity + 1);
+
+  vFragColor = vec4(color, 1.0);
 }

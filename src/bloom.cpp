@@ -34,8 +34,11 @@ void BloomEffect::render() {
   tex_.bind();
   tex_.copy(PixelDataInternalFormat::RGB, 0, 0, width_, height_);
 
-  gl( Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
+  gl(Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+  gl(Enable(GL_FRAMEBUFFER_SRGB));
 
   prog_.use();
   rect_.render();
+
+  gl(Disable(GL_FRAMEBUFFER_SRGB));
 }

@@ -28,7 +28,6 @@ void glInit() {
   gl(ClearDepth(1.0f));
   gl(Enable(GL_DEPTH_TEST));
   gl(Enable(GL_DEPTH_CLAMP));
-  gl(Enable(GL_FRAMEBUFFER_SRGB));
   gl(CullFace(GL_BACK));
 }
 

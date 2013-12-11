@@ -97,13 +97,9 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
   env_map_.active(0);
   env_map_.bind();
 
-  // The skybox looks better w/o gamma correction
-  bool srgb = gl(IsEnabled(GL_FRAMEBUFFER_SRGB));
-  if(srgb) { gl(Disable(GL_FRAMEBUFFER_SRGB)); }
   gl(DepthMask(false));
   make_cube_.render();
   gl(DepthMask(true));
-  if(srgb) { gl(Enable(GL_FRAMEBUFFER_SRGB)); }
 
   env_map_.unbind();
 }

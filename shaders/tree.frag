@@ -33,5 +33,11 @@ void main() {
   vec4 color = texture(uDiffuseTexture, vTexcoord);
   vec3 final_color = color.rgb * AmbientColor() * (SunPower() * diffuse_power + AmbientPower()) / 2;
 
-  vFragColor = vec4(pow(final_color, vec3(1.3)), min(color.a, alpha));
+  float actual_alpha = min(color.a, alpha);
+
+  if(actual_alpha < 1e-3) {
+    discard;
+  }
+
+  vFragColor = vec4(pow(final_color, vec3(1.3)), actual_alpha);
 }

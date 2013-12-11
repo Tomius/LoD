@@ -27,12 +27,21 @@ How to build (linux):
 How to build (Windows):
 ----------------------
 * Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
-* On Windows there's no uniform way to build, the setup depends on the IDE you use. You will have to link the following libraries:
-  * GL
-  * GLEW
-  * SFML - system/window
-  * Magick++
-  * Assimp
+* Get the 3rd party libraries:
+  * [GLEW](http://sourceforge.net/projects/glew/files/glew/1.10.0/) - The prebulilt one only works with MSVC, you probably need to build it yourself.
+  * [SFML](http://www.sfml-dev.org/download/sfml/2.1/)
+  * [Magick++](http://www.imagemagick.org/script/binary-releases.php) - Download the dynamic link Q16, install to compiler's path
+  * [Assimp](http://sourceforge.net/projects/assimp/files/assimp-3.0/) - You need the SDK exe.
+* Add the librarires to link:
+  * glew32
+  * opengl32
+  * sfml-window
+  * sfml-system
+  * assimp
+* Add ./include to search directories, or specify -Iinclude compiler flag.
+* Add `Magick++-config --cppflags --cxxflags --ldflags` to compiler settings
+* Add `Magick++-config --libs` to linker settings
+* Enable c++11 mode with your compiler
 
 ----------------------
-If you have any problem post in the issues tab or mail me at tomius1994@gmail.com.
+If you have any problem, please post in the issues tab or mail me at tomius1994@gmail.com. Any feedback would be appreciated.

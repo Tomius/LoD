@@ -25,11 +25,11 @@ Terrain::Terrain(Skybox& skybox)
   prog_ << vs_ << fs_ << skybox_.sky_fs;
   prog_.link().use();
 
-  oglwrap::UniformSampler(prog_, "uHeightMap").set(0);
-  oglwrap::UniformSampler(prog_, "uGrassMap0").set(1);
-  oglwrap::UniformSampler(prog_, "uGrassMap1").set(2);
-  oglwrap::UniformSampler(prog_, "uGrassNormalMap").set(3);
-  oglwrap::UniformSampler(prog_, "uShadowMap").set(4);
+  oglwrap::UniformSampler(prog_, "uHeightMap").set(1);
+  oglwrap::UniformSampler(prog_, "uGrassMap0").set(2);
+  oglwrap::UniformSampler(prog_, "uGrassMap1").set(3);
+  oglwrap::UniformSampler(prog_, "uGrassNormalMap").set(4);
+  oglwrap::UniformSampler(prog_, "uShadowMap").set(5);
 
   uScales_ = scale_vector;
 }
@@ -53,11 +53,14 @@ void Terrain::render(float time, const Camera& cam, const Shadow& shadow) {
   uNumUsedShadowMaps_ = shadow.getDepth();
   skybox_.env_map.active(0);
   skybox_.env_map.bind();
-  shadow.shadowTex().active(4);
+  shadow.shadowTex().active(5);
   shadow.shadowTex().bind();
 
   mesh_.render(cam.getPos(), cam.getForward(), uOffset_, uMipmapLevel_);
 
+  shadow.shadowTex().active(5);
+  shadow.shadowTex().unbind();
+  skybox_.env_map.active(0);
   skybox_.env_map.unbind();
 }
 

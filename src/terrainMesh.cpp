@@ -229,7 +229,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
   GLfloat maxAniso = 0.0f;
   gl(GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso));
 
-  heightMap_.active(0);
+  heightMap_.active(1);
   heightMap_.bind();
   {
     heightMap_.upload(
@@ -415,13 +415,13 @@ void TerrainMesh::render(const glm::vec3& camPos,
                          oglwrap::LazyUniform<glm::ivec2>& uOffset,
                          oglwrap::LazyUniform<int>& uMipmapLevel) {
 
-  heightMap_.active(0);
+  heightMap_.active(1);
   heightMap_.bind();
-  grassMaps_[0].active(1);
+  grassMaps_[0].active(2);
   grassMaps_[0].bind();
-  grassMaps_[1].active(2);
+  grassMaps_[1].active(3);
   grassMaps_[1].bind();
-  grassNormalMap_.active(3);
+  grassNormalMap_.active(4);
   grassNormalMap_.bind();
 
   gl(FrontFace(GL_CW));
@@ -435,13 +435,13 @@ void TerrainMesh::render(const glm::vec3& camPos,
   gl(Disable(GL_PRIMITIVE_RESTART));
 
   VertexArray::Unbind();
-  grassNormalMap_.active(3);
+  grassNormalMap_.active(4);
   grassNormalMap_.unbind();
-  grassMaps_[1].active(2);
+  grassMaps_[1].active(3);
   grassMaps_[1].unbind();
-  grassMaps_[0].active(1);
+  grassMaps_[0].active(2);
   grassMaps_[0].unbind();
-  heightMap_.active(0);
+  heightMap_.active(1);
   heightMap_.unbind();
 }
 

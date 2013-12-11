@@ -9,9 +9,9 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   , shadow_vs_("tree_shadow.vert")
   , fs_("tree.frag")
   , shadow_fs_("tree_shadow.frag")
-  , uProjection_(prog_, "uProjection")
-  , uModelCamera_(prog_, "uModelCamera")
-  , uInvTranspModel_(prog_, "uInvTranspModel")
+  , uProjectionMatrix_(prog_, "uProjectionMatrix")
+  , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
+  , uNormalMatrix_(prog_, "uNormalMatrix")
   , shadow_uMCP_(shadow_prog_, "uMCP")
   , uSunData_(prog_, "uSunData")
   , skybox_(skybox) {
@@ -59,7 +59,7 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
 
 void Tree::resize(glm::mat4 projMat) {
   prog_.use();
-  uProjection_ = projMat;
+  uProjectionMatrix_ = projMat;
 }
 
 void Tree::shadowRender(float time, const oglwrap::Camera& cam, Shadow& shadow) {
@@ -97,8 +97,8 @@ void Tree::render(float time, const oglwrap::Camera& cam) {
     // Render only if its in range.
     if(len_diff < std::max(scales_.x, scales_.z) * (800 - PERFORMANCE * 100)) {
       glm::mat4 model_mx = trees_[i].mat * mesh_.worldTransform();
-      uModelCamera_.set(cam_mx * model_mx);
-      uInvTranspModel_.set(glm::transpose(glm::inverse(glm::mat3(model_mx))));
+      uModelCameraMatrix_.set(cam_mx * model_mx);
+      uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
       mesh_.render();
     }
   }

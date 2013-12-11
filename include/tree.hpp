@@ -23,8 +23,8 @@ class Tree {
   oglwrap::VertexShader vs_, shadow_vs_;
   oglwrap::FragmentShader fs_, shadow_fs_;
 
-  oglwrap::LazyUniform<glm::mat4> uProjection_, uModelCamera_;
-  oglwrap::LazyUniform<glm::mat3> uInvTranspModel_;
+  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
+  oglwrap::LazyUniform<glm::mat3> uNormalMatrix_;
   oglwrap::LazyUniform<glm::mat4> shadow_uMCP_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
 

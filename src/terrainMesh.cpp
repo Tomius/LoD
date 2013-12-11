@@ -201,10 +201,14 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
         for(int segment = 0; segment < ring; segment += 2) {
           if(segment != 0) {
             indices_vector.push_back(GetIdx(ring - 1, line, segment - 1));
+            indices_vector.push_back(GetIdx(ring - 1, line, segment));
+            indices_vector.push_back(GetIdx(ring, line, segment));
+            indices_vector.push_back(GetIdx(ring - 1, line, segment + 1));
+          } else {
+            indices_vector.push_back(GetIdx(ring, line, segment));
+            indices_vector.push_back(GetIdx(ring - 1, line, segment));
+            indices_vector.push_back(GetIdx(ring - 1, line, segment + 1));
           }
-          indices_vector.push_back(GetIdx(ring, line, segment));
-          indices_vector.push_back(GetIdx(ring - 1, line, segment));
-          indices_vector.push_back(GetIdx(ring - 1, line, segment + 1));
           indices_vector.push_back(RESTART);
         }
 
@@ -369,9 +373,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
     if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
       vao_[mipmap_level].bind();
       indices_[mipmap_level].bind();
-      gl(Enable(GL_CULL_FACE));
       gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
-      gl(Disable(GL_CULL_FACE));
       CreateConnectors(pos, camPos);
     }
   }
@@ -399,9 +401,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
         // Draw
         vao_[mipmap_level].bind();
         indices_[mipmap_level].bind();
-        gl(Enable(GL_CULL_FACE));
         gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
-        gl(Disable(GL_CULL_FACE));
         CreateConnectors(pos, camPos);
       }
     }
@@ -425,6 +425,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
   grassNormalMap_.bind();
 
   gl(FrontFace(GL_CW));
+  gl(Enable(GL_CULL_FACE));
   gl(Enable(GL_PRIMITIVE_RESTART));
   gl(PrimitiveRestartIndex(RESTART));
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );
@@ -433,6 +434,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
 
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
   gl(Disable(GL_PRIMITIVE_RESTART));
+  gl(Disable(GL_CULL_FACE));
 
   VertexArray::Unbind();
   grassNormalMap_.active(4);

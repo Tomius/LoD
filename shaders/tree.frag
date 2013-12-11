@@ -25,10 +25,7 @@ void main() {
     alpha = 1 - (l - kMaxOpaqueDist) / (kMaxVisibleDist - kMaxOpaqueDist);
   }
 
-  float diffuse_power = max(
-    dot(normalize(w_vNormal), normalize(AmbientDirection())),
-    0.2
-  );
+  float diffuse_power = max(abs(dot(normalize(w_vNormal), normalize(AmbientDirection()))), 0.3);
 
   vec4 color = texture(uDiffuseTexture, vTexcoord);
   vec3 final_color = color.rgb * AmbientColor() * (SunPower() * diffuse_power + AmbientPower()) / 2;

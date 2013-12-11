@@ -229,10 +229,6 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
   GLfloat maxAniso = 0.0f;
   gl(GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso));
 
-  // Laziness level OVER 9000!!!
-  gl(PixelStorei(GL_UNPACK_ALIGNMENT, 1));
-  gl(PixelStorei(GL_PACK_ALIGNMENT, 1));
-
   heightMap_.active(0);
   heightMap_.bind();
   {

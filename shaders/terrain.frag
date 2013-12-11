@@ -9,7 +9,7 @@ in float vInvalid;
 in mat3  vNormalMatrix;
 
 uniform mat4 uCameraMatrix;
-uniform sampler2D uGrassMap[2], uGrassNormalMap;
+uniform sampler2D uGrassMap0, uGrassMap1, uGrassNormalMap;
 uniform sampler2DArrayShadow uShadowMap;
 uniform vec3 uScales;
 
@@ -91,8 +91,8 @@ void main() {
   }
 
   // Colors.
-  vec3 grass0_color = texture(uGrassMap[0], grass_texcoord).rgb;
-  vec3 grass1_color = texture(uGrassMap[1], grass_texcoord).rgb;
+  vec3 grass0_color = texture(uGrassMap0, grass_texcoord).rgb;
+  vec3 grass1_color = texture(uGrassMap1, grass_texcoord).rgb;
   float height_factor = clamp(sqrt((w_vPos.y - 15 * uScales.y) / 40.0f), 0.0f, 1.0f);
   vec3 grass_color = mix(grass0_color, grass1_color, height_factor);
 

@@ -26,8 +26,8 @@ Terrain::Terrain(Skybox& skybox)
   prog_.link().use();
 
   oglwrap::UniformSampler(prog_, "uHeightMap").set(0);
-  oglwrap::UniformSampler(prog_, "uGrassMap[0]").set(1);
-  oglwrap::UniformSampler(prog_, "uGrassMap[1]").set(2);
+  oglwrap::UniformSampler(prog_, "uGrassMap0").set(1);
+  oglwrap::UniformSampler(prog_, "uGrassMap1").set(2);
   oglwrap::UniformSampler(prog_, "uGrassNormalMap").set(3);
   oglwrap::UniformSampler(prog_, "uShadowMap").set(4);
 

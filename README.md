@@ -44,4 +44,4 @@ How to build (Windows):
 * Enable c++11 mode with your compiler
 
 ----------------------
-If you have any problem post in the issues tab or mail me at tomius1994@gmail.com.
+If you have any problem, please post in the issues tab or mail me at tomius1994@gmail.com. Any feedback would be appreciated.

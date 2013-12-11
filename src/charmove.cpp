@@ -98,28 +98,34 @@ void CharacterMovement::updateHeight(float groundHeight) {
   static sf::Clock clock;
   static float prevTime = 0;
   float time = clock.getElapsedTime().asSeconds();
-  float dt =  time - prevTime;
+  float diff_time = time - prevTime;
   prevTime = time;
 
-  const float diff = groundHeight - pos_.y;
-  if(diff >= 0 && jumping_ && vert_speed_ < 0) {
-    jumping_ = false;
-    pos_.y = groundHeight;
-    return;
-  }
-  if(!jumping_) {
-    const float offs = std::max(fabs(diff / 2.0f), 0.05) * dt * 20.0f;
-    if(fabs(diff) > offs) {
-      pos_.y += diff / fabs(diff) * offs;
+  while(diff_time > 0) {
+    float time_step = 0.01f;
+    float dt = std::min(time_step, diff_time);
+    diff_time -= time_step;
+
+    const float diff = groundHeight - pos_.y;
+    if(diff >= 0 && jumping_ && vert_speed_ < 0) {
+      jumping_ = false;
+      pos_.y = groundHeight;
+      return;
     }
-  }
-  if(jumping_) {
-    if(diff > 0) {
-      pos_.y += std::max(diff, vert_speed_) * dt * 30.0f;
-    } else {
-      pos_.y += vert_speed_ * dt * 30.0f;
+    if(!jumping_) {
+      const float offs = std::max(fabs(diff / 2.0f), 0.05) * dt * 20.0f;
+      if(fabs(diff) > offs) {
+        pos_.y += diff / fabs(diff) * offs;
+      }
     }
-    vert_speed_ -= dt * GRAVITY;
+    if(jumping_) {
+      if(diff > 0) {
+        pos_.y += std::max(diff, vert_speed_) * dt * 30.0f;
+      } else {
+        pos_.y += vert_speed_ * dt * 30.0f;
+      }
+      vert_speed_ -= dt * GRAVITY;
+    }
   }
 }
 

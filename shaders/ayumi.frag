@@ -1,4 +1,4 @@
-#version 140
+#version 150
 
 #define SHADOW_MAP_NUM 32 // The maximum number of shadow maps
 

@@ -1,4 +1,4 @@
-#version 140
+#version 150
 
 in vec4 aPosition;
 in vec2 aTexCoord;
@@ -10,7 +10,7 @@ out vec3 c_vPos;
 out vec3 w_vNormal;
 out vec2 vTexcoord;
 
-// #version 140 doesn't have the global inverse function, so I had to write it myself
+// #version 150 doesn't have the global inverse function, so I had to write it myself
 
 float Determinant(mat4 m) {
 	return m[0][0]*m[1][1]*m[2][2]*m[3][3] - m[0][0]*m[1][1]*m[2][3]*m[3][2] + m[0][0]*m[1][2]*m[2][3]*m[3][1] - m[0][0]*m[1][2]*m[2][1]*m[3][3]

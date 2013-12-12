@@ -6,6 +6,8 @@ using namespace oglwrap;
 /* 0 -> max quality
    4 -> max performance */
 extern const int PERFORMANCE;
+extern const float kFieldOfView;
+const float kCosFieldOfView = cos(kFieldOfView * M_PI / 180) - 0.01f;
 
 // ~~~~~~<{ A vector of short values }>~~~~~~
 
@@ -359,13 +361,15 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   // Predeclarations
   glm::ivec2 pos(0, 0);
   glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
-  glm::vec2 camFwd = glm::vec2(_camFwd.x, _camFwd.z);
+  glm::vec2 camFwd = glm::normalize(glm::vec2(_camFwd.x, _camFwd.z));
   int mipmap_level;
 
   // The center piece is special. Check for its visibility first.
-  glm::vec2 diff = glm::vec2(pos.x, pos.y) - camPos;
+  glm::vec2 diff = glm::normalize(glm::vec2(pos.x, pos.y) - camPos);
   mipmap_level = GetBlockMipmapLevel(pos, camPos);
-  if(glm::dot(camFwd, diff) >= 0 || mipmap_level == PERFORMANCE) {
+  if(glm::dot(camFwd, diff) >= kCosFieldOfView // Pre-frustum culling.
+        || mipmap_level == PERFORMANCE) // The lowest mipmap level, the one, the character is standing on
+  {
       uOffset = pos;
       uMipmapLevel = mipmap_level;
 
@@ -392,8 +396,11 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 
         // Check visibility
         glm::vec2 diff = glm::normalize(glm::vec2(pos.x, pos.y) - camPos);
-        if(glm::dot(camFwd, diff) < 0 && mipmap_level != PERFORMANCE)
+        if(glm::dot(camFwd, diff) < kCosFieldOfView // Pre-frustum culling.
+              && mipmap_level != PERFORMANCE) // The lowest mipmap level, the one, the character is standing on
+        {
           continue;
+        }
 
         uOffset = pos;
         uMipmapLevel = mipmap_level;

@@ -22,6 +22,7 @@ const float GRAVITY = 0.6f;
 /* 0 -> max quality
    4 -> max performance */
 extern const int PERFORMANCE = 0;
+extern const float kFieldOfView = 60;
 
 void glInit() {
   gl(ClearColor(0.0f, 0.0f, 0.0f, 0.0f));
@@ -141,7 +142,7 @@ int main() {
                 bloom.resize(width, height);
                 shadow.resize(width, height);
 
-                auto projMat = glm::perspectiveFov<float>(60, width, height, 0.5, 3000);
+                auto projMat = glm::perspectiveFov<float>(kFieldOfView, width, height, 0.5, 3000);
 
                 ayumi.resize(projMat);
                 skybox.resize(projMat);

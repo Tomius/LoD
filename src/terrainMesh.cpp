@@ -395,7 +395,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
         mipmap_level = GetBlockMipmapLevel(pos, camPos);
 
         // Check visibility
-        glm::vec2 diff = glm::normalize(glm::vec2(pos.x, pos.y) - camPos);
+        glm::vec2 diff = glm::normalize(glm::vec2(pos.x/2, pos.y/2) - camPos);
         if(glm::dot(camFwd, diff) < kCosFieldOfView // Pre-frustum culling.
               && mipmap_level != PERFORMANCE) // The lowest mipmap level, the one, the character is standing on
         {

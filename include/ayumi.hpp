@@ -25,6 +25,8 @@ class Ayumi {
   oglwrap::LazyUniform<glm::vec4> uSunData_;
   oglwrap::LazyUniform<int> uNumUsedShadowMaps_, uShadowSoftness_;
 
+  bool attack2_;
+
   Skybox& skybox_;
 public:
   Ayumi(Skybox& skybox, const CharacterMovement& charmove);

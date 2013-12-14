@@ -14,6 +14,7 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
     , uSunData_(prog_, "uSunData")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowSoftness_(prog_, "uShadowSoftness")
+    , attack2_(false)
     , skybox_(skybox) {
 
   oglwrap::ShaderSource vs_source("ayumi.vert");
@@ -69,6 +70,9 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
 
   mesh_.addAnimation("models/ayumi_attack.dae", "Attack",
                      oglwrap::AnimFlag::None, 2.5f);
+
+  mesh_.addAnimation("models/ayumi_attack2.dae", "Attack2",
+                     oglwrap::AnimFlag::None, 2.0f);
 
   mesh_.setDefaultAnimation("Stand", 0.3f);
   mesh_.forceAnimToDefault(0);

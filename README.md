@@ -23,7 +23,7 @@ How to build (linux):
 * Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
 * Get the external dependencies: libsfml2-dev libmagick++-dev libglew-dev 
 * Get a fresh copy of [assimp](https://github.com/assimp/assimp). (You'd better avoid the libassimp-dev package, it's kinda old).
-* Use the given Makefile(it uses g++), or the prebuilt executeable.
+* Use the given Makefile(it uses g++).
 
 How to build (Windows):
 ----------------------

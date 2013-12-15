@@ -18,11 +18,12 @@
 
 using namespace oglwrap;
 
-const float GRAVITY = 0.6f;
+extern const float GRAVITY = 0.6f;
 /* 0 -> max quality
    4 -> max performance */
 extern const int PERFORMANCE = 0;
 extern const float kFieldOfView = 60;
+bool was_left_click = false;
 
 void glInit() {
   gl(ClearColor(0.0f, 0.0f, 0.0f, 0.0f));
@@ -152,6 +153,11 @@ int main() {
               break;
             case sf::Event::MouseWheelMoved:
               cam.scrolling(event.mouseWheel.delta);
+              break;
+            case sf::Event::MouseButtonPressed:
+              if(event.mouseButton.button == sf::Mouse::Left) {
+                was_left_click = true;
+              }
               break;
             default:
               break;

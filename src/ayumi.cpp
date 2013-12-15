@@ -1,5 +1,7 @@
 #include "ayumi.hpp"
 
+extern bool was_left_click;
+
 Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
     : mesh_("models/ayumi.dae",
             aiProcessPreset_TargetRealtime_MaxQuality |
@@ -87,7 +89,8 @@ void Ayumi::resize(glm::mat4 projMat) {
 }
 
 void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
-  if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+  if(was_left_click) {
+    was_left_click = false;
     if(mesh_.getCurrentAnimation() != "Attack" && mesh_.getCurrentAnimation() != "Attack2") {
       mesh_.setCurrentAnimation("Attack", time, 0.3f);
     } else {

@@ -49,6 +49,17 @@ class Ayumi {
         ayumi.attack2_ = false;
       }
 
+      if(current_anim == "Attack" || current_anim == "Attack2") {
+        if(ayumi.charmove_.is_jumping()) {
+          *transition_time = 0.3f;
+          if(ayumi.charmove_.is_jumping_rise()) {
+            return "JumpRise";
+          } else {
+            return "JumpFall";
+          }
+        }
+      }
+
       if(ayumi.charmove_.isWalking()) {
         if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
           if(current_anim == "Attack2") {

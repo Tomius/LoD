@@ -48,6 +48,7 @@ Acknowledgements
 ================
 
 - *Darkz* for useful feedback and help with the fixing of several bugs.
+- *Kristóf Marussy (kris7t)* for a lot of useful advices and catching many implementation-dependent bugs.
 
 License
 =======

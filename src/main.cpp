@@ -75,13 +75,25 @@ int main() {
   std::cout << " - Anti-aliasing level: " << settings.antialiasingLevel << std::endl;
   std::cout << " - OpenGL version: " << settings.majorVersion << "." << settings.minorVersion << std::endl;
 
+  if(settings.majorVersion < 3 && settings.minorVersion < 1) {
+    std::cout << "At least OpenGL version 3.1 is required to run this program" << std::endl;
+    return -1;
+  }
+
   // No V-sync needed because of multiple draw calls per frame.
   window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(false);
 
   sf::Clock clock;
   bool fixMouse = false;
-  if(glewInit() == GLEW_OK && GLEW_VERSION_3_1) try {
+
+  GLenum err = glewInit();
+  if(err != GLEW_OK) {
+    std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
+    return -1;
+  } 
+
+  try {
       glInit();
 
       dbg_clock.restart();

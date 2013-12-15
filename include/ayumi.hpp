@@ -27,6 +27,43 @@ class Ayumi {
 
   bool attack2_;
 
+  const CharacterMovement& charmove_;
+
+  struct AnimationEndedListener : public oglwrap::AnimatedMesh::AnimationEndedListener {
+    Ayumi& ayumi;
+
+    AnimationEndedListener(Ayumi& ayumi) : ayumi(ayumi) { }
+
+    std::string operator()(const std::string& current_anim, 
+                           float *transition_time,
+                           bool *use_default_speed_and_flags, 
+                           unsigned *flags,
+                           float *speed) override {
+
+      *use_default_speed_and_flags = true;
+
+      if(current_anim == "Attack" && ayumi.attack2_) {
+        *transition_time = 0.1f;
+        return "Attack2";
+      } else if(current_anim == "Attack2") {
+        ayumi.attack2_ = false;
+      }
+
+      if(ayumi.charmove_.isWalking()) {
+        if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+          *transition_time = 0.3f;
+          return "Run";
+        } else {
+          *transition_time = 0.2f;
+          return "Walk";
+        }
+      } else {
+        *transition_time = 0.2f;
+        return "Stand";
+      }
+    }
+  } anim_end_listener_;
+
   Skybox& skybox_;
 public:
   Ayumi(Skybox& skybox, const CharacterMovement& charmove);

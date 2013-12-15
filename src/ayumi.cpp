@@ -15,6 +15,8 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowSoftness_(prog_, "uShadowSoftness")
     , attack2_(false)
+    , charmove_(charmove)
+    , anim_end_listener_(*this)
     , skybox_(skybox) {
 
   oglwrap::ShaderSource vs_source("ayumi.vert");
@@ -48,34 +50,31 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
   uShadowSoftness_ = 1 << clamp(4 - PERFORMANCE, 0, 4);
 
   mesh_.addAnimation("models/ayumi_idle.dae", "Stand",
-                     oglwrap::AnimFlag::Repeat |
-                     oglwrap::AnimFlag::Interruptable);
+                     oglwrap::AnimFlag::Repeat);
 
   mesh_.addAnimation("models/ayumi_walk.dae", "Walk",
                      oglwrap::AnimFlag::Repeat |
-                     oglwrap::AnimFlag::Mirrored |
-                     oglwrap::AnimFlag::Interruptable);
+                     oglwrap::AnimFlag::Mirrored);
 
   mesh_.addAnimation("models/ayumi_run.dae", "Run",
-                     oglwrap::AnimFlag::Repeat |
-                     oglwrap::AnimFlag::Interruptable);
+                     oglwrap::AnimFlag::Repeat);
 
   mesh_.addAnimation("models/ayumi_jump_rise.dae", "JumpRise",
-                     oglwrap::AnimFlag::MirroredRepeat |
-                     oglwrap::AnimFlag::Interruptable);
+                     oglwrap::AnimFlag::MirroredRepeat);
 
   mesh_.addAnimation("models/ayumi_jump_fall.dae", "JumpFall",
-                     oglwrap::AnimFlag::MirroredRepeat |
-                     oglwrap::AnimFlag::Interruptable);
+                     oglwrap::AnimFlag::MirroredRepeat);
 
   mesh_.addAnimation("models/ayumi_attack.dae", "Attack",
                      oglwrap::AnimFlag::None, 2.5f);
 
   mesh_.addAnimation("models/ayumi_attack2.dae", "Attack2",
-                     oglwrap::AnimFlag::None, 2.0f);
+                     oglwrap::AnimFlag::None, 1.5f);
 
   mesh_.setDefaultAnimation("Stand", 0.3f);
-  mesh_.forceAnimToDefault(0);
+  mesh_.setAnimToDefault(0);
+
+  mesh_.setAnimationEndedCallback(&anim_end_listener_);
 }
 
 oglwrap::AnimatedMesh& Ayumi::getMesh() {
@@ -89,21 +88,46 @@ void Ayumi::resize(glm::mat4 projMat) {
 
 void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
   if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-    mesh_.setCurrentAnimation("Attack", time, 0.3f);
+    if(mesh_.getCurrentAnimation() != "Attack" && mesh_.getCurrentAnimation() != "Attack2") {
+      mesh_.setCurrentAnimation("Attack", time, 0.3f);
+    } else {
+      attack2_ = true;
+    }
   } else if(charmove.is_jumping()) {
     if(charmove.is_jumping_rise()) {
-      mesh_.setCurrentAnimation("JumpRise", time, 0.3f);
+      if(mesh_.getCurrentAnimation() != "JumpRise" && 
+         mesh_.getCurrentAnimation() != "Attack" && 
+         mesh_.getCurrentAnimation() != "Attack2") {
+        mesh_.setCurrentAnimation("JumpRise", time, 0.3f);
+      }
     } else {
-      mesh_.setCurrentAnimation("JumpFall", time, 0.3f);
+      if(mesh_.getCurrentAnimation() != "JumpFall" && 
+         mesh_.getCurrentAnimation() != "Attack" && 
+         mesh_.getCurrentAnimation() != "Attack2") {
+        mesh_.setCurrentAnimation("JumpFall", time, 0.3f);
+      }
     }
-  } else if(charmove.isWalking()) {
-    if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-      mesh_.setCurrentAnimation("Run", time, 0.2f);
-    } else {
-      mesh_.setCurrentAnimation("Walk", time, 0.3f);
-    }
-  } else {
-    mesh_.setAnimToDefault(time);
+  } else if(
+    mesh_.getCurrentAnimation() == "JumpFall" || 
+    mesh_.getCurrentAnimation() == "Run" || 
+    mesh_.getCurrentAnimation() == "Walk" || 
+    mesh_.getCurrentAnimation() == "Stand"
+  ) {
+    if(charmove_.isWalking()) {
+        if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+          if(mesh_.getCurrentAnimation() != "Run") {
+            mesh_.setCurrentAnimation("Run", time, 0.3f);
+          }
+        } else {
+          if(mesh_.getCurrentAnimation() != "Walk") {
+            mesh_.setCurrentAnimation("Walk", time, 0.3f);
+          }
+        }
+      } else {
+        if(mesh_.getCurrentAnimation() != "Stand") {
+          mesh_.setAnimToDefault(time);
+        }
+      }
   }
 
   mesh_.updateBoneInfo(time);

@@ -21,8 +21,9 @@ Dependencies:
 How to build (linux):
 --------------------
 * Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
-* Get the external dependencies: libsfml2-dev libmagick++-dev libglew-dev libassimp-dev
-* Use the given Makefile(it uses g++), or the prebuilt executeable.
+* Get the external dependencies: libsfml2-dev libmagick++-dev libglew-dev 
+* Get a fresh copy of [assimp](https://github.com/assimp/assimp). (You'd better avoid the libassimp-dev package, it's kinda old).
+* Use the given Makefile(it uses g++).
 
 How to build (Windows):
 ----------------------
@@ -42,6 +43,27 @@ How to build (Windows):
 * Add `Magick++-config --cppflags --cxxflags --ldflags` to compiler settings
 * Add `Magick++-config --libs` to linker settings
 * Enable c++11 mode with your compiler
+
+Acknowledgements
+================
+
+- *Darkz* for useful feedback and help with the fixing of several bugs.
+
+License
+=======
+
+    DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
+                    
+    Copyright (C) 2013 Csala Tamás <tomius1994@gmail.com> 
+         
+    Everyone is permitted to copy and distribute verbatim or modified 
+    copies of this license document, and changing it is allowed as long 
+    as the name is changed. 
+       
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
+    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION 
+     
+    0. You just DO WHAT THE FUCK YOU WANT TO.
 
 ----------------------
 If you have any problem, please post in the issues tab or mail me at tomius1994@gmail.com. Any feedback would be appreciated.

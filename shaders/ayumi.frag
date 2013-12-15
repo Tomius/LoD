@@ -77,7 +77,7 @@ float Visibility() {
       ));
     }
 
-    if(visibility < 0)
+    if(visibility <= 0)
       return 0;
   }
 
@@ -112,5 +112,5 @@ void main() {
   vec3 final_color = color * AmbientColor() *
       (Visibility() * SunPower() * (diffuse_power + spec_mask * specular_power) + AmbientPower());
 
-  vFragColor = vec4(final_color, 1.0);
+  vFragColor = clamp(vec4(final_color, 1.0), vec4(0.0), vec4(1.0));
 }

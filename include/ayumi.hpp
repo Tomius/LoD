@@ -43,7 +43,7 @@ class Ayumi {
       *use_default_speed_and_flags = true;
 
       if(current_anim == "Attack" && ayumi.attack2_) {
-        *transition_time = 0.1f;
+        *transition_time = 0.2f;
         return "Attack2";
       } else if(current_anim == "Attack2") {
         ayumi.attack2_ = false;
@@ -51,14 +51,26 @@ class Ayumi {
 
       if(ayumi.charmove_.isWalking()) {
         if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-          *transition_time = 0.3f;
+          if(current_anim == "Attack2") {
+            *transition_time = 0.4f;
+          } else {
+            *transition_time = 0.3f;
+          }
           return "Run";
         } else {
-          *transition_time = 0.2f;
+          if(current_anim == "Attack2") {
+            *transition_time = 0.4f;
+          } else {
+            *transition_time = 0.2f;
+          }
           return "Walk";
         }
       } else {
-        *transition_time = 0.2f;
+        if(current_anim == "Attack2") {
+          *transition_time = 0.4f;
+        } else {
+          *transition_time = 0.2f;
+        }
         return "Stand";
       }
     }

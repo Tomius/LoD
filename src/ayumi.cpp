@@ -69,7 +69,7 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
                      oglwrap::AnimFlag::None, 2.5f);
 
   mesh_.addAnimation("models/ayumi_attack2.dae", "Attack2",
-                     oglwrap::AnimFlag::None, 1.5f);
+                     oglwrap::AnimFlag::None, 1.4f);
 
   mesh_.setDefaultAnimation("Stand", 0.3f);
   mesh_.setAnimToDefault(0);

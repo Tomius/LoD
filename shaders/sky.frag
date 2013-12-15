@@ -122,7 +122,7 @@ vec3 SkyColor(vec3 look_dir) {
     night_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r)) + moon * (1.0 - cloud.a);
   }
 
-  return mix(night_color, day_color, uDay);
+  return clamp(mix(night_color, day_color, uDay), vec3(0.0), vec3(1.0));
 }
 
 // Functions for other objects' lighting computations
@@ -143,7 +143,7 @@ float AmbientPower() {
   return mix(
     0.1, // night
     0.25 * max(dot( // day
-        normalize(uSunPos) + vec3(0.0, 0.12, 0.0),
+        normalize(uSunPos + vec3(0.0, 0.12, 0.0)),
         vec3(0.0, 1.0, 0.0)
     ), 0.4),
     uDay

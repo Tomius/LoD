@@ -39,5 +39,5 @@ void main() {
   lumiosity = length(color);
   color *= lumiosity / (lumiosity + 1);
 
-  vFragColor = vec4(color, 1.0);
+  vFragColor = clamp(vec4(color, 1.0), vec4(0.0), vec4(1.0));
 }

@@ -75,7 +75,7 @@ int main() {
   std::cout << " - Anti-aliasing level: " << settings.antialiasingLevel << std::endl;
   std::cout << " - OpenGL version: " << settings.majorVersion << "." << settings.minorVersion << std::endl;
 
-  if(settings.majorVersion < 3 && settings.minorVersion < 1) {
+  if(settings.majorVersion < 3 || (settings.majorVersion == 3 && settings.minorVersion < 1)) {
     std::cout << "At least OpenGL version 3.1 is required to run this program" << std::endl;
     return -1;
   }

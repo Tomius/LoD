@@ -367,7 +367,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   // The center piece is special. Check for its visibility first.
   glm::vec2 diff = glm::normalize(glm::vec2(pos.x, pos.y) - camPos);
   mipmap_level = GetBlockMipmapLevel(pos, camPos);
-  if(glm::dot(camFwd, diff) >= kCosFieldOfView // Pre-frustum culling.
+  if(glm::dot(camFwd, diff) >= (PERFORMANCE ? 0 : kCosFieldOfView) // Pre-frustum culling.
         || mipmap_level == PERFORMANCE) // The lowest mipmap level, the one, the character is standing on
   {
       uOffset = pos;
@@ -396,7 +396,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 
         // Check visibility
         glm::vec2 diff = glm::normalize(glm::vec2(pos.x/2, pos.y/2) - camPos);
-        if(glm::dot(camFwd, diff) < kCosFieldOfView // Pre-frustum culling.
+        if(glm::dot(camFwd, diff) < (PERFORMANCE ? 0 : kCosFieldOfView) // Pre-frustum culling.
               && mipmap_level != PERFORMANCE) // The lowest mipmap level, the one, the character is standing on
         {
           continue;

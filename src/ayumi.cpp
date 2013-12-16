@@ -78,6 +78,9 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
   mesh_.addAnimation("models/ayumi_attack2.dae", "Attack2",
                      oglwrap::AnimFlag::None, 1.4f);
 
+  mesh_.addAnimation("models/ayumi_attack3.dae", "Attack3",
+                     oglwrap::AnimFlag::None, 3.0f);
+
   mesh_.setDefaultAnimation("Stand", 0.3f);
   mesh_.forceAnimToDefault(0);
 
@@ -96,10 +99,12 @@ void Ayumi::resize(glm::mat4 projMat) {
 void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
   if(was_left_click) {
     was_left_click = false;
-    if(mesh_.getCurrentAnimation() != "Attack" && mesh_.getCurrentAnimation() != "Attack2") {
-      mesh_.setCurrentAnimation("Attack", time, 0.3f);
-    } else {
+    if(mesh_.getCurrentAnimation() == "Attack") {
       attack2_ = true;
+    } else if(mesh_.getCurrentAnimation() == "Attack2") {
+      attack3_ = true;
+    } else if(mesh_.getCurrentAnimation() != "Attack3") {
+      mesh_.setCurrentAnimation("Attack", time, 0.3f);
     }
   } else if(charmove.is_jumping()) {
     if(charmove.is_jumping_rise()) {

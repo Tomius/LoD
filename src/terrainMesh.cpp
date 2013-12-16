@@ -484,7 +484,7 @@ double TerrainMesh::getHeight(double x, double y) const {
   using namespace glm;
   ivec2 coord = ivec2(round(x), round(y));
 
-  // If speed is required than just approximate.
+  // If speed is required then just approximate.
   if(PERFORMANCE >= 2) {
     return fetchHeight(coord);
   }

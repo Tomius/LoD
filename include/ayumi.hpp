@@ -25,7 +25,7 @@ class Ayumi {
   oglwrap::LazyUniform<glm::vec4> uSunData_;
   oglwrap::LazyUniform<int> uNumUsedShadowMaps_, uShadowSoftness_;
 
-  bool attack2_;
+  bool attack2_, attack3_;
 
   const CharacterMovement& charmove_;
 
@@ -43,13 +43,19 @@ class Ayumi {
       *use_default_flags = true;
 
       if(current_anim == "Attack" && ayumi.attack2_) {
-        *transition_time = 0.2f;
+        *transition_time = 0.1f;
         return "Attack2";
       } else if(current_anim == "Attack2") {
         ayumi.attack2_ = false;
+        if(ayumi.attack3_) {
+          *transition_time = 0.05f;
+          return "Attack3";
+        }
+      } else if(current_anim == "Attack3") {
+        ayumi.attack3_ = false;
       }
 
-      if(current_anim == "Attack" || current_anim == "Attack2") {
+      if(current_anim == "Attack" || current_anim == "Attack2" || current_anim == "Attack3") {
         if(ayumi.charmove_.is_jumping()) {
           *transition_time = 0.3f;
           if(ayumi.charmove_.is_jumping_rise()) {

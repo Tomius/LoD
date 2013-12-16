@@ -36,11 +36,11 @@ class Ayumi {
 
     std::string operator()(const std::string& current_anim, 
                            float *transition_time,
-                           bool *use_default_speed_and_flags, 
+                           bool *use_default_flags, 
                            unsigned *flags,
                            float *speed) override {
 
-      *use_default_speed_and_flags = true;
+      *use_default_flags = true;
 
       if(current_anim == "Attack" && ayumi.attack2_) {
         *transition_time = 0.2f;

@@ -340,16 +340,20 @@ static inline int GetBlockMipmapLevel(const glm::ivec2& _pos, const glm::vec2& c
 
 static inline bool IsBlockVisible(const glm::ivec2& _blockPos, const glm::vec2& camPos, const glm::vec2& camFwd) {
   glm::vec2 blockPos = glm::vec2(_blockPos.x/2, _blockPos.y/2);
-  glm::vec2 diff = glm::normalize(blockPos - camPos);
-  if(glm::dot(camFwd, diff) >= kCosFieldOfView || diff.length() < kBlockRadius) {
+  glm::vec2 diff = blockPos - camPos;
+  float dot = glm::dot(camFwd, glm::normalize(diff));
+
+  if(dot >= kCosFieldOfView || diff.length() < kBlockRadius) {
     return true;
-  } else {
-    for(int i = 0; i < 6; ++i) {
-      glm::ivec2 pos = _blockPos + GetBlockPos(1, i, 0, kBlockRadius);
-      diff = glm::normalize(glm::vec2(pos.x/2, pos.y/2) - camPos);
-      if(glm::dot(camFwd, diff) >= kCosFieldOfView) {
-        return true;
-      }
+  } else if(dot < 0) {
+    return false;
+  }
+
+  for(int i = 0; i < 6; ++i) {
+    glm::ivec2 pos = _blockPos + GetBlockPos(1, i, 0, kBlockRadius);
+    diff = glm::normalize(glm::vec2(pos.x/2, pos.y/2) - camPos);
+    if(glm::dot(camFwd, diff) >= kCosFieldOfView) {
+      return true;
     }
   }
 

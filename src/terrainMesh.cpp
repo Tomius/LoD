@@ -7,7 +7,7 @@ using namespace oglwrap;
    4 -> max performance */
 extern const int PERFORMANCE;
 extern const float kFieldOfView;
-const float kCosFieldOfView = cos(kFieldOfView * M_PI / 180) - 0.01f;
+const float kCosFieldOfView = cos(kFieldOfView * M_PI / 180);
 
 // ~~~~~~<{ A vector of short values }>~~~~~~
 
@@ -290,6 +290,10 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
 // This works with ivec2 rather than svec2, as it's result is
 // uploaded as a uniform which have to an int anyway.
 static inline glm::ivec2 GetBlockPos(int ring, char line, int segment, int distance = 1) {
+  if(ring == 0) {
+    return glm::ivec2(0);
+  }
+
   /*
                            o----- (5) -----o
                           / \             / \
@@ -323,7 +327,7 @@ static inline glm::ivec2 GetBlockPos(int ring, char line, int segment, int dista
   return prevPoint + (nextPoint - prevPoint) * segment / ring;
 }
 
-static inline int GetBlockMipmapLevel(glm::ivec2 _pos, glm::vec2 camPos) {
+static inline int GetBlockMipmapLevel(const glm::ivec2& _pos, const glm::vec2& camPos) {
   glm::vec2 pos(_pos.x / 2, _pos.y / 2);
 
   return std::min(
@@ -332,6 +336,24 @@ static inline int GetBlockMipmapLevel(glm::ivec2 _pos, glm::vec2 camPos) {
              0
            ) + PERFORMANCE, kBlockMipmapLevel - 1
          );
+}
+
+static inline bool IsBlockVisible(const glm::ivec2& _blockPos, const glm::vec2& camPos, const glm::vec2& camFwd) {
+  glm::vec2 blockPos = glm::vec2(_blockPos.x/2, _blockPos.y/2);
+  glm::vec2 diff = glm::normalize(blockPos - camPos);
+  if(glm::dot(camFwd, diff) >= kCosFieldOfView || diff.length() < kBlockRadius) {
+    return true;
+  } else {
+    for(int i = 0; i < 6; ++i) {
+      glm::ivec2 pos = _blockPos + GetBlockPos(1, i, 0, kBlockRadius);
+      diff = glm::normalize(glm::vec2(pos.x/2, pos.y/2) - camPos);
+      if(glm::dot(camFwd, diff) >= kCosFieldOfView) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
@@ -364,13 +386,10 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   glm::vec2 camFwd = glm::normalize(glm::vec2(_camFwd.x, _camFwd.z));
   int mipmap_level;
 
-  // The center piece is special. Check for its visibility first.
-  glm::vec2 diff = glm::normalize(glm::vec2(pos.x, pos.y) - camPos);
-  mipmap_level = GetBlockMipmapLevel(pos, camPos);
-  if(glm::dot(camFwd, diff) >= (PERFORMANCE ? 0 : kCosFieldOfView) // Pre-frustum culling.
-        || mipmap_level == PERFORMANCE) // The lowest mipmap level, the one, the character is standing on
-  {
+  // The center piece is special.
+  if(IsBlockVisible(pos, camPos, camFwd)) {
       uOffset = pos;
+      mipmap_level = GetBlockMipmapLevel(pos, camPos);
       uMipmapLevel = mipmap_level;
 
     // Draw the center piece
@@ -394,22 +413,16 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
         pos = GetBlockPos(ring, line, segment, distance);
         mipmap_level = GetBlockMipmapLevel(pos, camPos);
 
-        // Check visibility
-        glm::vec2 diff = glm::normalize(glm::vec2(pos.x/2, pos.y/2) - camPos);
-        if(glm::dot(camFwd, diff) < (PERFORMANCE ? 0 : kCosFieldOfView) // Pre-frustum culling.
-              && mipmap_level != PERFORMANCE) // The lowest mipmap level, the one, the character is standing on
-        {
-          continue;
+        if(IsBlockVisible(pos, camPos, camFwd)) {
+          uOffset = pos;
+          uMipmapLevel = mipmap_level;
+
+          // Draw
+          vao_[mipmap_level].bind();
+          indices_[mipmap_level].bind();
+          gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
+          CreateConnectors(pos, camPos);
         }
-
-        uOffset = pos;
-        uMipmapLevel = mipmap_level;
-
-        // Draw
-        vao_[mipmap_level].bind();
-        indices_[mipmap_level].bind();
-        gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
-        CreateConnectors(pos, camPos);
       }
     }
     distance += kBlockRadius;

@@ -101,7 +101,7 @@ void main() {
   float length_from_camera = length(c_vPos);
 
   vec3 final_color = grass_color * AmbientColor() *
-    (max(Visibility() * SunPower(), 0.0)*(specular_power + diffuse_power) + AmbientPower());
+    (Visibility()*SunPower()*(specular_power + diffuse_power) + AmbientPower());
 
   // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));

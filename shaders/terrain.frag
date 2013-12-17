@@ -40,9 +40,10 @@ const float kMaxShadow = 0.8;
 float Visibility() {
   float bias = 0.01;
   float visibility = 1.0;
+  int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
 
   // For every shadow casters
-  for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+  for(int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
     visibility -= kMaxShadow * (1 - texture(
@@ -79,9 +80,10 @@ void main() {
   vec3 c_view_direction = normalize(-(uCameraMatrix * vec4(w_vPos, 1)).xyz);
 
   // Lighting values.
-  float diffuse_power = max(dot(c_normal, c_light_dir), 0);
+  float diffuse_power = dot(c_normal, c_light_dir);
   float specular_power;
-  if(diffuse_power < 0.0) {
+  if(diffuse_power <= 0.0) {
+    diffuse_power = 0.0;
     specular_power = 0.0;
   } else {
     specular_power = pow(
@@ -99,7 +101,7 @@ void main() {
   float length_from_camera = length(c_vPos);
 
   vec3 final_color = grass_color * AmbientColor() *
-    (Visibility() * SunPower() * (specular_power + diffuse_power) + AmbientPower());
+    (max(Visibility() * SunPower(), 0.0)*(specular_power + diffuse_power) + AmbientPower());
 
   // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));

@@ -57,9 +57,10 @@ vec2 kPoissonDisk[16] = vec2[](
 float Visibility() {
   float visibility = 1.0;
   float bias = 0.01;
+  int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
 
   // For every shadow casters
-  for(int i = 0; i < min(uNumUsedShadowMaps, SHADOW_MAP_NUM); ++i) {
+  for(int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
     // Self-shadow needs better MSA
@@ -77,12 +78,12 @@ float Visibility() {
       ));
     }
 
-    if(visibility <= 0)
-      return 0;
+    if(visibility <= 0.0) {
+      return 0.0;
+    }
   }
 
-  // The visibility shouldn't go negative.
-	return max(visibility, 0.0);
+	return visibility;
 }
 
 void main() {
@@ -90,10 +91,11 @@ void main() {
   vec3 c_viewDir = normalize(-c_vPos);
 
   vec3 c_lightDir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
-  float diffuse_power = max(dot(c_normal, c_lightDir), 0);
+  float diffuse_power = dot(c_normal, c_lightDir);
 
   float specular_power;
-  if(diffuse_power < 0.0) {
+  if(diffuse_power <= 0.0) {
+    diffuse_power = 0.0;
     specular_power = 0.0;
   } else {
     specular_power = pow(
@@ -109,8 +111,8 @@ void main() {
   vec3 color = texture(uDiffuseTexture, vTexCoord).rgb;
   float spec_mask = texture(uSpecularTexture, vTexCoord).r;
 
-  vec3 final_color = color * AmbientColor() *
-      (Visibility() * SunPower() * (diffuse_power + spec_mask * specular_power) + AmbientPower());
+  vec3 final_color = color * AmbientColor() * 
+    (max(Visibility()*SunPower(), 0.0) * (diffuse_power + spec_mask*specular_power) + AmbientPower());
 
   vFragColor = clamp(vec4(final_color, 1.0), vec4(0.0), vec4(1.0));
 }

@@ -77,13 +77,9 @@ float Visibility() {
         )
       ));
     }
-
-    if(visibility <= 0.0) {
-      return 0.0;
-    }
   }
 
-	return visibility;
+	return max(visibility, 0.0);
 }
 
 void main() {

@@ -105,5 +105,5 @@ void main() {
   vec3 fog = AmbientColor() * fog_color * (0.005 + SunPower());
   float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 6;
 
-  vFragColor = vec4(clamp(mix(final_color, fog, alpha), vec3(0), vec3(1)), 1.0);
+  vFragColor = vec4(mix(final_color, fog, alpha), 1.0);
 }

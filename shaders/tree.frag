@@ -36,5 +36,5 @@ void main() {
     discard;
   }
 
-  vFragColor = clamp(vec4(pow(final_color, vec3(1.3)), actual_alpha), vec4(0.0), vec4(1.0));
+  vFragColor = vec4(pow(final_color, vec3(1.3)), actual_alpha);
 }

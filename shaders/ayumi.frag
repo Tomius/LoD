@@ -110,5 +110,5 @@ void main() {
   vec3 final_color = color * AmbientColor() * 
     (Visibility()*SunPower()*(diffuse_power + spec_mask*specular_power) + AmbientPower());
 
-  vFragColor = clamp(vec4(final_color, 1.0), vec4(0.0), vec4(1.0));
+  vFragColor = vec4(final_color, 1.0);
 }

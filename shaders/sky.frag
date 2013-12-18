@@ -122,7 +122,7 @@ vec3 SkyColor(vec3 look_dir) {
     night_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r)) + moon * (1.0 - cloud.a);
   }
 
-  return clamp(mix(night_color, day_color, uDay), vec3(0.0), vec3(1.0));
+  return mix(night_color, day_color, uDay);
 }
 
 // Functions for other objects' lighting computations

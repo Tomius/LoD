@@ -21,17 +21,20 @@ class CharacterMovement {
   // Moving speed per second in OpenGL units.
   float rot_speed_, vert_speed_, horiz_speed_;
 
-  bool walking_, jumping_, transition_;
+  bool walking_, jumping_, flip_, can_flip_, transition_;
 
 public:
   CharacterMovement(glm::vec3 pos = glm::vec3(),
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f);
   void update(const oglwrap::Camera& cam, glm::vec2 character_offset);
+  void handleSpacePressed();
   void updateHeight(float groundHeight);
-  bool is_jumping() const;
-  bool is_jumping_rise() const;
-  bool is_jumping_fall() const;
+  bool isJumping() const;
+  bool isJumpingRise() const;
+  bool isJumpingFall() const;
+  bool isDoingFlip() const;
+  void setFlip(bool flip);
   bool isWalking() const;
   glm::mat4 getModelMatrix() const;
   glm::vec3 getPos() const;

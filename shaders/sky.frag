@@ -135,16 +135,16 @@ float isDay() {
 }
 
 float SunPower() {
-  return clamp((uDay + 0.1) * (normalize(uSunPos).y + 0.5), 0.04, 1.0);
+  return max((uDay + 0.1) * (normalize(uSunPos).y + 0.5), 0.04);
 }
 
 float AmbientPower() {
   return mix(
     0.1, // night
-    0.25 * max(dot( // day
+    0.25 * dot( // day
         normalize(uSunPos + vec3(0.0, 0.12, 0.0)),
         vec3(0.0, 1.0, 0.0)
-    ), 0.4),
+    ),
     uDay
   );
 }

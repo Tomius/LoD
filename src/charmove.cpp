@@ -15,8 +15,22 @@ CharacterMovement::CharacterMovement(glm::vec3 pos,
   , horiz_speed_(horizontal_speed)
   , walking_(false)
   , jumping_(false)
+  , flip_(false)
+  , can_flip_(true)
   , transition_(false)
 { }
+
+void CharacterMovement::handleSpacePressed() {
+  if(!jumping_) {
+      jumping_ = true;
+      flip_ = false;
+      vert_speed_ = 11.0f;
+    } else if (can_flip_) {
+      can_flip_ = false;
+      flip_ = true;
+      vert_speed_ = 11.0f;
+    }
+}
 
 void CharacterMovement::update(const Camera& cam, glm::vec2 character_offset) {
   using namespace glm;
@@ -50,12 +64,6 @@ void CharacterMovement::update(const Camera& cam, glm::vec2 character_offset) {
   walking_ = moveDir.x || moveDir.y;
   transition_ = transition_ || (walking_ != lastWalking) || (lastMoveDir != moveDir);
   lastMoveDir = moveDir;
-
-  if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && !jumping_) {
-    jumping_ = true;
-    vert_speed_ = 0.5f;
-  }
-
 
   if(walking_) {
     double cameraRot = -cam.getRoty(); // -z is forward
@@ -109,6 +117,7 @@ void CharacterMovement::updateHeight(float groundHeight) {
     const float diff = groundHeight - pos_.y;
     if(diff >= 0 && jumping_ && vert_speed_ < 0) {
       jumping_ = false;
+      can_flip_ = true;
       pos_.y = groundHeight;
       return;
     }
@@ -120,29 +129,37 @@ void CharacterMovement::updateHeight(float groundHeight) {
     }
     if(jumping_) {
       if(diff > 0) {
-        pos_.y += std::max(diff, vert_speed_) * dt * 30.0f;
+        pos_.y += std::max(diff, vert_speed_) * dt;
       } else {
-        pos_.y += vert_speed_ * dt * 30.0f;
+        pos_.y += vert_speed_ * dt;
       }
       vert_speed_ -= dt * GRAVITY;
     }
   }
 }
 
-bool CharacterMovement::is_jumping() const {
+bool CharacterMovement::isJumping() const {
   return jumping_;
 }
 
-bool CharacterMovement::is_jumping_rise() const {
-  return jumping_ && vert_speed_ > 0;
+bool CharacterMovement::isJumpingRise() const {
+  return jumping_ && !flip_ && vert_speed_ > 0;
 }
 
-bool CharacterMovement::is_jumping_fall() const {
-  return jumping_ && vert_speed_ < 0;
+bool CharacterMovement::isJumpingFall() const {
+  return jumping_ && !flip_ && vert_speed_ < 0;
+}
+
+bool CharacterMovement::isDoingFlip() const {
+  return flip_;
 }
 
 bool CharacterMovement::isWalking() const {
   return walking_;
+}
+
+void CharacterMovement::setFlip(bool flip) {
+  flip_ = flip;
 }
 
 glm::mat4 CharacterMovement::getModelMatrix() const {

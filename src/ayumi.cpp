@@ -2,7 +2,7 @@
 
 extern bool was_left_click;
 
-Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
+Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
     : mesh_("models/ayumi.dae",
             aiProcessPreset_TargetRealtime_MaxQuality |
             aiProcess_FlipUVs)
@@ -57,6 +57,10 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
 
   mesh_.addAnimation("models/ayumi_walk.dae", "Walk",
                      oglwrap::AnimFlag::Repeat |
+                     oglwrap::AnimFlag::Interruptable);
+
+  mesh_.addAnimation("models/ayumi_walk.dae", "MoonWalk",
+                     oglwrap::AnimFlag::Repeat |
                      oglwrap::AnimFlag::Mirrored |
                      oglwrap::AnimFlag::Interruptable);
 
@@ -65,12 +69,15 @@ Ayumi::Ayumi(Skybox& skybox, const CharacterMovement& charmove)
                      oglwrap::AnimFlag::Interruptable);
 
   mesh_.addAnimation("models/ayumi_jump_rise.dae", "JumpRise",
-                     oglwrap::AnimFlag::MirroredRepeat |
+                     oglwrap::AnimFlag::MirroredRepeat | 
                      oglwrap::AnimFlag::Interruptable);
 
   mesh_.addAnimation("models/ayumi_jump_fall.dae", "JumpFall",
-                     oglwrap::AnimFlag::MirroredRepeat |
+                     oglwrap::AnimFlag::MirroredRepeat | 
                      oglwrap::AnimFlag::Interruptable);
+
+  mesh_.addAnimation("models/ayumi_flip.dae", "Flip",
+                     oglwrap::AnimFlag::None, 1.2);
 
   mesh_.addAnimation("models/ayumi_attack.dae", "Attack",
                      oglwrap::AnimFlag::None, 2.5f);
@@ -106,8 +113,10 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
     } else if(mesh_.getCurrentAnimation() != "Attack3") {
       mesh_.setCurrentAnimation("Attack", time, 0.3f);
     }
-  } else if(charmove.is_jumping()) {
-    if(charmove.is_jumping_rise()) {
+  } else if(charmove.isJumping()) {
+    if(charmove.isDoingFlip()) {
+      mesh_.setCurrentAnimation("Flip", time, 0.1f);
+    } else if(charmove.isJumpingRise()) {
       mesh_.setCurrentAnimation("JumpRise", time, 0.3f);
     } else {
       mesh_.setCurrentAnimation("JumpFall", time, 0.3f);

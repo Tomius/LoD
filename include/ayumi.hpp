@@ -27,7 +27,7 @@ class Ayumi {
 
   bool attack2_, attack3_;
 
-  const CharacterMovement& charmove_;
+  CharacterMovement& charmove_;
 
   struct AnimationEndedListener : public oglwrap::AnimatedMesh::AnimationEndedListener {
     Ayumi& ayumi;
@@ -53,17 +53,22 @@ class Ayumi {
         }
       } else if(current_anim == "Attack3") {
         ayumi.attack3_ = false;
+        return "JumpFall";
       }
 
       if(current_anim == "Attack" || current_anim == "Attack2" || current_anim == "Attack3") {
-        if(ayumi.charmove_.is_jumping()) {
+        if(ayumi.charmove_.isJumping()) {
           *transition_time = 0.3f;
-          if(ayumi.charmove_.is_jumping_rise()) {
+          if(ayumi.charmove_.isJumpingRise()) {
             return "JumpRise";
           } else {
             return "JumpFall";
           }
         }
+      }
+
+      if(current_anim == "Flip") {
+        ayumi.charmove_.setFlip(false);
       }
 
       if(ayumi.charmove_.isWalking()) {
@@ -95,7 +100,7 @@ class Ayumi {
 
   Skybox& skybox_;
 public:
-  Ayumi(Skybox& skybox, const CharacterMovement& charmove);
+  Ayumi(Skybox& skybox, CharacterMovement& charmove);
   oglwrap::AnimatedMesh& getMesh();
   void resize(glm::mat4 projMat);
   void updateStatus(float time, const CharacterMovement& charmove);

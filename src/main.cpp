@@ -18,7 +18,7 @@
 
 using namespace oglwrap;
 
-extern const float GRAVITY = 0.6f;
+extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
    4 -> max performance */
 extern const int PERFORMANCE = 1;
@@ -110,7 +110,7 @@ int main() {
       PrintDebugTime();
 
       PrintDebugText("Initializing the shadow maps");
-        Shadow shadow(PERFORMANCE ? 256 : 512, 32);
+        Shadow shadow(PERFORMANCE < 2 ? 512 : 256, 32);
       PrintDebugTime();
 
       PrintDebugText("Initializing the trees");
@@ -146,6 +146,8 @@ int main() {
               } else if(event.key.code == sf::Keyboard::F11) {
                 fixMouse = !fixMouse;
                 window.setMouseCursorVisible(!fixMouse);
+              } else if(event.key.code == sf::Keyboard::Space) {
+                charmove.handleSpacePressed();
               }
               break;
             case sf::Event::Resized: {
@@ -168,7 +170,7 @@ int main() {
               break;
             case sf::Event::MouseButtonPressed:
               if(event.mouseButton.button == sf::Mouse::Left) {
-                was_left_click = true;
+                was_left_click = true; 
               }
               break;
             default:

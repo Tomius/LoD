@@ -24,11 +24,11 @@ void CharacterMovement::handleSpacePressed() {
   if(!jumping_) {
       jumping_ = true;
       flip_ = false;
-      vert_speed_ = 11.0f;
+      vert_speed_ = 10.0f;
     } else if (can_flip_) {
       can_flip_ = false;
       flip_ = true;
-      vert_speed_ = 11.0f;
+      vert_speed_ = 12.0f;
     }
 }
 

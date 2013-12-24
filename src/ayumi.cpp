@@ -77,7 +77,7 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
                      oglwrap::AnimFlag::Interruptable);
 
   mesh_.addAnimation("models/ayumi_flip.dae", "Flip",
-                     oglwrap::AnimFlag::None, 1.2);
+                     oglwrap::AnimFlag::None, 1.25f);
 
   mesh_.addAnimation("models/ayumi_attack.dae", "Attack",
                      oglwrap::AnimFlag::None, 2.5f);
@@ -115,7 +115,7 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
     }
   } else if(charmove.isJumping()) {
     if(charmove.isDoingFlip()) {
-      mesh_.setCurrentAnimation("Flip", time, 0.1f);
+      mesh_.setCurrentAnimation("Flip", time, 0.05f);
     } else if(charmove.isJumpingRise()) {
       mesh_.setCurrentAnimation("JumpRise", time, 0.3f);
     } else {

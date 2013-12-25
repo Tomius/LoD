@@ -70,11 +70,11 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
 
   mesh_.addAnimation("models/ayumi_jump_rise.dae", "JumpRise",
                      oglwrap::AnimFlag::MirroredRepeat | 
-                     oglwrap::AnimFlag::Interruptable);
+                     oglwrap::AnimFlag::Interruptable, 0.5f);
 
   mesh_.addAnimation("models/ayumi_jump_fall.dae", "JumpFall",
                      oglwrap::AnimFlag::MirroredRepeat | 
-                     oglwrap::AnimFlag::Interruptable);
+                     oglwrap::AnimFlag::Interruptable, 0.5f);
 
   mesh_.addAnimation("models/ayumi_flip.dae", "Flip",
                      oglwrap::AnimFlag::None, 1.25f);

@@ -52,26 +52,24 @@ class Ayumi {
           return "Attack3";
         }
       } else if(current_anim == "Attack3") {
+        *transition_time = 0.4f;
         ayumi.attack3_ = false;
-        return "JumpFall";
-      }
-
-      if(current_anim == "Attack" || current_anim == "Attack2" || current_anim == "Attack3") {
-        if(ayumi.charmove_.isJumping()) {
-          *transition_time = 0.3f;
-          if(ayumi.charmove_.isJumpingRise()) {
-            return "JumpRise";
-          } else {
-            return "JumpFall";
-          }
-        }
       }
 
       if(current_anim == "Flip") {
+        *transition_time = 0.5f;
         ayumi.charmove_.setFlip(false);
+        return "JumpFall";
       }
 
-      if(ayumi.charmove_.isWalking()) {
+      if(ayumi.charmove_.isJumping()) {
+        *transition_time = 0.3f;
+        if(ayumi.charmove_.isJumpingRise()) {
+          return "JumpRise";
+        } else {
+          return "JumpFall";
+        }
+      } else if(ayumi.charmove_.isWalking()) {
         if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
           if(current_anim == "Attack2") {
             *transition_time = 0.4f;
@@ -99,6 +97,7 @@ class Ayumi {
   } anim_end_listener_;
 
   Skybox& skybox_;
+
 public:
   Ayumi(Skybox& skybox, CharacterMovement& charmove);
   oglwrap::AnimatedMesh& getMesh();

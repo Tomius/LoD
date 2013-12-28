@@ -57,7 +57,7 @@ class Ayumi {
       }
 
       if(current_anim == "Flip") {
-        *transition_time = 0.5f;
+        *transition_time = 0.2f;
         ayumi.charmove_.setFlip(false);
         return "JumpFall";
       }
@@ -96,6 +96,22 @@ class Ayumi {
     }
   } anim_end_listener_;
 
+  struct CanJumpFunctor : public CharacterMovement::CanJumpFunctor {
+    const Ayumi& ayumi;
+    CanJumpFunctor(const Ayumi& ayumi) : ayumi(ayumi) { }
+    bool operator()() const {
+      return ayumi.canJump();
+    }
+  } can_jump_functor_;
+
+  struct CanFlipFunctor : public CharacterMovement::CanFlipFunctor {
+    const Ayumi& ayumi;
+    CanFlipFunctor(const Ayumi& ayumi) : ayumi(ayumi) { }
+    bool operator()() const {
+      return ayumi.canFlip();
+    }
+  } can_flip_functor_;
+
   Skybox& skybox_;
 
 public:
@@ -106,6 +122,8 @@ public:
   void shadowRender(float time, Shadow& shadow, const CharacterMovement& charmove);
   void render(float time, const oglwrap::Camera& cam,
               const CharacterMovement& charmove, const Shadow& shadow);
+  bool canJump() const;
+  bool canFlip() const;
 };
 
 #endif // LOD_AYUMI_HPP_

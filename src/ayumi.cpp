@@ -19,7 +19,12 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
     , attack2_(false)
     , charmove_(charmove)
     , anim_end_listener_(*this)
+    , can_jump_functor_(*this)
+    , can_flip_functor_(*this)
     , skybox_(skybox) {
+
+  charmove.setCanJumpFunctor(&can_jump_functor_);
+  charmove.setCanFlipFunctor(&can_flip_functor_);
 
   oglwrap::ShaderSource vs_source("ayumi.vert");
   vs_source.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
@@ -104,18 +109,28 @@ void Ayumi::resize(glm::mat4 projMat) {
 }
 
 void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
+  std::string curr_anim = mesh_.getCurrentAnimation();
+
   if(was_left_click) {
     was_left_click = false;
-    if(mesh_.getCurrentAnimation() == "Attack") {
+    if(curr_anim == "Attack") {
       attack2_ = true;
-    } else if(mesh_.getCurrentAnimation() == "Attack2") {
+    } else if(curr_anim == "Attack2") {
       attack3_ = true;
-    } else if(mesh_.getCurrentAnimation() != "Attack3") {
-      mesh_.setCurrentAnimation("Attack", time, 0.3f);
+    } else if(curr_anim != "Attack3") {
+      if(curr_anim == "JumpRise" || curr_anim == "JumpFall") {
+        mesh_.forceCurrentAnimation("Attack", time, 0.2f);
+      } else {
+        mesh_.setCurrentAnimation("Attack", time, 0.3f);
+      }
     }
   } else if(charmove.isJumping()) {
     if(charmove.isDoingFlip()) {
-      mesh_.setCurrentAnimation("Flip", time, 0.05f);
+      if(curr_anim == "JumpRise") {
+        mesh_.setCurrentAnimation("Flip", time, 0.05f);
+      } else {
+        mesh_.setCurrentAnimation("Flip", time, 0.2f);
+      }
     } else if(charmove.isJumpingRise()) {
       mesh_.setCurrentAnimation("JumpRise", time, 0.3f);
     } else {
@@ -124,18 +139,12 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
   } else {
     if(charmove_.isWalking()) {
       if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-        if(mesh_.getCurrentAnimation() != "Run") {
-          mesh_.setCurrentAnimation("Run", time, 0.3f);
-        }
+        mesh_.setCurrentAnimation("Run", time, 0.3f);
       } else {
-        if(mesh_.getCurrentAnimation() != "Walk") {
-          mesh_.setCurrentAnimation("Walk", time, 0.3f);
-        }
+        mesh_.setCurrentAnimation("Walk", time, 0.3f);
       }
     } else {
-      if(mesh_.getCurrentAnimation() != "Stand") {
-        mesh_.setAnimToDefault(time);
-      }
+      mesh_.setAnimToDefault(time);
     }
   }
 
@@ -145,8 +154,8 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
 void Ayumi::shadowRender(float time, Shadow& shadow, const CharacterMovement& charmove) {
   shadow_prog_.use();
   shadow_uMCP_ = shadow.modelCamProjMat(
-                   skybox_.getSunPos(time), mesh_.bSphere(), charmove.getModelMatrix()
-                 );
+    skybox_.getSunPos(time), mesh_.bSphere(), charmove.getModelMatrix()
+  );
   mesh_.uploadBoneInfo(shadow_uBones_);
 
   gl(FrontFace(GL_CCW));
@@ -182,4 +191,12 @@ void Ayumi::render(float time, const oglwrap::Camera& cam,
   gl(Disable(GL_CULL_FACE));
   skybox_.env_map.active(0);
   skybox_.env_map.unbind();
+}
+
+bool Ayumi::canJump() const {
+  return mesh_.isInterrupable();
+}
+
+bool Ayumi::canFlip() const {
+  return mesh_.isInterrupable();
 }

@@ -18,18 +18,24 @@ CharacterMovement::CharacterMovement(glm::vec3 pos,
   , flip_(false)
   , can_flip_(true)
   , transition_(false)
+  , can_jump_functor_(nullptr)
+  , can_flip_functor_(nullptr)
 { }
 
 void CharacterMovement::handleSpacePressed() {
   if(!jumping_) {
+    if(can_jump_functor_ == nullptr || (*can_jump_functor_)()) {
       jumping_ = true;
       flip_ = false;
       vert_speed_ = 10.0f;
-    } else if (can_flip_) {
+    }
+  } else if (can_flip_) {
+    if(can_flip_functor_ == nullptr || (*can_flip_functor_)()) {
       can_flip_ = false;
       flip_ = true;
       vert_speed_ = 12.0f;
     }
+  }
 }
 
 void CharacterMovement::update(const Camera& cam, glm::vec2 character_offset) {
@@ -117,6 +123,7 @@ void CharacterMovement::updateHeight(float groundHeight) {
     const float diff = groundHeight - pos_.y;
     if(diff >= 0 && jumping_ && vert_speed_ < 0) {
       jumping_ = false;
+      flip_ = false;
       can_flip_ = true;
       pos_.y = groundHeight;
       return;

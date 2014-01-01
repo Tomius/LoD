@@ -19,7 +19,7 @@ class CharacterMovement {
   double curr_rot_, dest_rot_;
 
   // Moving speed per second in OpenGL units.
-  float rot_speed_, vert_speed_, horiz_speed_;
+  float rot_speed_, vert_speed_, horiz_speed_, horiz_speed_factor_;
 
   bool walking_, jumping_, flip_, can_flip_, transition_;
 

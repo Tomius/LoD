@@ -82,7 +82,7 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
                      oglwrap::AnimFlag::Interruptable, 0.5f);
 
   mesh_.addAnimation("models/ayumi_flip.dae", "Flip",
-                     oglwrap::AnimFlag::None, 1.25f);
+                     oglwrap::AnimFlag::None, 1.5f);
 
   mesh_.addAnimation("models/ayumi_attack.dae", "Attack",
                      oglwrap::AnimFlag::None, 2.5f);

@@ -42,12 +42,12 @@ class Ayumi {
 
       *use_default_flags = true;
 
-      if(current_anim == "Attack" && ayumi.attack2_) {
+      if(current_anim == "Attack" && (ayumi.attack2_ || sf::Mouse::isButtonPressed(sf::Mouse::Left))) {
         *transition_time = 0.1f;
         return "Attack2";
       } else if(current_anim == "Attack2") {
         ayumi.attack2_ = false;
-        if(ayumi.attack3_) {
+        if(ayumi.attack3_ || sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
           *transition_time = 0.05f;
           return "Attack3";
         }
@@ -70,24 +70,23 @@ class Ayumi {
           return "JumpFall";
         }
       } else if(ayumi.charmove_.isWalking()) {
+        if(current_anim == "Attack2") {
+          *transition_time = 0.4f;
+        } else if(current_anim == "Attack_Chain0") {
+          *transition_time = 0.5f;
+        } else {
+          *transition_time = 0.3f;
+        }
         if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-          if(current_anim == "Attack2") {
-            *transition_time = 0.4f;
-          } else {
-            *transition_time = 0.3f;
-          }
           return "Run";
         } else {
-          if(current_anim == "Attack2") {
-            *transition_time = 0.4f;
-          } else {
-            *transition_time = 0.2f;
-          }
           return "Walk";
         }
       } else {
         if(current_anim == "Attack2") {
           *transition_time = 0.4f;
+        } else if(current_anim == "Attack_Chain0") {
+          *transition_time = 0.6f;
         } else {
           *transition_time = 0.2f;
         }

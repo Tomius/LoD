@@ -72,11 +72,11 @@ void main() {
   vec3 w_final_normal = normalize(vNormalMatrix * normal_offset);
   vec3 c_normal = (uCameraMatrix * vec4(w_final_normal, 0.0)).xyz;
 
-  // Lighting directions.
+  // Lighting directions
   vec3 c_light_dir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
   vec3 c_view_direction = normalize(-(uCameraMatrix * vec4(w_vPos, 1)).xyz);
 
-  // Lighting values.
+  // Lighting values
   float diffuse_power = dot(c_normal, c_light_dir);
   float specular_power;
   if(diffuse_power <= 0.0) {
@@ -89,7 +89,7 @@ void main() {
     );
   }
 
-  // Colors.
+  // Colors
   vec3 grass0_color = texture(uGrassMap0, grass_texcoord).rgb;
   vec3 grass1_color = texture(uGrassMap1, grass_texcoord).rgb;
   float height_factor = clamp(sqrt((w_vPos.y - 15 * uScales.y) / 40.0f), 0.0f, 1.0f);

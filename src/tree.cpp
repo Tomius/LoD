@@ -1,7 +1,7 @@
 #include "tree.hpp"
 
 Tree::Tree(Skybox& skybox, const Terrain& terrain)
-  : mesh_("models/trees/trees_0/tree_1.obj",
+  : mesh_("models/trees/tree.obj",
           aiProcessPreset_TargetRealtime_MaxQuality |
           aiProcess_FlipUVs
          )
@@ -44,7 +44,7 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
                           1.0f + rand() / RAND_MAX,
                           1.0f + rand() / RAND_MAX,
                           1.0f + rand() / RAND_MAX
-                        );
+                        ) * 2.0f;
 
       float rotation = 360.0f * rand() / RAND_MAX;
 

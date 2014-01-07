@@ -88,10 +88,10 @@ static inline svec2 GetPos(int ring, char line, int segment, int distance = 1) {
   svec2 nextPoint = distance * points[size_t((line + 1) % 6)];
 
   return prevPoint + svec2(
-           // This could overflow if done with shorts, even if the result is a valid short
-           int(nextPoint.x - prevPoint.x) * segment / ring,
-           int(nextPoint.y - prevPoint.y) * segment / ring
-         );
+    // This could overflow if done with shorts, even if the result is a valid short
+    int(nextPoint.x - prevPoint.x) * segment / ring,
+    int(nextPoint.y - prevPoint.y) * segment / ring
+  );
 
 }
 
@@ -332,9 +332,9 @@ static inline int GetBlockMipmapLevel(const glm::ivec2& _pos, const glm::vec2& c
 
   return std::min(
            std::max(
-             int(log2(glm::length(pos - camPos)) - log2((2.0 - 0.25*PERFORMANCE) * kBlockRadius)),
+             int(log2(glm::length(pos - camPos)) - log2(kBlockRadius)), 
              0
-           ) + PERFORMANCE, kBlockMipmapLevel - 1
+           ), kBlockMipmapLevel - 1
          );
 }
 
@@ -397,12 +397,12 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
       uMipmapLevel = mipmap_level;
 
     // Draw the center piece
-    if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
+    //if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
       vao_[mipmap_level].bind();
       indices_[mipmap_level].bind();
       gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
       CreateConnectors(pos, camPos);
-    }
+    //}
   }
 
   // All the other ones
@@ -411,8 +411,8 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   for(int ring = 1; ring < kRingCount; ring++) {
     for(char line = 0; line < 6; line++) {
       for(int segment = 0; segment < ring ; segment++) {
-        if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) > terrain_.w - PERFORMANCE * 500)
-          continue;
+        // if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) > terrain_.w - PERFORMANCE * 500)
+        //   continue;
 
         pos = GetBlockPos(ring, line, segment, distance);
         mipmap_level = GetBlockMipmapLevel(pos, camPos);
@@ -483,11 +483,6 @@ double TerrainMesh::getHeight(double x, double y) const {
   using namespace std;
   using namespace glm;
   ivec2 coord = ivec2(round(x), round(y));
-
-  // If speed is required then just approximate.
-  if(PERFORMANCE >= 2) {
-    return fetchHeight(coord);
-  }
 
   /*    Neighbors in geometry:
 

@@ -65,7 +65,7 @@ int main() {
     sf::VideoMode(800, 600),
     "Land of Dreams",
     sf::Style::Default,
-    sf::ContextSettings(24, 0, 0, 3, 1)
+    sf::ContextSettings(32, 0, 0, 3, 1)
   );
   PrintDebugTime();
 

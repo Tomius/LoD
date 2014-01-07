@@ -2,7 +2,11 @@
 
 using namespace oglwrap;
 
-static const glm::vec3 scale_vector = glm::vec3(0.5, 0.5, 0.5);
+/* 0 -> max quality
+   4 -> max performance */
+extern const int PERFORMANCE;
+const float xz_scale = (1 << PERFORMANCE)/2.0f;
+static const glm::vec3 scale_vector = glm::vec3(xz_scale, 1.0f, xz_scale);
 
 Terrain::Terrain(Skybox& skybox)
   : vs_("terrain.vert")
@@ -15,7 +19,7 @@ Terrain::Terrain(Skybox& skybox)
   , uOffset_(prog_, "uOffset")
   , uMipmapLevel_(prog_, "uMipmapLevel")
   , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
-  , mesh_("terrain/mideu.rtd")
+  , mesh_(std::string("terrain/mideu.rtd") + char(PERFORMANCE + '0'))
   , skybox_(skybox)
   , w_(mesh_.w)
   , h_(mesh_.h)

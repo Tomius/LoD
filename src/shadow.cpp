@@ -15,8 +15,9 @@ Shadow::Shadow(size_t shadowMapSize, size_t depth)
   );
   tex_.minFilter(MinFilter::Linear);
   tex_.magFilter(MagFilter::Linear);
-  tex_.wrapS(Wrap::ClampToEdge);
-  tex_.wrapT(Wrap::ClampToEdge);
+  tex_.wrapS(Wrap::ClampToBorder);
+  tex_.wrapT(Wrap::ClampToBorder);
+  tex_.borderColor(glm::vec4(1.0f));
   tex_.compareFunc(Enums::CompFunc::LEqual);
   tex_.compareMode(CompMode::CompareRefToTexture);
 

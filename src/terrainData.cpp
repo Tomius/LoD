@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cassert>
 #include <stdexcept>
+#include <sstream>
 #include <Magick++.h>
 #include "terrainData.hpp"
 
@@ -9,19 +10,24 @@ using namespace std;
 
 // -------======{[ Handling endianness ]}======-------
 
-// All the binary formats described here use little-endian encoding.
+// The rtd is encoded in little-endian format. 
+// For big-endian users, conversion happens at both 
+// saving an loading.
 
-bool IsLittleEndian() {
+/// Returns if this program is run on a LittleEndian computer.
+static bool IsLittleEndian() {
   // The short value 1 has bytes (1, 0) in
   // little-endian and (0, 1) in big-endian
   short s = 1;
   return (((char*)&s)[0]) == 1;
 }
 
+/// Stores if this program is run on a LittleEndian computer.
 static bool littleEndian = IsLittleEndian();
 
 template <class T>
-void endianSwap(T& data) {
+/// Performes an endian swap, if this computer is big-endian.
+static void EndianSwap(T& data) {
   if(littleEndian) {
     return;
   }
@@ -35,38 +41,129 @@ void endianSwap(T& data) {
 
 // -------======{[ RawTerrainData ]}======-------
 
-RawTerrainData::RawTerrainData(const std::string& filename) {
-  if(filename.find(".rtd") != string::npos) {
-    InitFromRawTerrain(filename);
+/// Constucts an empty terrianData (full of memory junk).
+/** @param w - The width of the terrain data to create.
+  * @param h - The height of the terrain data to create. 
+  * @param level - The mipmap level of the terrain data. */
+RawTerrainData::RawTerrainData(int w, int h, int level) 
+    : w(w), h(h), level(level) {
+  heightData.resize(w*h);
+}
+
+/// Loads in a terrain data, from either an .rtd, a heightmap (image), or a DEM (.asc).
+/** @param filename - The path to the file to load. */
+RawTerrainData::RawTerrainData(const std::string& filename) : level(0) {
+  size_t rtd_pos = filename.find(".rtd");
+  if(rtd_pos != string::npos) {
+    // Get the number at the end of the extension. It's the mipmap level.
+    level = atoi(filename.c_str() + rtd_pos + 4);
+
+    if(level > MAX_NUM_TERRAIN_MIPMAPS) {
+      throw std::runtime_error("Invalid filename, too high mipmap level: " + filename);
+    }
+
+    // Check if the that mipmap level exists.
+    ifstream file(filename);
+    if(file.is_open()) {
+      initFromRawTerrain(filename);
+    } else {
+      // Check if we have mipmap 0.
+      std::string base_path = filename.substr(0, rtd_pos + 4);
+      std::string rtd0_path = base_path + '0';
+      file.open(rtd0_path);
+      if(file.is_open()) {
+        // If we do, then generate the mipmaps.
+        level = 0;
+        initFromRawTerrain(rtd0_path);
+        createLoDs(base_path, MAX_NUM_TERRAIN_MIPMAPS);
+        // Then load the level we actually wanted.
+        initFromRawTerrain(filename);
+      } else {
+        throw std::runtime_error("Can't find file: " + filename);
+      }
+    }
+    
   } else if(filename.find(".asc") != string::npos) {
-    InitFromAsc(filename);
+    initFromAsc(filename);
   } else {
-    InitFromImage(filename);
+    initFromImage(filename);
   }
 }
 
-void RawTerrainData::Save(const std::string& filename) {
+/// Saves the rtd in .rtd format.
+/** @param filename - The path to the file to save to. Should end with '.rtd' */
+void RawTerrainData::save(const std::string& filename) const {
   ofstream ofs(filename, ios::binary);
 
-  endianSwap(w);
-  ofs.write((const char *)&w, sizeof(size_t));
-  endianSwap(h);
-  ofs.write((const char *)&h, sizeof(size_t));
+  size_t temp_w = w, temp_h = h;
+  EndianSwap(temp_w);
+  ofs.write((const char *)&temp_w, sizeof(size_t));
+  EndianSwap(temp_h);
+  ofs.write((const char *)&temp_h, sizeof(size_t));
   ofs.write((const char *)heightData.data(), heightData.size());
 
   assert(ofs.good());
 }
 
-void RawTerrainData::InitFromRawTerrain(const std::string& filename) {
+/// Returns the next mipmap level of this rtd.
+/** The caller is responsible to delete the return value. */
+RawTerrainData* RawTerrainData::getNextLodLevel() const {
+  RawTerrainData *rtd = new RawTerrainData(w/2, h/2, level + 1);
+  for(int x = 0; x < w/2; x++) {
+    for(int y = 0; y < h/2; y++) {
+      (*rtd)(x, y) = ((short)(*this)(2*x, 2*y) + (*this)(2*x + 1, 2*y) +
+                  (*this)(2*x, 2*y + 1) + (*this)(2*x + 1, 2*y + 1)) / 4;
+    }
+  }
+  return rtd;
+}
+
+/// Creates a given number of mipmaps for this rtd.
+/** @param filename - The path of the file, where to save the mipmaps. Should end with '.rtd'.
+  * @param num_level - The number of mipmap levels to generate. */
+void RawTerrainData::createLoDs(const std::string& filename, int num_levels) const {
+  if(num_levels <= 0) {
+    return;
+  }
+
+  RawTerrainData *r = getNextLodLevel();
+  std::stringstream ss;
+  ss << r->level;
+  r->save(filename + ss.str());
+  r->createLoDs(filename, num_levels - 1);
+  delete r;
+}
+
+/// Indexes the terrain data like it was 2D array.
+const unsigned char& RawTerrainData::operator()(int x, int y) const {
+  if(0 <= x && x < w && 0 <= y && y < h) {
+    return heightData[x*h + y];
+  } else {
+    throw std::out_of_range("OverIndexing in RawTerrainData::operator()");
+  }
+}
+
+/// Indexes the terrain data like it was 2D array.
+unsigned char& RawTerrainData::operator()(int x, int y) {
+  if(0 <= x && x < w && 0 <= y && y < h) {
+    return heightData[x*h + y];
+  } else {
+    throw std::out_of_range("OverIndexing in RawTerrainData::operator()");
+  }
+}
+
+/// Loads in a terrain data, from a '.rtd' file.
+/** @param filename - The path to the file to load. */
+void RawTerrainData::initFromRawTerrain(const std::string& filename) {
   ifstream ifs(filename, ios::binary);
   if(!ifs.good()) {
     throw std::runtime_error("Error reading file: " + filename);
   }
 
   ifs.read((char *)&w, sizeof(size_t));
-  endianSwap(w);
+  EndianSwap(w);
   ifs.read((char *)&h, sizeof(size_t));
-  endianSwap(h);
+  EndianSwap(h);
 
   heightData.resize(w * h);
   ifs.read((char *)heightData.data(), heightData.size());
@@ -76,7 +173,9 @@ void RawTerrainData::InitFromRawTerrain(const std::string& filename) {
   }
 }
 
-void RawTerrainData::InitFromAsc(const std::string& filename) {
+/// Loads in a terrain data, from a '.asc' (DEM) file.
+/** @param filename - The path to the file to load. */
+void RawTerrainData::initFromAsc(const std::string& filename) {
   ifstream ifs(filename);
   if(!ifs.good()) {
     throw std::runtime_error("Error reading file: " + filename);
@@ -93,7 +192,7 @@ void RawTerrainData::InitFromAsc(const std::string& filename) {
   assert(str == "nrows");
   h = iData;
 
-  // Some data I don't need
+  // Some data we don't need to store
   ifs >> str >> dData;
   assert(str == "xllcorner");
   ifs >> str >> dData;
@@ -124,7 +223,10 @@ void RawTerrainData::InitFromAsc(const std::string& filename) {
   }
 }
 
-void RawTerrainData::InitFromImage(const std::string& filename) {
+/// Loads in a terrain data, from an image file.
+/** Only the red channel will be used.
+  * @param filename - The path to the file to load. */
+void RawTerrainData::initFromImage(const std::string& filename) {
   Magick::Image image(filename);
   w = image.columns();
   h = image.rows();

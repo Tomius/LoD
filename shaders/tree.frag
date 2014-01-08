@@ -11,9 +11,13 @@ vec3 AmbientDirection();
 float SunPower();
 float AmbientPower();
 vec3 AmbientColor();
+float isDay();
 
-float kMaxVisibleDist = max(uScales.x, uScales.z) * 800.0;
-float kMaxOpaqueDist = max(uScales.x, uScales.z) * 700.0;
+float xz_scale = sqrt(uScales.x*uScales.z);
+float kMaxVisibleDist = xz_scale * 800.0;
+float kMaxOpaqueDist = xz_scale * 700.0;
+float kFogMin = xz_scale * 128.0;
+float kFogMax = xz_scale * 2048.0;
 
 out vec4 vFragColor;
 
@@ -36,5 +40,11 @@ void main() {
     discard;
   }
 
-  vFragColor = vec4(pow(final_color, vec3(1.3)), actual_alpha);
+  float length_from_camera = length(c_vPos);
+
+  vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));
+  vec3 fog = AmbientColor() * fog_color * (0.005 + SunPower());
+  float fog_alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 6;
+
+  vFragColor = vec4(mix(pow(final_color, vec3(1.3)), fog, fog_alpha), actual_alpha);
 }

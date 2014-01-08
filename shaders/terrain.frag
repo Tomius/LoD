@@ -98,12 +98,12 @@ void main() {
   float length_from_camera = length(c_vPos);
 
   vec3 final_color = grass_color * AmbientColor() *
-    (Visibility()*SunPower()*(specular_power + diffuse_power) + AmbientPower());
+    (Visibility()*SunPower()*(specular_power + diffuse_power) + 2.0 * AmbientPower());
 
   // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));
   vec3 fog = AmbientColor() * fog_color * (0.005 + SunPower());
-  float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 6;
+  float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 4;
 
   vFragColor = vec4(mix(final_color, fog, alpha), 1.0);
 }

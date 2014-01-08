@@ -41,4 +41,5 @@ void BloomEffect::render() {
   rect_.render();
 
   gl(Disable(GL_FRAMEBUFFER_SRGB));
+  tex_.unbind();
 }

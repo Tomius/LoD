@@ -15,6 +15,7 @@
 #include "ayumi.hpp"
 #include "tree.hpp"
 #include "shadow.hpp"
+#include "map.hpp"
 
 using namespace oglwrap;
 
@@ -117,6 +118,10 @@ int main() {
         Tree tree(skybox, terrain);
       PrintDebugTime();
 
+      PrintDebugText("Initializing the map");
+        Map map(glm::vec2(terrain.w, terrain.h));
+      PrintDebugTime();
+
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 
       PrintDebugText("Initializing the Ayumi");
@@ -148,6 +153,8 @@ int main() {
                 window.setMouseCursorVisible(!fixMouse);
               } else if(event.key.code == sf::Keyboard::Space) {
                 charmove.handleSpacePressed();
+              } else if(event.key.code == sf::Keyboard::M) {
+                map.toggle();
               }
               break;
             case sf::Event::Resized: {
@@ -207,6 +214,7 @@ int main() {
         ayumi.render(time, cam, charmove, shadow);
         tree.render(time, cam);
         bloom.render();
+        map.render(cam);
 
         window.display();
 

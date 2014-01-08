@@ -1,6 +1,6 @@
 #include "charmove.hpp"
 
-#define SPEED_HACK 1.0f
+#define SPEED_HACK 5.0f
 
 using namespace oglwrap;
 

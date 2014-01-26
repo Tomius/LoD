@@ -35,9 +35,9 @@ void main() {
   float lumiosity = length(texel) / sqrt(3.0);
   vec3 color = sum * 0.5*(1.2-lumiosity) + texel.rgb;
 
-  // Apply a simple HDR
-  lumiosity = length(color);
-  color *= lumiosity / (lumiosity + 1);
+  // Apply Filmic tone mapping approximation, by Jim Hejl
+  vec3 x = max(color - 0.004, 0.0);
+  color = pow((x*(6.2*x+0.5))/(x*(6.2*x+1.7)+0.06), vec3(2.2f));
 
   vFragColor = clamp(vec4(color, 1.0), vec4(0.0), vec4(1.0));
 }

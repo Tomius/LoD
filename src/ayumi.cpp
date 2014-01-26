@@ -157,7 +157,7 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
 void Ayumi::shadowRender(float time, Shadow& shadow, const CharacterMovement& charmove) {
   shadow_prog_.use();
   shadow_uMCP_ = shadow.modelCamProjMat(
-    skybox_.getSunPos(time), mesh_.bSphere(), charmove.getModelMatrix()
+    skybox_.getSunPos(time), mesh_.bSphere(), charmove.getModelMatrix(), mesh_.worldTransform()
   );
   mesh_.uploadBoneInfo(shadow_uBones_);
 

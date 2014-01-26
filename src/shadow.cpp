@@ -46,7 +46,8 @@ glm::mat4 Shadow::camMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const {
                      glm::vec3(targetBSphere), glm::vec3(0, 1, 0));
 }
 
-glm::mat4 Shadow::modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere, glm::mat4 modelMatrix) {
+glm::mat4 Shadow::modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere, 
+                                  glm::mat4 modelMatrix, glm::mat4 worldTransform) {
   // [-1, 1] -> [0, 1] convert
   glm::mat4 biasMatrix(
     0.5, 0.0, 0.0, 0.0,
@@ -63,7 +64,7 @@ glm::mat4 Shadow::modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere
 
   cp_matrices_[curr_depth_] = biasMatrix * pc;
 
-  return pc * modelMatrix;
+  return pc * modelMatrix * worldTransform;
 }
 
 const std::vector<glm::mat4>& Shadow::shadowCPs() const {

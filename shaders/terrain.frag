@@ -80,30 +80,31 @@ void main() {
   float diffuse_power = dot(c_normal, c_light_dir);
   float specular_power;
   if(diffuse_power <= 0.0) {
-    diffuse_power = 0.0;
-    specular_power = 0.0;
+    diffuse_power = 0;
+    specular_power = 0;
   } else {
-    specular_power = pow(
-      max(0.0, dot(reflect(-c_light_dir, c_normal), c_view_direction)),
-      kSpecularShininess
-    );
+    vec3 L = c_light_dir, V = c_view_direction;
+    vec3 H = normalize(L + V), N = c_normal;
+    specular_power = pow(max(dot(H, N), 0), kSpecularShininess);
   }
 
   // Colors
   vec3 grass0_color = texture(uGrassMap0, grass_texcoord).rgb;
   vec3 grass1_color = texture(uGrassMap1, grass_texcoord).rgb;
-  float height_factor = clamp(sqrt((w_vPos.y - 15 * uScales.y) / 40.0f), 0.0f, 1.0f);
+  float height_factor = clamp(sqrt((w_vPos.y - 15 * uScales.y) / 40), 0, 1);
   vec3 grass_color = mix(grass0_color, grass1_color, height_factor);
 
   float length_from_camera = length(c_vPos);
 
+  const float ambient_occlusion = 0.2f;
+
   vec3 final_color = grass_color * AmbientColor() *
-    (Visibility()*SunPower()*(specular_power + diffuse_power) + AmbientPower());
+    (Visibility()*SunPower()*(specular_power + diffuse_power + ambient_occlusion) + AmbientPower());
 
   // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));
   vec3 fog = AmbientColor() * fog_color * (0.005 + SunPower());
-  float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 4;
+  float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0, 1) / 4;
 
-  vFragColor = vec4(mix(final_color, fog, alpha), 1.0);
+  vFragColor = vec4(mix(final_color, fog, alpha), 1);
 }

@@ -4,6 +4,7 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
+#include "oglwrap/textures/texture_2D.hpp"
 
 #include "terrainData.hpp"
 

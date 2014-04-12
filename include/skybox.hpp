@@ -5,6 +5,7 @@
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/shapes/cube.hpp"
+#include "oglwrap/textures/texture_cube.hpp"
 
 class Skybox {
   oglwrap::Cube make_cube_;

@@ -5,7 +5,7 @@
 #define BONE_ATTRIB_NUM
 
 // If you reorder or change the layout of these,
-// remember to that to ayumi_shadow.vert too!
+// remember to do that to ayumi_shadow.vert too!
 in vec4  aPosition;
 in ivec4 aBoneIDs[BONE_ATTRIB_NUM];
 in vec4  aWeights[BONE_ATTRIB_NUM];

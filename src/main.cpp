@@ -92,7 +92,7 @@ int main() {
   if(err != GLEW_OK) {
     std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
     return -1;
-  } 
+  }
 
   try {
       glInit();
@@ -177,7 +177,7 @@ int main() {
               break;
             case sf::Event::MouseButtonPressed:
               if(event.mouseButton.button == sf::Mouse::Left) {
-                was_left_click = true; 
+                was_left_click = true;
               }
               break;
             default:

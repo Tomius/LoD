@@ -5,6 +5,7 @@
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/shapes/fullScreenRect.hpp"
+#include "oglwrap/textures/texture_2D.hpp"
 
 class BloomEffect {
   oglwrap::VertexShader vs_;

@@ -46,7 +46,7 @@ glm::mat4 Shadow::camMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const {
                      glm::vec3(targetBSphere), glm::vec3(0, 1, 0));
 }
 
-glm::mat4 Shadow::modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere, 
+glm::mat4 Shadow::modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere,
                                   glm::mat4 modelMatrix, glm::mat4 worldTransform) {
   // [-1, 1] -> [0, 1] convert
   glm::mat4 biasMatrix(

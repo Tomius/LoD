@@ -10,7 +10,7 @@ HEADERS = $(wildcard $(INCLUDE_DIR)/*.hpp)
 MKDIR_P = mkdir -p
 
 CXX = clang++
-CXXFLAGS = -std=c++11 -Iinclude/ -Wall `Magick++-config --cppflags --cxxflags` -g
+CXXFLAGS = -std=c++11 -Iinclude/ -Wall -Qunused-arguments `Magick++-config --cxxflags --cppflags` -g
 LDFLAGS = -lGL -lGLEW -lsfml-window -lsfml-system -lassimp `Magick++-config --ldflags --libs` -g
 
 .PHONY: all clean

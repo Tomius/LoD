@@ -13,7 +13,7 @@
 #include "shadow.hpp"
 
 /* 0 -> max quality
-   4 -> max performance */
+   2 -> max performance */
 extern const int PERFORMANCE;
 
 class Tree {

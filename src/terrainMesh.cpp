@@ -4,7 +4,7 @@ using namespace oglwrap;
 #define RESTART 0xFFFFFFFF
 
 /* 0 -> max quality
-   4 -> max performance */
+   2 -> max performance */
 extern const int PERFORMANCE;
 extern const float kFieldOfView;
 const float kCosFieldOfView = cos(kFieldOfView * M_PI / 180);
@@ -332,7 +332,7 @@ static inline int GetBlockMipmapLevel(const glm::ivec2& _pos, const glm::vec2& c
 
   return std::min(
            std::max(
-             int(log2(glm::length(pos - camPos)) - log2(kBlockRadius)), 
+             int(log2(glm::length(pos - camPos)) - log2(kBlockRadius)),
              0
            ), kBlockMipmapLevel - 1
          );

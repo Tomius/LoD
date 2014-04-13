@@ -3,7 +3,7 @@
 using namespace oglwrap;
 
 /* 0 -> max quality
-   4 -> max performance */
+   2 -> max performance */
 extern const int PERFORMANCE;
 const float xz_scale = (1 << PERFORMANCE)/2.0f;
 static const glm::vec3 scale_vector = glm::vec3(xz_scale, 1.0f, xz_scale);

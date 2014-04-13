@@ -18,13 +18,10 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
     , uShadowSoftness_(prog_, "uShadowSoftness")
     , attack2_(false)
     , charmove_(charmove)
-    , anim_end_listener_(*this)
-    , can_jump_functor_(*this)
-    , can_flip_functor_(*this)
     , skybox_(skybox) {
 
-  charmove.setCanJumpFunctor(&can_jump_functor_);
-  charmove.setCanFlipFunctor(&can_flip_functor_);
+  charmove.setCanJumpFunctor(std::bind(&Ayumi::canJump, this));
+  charmove.setCanFlipFunctor(std::bind(&Ayumi::canFlip, this));
 
   oglwrap::ShaderSource vs_source("ayumi.vert");
   vs_source.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
@@ -74,11 +71,11 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
                      oglwrap::AnimFlag::Interruptable);
 
   mesh_.addAnimation("models/ayumi/ayumi_jump_rise.dae", "JumpRise",
-                     oglwrap::AnimFlag::MirroredRepeat | 
+                     oglwrap::AnimFlag::MirroredRepeat |
                      oglwrap::AnimFlag::Interruptable, 0.5f);
 
   mesh_.addAnimation("models/ayumi/ayumi_jump_fall.dae", "JumpFall",
-                     oglwrap::AnimFlag::MirroredRepeat | 
+                     oglwrap::AnimFlag::MirroredRepeat |
                      oglwrap::AnimFlag::Interruptable, 0.5f);
 
   mesh_.addAnimation("models/ayumi/ayumi_flip.dae", "Flip",
@@ -99,7 +96,11 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
   mesh_.setDefaultAnimation("Stand", 0.3f);
   mesh_.forceAnimToDefault(0);
 
-  mesh_.setAnimationEndedCallback(&anim_end_listener_);
+  using namespace std::placeholders;
+  oglwrap::AnimatedMesh::AnimationEndedCallback callback =
+    std::bind(&Ayumi::animationEndedCallback, this, _1, _2, _3, _4, _5);
+
+  mesh_.setAnimationEndedCallback(callback);
 }
 
 oglwrap::AnimatedMesh& Ayumi::getMesh() {
@@ -202,4 +203,64 @@ bool Ayumi::canJump() const {
 
 bool Ayumi::canFlip() const {
   return mesh_.isInterrupable();
+}
+
+std::string Ayumi::animationEndedCallback(const std::string& current_anim,
+                                          float *transition_time,
+                                          bool *use_default_flags,
+                                          unsigned *flags,
+                                          float *speed) {
+
+  *use_default_flags = true;
+
+  if(current_anim == "Attack" && (attack2_ || sf::Mouse::isButtonPressed(sf::Mouse::Left))) {
+    *transition_time = 0.1f;
+    return "Attack2";
+  } else if(current_anim == "Attack2") {
+    attack2_ = false;
+    if(attack3_ || sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+      *transition_time = 0.05f;
+      return "Attack3";
+    }
+  } else if(current_anim == "Attack3") {
+    *transition_time = 0.4f;
+    attack3_ = false;
+  }
+
+  if(current_anim == "Flip") {
+    *transition_time = 0.2f;
+    charmove_.setFlip(false);
+    return "JumpFall";
+  }
+
+  if(charmove_.isJumping()) {
+    *transition_time = 0.3f;
+    if(charmove_.isJumpingRise()) {
+      return "JumpRise";
+    } else {
+      return "JumpFall";
+    }
+  } else if(charmove_.isWalking()) {
+    if(current_anim == "Attack2") {
+      *transition_time = 0.4f;
+    } else if(current_anim == "Attack_Chain0") {
+      *transition_time = 0.5f;
+    } else {
+      *transition_time = 0.3f;
+    }
+    if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+      return "Run";
+    } else {
+      return "Walk";
+    }
+  } else {
+    if(current_anim == "Attack2") {
+      *transition_time = 0.4f;
+    } else if(current_anim == "Attack_Chain0") {
+      *transition_time = 0.6f;
+    } else {
+      *transition_time = 0.2f;
+    }
+    return "Stand";
+  }
 }

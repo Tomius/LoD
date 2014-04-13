@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 
-#define MAX_NUM_TERRAIN_MIPMAPS 4 // The max num of PERFORMANCE
+#define MAX_NUM_TERRAIN_MIPMAPS 2 // The max num of PERFORMANCE
 
 /// A class holding terrain elevation data.
 class RawTerrainData {

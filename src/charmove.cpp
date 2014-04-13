@@ -25,14 +25,14 @@ CharacterMovement::CharacterMovement(glm::vec3 pos,
 
 void CharacterMovement::handleSpacePressed() {
   if(!jumping_) {
-    if(can_jump_functor_ == nullptr || (*can_jump_functor_)()) {
+    if(can_jump_functor_ == nullptr || can_jump_functor_()) {
       jumping_ = true;
       flip_ = false;
       vert_speed_ = 10.0f;
       horiz_speed_factor_ = 1.0f;
     }
   } else if (can_flip_) {
-    if(can_flip_functor_ == nullptr || (*can_flip_functor_)()) {
+    if(can_flip_functor_ == nullptr || can_flip_functor_()) {
       can_flip_ = false;
       flip_ = true;
       vert_speed_ = 11.0f;

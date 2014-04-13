@@ -10,8 +10,8 @@ using namespace std;
 
 // -------======{[ Handling endianness ]}======-------
 
-// The rtd is encoded in little-endian format. 
-// For big-endian users, conversion happens at both 
+// The rtd is encoded in little-endian format.
+// For big-endian users, conversion happens at both
 // saving an loading.
 
 /// Returns if this program is run on a LittleEndian computer.
@@ -26,7 +26,7 @@ static bool IsLittleEndian() {
 static bool littleEndian = IsLittleEndian();
 
 template <class T>
-/// Performes an endian swap, if this computer is big-endian.
+/// Performs an endian swap, if this computer is big-endian.
 static void EndianSwap(T& data) {
   if(littleEndian) {
     return;
@@ -41,11 +41,11 @@ static void EndianSwap(T& data) {
 
 // -------======{[ RawTerrainData ]}======-------
 
-/// Constucts an empty terrianData (full of memory junk).
+/// Constructs an empty terrianData (full of memory junk).
 /** @param w - The width of the terrain data to create.
-  * @param h - The height of the terrain data to create. 
+  * @param h - The height of the terrain data to create.
   * @param level - The mipmap level of the terrain data. */
-RawTerrainData::RawTerrainData(int w, int h, int level) 
+RawTerrainData::RawTerrainData(int w, int h, int level)
     : w(w), h(h), level(level) {
   heightData.resize(w*h);
 }
@@ -82,7 +82,7 @@ RawTerrainData::RawTerrainData(const std::string& filename) : level(0) {
         throw std::runtime_error("Can't find file: " + filename);
       }
     }
-    
+
   } else if(filename.find(".asc") != string::npos) {
     initFromAsc(filename);
   } else {

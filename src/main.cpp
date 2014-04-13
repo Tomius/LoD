@@ -21,8 +21,8 @@ using namespace oglwrap;
 
 extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
-   4 -> max performance */
-extern const int PERFORMANCE = 1;
+   2 -> max performance */
+extern const int PERFORMANCE = 2;
 extern const float kFieldOfView = 60;
 bool was_left_click = false;
 

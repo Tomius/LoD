@@ -24,29 +24,23 @@ class CharacterMovement {
   bool walking_, jumping_, flip_, can_flip_, transition_;
 
 public:
-  struct CanJumpFunctor {
-    virtual bool operator()() const = 0;
-  };
-
-  struct CanFlipFunctor {
-    virtual bool operator()() const = 0;
-  };
+  using CanDoSomething = std::function<bool()>;
 
 private:
 
-  CanJumpFunctor* can_jump_functor_;
-  CanFlipFunctor* can_flip_functor_;
+  CanDoSomething can_jump_functor_;
+  CanDoSomething can_flip_functor_;
 
 public:
   CharacterMovement(glm::vec3 pos = glm::vec3(),
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f);
-  
-  void setCanJumpFunctor(CanJumpFunctor *can_jump_functor) { 
-    can_jump_functor_ = can_jump_functor; 
+
+  void setCanJumpFunctor(CanDoSomething can_jump_functor) {
+    can_jump_functor_ = can_jump_functor;
   }
-  void setCanFlipFunctor(CanFlipFunctor *can_flip_functor) { 
-    can_flip_functor_ = can_flip_functor; 
+  void setCanFlipFunctor(CanDoSomething can_flip_functor) {
+    can_flip_functor_ = can_flip_functor;
   }
   void update(const oglwrap::Camera& cam, glm::vec2 character_offset);
   void handleSpacePressed();

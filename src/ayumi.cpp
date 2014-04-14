@@ -20,8 +20,8 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
     , charmove_(charmove)
     , skybox_(skybox) {
 
-  charmove.setCanJumpFunctor(std::bind(&Ayumi::canJump, this));
-  charmove.setCanFlipFunctor(std::bind(&Ayumi::canFlip, this));
+  charmove.setCanJumpCallback(std::bind(&Ayumi::canJump, this));
+  charmove.setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
 
   oglwrap::ShaderSource vs_source("ayumi.vert");
   vs_source.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());

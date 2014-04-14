@@ -24,6 +24,7 @@ extern const float GRAVITY = 18.0f;
    2 -> max performance */
 extern const int PERFORMANCE = 2;
 extern const float kFieldOfView = 60;
+double ogl_version = 2.1;
 bool was_left_click = false;
 
 void glInit() {
@@ -66,7 +67,7 @@ int main() {
     sf::VideoMode(800, 600),
     "Land of Dreams",
     sf::Style::Default,
-    sf::ContextSettings(32, 0, 0, 3, 1)
+    sf::ContextSettings(32, 0, 0, 2, 1)
   );
   PrintDebugTime();
 
@@ -76,8 +77,10 @@ int main() {
   std::cout << " - Anti-aliasing level: " << settings.antialiasingLevel << std::endl;
   std::cout << " - OpenGL version: " << settings.majorVersion << "." << settings.minorVersion << std::endl;
 
-  if(settings.majorVersion < 3 || (settings.majorVersion == 3 && settings.minorVersion < 1)) {
-    std::cout << "At least OpenGL version 3.1 is required to run this program" << std::endl;
+  ogl_version = settings.majorVersion + settings.minorVersion/10.0;
+
+  if(ogl_version < 2.1) {
+    std::cout << "At least OpenGL version 2.1 is required to run this program" << std::endl;
     return -1;
   }
 

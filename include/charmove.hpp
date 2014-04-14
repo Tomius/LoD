@@ -36,10 +36,10 @@ public:
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f);
 
-  void setCanJumpFunctor(CanDoSomething can_jump_functor) {
+  void setCanJumpCallback(CanDoSomething can_jump_functor) {
     can_jump_functor_ = can_jump_functor;
   }
-  void setCanFlipFunctor(CanDoSomething can_flip_functor) {
+  void setCanFlipCallback(CanDoSomething can_flip_functor) {
     can_flip_functor_ = can_flip_functor;
   }
   void update(const oglwrap::Camera& cam, glm::vec2 character_offset);

@@ -3,10 +3,15 @@
 using namespace oglwrap;
 #define RESTART 0xFFFFFFFF
 
+#ifndef GL_PRIMITIVE_RESTART
+  #define GL_PRIMITIVE_RESTART 0x8F9D
+#endif
+
 /* 0 -> max quality
    2 -> max performance */
 extern const int PERFORMANCE;
 extern const float kFieldOfView;
+extern double ogl_version;
 const float kCosFieldOfView = cos(kFieldOfView * M_PI / 180);
 
 // ~~~~~~<{ A vector of short values }>~~~~~~
@@ -45,13 +50,13 @@ inline svec2 operator*(short lhs, const svec2 rhs) {
                             o-------o-------o
 
    Irregularness looks good with tessellation, but a normal hexagon is "too irregular".
-   The problem with it, is that I assume that it's width is 1, it's height will be
+   The problem with it, is that if I assume that it's width is 1, it's height will be
    sqrt(3)/2, which isn't really a whole number, and the mesh can actually be pretty big,
    and floats are not precise. Instead we can use a bit stretched hexagon, so that it's
-   width and height equals. With this we can use integral position coordinates, and
+   width and height are equal. With this we can use integral position coordinates, and
    short is likely to be enough(which is half the size of a float :) ). There's also
    another problem: The odd rows are shifted with a half texel compared to even rows.
-   To handle this, work with twice as big hexagons, but will fix this in the vs.
+   To handle this, I work with twice as big hexagons, but will fix this in the vs.
 
    Getting the coordinates for this in the normal XY coordinates can be tricky.
    Though you might notice that this is actually a very symmetrical fractal.
@@ -118,6 +123,21 @@ static inline void distIncr(int mmlev, int& distance) {
   distance += 1 << (mmlev + 1);
 }
 
+// Uses primitive restart if its available, else it uses degenerates.
+void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
+  if(ogl_version < 3.1) {
+    for(int idx = 0; idx < indices.size(); idx++) {
+      if(indices[idx] == RESTART) {
+        if(idx != 0 && indices[idx-1] != RESTART) {
+          indices[idx] = indices[idx-1];
+        } else if (idx != indices.size() - 1 && indices[idx+1] != RESTART) {
+          indices[idx] = indices[idx+1];
+        }
+      }
+    }
+  }
+}
+
 // Warning this function is nearly impossible to understand just from the code.
 // Grab a paper and a pen, and draw simple figures about it, I mean draw 1-2 ring
 // hexagons to understand the vertex positions part, and lines with max 6-8 segments
@@ -166,6 +186,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
         }
       }
 
+      HandlePrimitiveRestart(indices_vector);
       index_num_[m] = indices_vector.size();
       indices_[m].data(indices_vector);
 
@@ -189,12 +210,14 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
         indices_vector.push_back(GetIdx(ring, line + 1, 0));
         indices_vector.push_back(RESTART);
 
+        HandlePrimitiveRestart(indices_vector);
         border_indices_[m][line][0].bind();
         border_indices_[m][line][0].data(indices_vector);
       }
 
       // The ones that connect different mipmapLevel blocks
       // Idea: skip every odd vertex on the outer ring
+      // It's easier here to go with GL_TRIANGLES rather than tri-strip.
       for(int line = 0; line < 6; line++) {
 
         std::vector<unsigned int> indices_vector;
@@ -205,13 +228,15 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
             indices_vector.push_back(GetIdx(ring - 1, line, segment - 1));
             indices_vector.push_back(GetIdx(ring - 1, line, segment));
             indices_vector.push_back(GetIdx(ring, line, segment));
+
+            indices_vector.push_back(GetIdx(ring, line, segment));
+            indices_vector.push_back(GetIdx(ring - 1, line, segment));
             indices_vector.push_back(GetIdx(ring - 1, line, segment + 1));
           } else {
             indices_vector.push_back(GetIdx(ring, line, segment));
             indices_vector.push_back(GetIdx(ring - 1, line, segment));
             indices_vector.push_back(GetIdx(ring - 1, line, segment + 1));
           }
-          indices_vector.push_back(RESTART);
         }
 
 
@@ -220,7 +245,6 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
           indices_vector.push_back(GetIdx(ring, line, segment));
           indices_vector.push_back(GetIdx(ring - 1, line, segment + 1));
           indices_vector.push_back(GetIdx(ring, line, segment + 2));
-          indices_vector.push_back(RESTART);
         }
 
         border_indices_[m][line][1].bind();
@@ -284,6 +308,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
   VertexArray::Unbind();
   Texture2D::Unbind();
 }
+
+
 
 // -------======{[ Functions about creating the map from the blocks ]}======-------
 
@@ -375,7 +401,11 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
     border_indices_[own_mipmap][line][irregular].bind();
     size_t indices_num = border_indices_[own_mipmap][line][irregular].size() / sizeof(int);
 
-    gl(DrawElements(GL_TRIANGLE_STRIP, indices_num, (GLenum)DataType::UnsignedInt, nullptr));
+    if(irregular) {
+      gl(DrawElements(GL_TRIANGLES, indices_num, (GLenum)DataType::UnsignedInt, nullptr));
+    } else {
+      gl(DrawElements(GL_TRIANGLE_STRIP, indices_num, (GLenum)DataType::UnsignedInt, nullptr));
+    }
   }
 }
 
@@ -396,13 +426,10 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
       mipmap_level = GetBlockMipmapLevel(pos, camPos);
       uMipmapLevel = mipmap_level;
 
-    // Draw the center piece
-    //if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) <= terrain_.w - PERFORMANCE * 500) {
       vao_[mipmap_level].bind();
       indices_[mipmap_level].bind();
       gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
       CreateConnectors(pos, camPos);
-    //}
   }
 
   // All the other ones
@@ -411,8 +438,6 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   for(int ring = 1; ring < kRingCount; ring++) {
     for(char line = 0; line < 6; line++) {
       for(int segment = 0; segment < ring ; segment++) {
-        // if(glm::length(pos/2 - glm::ivec2(camPos.x, camPos.y)) > terrain_.w - PERFORMANCE * 500)
-        //   continue;
 
         pos = GetBlockPos(ring, line, segment, distance);
         mipmap_level = GetBlockMipmapLevel(pos, camPos);
@@ -450,14 +475,18 @@ void TerrainMesh::render(const glm::vec3& camPos,
 
   gl(FrontFace(GL_CW));
   gl(Enable(GL_CULL_FACE));
-  gl(Enable(GL_PRIMITIVE_RESTART));
-  gl(PrimitiveRestartIndex(RESTART));
+  if(ogl_version >= 3.1) {
+    gl(Enable(GL_PRIMITIVE_RESTART));
+    gl(PrimitiveRestartIndex(RESTART));
+  }
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );
 
   DrawBlocks(camPos, camFwd, uOffset, uMipmapLevel);
 
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
-  gl(Disable(GL_PRIMITIVE_RESTART));
+  if(ogl_version >= 3.1) {
+    gl(Disable(GL_PRIMITIVE_RESTART));
+  }
   gl(Disable(GL_CULL_FACE));
 
   VertexArray::Unbind();

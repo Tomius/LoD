@@ -24,22 +24,22 @@ class CharacterMovement {
   bool walking_, jumping_, flip_, can_flip_, transition_;
 
 public:
-  using CanDoSomething = std::function<bool()>;
+  using CanDoCallback = bool();
 
 private:
 
-  CanDoSomething can_jump_functor_;
-  CanDoSomething can_flip_functor_;
+  std::function<CanDoCallback> can_jump_functor_;
+  std::function<CanDoCallback> can_flip_functor_;
 
 public:
   CharacterMovement(glm::vec3 pos = glm::vec3(),
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f);
 
-  void setCanJumpCallback(CanDoSomething can_jump_functor) {
+  void setCanJumpCallback(std::function<CanDoCallback> can_jump_functor) {
     can_jump_functor_ = can_jump_functor;
   }
-  void setCanFlipCallback(CanDoSomething can_flip_functor) {
+  void setCanFlipCallback(std::function<CanDoCallback> can_flip_functor) {
     can_flip_functor_ = can_flip_functor;
   }
   void update(const oglwrap::Camera& cam, glm::vec2 character_offset);

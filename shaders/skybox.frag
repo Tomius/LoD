@@ -1,11 +1,9 @@
-#version 150
+#version 120
 
-in vec3 vTexcoord;
-
-out vec4 vFragColor;
+varying vec3 vTexcoord;
 
 vec3 SkyColor(vec3 lookDir);
 
 void main() {
-  vFragColor = vec4(SkyColor(normalize(vTexcoord)), 1.0);
+  gl_FragColor = vec4(SkyColor(normalize(vTexcoord)), 1.0);
 }

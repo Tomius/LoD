@@ -17,6 +17,7 @@ Terrain::Terrain(Skybox& skybox)
   , uSunData_(prog_, "uSunData")
   , uScales_(prog_, "uScales")
   , uOffset_(prog_, "uOffset")
+  , uTexSize_(prog_, "uTexSize")
   , uMipmapLevel_(prog_, "uMipmapLevel")
   , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
   , mesh_(std::string("terrain/mideu.rtd") + char(PERFORMANCE + '0'))
@@ -36,6 +37,7 @@ Terrain::Terrain(Skybox& skybox)
   oglwrap::UniformSampler(prog_, "uShadowMap").set(5);
 
   uScales_ = scale_vector;
+  uTexSize_ = glm::ivec2(mesh_.w, mesh_.h);
 }
 
 glm::vec3 Terrain::getScales() const {

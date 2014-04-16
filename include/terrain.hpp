@@ -14,7 +14,7 @@ class Terrain {
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uShadowCP_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
   oglwrap::LazyUniform<glm::vec3> uScales_;
-  oglwrap::LazyUniform<glm::ivec2> uOffset_;
+  oglwrap::LazyUniform<glm::ivec2> uOffset_, uTexSize_;
   oglwrap::LazyUniform<int> uMipmapLevel_, uNumUsedShadowMaps_;
   TerrainMesh mesh_;
 

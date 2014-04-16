@@ -4,17 +4,24 @@ using namespace oglwrap;
 
 BloomEffect::BloomEffect()
   : vs_("bloom.vert")
-  , fs_("bloom.frag") {
+  , fs_("bloom.frag")
+  , uScreenSize_(prog_, "uScreenSize") {
 
   prog_ << vs_ << fs_;
   prog_.link().use();
 
   rect_.setupPositions(prog_ | "aPosition");
+
+  tex_.active(0);
+  tex_.bind();
+  tex_.minFilter(MinFilter::Linear);
 }
 
 void BloomEffect::resize(GLuint w, GLuint h) {
   width_ = w;
   height_ = h;
+  prog_.use();
+  uScreenSize_ = glm::vec2(w, h);
 
   tex_.active(0);
   tex_.bind();

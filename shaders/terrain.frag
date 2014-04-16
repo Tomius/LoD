@@ -1,12 +1,13 @@
-#version 150
+#version 130
 
+// This might be overwritten by the c++ code.
 #define SHADOW_MAP_NUM 32
 
-in vec3  w_vNormal;
-in vec3  c_vPos, w_vPos;
-in vec2  vTexcoord;
-in float vInvalid;
-in mat3  vNormalMatrix;
+varying vec3  w_vNormal;
+varying vec3  c_vPos, w_vPos;
+varying vec2  vTexcoord;
+varying float vInvalid;
+varying mat3  vNormalMatrix;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap0, uGrassMap1, uGrassNormalMap;
@@ -15,8 +16,6 @@ uniform vec3 uScales;
 
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;
-
-out vec4 vFragColor;
 
 // External functions
 vec3 AmbientDirection();
@@ -106,5 +105,5 @@ void main() {
   vec3 fog = AmbientColor() * fog_color * (0.005 + SunPower());
   float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0, 1) / 4;
 
-  vFragColor = vec4(mix(final_color, fog, alpha), 1);
+  gl_FragColor = vec4(mix(final_color, fog, alpha), 1);
 }

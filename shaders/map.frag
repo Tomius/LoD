@@ -1,10 +1,9 @@
-#version 150
+#version 120
 
-in vec2 vTexcoord;
-uniform sampler2D uTex; 
+varying vec2 vTexcoord;
 
-out vec4 vFragColor;
+uniform sampler2D uTex;
 
 void main() {
-	vFragColor = vec4(texture(uTex, vTexcoord).rgb, 0.6);
+	gl_FragColor = vec4(texture2D(uTex, vTexcoord).rgb, 0.6);
 }

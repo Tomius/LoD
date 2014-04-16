@@ -42,13 +42,9 @@ public:
 
 
 private: // Callbacks
-  bool canJump() const;
-  bool canFlip() const;
-  std::string animationEndedCallback(const std::string& current_anim,
-                                     float *transition_time,
-                                     bool *use_default_flags,
-                                     unsigned *flags,
-                                     float *speed);
+  CharacterMovement::CanDoCallback canJump;
+  CharacterMovement::CanDoCallback canFlip;
+  oglwrap::AnimatedMesh::AnimationEndedCallback animationEndedCallback;
 };
 
 #endif // LOD_AYUMI_HPP_

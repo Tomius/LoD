@@ -1,28 +1,28 @@
-#version 150
+#version 130
 
-in ivec2 aPosition;
+attribute vec2 aPositionFloat;
+ivec2 aPosition = ivec2(aPositionFloat);
 
 uniform mat4 uProjectionMatrix, uCameraMatrix;
-uniform ivec2 uOffset;
+uniform ivec2 uOffset, uTexSize;
 uniform vec3 uScales;
 uniform sampler2D uHeightMap;
 uniform int uMipmapLevel;
 
-out vec3  w_vNormal;
-out vec3  c_vPos, w_vPos;
-out vec2  vTexcoord;
-out float vInvalid;
-out mat3  vNormalMatrix;
+varying vec3  w_vNormal;
+varying vec3  c_vPos, w_vPos;
+varying vec2  vTexcoord;
+varying float vInvalid;
+varying mat3  vNormalMatrix;
 
 float fetchHeight(ivec2 texCoord) {
-  return texelFetch(uHeightMap, texCoord, 0).r * 255;
+  return texture2D(uHeightMap, texCoord/vec2(uTexSize)).r * 255;
 }
 
 void main() {
   vec2 w_offsPos = (aPosition + uOffset) / 2.0;
 
-  ivec2 tex_size = textureSize(uHeightMap, 0);
-  if(abs(int(w_offsPos.x)) - 1 >= tex_size.x / 2 || abs(int(w_offsPos.y)) - 1 >= tex_size.y / 2) {
+  if(int(abs(w_offsPos.x)) - 1 >= uTexSize.x / 2 || int(abs(w_offsPos.y)) - 1 >= uTexSize.y / 2) {
     vInvalid = 1e10;
     gl_Position = vec4(0.0);
     return;
@@ -30,8 +30,8 @@ void main() {
     vInvalid = 0.0;
   }
 
-  ivec2 iTexcoord = ivec2(w_offsPos) + tex_size / 2;
-  vTexcoord = iTexcoord / vec2(tex_size);
+  ivec2 iTexcoord = ivec2(w_offsPos) + uTexSize / 2;
+  vTexcoord = iTexcoord / vec2(uTexSize);
   float height = fetchHeight(iTexcoord);
 
   vec4 w_pos = vec4(uScales * vec3(w_offsPos.x, height, w_offsPos.y), 1.0);
@@ -50,15 +50,21 @@ void main() {
 
   vec3 neighbours[6];
   for(int i = 0; i < 6; i++) {
-    ivec2 nPos = (aPosition + uOffset + ((1 << (uMipmapLevel + 1)) * iNeighbours[i])) / 2;
-    ivec2 nTexcoord = nPos + tex_size / 2;
+    int neighbourDistance = int(pow(2, (uMipmapLevel + 1))); // no << in #version 120
+    ivec2 nPos = (aPosition + uOffset + (neighbourDistance * iNeighbours[i])) / 2;
+    ivec2 nTexcoord = nPos + uTexSize / 2;
     neighbours[i] = uScales * vec3(nPos.x, fetchHeight(nTexcoord), nPos.y) - vec3(w_pos);
   }
 
   vec3 w_normal = vec3(0.0);
-  for(int i = 0; i < 6; i++) {
-    w_normal += normalize(cross(neighbours[i], neighbours[(i+1) % 6]));
-  }
+
+  // For loop is for noobs. And for those who have #version 130, and operator%.
+  w_normal += normalize(cross(neighbours[0], neighbours[1]));
+  w_normal += normalize(cross(neighbours[1], neighbours[2]));
+  w_normal += normalize(cross(neighbours[2], neighbours[3]));
+  w_normal += normalize(cross(neighbours[3], neighbours[4]));
+  w_normal += normalize(cross(neighbours[4], neighbours[5]));
+  w_normal += normalize(cross(neighbours[5], neighbours[0]));
 
   w_normal = normalize(w_normal);
   w_vNormal = w_normal;

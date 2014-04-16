@@ -1,4 +1,4 @@
-#version 150
+#version 120
 
 const float kWorldRadius = 6371000;
 const float kAtmThickness = 50000;
@@ -27,7 +27,7 @@ vec3 SkyColor(vec3 look_dir) {
   float sun_power = max(sun_dir.y + 0.12, 0.02);
   float atm_size = AtmIntersection(look_dir);
   float look_dir_sun_dist = max(dot(look_dir, sun_dir), 0.0) + 0.003 * sqrt(atm_size);
-  vec4 cloud = texture(uEnvMap, look_dir);
+  vec4 cloud = textureCube(uEnvMap, look_dir);
   float cloud_border = (1.0 - cloud.a) * cloud.b;
   vec3 atm_color = max(kLightColor - kAirColor * pow(atm_size, 0.33), vec3(0.0));
 

@@ -97,8 +97,7 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
   mesh_.forceAnimToDefault(0);
 
   using namespace std::placeholders;
-  oglwrap::AnimatedMesh::AnimationEndedCallback callback =
-    std::bind(&Ayumi::animationEndedCallback, this, _1, _2, _3, _4, _5);
+  auto callback = std::bind(&Ayumi::animationEndedCallback, this, _1, _2, _3, _4, _5);
 
   mesh_.setAnimationEndedCallback(callback);
 }
@@ -197,11 +196,11 @@ void Ayumi::render(float time, const oglwrap::Camera& cam,
   skybox_.env_map.unbind();
 }
 
-bool Ayumi::canJump() const {
+bool Ayumi::canJump() {
   return mesh_.isInterrupable();
 }
 
-bool Ayumi::canFlip() const {
+bool Ayumi::canFlip() {
   return mesh_.isInterrupable();
 }
 

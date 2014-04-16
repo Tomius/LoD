@@ -12,8 +12,8 @@ class BloomEffect {
   oglwrap::FragmentShader fs_;
   oglwrap::Program prog_;
 
-  oglwrap::TextureRect tex_;
-
+  oglwrap::Texture2D tex_;
+  oglwrap::LazyUniform<glm::vec2> uScreenSize_;
   oglwrap::FullScreenRectangle rect_;
 
   GLuint width_, height_;

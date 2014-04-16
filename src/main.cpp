@@ -114,7 +114,7 @@ int main() {
       PrintDebugTime();
 
       PrintDebugText("Initializing the shadow maps");
-        Shadow shadow(PERFORMANCE < 2 ? 512 : 256, 32);
+        Shadow shadow(PERFORMANCE < 2 ? 512 : 256, 64);
       PrintDebugTime();
 
       PrintDebugText("Initializing the trees");

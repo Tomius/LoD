@@ -1,11 +1,11 @@
-#version 150
+#version 120
 
-in vec2 aPosition; 
-in vec2 aTexcoord;
+attribute vec2 aPosition;
+attribute vec2 aTexcoord;
 
 uniform mat3 uModelMatrix;
 
-out vec2 vTexcoord;
+varying vec2 vTexcoord;
 
 void main() {
 	vTexcoord = aTexcoord;

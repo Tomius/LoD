@@ -168,7 +168,11 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
       }
 
       positions_[m].data(vertices_vector);
-      VertexAttribArray(0).setup<short>(2).enable();
+
+      // DONT USE: VertexAttribArray(0).setup<short>(2).enable();
+      // DO NOT USE IPointer! We want the values to be converted to float
+      // (You know, #version 120 has no integer attributes)
+      VertexAttribArray(0).pointer(2, DataType::Short).enable();
     }
 
     indices_[m].bind();

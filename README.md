@@ -21,13 +21,12 @@ Dependencies:
 
 How to build (linux):
 --------------------
-* Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
-* Get the external dependencies: libsfml-dev libmagick++-dev libglew-dev
+* Get the external dependencies: libmagick++-dev libglew-dev
+* Get libsfml2-dev, or grab it from its [offical website](http://www.sfml-dev.org/download/sfml/2.1/)
 * Get a fresh copy of [assimp](https://github.com/assimp/assimp). (You'd better avoid the libassimp-dev package, it's kinda old).
-* Use the given Makefile (it uses clang++).
-* For Debian:
+* Use the following command
 ```
-sudo apt-get install libassimp-dev libsfml-dev libmagick++-dev libglew-dev && mkdir LandOfDreams && cd LandOfDreams && git clone https://github.com/Tomius/LoD.git && git clone https://github.com/Tomius/oglwrap.git && cd LoD/include/ && ln -s ../../oglwrap/oglwrap/ && cd .. && make && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && git clone https://github.com/Tomius/LoD.git && git clone https://github.com/Tomius/oglwrap.git && cd LoD/include/ && ln -s ../../oglwrap/oglwrap/ && cd .. && make && ./LoD
 ```
 
 How to build (Windows):

@@ -14,7 +14,7 @@ Dependencies:
 * OpenGL 2.1, Shader model 120 with GL_EXT_texture_array extension
 * GLEW - for loading OpenGL extensions
 * [oglwrap](https://github.com/Tomius/oglwrap) - my C++ OpenGL wrapper.
-* SFML - for window handling
+* SFML 2 - for window handling
 * Magick++ - for image loading.
 * Assimp - for loading the character in. (An up-to-date copy of assimp is prefered, or else Ayumi might not get loaded correctly.)
 
@@ -22,9 +22,13 @@ Dependencies:
 How to build (linux):
 --------------------
 * Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
-* Get the external dependencies: libsfml2-dev libmagick++-dev libglew-dev
+* Get the external dependencies: libsfml-dev libmagick++-dev libglew-dev
 * Get a fresh copy of [assimp](https://github.com/assimp/assimp). (You'd better avoid the libassimp-dev package, it's kinda old).
-* Use the given Makefile(it uses g++).
+* Use the given Makefile (it uses clang++).
+* For Debian:
+```
+sudo apt-get install libassimp-dev libsfml-dev libmagick++-dev libglew-dev && mkdir LandOfDreams && cd LandOfDreams && git clone https://github.com/Tomius/LoD.git && git clone https://github.com/Tomius/oglwrap.git && cd LoD/include/ && ln -s ../../oglwrap/oglwrap/ && cd .. && make && ./LoD
+```
 
 How to build (Windows):
 ----------------------

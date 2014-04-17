@@ -21,6 +21,16 @@ Dependencies:
 
 How to build (linux):
 --------------------
+* One command install for Debian (takes about 10 mins):
+	* For 64 bits system:
+		```
+		mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && make && sudo make install && cd .. && rm -rf assimp && wget http://www.sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-64bits.tar.bz2 && tar jxf ./SFML-2.1-linux-gcc-64bits.tar.bz2 && sudo cp -r SFML-2.1/* /usr/local/ && rm -rf SFML* && git clone https://github.com/Tomius/LoD.git && git clone https://github.com/Tomius/oglwrap.git && cd LoD/include/ && ln -s ../../oglwrap/oglwrap/ && cd .. && make && ./LoD
+		```
+	* For 32 bits system:
+		```
+		mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && make && sudo make install && cd .. && rm -rf assimp && wget http://www.sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-32bits.tar.bz2 && tar jxf ./SFML-2.1-linux-gcc-32bits.tar.bz2 && sudo cp -r SFML-2.1/* /usr/local/ && rm -rf SFML* && git clone https://github.com/Tomius/LoD.git && git clone https://github.com/Tomius/oglwrap.git && cd LoD/include/ && ln -s ../../oglwrap/oglwrap/ && cd .. && make && ./LoD
+		```
+* Else:
 * Get the external dependencies: libmagick++-dev libglew-dev
 * Get libsfml2-dev, or grab it from its [offical website](http://www.sfml-dev.org/download/sfml/2.1/)
 * Get a fresh copy of [assimp](https://github.com/assimp/assimp). (You'd better avoid the libassimp-dev package, it's kinda old).

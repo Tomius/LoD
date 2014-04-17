@@ -125,7 +125,7 @@ static inline void distIncr(int mmlev, int& distance) {
 
 // Uses primitive restart if its available, else it uses degenerates.
 void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
-  if(ogl_version < 3.1) {
+  #ifndef GL_NV_primitive_restart
     for(int idx = 0; idx < indices.size(); idx++) {
       if(indices[idx] == RESTART) {
         if(idx != 0 && indices[idx-1] != RESTART) {
@@ -135,7 +135,7 @@ void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
         }
       }
     }
-  }
+  #endif
 }
 
 // Warning this function is nearly impossible to understand just from the code.
@@ -479,18 +479,18 @@ void TerrainMesh::render(const glm::vec3& camPos,
 
   gl(FrontFace(GL_CW));
   gl(Enable(GL_CULL_FACE));
-  if(ogl_version >= 3.1) {
+  #ifdef GL_NV_primitive_restart
     gl(Enable(GL_PRIMITIVE_RESTART));
     gl(PrimitiveRestartIndex(RESTART));
-  }
+  #endif
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );
 
   DrawBlocks(camPos, camFwd, uOffset, uMipmapLevel);
 
   //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
-  if(ogl_version >= 3.1) {
+  #ifdef GL_NV_primitive_restart
     gl(Disable(GL_PRIMITIVE_RESTART));
-  }
+  #endif
   gl(Disable(GL_CULL_FACE));
 
   VertexArray::Unbind();

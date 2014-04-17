@@ -1,4 +1,5 @@
-#version 130
+#version 120
+#extension GL_EXT_texture_array : enable
 
 // This might be overwritten by the c++ code.
 #define SHADOW_MAP_NUM 32
@@ -29,6 +30,11 @@ float kFogMax = max(uScales.x, uScales.z) * 2048.0;
 
 const float kSpecularShininess = 20.0;
 
+// We love #version 120
+int min(int a, int b) {
+  return a > b ? b : a;
+}
+
 // -------======{[ Shadow ]}======-------
 
 // The maximum potion of light that should be subtracted
@@ -45,7 +51,7 @@ float Visibility() {
   for(int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
-    visibility -= kMaxShadow * (1 - texture(
+    visibility -= kMaxShadow * (1 - shadow2DArray(
       uShadowMap,
       vec4( // x, y, slice, depth
         shadowCoord.xy, i,
@@ -67,7 +73,7 @@ void main() {
 
   // Normals
   vec3 w_normal = normalize(w_vNormal);
-  vec3 normal_offset = texture(uGrassNormalMap, grass_texcoord).rgb;
+  vec3 normal_offset = texture2D(uGrassNormalMap, grass_texcoord).rgb;
   vec3 w_final_normal = normalize(vNormalMatrix * normal_offset);
   vec3 c_normal = (uCameraMatrix * vec4(w_final_normal, 0.0)).xyz;
 
@@ -88,8 +94,8 @@ void main() {
   }
 
   // Colors
-  vec3 grass0_color = texture(uGrassMap0, grass_texcoord).rgb;
-  vec3 grass1_color = texture(uGrassMap1, grass_texcoord).rgb;
+  vec3 grass0_color = texture2D(uGrassMap0, grass_texcoord).rgb;
+  vec3 grass1_color = texture2D(uGrassMap1, grass_texcoord).rgb;
   float height_factor = clamp(sqrt((w_vPos.y - 15 * uScales.y) / 40), 0, 1);
   vec3 grass_color = mix(grass0_color, grass1_color, height_factor);
 

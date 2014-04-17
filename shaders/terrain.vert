@@ -1,4 +1,4 @@
-#version 130
+#version 120
 
 attribute vec2 aPositionFloat;
 ivec2 aPosition = ivec2(aPositionFloat);

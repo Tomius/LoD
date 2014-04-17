@@ -22,9 +22,9 @@ using namespace oglwrap;
 extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
    2 -> max performance */
-extern const int PERFORMANCE = 2;
+extern const int PERFORMANCE = 1;
 extern const float kFieldOfView = 60;
-double ogl_version = 2.1;
+double ogl_version;
 bool was_left_click = false;
 
 void glInit() {

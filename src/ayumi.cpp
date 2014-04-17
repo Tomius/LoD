@@ -43,7 +43,9 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
   mesh_.setupPositions(prog_ | "aPosition");
   mesh_.setupTexCoords(prog_ | "aTexCoord");
   mesh_.setupNormals(prog_ | "aNormal");
-  mesh_.setupBones(prog_ | "aBoneIDs", prog_ | "aWeights");
+  oglwrap::LazyVertexAttribArray boneIDs(prog_, "aBoneIDs", false);
+  oglwrap::LazyVertexAttribArray weights(prog_, "aWeights", false);
+  mesh_.setupBones(boneIDs, weights, false);
   oglwrap::UniformSampler(prog_, "uEnvMap").set(0);
 
   mesh_.setupDiffuseTextures(1);

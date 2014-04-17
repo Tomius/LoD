@@ -1,11 +1,11 @@
-#version 150
+#version 120
 
-in vec4 aPosition;
-in vec2 aTexCoord;
+attribute vec4 aPosition;
+attribute vec2 aTexCoord;
 
 uniform mat4 uMCP;
 
-out vec2 vTexcoord;
+varying vec2 vTexcoord;
 
 void main() {
   vTexcoord = aTexCoord;

@@ -1,8 +1,8 @@
-#version 150
+#version 120
 
-in vec3 c_vPos;
-in vec3 w_vNormal;
-in vec2 vTexcoord;
+varying vec3 c_vPos;
+varying vec3 w_vNormal;
+varying vec2 vTexcoord;
 
 uniform sampler2D uDiffuseTexture;
 uniform vec3 uScales = vec3(0.5, 0.5, 0.5);
@@ -19,8 +19,6 @@ float kMaxOpaqueDist = xz_scale * 700.0;
 float kFogMin = xz_scale * 128.0;
 float kFogMax = xz_scale * 2048.0;
 
-out vec4 vFragColor;
-
 void main() {
   float alpha = 1.0, l = length(c_vPos);
   if(l > kMaxVisibleDist) {
@@ -31,7 +29,7 @@ void main() {
 
   float diffuse_power = max(abs(dot(normalize(w_vNormal), normalize(AmbientDirection()))), 0.3);
 
-  vec4 color = texture(uDiffuseTexture, vTexcoord);
+  vec4 color = texture2D(uDiffuseTexture, vTexcoord);
   vec3 final_color = color.rgb * AmbientColor() * (SunPower() * diffuse_power + AmbientPower()) / 2;
 
   float actual_alpha = min(color.a, alpha);
@@ -42,9 +40,9 @@ void main() {
 
   float length_from_camera = length(c_vPos);
 
-  vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));
+  vec3 fog_color = vec3(mix(-1.6, 0.8, isDay()));
   vec3 fog = AmbientColor() * fog_color * (0.005 + SunPower());
   float fog_alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 6;
 
-  vFragColor = vec4(mix(pow(final_color, vec3(1.3)), fog, fog_alpha), actual_alpha);
+  gl_FragColor = vec4(mix(pow(final_color, vec3(1.3)), fog, fog_alpha), actual_alpha);
 }

@@ -1,10 +1,11 @@
-#version 150
+#version 120
+#extension GL_EXT_texture_array : enable
 
 #define SHADOW_MAP_NUM 32 // The maximum number of shadow maps
 
-in vec3 c_vNormal;
-in vec3 w_vPos, c_vPos;
-in vec2 vTexCoord;
+varying vec3 c_vNormal;
+varying vec3 w_vPos, c_vPos;
+varying vec2 vTexCoord;
 
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
 uniform sampler2DArrayShadow uShadowMap;
@@ -12,8 +13,6 @@ uniform mat4 uCameraMatrix;
 
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int  uNumUsedShadowMaps;
-
-out vec4 vFragColor;
 
 vec3 AmbientDirection();
 float AmbientPower();
@@ -54,6 +53,17 @@ vec2 kPoissonDisk[16] = vec2[](
   vec2( 0.14383161, -0.14100790 )
 );
 
+// We love #version 120
+int min(int a, int b) {
+  return a > b ? b : a;
+}
+int max(int a, int b) {
+  return a > b ? a : b;
+}
+float max(float a, float b) {
+  return a > b ? a : b;
+}
+
 float Visibility() {
   float visibility = 1.0;
   float bias = 0.01;
@@ -69,7 +79,7 @@ float Visibility() {
 
     // Sample the shadow map kShadowSoftness times.
     for(int j = 0; j < softness; ++j) {
-      visibility -= alpha * (1.0 - texture(
+      visibility -= alpha * (1.0 - shadow2DArray(
         uShadowMap,
         vec4( // x, y, slice, depth
           shadowCoord.xy + kPoissonDisk[j] / 256.0,
@@ -104,11 +114,11 @@ void main() {
     );
   }
 
-  vec3 color = texture(uDiffuseTexture, vTexCoord).rgb;
-  float spec_mask = texture(uSpecularTexture, vTexCoord).r;
+  vec3 color = texture2D(uDiffuseTexture, vTexCoord).rgb;
+  float spec_mask = texture2D(uSpecularTexture, vTexCoord).r;
 
-  vec3 final_color = color * AmbientColor() * 
+  vec3 final_color = color * AmbientColor() *
     (Visibility()*SunPower()*(diffuse_power + spec_mask*specular_power) + (AmbientPower() + 0.1));
 
-  vFragColor = vec4(final_color, 1.0);
+  gl_FragColor = vec4(final_color, 1.0);
 }

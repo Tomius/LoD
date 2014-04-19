@@ -98,10 +98,9 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
   mesh_.setDefaultAnimation("Stand", 0.3f);
   mesh_.forceAnimToDefault(0);
 
-  using namespace std::placeholders;
-  auto callback = std::bind(&Ayumi::animationEndedCallback, this, _1, _2, _3, _4, _5);
-
-  mesh_.setAnimationEndedCallback(callback);
+  mesh_.setAnimationEndedCallback(
+    [this](const std::string& current_anim){return animationEndedCallback(current_anim);}
+  );
 }
 
 oglwrap::AnimatedMesh& Ayumi::getMesh() {
@@ -116,6 +115,8 @@ void Ayumi::resize(glm::mat4 projMat) {
 void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
   std::string curr_anim = mesh_.getCurrentAnimation();
 
+  using oglwrap::AnimParams;
+
   if(was_left_click) {
     was_left_click = false;
     if(curr_anim == "Attack") {
@@ -124,29 +125,29 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
       attack3_ = true;
     } else if(curr_anim != "Attack3") {
       if(curr_anim == "JumpRise" || curr_anim == "JumpFall") {
-        mesh_.forceCurrentAnimation("Attack", time, 0.2f);
+        mesh_.forceCurrentAnimation(AnimParams("Attack", 0.2f), time);
       } else {
-        mesh_.setCurrentAnimation("Attack", time, 0.3f);
+        mesh_.setCurrentAnimation(AnimParams("Attack", 0.3f), time);
       }
     }
   } else if(charmove.isJumping()) {
     if(charmove.isDoingFlip()) {
       if(curr_anim == "JumpRise") {
-        mesh_.setCurrentAnimation("Flip", time, 0.05f);
+        mesh_.setCurrentAnimation(AnimParams("Flip", 0.05f), time);
       } else {
-        mesh_.setCurrentAnimation("Flip", time, 0.2f);
+        mesh_.setCurrentAnimation(AnimParams("Flip", 0.2f), time);
       }
     } else if(charmove.isJumpingRise()) {
-      mesh_.setCurrentAnimation("JumpRise", time, 0.3f);
+      mesh_.setCurrentAnimation(AnimParams("JumpRise", 0.3f), time);
     } else {
-      mesh_.setCurrentAnimation("JumpFall", time, 0.3f);
+      mesh_.setCurrentAnimation(AnimParams("JumpFall", 0.3f), time);
     }
   } else {
     if(charmove_.isWalking()) {
       if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-        mesh_.setCurrentAnimation("Run", time, 0.3f);
+        mesh_.setCurrentAnimation(AnimParams("Run", 0.3f), time);
       } else {
-        mesh_.setCurrentAnimation("Walk", time, 0.3f);
+        mesh_.setCurrentAnimation(AnimParams("Walk", 0.3f), time);
       }
     } else {
       mesh_.setAnimToDefault(time);
@@ -206,62 +207,57 @@ bool Ayumi::canFlip() {
   return mesh_.isInterrupable();
 }
 
-std::string Ayumi::animationEndedCallback(const std::string& current_anim,
-                                          float *transition_time,
-                                          bool *use_default_flags,
-                                          unsigned *flags,
-                                          float *speed) {
-
-  *use_default_flags = true;
+oglwrap::AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
+  using oglwrap::AnimParams;
 
   if(current_anim == "Attack" && (attack2_ || sf::Mouse::isButtonPressed(sf::Mouse::Left))) {
-    *transition_time = 0.1f;
-    return "Attack2";
+    return AnimParams("Attack2", 0.1f);
   } else if(current_anim == "Attack2") {
     attack2_ = false;
     if(attack3_ || sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-      *transition_time = 0.05f;
-      return "Attack3";
+      return AnimParams("Attack3", 0.05f);
     }
   } else if(current_anim == "Attack3") {
-    *transition_time = 0.4f;
     attack3_ = false;
   }
 
   if(current_anim == "Flip") {
-    *transition_time = 0.2f;
     charmove_.setFlip(false);
-    return "JumpFall";
+    return AnimParams("JumpFall", 0.2f);
   }
 
   if(charmove_.isJumping()) {
-    *transition_time = 0.3f;
     if(charmove_.isJumpingRise()) {
-      return "JumpRise";
+      return AnimParams("JumpRise", 0.3f);
     } else {
-      return "JumpFall";
+      return AnimParams("JumpFall", 0.3f);
     }
   } else if(charmove_.isWalking()) {
+    AnimParams params;
+
     if(current_anim == "Attack2") {
-      *transition_time = 0.4f;
+      params.transition_time = 0.4f;
     } else if(current_anim == "Attack_Chain0") {
-      *transition_time = 0.5f;
+      params.transition_time = 0.5f;
     } else {
-      *transition_time = 0.3f;
+      params.transition_time = 0.3f;
     }
     if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-      return "Run";
+      params.name = "Run";
+      return params;
     } else {
-      return "Walk";
+      params.name = "Walk";
+      return params;
     }
   } else {
+    AnimParams params;
+
     if(current_anim == "Attack2") {
-      *transition_time = 0.4f;
+      return AnimParams("Stand", 0.4f);
     } else if(current_anim == "Attack_Chain0") {
-      *transition_time = 0.6f;
+      return AnimParams("Stand", 0.6f);
     } else {
-      *transition_time = 0.2f;
+      return AnimParams("Stand", 0.2f);
     }
-    return "Stand";
   }
 }

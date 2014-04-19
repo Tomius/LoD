@@ -127,7 +127,7 @@ int main() {
 
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 
-      PrintDebugText("Initializing the Ayumi");
+      PrintDebugText("Initializing Ayumi");
         Ayumi ayumi(skybox, charmove);
       PrintDebugTime();
 

@@ -1,5 +1,8 @@
 #include "shadow.hpp"
 
+using namespace oglwrap;
+extern Context gl;
+
 Shadow::Shadow(size_t shadowMapSize, size_t depth)
   : fbo_(depth), cp_matrices_(depth), size_(shadowMapSize)
   , curr_depth_(0), max_depth_(depth) {
@@ -25,11 +28,12 @@ Shadow::Shadow(size_t shadowMapSize, size_t depth)
   for(int i = 0; i < depth; ++i) {
     fbo_[i].bind();
     fbo_[i].attachTextureLayer(FboAttachment::Depth, tex_, 0, i);
-    gl(DrawBuffer(GL_NONE)); // No color output in the bound framebuffer, only depth.
+    // No color output in the bound framebuffer, only depth.
+    gl.DrawBuffer(ColorBuffer::None);
     fbo_[i].validate();
   }
 
-  oglwrap::Framebuffer::Unbind();
+  Framebuffer::Unbind();
 }
 
 void Shadow::resize(size_t width, size_t height) {
@@ -71,21 +75,21 @@ const std::vector<glm::mat4>& Shadow::shadowCPs() const {
   return cp_matrices_;
 }
 
-const oglwrap::Texture2D_Array& Shadow::shadowTex() const {
+const Texture2D_Array& Shadow::shadowTex() const {
   return tex_;
 }
 
 void Shadow::begin() {
   fbo_[0].bind();
   curr_depth_ = 0;
-  glViewport(0, 0, size_, size_);
-  glClear(GL_DEPTH_BUFFER_BIT);
+  gl.Viewport(size_, size_);
+  gl.Clear().Depth();
 }
 
 void Shadow::push() {
   if(curr_depth_ + 1 < max_depth_) {
     fbo_[++curr_depth_].bind();
-    glClear(GL_DEPTH_BUFFER_BIT);
+    gl.Clear().Depth();
   } else {
     throw std::overflow_error("ShadowMap stack overflow.");
   }
@@ -100,6 +104,6 @@ size_t Shadow::getMaxDepth() const {
 }
 
 void Shadow::end() {
-  oglwrap::Framebuffer::Unbind();
-  glViewport(0, 0, w_, h_);
+  Framebuffer::Unbind();
+  gl.Viewport(w_, h_);
 }

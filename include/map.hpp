@@ -10,6 +10,7 @@
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/shapes/fullScreenRect.hpp"
 #include "oglwrap/utils/camera.hpp"
+#include "oglwrap/textures/texture_2D.hpp"
 
 class Map {
 	bool open_;
@@ -20,8 +21,8 @@ class Map {
 	oglwrap::Program prog_;
 
 public:
-	Map(glm::vec2 terrain_size) 
-			: open_(false) 
+	Map(glm::vec2 terrain_size)
+			: open_(false)
 			, terrain_size_(terrain_size)
 	{
 		oglwrap::VertexShader vs("map.vert");
@@ -104,21 +105,22 @@ public:
 	}
 
 	void render(const oglwrap::Camera& cam) {
+		using namespace oglwrap;
+
 		if(open_) {
 			prog_.use();
 			tex_.active(0);
 			tex_.bind();
-			gl(Enable(GL_BLEND));
-			gl(BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-			gl(Disable(GL_CULL_FACE));
-			gl(Disable(GL_DEPTH_TEST));
+
+			auto capabilies = Context::TemporarySet({
+				{Capability::Blend, true},
+				{Capability::CullFace, false},
+				{Capability::DepthTest, false}
+			});
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			rect_.render();
 			mark_.render(getMarkPos(cam), getMarkOrientation(cam));
-
-			gl(Enable(GL_DEPTH_TEST));
-			gl(Enable(GL_CULL_FACE));
-			gl(Disable(GL_BLEND));
 		}
 	}
 

@@ -1,6 +1,8 @@
 #include "terrainMesh.hpp"
 
 using namespace oglwrap;
+extern Context gl;
+
 #define RESTART 0xFFFFFFFF
 
 #ifndef GL_PRIMITIVE_RESTART
@@ -259,9 +261,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
   }
 
 
-  // Upload the textures:
-  GLfloat maxAniso = 0.0f;
-  gl(GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso));
+  // Upload the textures
 
   heightMap_.active(1);
   heightMap_.bind();
@@ -273,30 +273,21 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
       PixelDataType::UnsignedByte,
       terrain_.heightData.data()
     );
-
-    heightMap_.anisotropy(maxAniso);
     heightMap_.minFilter(MinFilter::Linear);
     heightMap_.magFilter(MagFilter::Linear);
   }
 
-  grassMaps_[0].bind();
-  {
-    grassMaps_[0].loadTexture("textures/grass.jpg");
-    grassMaps_[0].generateMipmap();
-    grassMaps_[0].minFilter(MinFilter::LinearMipmapLinear);
-    grassMaps_[0].magFilter(MagFilter::Linear);
-    grassMaps_[0].wrapS(Wrap::Repeat);
-    grassMaps_[0].wrapT(Wrap::Repeat);
-  }
-
-  grassMaps_[1].bind();
-  {
-    grassMaps_[1].loadTexture("textures/grass_2.jpg");
-    grassMaps_[1].generateMipmap();
-    grassMaps_[1].minFilter(MinFilter::LinearMipmapLinear);
-    grassMaps_[1].magFilter(MagFilter::Linear);
-    grassMaps_[1].wrapS(Wrap::Repeat);
-    grassMaps_[1].wrapT(Wrap::Repeat);
+  for(int i = 0; i < 2; ++i) {
+    grassMaps_[i].bind();
+    grassMaps_[i].loadTexture(
+      i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg"
+    );
+    grassMaps_[i].generateMipmap();
+    grassMaps_[i].maxAnisotropy();
+    grassMaps_[i].minFilter(MinFilter::LinearMipmapLinear);
+    grassMaps_[i].magFilter(MagFilter::Linear);
+    grassMaps_[i].wrapS(Wrap::Repeat);
+    grassMaps_[i].wrapT(Wrap::Repeat);
   }
 
   grassNormalMap_.bind();
@@ -406,9 +397,9 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
     size_t indices_num = border_indices_[own_mipmap][line][irregular].size() / sizeof(int);
 
     if(irregular) {
-      gl(DrawElements(GL_TRIANGLES, indices_num, (GLenum)DataType::UnsignedInt, nullptr));
+      glDrawElements(GL_TRIANGLES, indices_num, (GLenum)DataType::UnsignedInt, nullptr);
     } else {
-      gl(DrawElements(GL_TRIANGLE_STRIP, indices_num, (GLenum)DataType::UnsignedInt, nullptr));
+      glDrawElements(GL_TRIANGLE_STRIP, indices_num, (GLenum)DataType::UnsignedInt, nullptr);
     }
   }
 }
@@ -432,7 +423,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 
       vao_[mipmap_level].bind();
       indices_[mipmap_level].bind();
-      gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
+      glDrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr);
       CreateConnectors(pos, camPos);
   }
 
@@ -453,7 +444,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
           // Draw
           vao_[mipmap_level].bind();
           indices_[mipmap_level].bind();
-          gl(DrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr));
+          glDrawElements(GL_TRIANGLE_STRIP, index_num_[mipmap_level], (GLenum)DataType::UnsignedInt, nullptr);
           CreateConnectors(pos, camPos);
         }
       }
@@ -477,21 +468,18 @@ void TerrainMesh::render(const glm::vec3& camPos,
   grassNormalMap_.active(4);
   grassNormalMap_.bind();
 
-  gl(FrontFace(GL_CW));
-  gl(Enable(GL_CULL_FACE));
+  gl(FaceOrientation::CW);
+  Context::TemporaryEnable cullface(Capability::CullFace);
+
   #ifdef GL_NV_primitive_restart
-    gl(Enable(GL_PRIMITIVE_RESTART));
-    gl(PrimitiveRestartIndex(RESTART));
+    Context::TemporaryEnable prestart(Capability::PrimitiveRestart);
+    glPrimitiveRestartIndex(RESTART);
   #endif
-  //gl( PolygonMode(GL_FRONT_AND_BACK, GL_LINE) );
+  //gl.PolygonMode(PolyMode::Line);
 
   DrawBlocks(camPos, camFwd, uOffset, uMipmapLevel);
 
-  //gl( PolygonMode(GL_FRONT_AND_BACK, GL_FILL) );
-  #ifdef GL_NV_primitive_restart
-    gl(Disable(GL_PRIMITIVE_RESTART));
-  #endif
-  gl(Disable(GL_CULL_FACE));
+  //gl.PolygonMode(PolyMode::Fill);
 
   VertexArray::Unbind();
   grassNormalMap_.active(4);

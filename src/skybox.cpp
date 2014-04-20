@@ -1,6 +1,7 @@
 #include "skybox.hpp"
 
 using namespace oglwrap;
+extern Context gl;
 using namespace glm;
 
 Skybox::Skybox()
@@ -16,7 +17,7 @@ Skybox::Skybox()
   prog_ << vs_ << fs_ << sky_fs_;
   prog_.link().use();
 
-  make_cube_.setupPositions(prog_ | "aPosition");
+  cube_.setupPositions(prog_ | "aPosition");
 
   env_map_.active(0);
   {
@@ -96,10 +97,10 @@ void Skybox::render(float time, const glm::mat4& cameraMat) {
 
   env_map_.active(0);
   env_map_.bind();
+  gl.DepthMask(false);
 
-  gl(DepthMask(false));
-  make_cube_.render();
-  gl(DepthMask(true));
+  cube_.render();
 
+  gl.DepthMask(true);
   env_map_.unbind();
 }

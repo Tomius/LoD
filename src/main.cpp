@@ -18,6 +18,7 @@
 #include "map.hpp"
 
 using namespace oglwrap;
+Context gl;
 
 extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
@@ -28,11 +29,11 @@ double ogl_version;
 bool was_left_click = false;
 
 void glInit() {
-  gl(ClearColor(0.0f, 0.0f, 0.0f, 0.0f));
-  gl(ClearDepth(1.0f));
-  gl(Enable(GL_DEPTH_TEST));
-  gl(Enable(GL_DEPTH_CLAMP));
-  gl(CullFace(GL_BACK));
+  gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  gl.ClearDepth(1.0f);
+  gl.Enable(Capability::DepthTest);
+  gl.Enable(Capability::DepthClamp);
+  gl.CullFace(Face::Back);
 }
 
 void FpsDisplay(float time) {
@@ -163,11 +164,13 @@ int main() {
             case sf::Event::Resized: {
                 int width = event.size.width, height = event.size.height;
 
-                glViewport(0, 0, width, height);
+                gl.Viewport(width, height);
                 bloom.resize(width, height);
                 shadow.resize(width, height);
 
-                auto projMat = glm::perspectiveFov<float>(kFieldOfView, width, height, 0.5, 3000);
+                auto projMat = glm::perspectiveFov<float>(
+                  kFieldOfView, width, height, 0.5, 3000
+                );
 
                 ayumi.resize(projMat);
                 skybox.resize(projMat);
@@ -188,7 +191,7 @@ int main() {
           }
         }
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gl.Clear().Color().Depth();
 
         // Updates
         cam.updateRotation(window, fixMouse);

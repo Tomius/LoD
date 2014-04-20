@@ -8,7 +8,7 @@
 #include "oglwrap/textures/texture_cube.hpp"
 
 class Skybox {
-  oglwrap::Cube make_cube_;
+  oglwrap::Cube cube_;
 
   oglwrap::VertexShader vs_;
   oglwrap::FragmentShader fs_;

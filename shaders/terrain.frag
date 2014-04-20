@@ -57,7 +57,7 @@ float Visibility() {
         shadowCoord.xy, i,
         (shadowCoord.z - bias) / shadowCoord.w
       )
-    ));
+    ).r);
   }
 
   return max(visibility, 0.0);

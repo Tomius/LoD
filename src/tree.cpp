@@ -1,5 +1,7 @@
 #include "tree.hpp"
 
+using namespace oglwrap;
+
 Tree::Tree(Skybox& skybox, const Terrain& terrain)
   : mesh_("models/trees/tree.obj",
           aiProcessPreset_TargetRealtime_MaxQuality |
@@ -68,7 +70,7 @@ void Tree::shadowRender(float time, const oglwrap::Camera& cam, Shadow& shadow) 
   auto campos = cam.getPos();
   for(size_t i = 0; i < trees_.size() && shadow.getDepth() + 1 < shadow.getMaxDepth(); i++) {
     if(glm::length(campos - trees_[i].pos) < std::max(scales_.x, scales_.z) * (300 - PERFORMANCE * 50)) {
-      shadow_uMCP_ = 
+      shadow_uMCP_ =
         shadow.modelCamProjMat(skybox_.getSunPos(time), mesh_.bSphere(), trees_[i].mat, mesh_.worldTransform());
       mesh_.render();
       shadow.push();
@@ -82,8 +84,8 @@ void Tree::render(float time, const oglwrap::Camera& cam) {
   skybox_.env_map.active(0);
   skybox_.env_map.bind();
 
-  gl(Enable(GL_BLEND));
-  gl(BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+  auto blend = Context::TemporaryEnable(Capability::Blend);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   auto campos = cam.getPos();
   auto cam_mx = cam.cameraMatrix();
@@ -102,8 +104,6 @@ void Tree::render(float time, const oglwrap::Camera& cam) {
       mesh_.render();
     }
   }
-
-  gl(Disable(GL_BLEND));
 
   skybox_.env_map.active(0);
   skybox_.env_map.unbind();

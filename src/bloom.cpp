@@ -1,6 +1,7 @@
 #include "bloom.hpp"
 
 using namespace oglwrap;
+extern Context gl;
 
 BloomEffect::BloomEffect()
   : vs_("bloom.vert")
@@ -41,7 +42,7 @@ void BloomEffect::render() {
   tex_.bind();
   tex_.copy(PixelDataInternalFormat::RGB, 0, 0, width_, height_);
 
-  gl(Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+  gl.Clear().Color().Depth();
 
   prog_.use();
   rect_.render();

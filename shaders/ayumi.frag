@@ -85,7 +85,7 @@ float Visibility() {
           shadowCoord.xy + kPoissonDisk[j] / 256.0,
           i, (shadowCoord.z - bias) / shadowCoord.w
         )
-      ));
+      ).r);
     }
   }
 

@@ -4,7 +4,7 @@
 #define BONE_NUM
 #define BONE_ATTRIB_NUM
 
-in vec4  aPosition;
+attribute vec4 aPosition;
 
 #if BONE_ATTRIB_NUM > 0
 attribute vec4 aBoneIDs0;

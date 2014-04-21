@@ -35,8 +35,11 @@ public:
 		tex_.loadTexture("textures/map.png");
 		tex_.minFilter(oglwrap::MinFilter::Linear);
 		tex_.magFilter(oglwrap::MagFilter::Linear);
-		oglwrap::UniformSampler(prog_, "uTex").set(0);
 		tex_.unbind();
+
+		oglwrap::UniformSampler(prog_, "uTex").set(0);
+
+		std::cout << prog_.validate();
 
 		rect_.setupPositions(prog_ | "aPosition");
 		rect_.setupTexCoords(prog_ | "aTexcoord");
@@ -63,8 +66,11 @@ public:
 			tex_.loadTexture("textures/map_mark.png");
 			tex_.minFilter(oglwrap::MinFilter::Linear);
 			tex_.magFilter(oglwrap::MagFilter::Linear);
-			oglwrap::UniformSampler(prog_, "uTex").set(0);
 			tex_.unbind();
+
+			oglwrap::UniformSampler(prog_, "uTex").set(0);
+
+			std::cout << prog_.validate();
 
 			rect_.setupPositions(prog_ | "aPosition");
 			rect_.setupTexCoords(prog_ | "aTexcoord");
@@ -123,9 +129,9 @@ public:
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			rect_.render();
-			mark_.render(getMarkPos(cam), getMarkOrientation(cam));
-
 			tex_.unbind();
+
+			mark_.render(getMarkPos(cam), getMarkOrientation(cam));
 		}
 	}
 

@@ -17,6 +17,10 @@ Skybox::Skybox()
   prog_ << vs_ << fs_ << sky_fs_;
   prog_.link().use();
 
+  UniformSampler(prog_, "uEnvMap").set(0);
+
+  std::cout << prog_.validate();
+
   cube_.setupPositions(prog_ | "aPosition");
 
   env_map_.active(0);

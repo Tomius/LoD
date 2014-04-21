@@ -37,6 +37,8 @@ Terrain::Terrain(Skybox& skybox)
   UniformSampler(prog_, "uGrassNormalMap").set(4);
   UniformSampler(prog_, "uShadowMap").set(5);
 
+  std::cout << prog_.validate();
+
   uScales_ = scale_vector;
   uTexSize_ = glm::ivec2(mesh_.w, mesh_.h);
 }

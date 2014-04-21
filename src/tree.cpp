@@ -22,7 +22,9 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   shadow_prog_.link().use();
 
   mesh_.setupDiffuseTextures(1);
-  oglwrap::UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
+  UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
+
+  std::cout << shadow_prog_.validate();
 
   prog_ << vs_ << fs_ << skybox_.sky_fs;
   prog_.link().use();
@@ -30,8 +32,10 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   mesh_.setupPositions(prog_ | "aPosition");
   mesh_.setupTexCoords(prog_ | "aTexCoord");
   mesh_.setupNormals(prog_ | "aNormal");
-  oglwrap::UniformSampler(prog_, "uEnvMap").set(0);
-  oglwrap::UniformSampler(prog_, "uDiffuseTexture").set(1);
+  UniformSampler(prog_, "uEnvMap").set(0);
+  UniformSampler(prog_, "uDiffuseTexture").set(1);
+
+  std::cout << prog_.validate();
 
   // Get the trees' positions.
   srand(5);
@@ -64,7 +68,7 @@ void Tree::resize(glm::mat4 projMat) {
   uProjectionMatrix_ = projMat;
 }
 
-void Tree::shadowRender(float time, const oglwrap::Camera& cam, Shadow& shadow) {
+void Tree::shadowRender(float time, const Camera& cam, Shadow& shadow) {
   shadow_prog_.use();
 
   auto campos = cam.getPos();
@@ -78,7 +82,7 @@ void Tree::shadowRender(float time, const oglwrap::Camera& cam, Shadow& shadow) 
   }
 }
 
-void Tree::render(float time, const oglwrap::Camera& cam) {
+void Tree::render(float time, const Camera& cam) {
   prog_.use();
   uSunData_.set(skybox_.getSunData(time));
   skybox_.env_map.active(0);

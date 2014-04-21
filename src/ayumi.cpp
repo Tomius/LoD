@@ -36,11 +36,13 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
   VertexShader vs(vs_source), shadow_vs(shadow_vs_source);
   FragmentShader fs("ayumi.frag"), shadow_fs("shadow.frag");
 
-  prog_ << vs << fs << skybox_.sky_fs;
-  prog_.link().use();
-
   shadow_prog_ << shadow_vs << shadow_fs;
   shadow_prog_.link();
+
+  std::cout << shadow_prog_.validate();
+
+  prog_ << vs << fs << skybox_.sky_fs;
+  prog_.link().use();
 
   mesh_.setupPositions(prog_ | "aPosition");
   mesh_.setupTexCoords(prog_ | "aTexCoord");
@@ -56,6 +58,8 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
   UniformSampler(prog_, "uSpecularTexture").set(2);
   UniformSampler(prog_, "uShadowMap").set(3);
   uShadowSoftness_ = 1 << clamp(4 - PERFORMANCE, 0, 4);
+
+  std::cout << prog_.validate();
 
   mesh_.addAnimation("models/ayumi/ayumi_idle.dae", "Stand",
                      AnimFlag::Repeat |
@@ -166,9 +170,11 @@ void Ayumi::shadowRender(float time, Shadow& shadow, const CharacterMovement& ch
 
   gl.FrontFace(FaceOrientation::CCW);
   auto cullface = Context::TemporaryEnable(Capability::CullFace);
+  mesh_.disableTextures();
 
   mesh_.render();
 
+  mesh_.enableTextures();
   if(shadow.getDepth() < shadow.getMaxDepth()) {
     shadow.push();
   }

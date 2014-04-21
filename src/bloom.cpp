@@ -11,6 +11,10 @@ BloomEffect::BloomEffect()
   prog_ << vs_ << fs_;
   prog_.link().use();
 
+  UniformSampler(prog_, "uTex").set(0);
+
+  std::cout << prog_.validate();
+
   rect_.setupPositions(prog_ | "aPosition");
 
   tex_.active(0);

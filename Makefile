@@ -5,7 +5,7 @@ INCLUDE_DIR = include
 
 CPP_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS = $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))
-HEADERS = $(wildcard $(INCLUDE_DIR)/*.hpp)
+HEADERS := $(shell find -L $(INCLUDE_DIR) -name '*.hpp')
 
 MKDIR_P = mkdir -p
 

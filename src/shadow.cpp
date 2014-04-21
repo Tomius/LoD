@@ -17,6 +17,7 @@ Shadow::Shadow(size_t shadowMapSize, size_t depth)
     PixelDataType::Float, nullptr
   );
   tex_.minFilter(MinFilter::Linear);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
   tex_.magFilter(MagFilter::Linear);
   tex_.wrapS(Wrap::ClampToBorder);
   tex_.wrapT(Wrap::ClampToBorder);

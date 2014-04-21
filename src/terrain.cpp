@@ -30,11 +30,12 @@ Terrain::Terrain(Skybox& skybox)
   prog_ << vs_ << fs_ << skybox_.sky_fs;
   prog_.link().use();
 
-  oglwrap::UniformSampler(prog_, "uHeightMap").set(1);
-  oglwrap::UniformSampler(prog_, "uGrassMap0").set(2);
-  oglwrap::UniformSampler(prog_, "uGrassMap1").set(3);
-  oglwrap::UniformSampler(prog_, "uGrassNormalMap").set(4);
-  oglwrap::UniformSampler(prog_, "uShadowMap").set(5);
+  UniformSampler(prog_, "uEnvMap").set(0);
+  UniformSampler(prog_, "uHeightMap").set(1);
+  UniformSampler(prog_, "uGrassMap0").set(2);
+  UniformSampler(prog_, "uGrassMap1").set(3);
+  UniformSampler(prog_, "uGrassNormalMap").set(4);
+  UniformSampler(prog_, "uShadowMap").set(5);
 
   uScales_ = scale_vector;
   uTexSize_ = glm::ivec2(mesh_.w, mesh_.h);

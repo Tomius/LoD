@@ -30,6 +30,7 @@ public:
 		prog_ << vs << fs;
 		prog_.link().use();
 
+		tex_.active(0);
 		tex_.bind();
 		tex_.loadTexture("textures/map.png");
 		tex_.minFilter(oglwrap::MinFilter::Linear);
@@ -57,6 +58,7 @@ public:
 			prog_ << vs << fs;
 			prog_.link().use();
 
+			tex_.active(0);
 			tex_.bind();
 			tex_.loadTexture("textures/map_mark.png");
 			tex_.minFilter(oglwrap::MinFilter::Linear);
@@ -85,6 +87,7 @@ public:
 
 		void render(glm::vec2 pos, glm::vec2 forward) {
 			prog_.use();
+			tex_.active(0);
 			tex_.bind();
 
 			uModelMatrix_ = getModelMatrix(pos, forward);
@@ -121,6 +124,8 @@ public:
 
 			rect_.render();
 			mark_.render(getMarkPos(cam), getMarkOrientation(cam));
+
+			tex_.unbind();
 		}
 	}
 

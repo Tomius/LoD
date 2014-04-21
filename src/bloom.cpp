@@ -16,6 +16,8 @@ BloomEffect::BloomEffect()
   tex_.active(0);
   tex_.bind();
   tex_.minFilter(MinFilter::Linear);
+  tex_.magFilter(MagFilter::Linear);
+  tex_.unbind();
 }
 
 void BloomEffect::resize(GLuint w, GLuint h) {
@@ -34,6 +36,7 @@ void BloomEffect::resize(GLuint w, GLuint h) {
     PixelDataType::Float,
     nullptr
   );
+  tex_.unbind();
 }
 
 void BloomEffect::render() {

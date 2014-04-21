@@ -22,7 +22,7 @@ Shadow::Shadow(size_t shadowMapSize, size_t depth)
   tex_.wrapS(Wrap::ClampToBorder);
   tex_.wrapT(Wrap::ClampToBorder);
   tex_.borderColor(glm::vec4(1.0f));
-  tex_.compareFunc(Enums::CompFunc::LEqual);
+  tex_.compareFunc(CompFunc::LEqual);
   tex_.compareMode(CompMode::CompareRefToTexture);
 
   // Setup the FBOs

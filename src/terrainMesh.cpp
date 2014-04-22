@@ -397,9 +397,9 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
     size_t indices_num = border_indices_[own_mipmap][line][irregular].size() / sizeof(int);
 
     if(irregular) {
-      gl.DrawElements(PrimType::Triangles, indices_num, WholeDataType::UnsignedInt);
+      gl.DrawElements(PrimType::Triangles, indices_num, IndexType::UnsignedInt);
     } else {
-      gl.DrawElements(PrimType::TriangleStrip, indices_num, WholeDataType::UnsignedInt);
+      gl.DrawElements(PrimType::TriangleStrip, indices_num, IndexType::UnsignedInt);
     }
   }
 }
@@ -423,7 +423,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 
       vao_[mipmap_level].bind();
       indices_[mipmap_level].bind();
-      gl.DrawElements(PrimType::TriangleStrip, index_num_[mipmap_level], WholeDataType::UnsignedInt);
+      gl.DrawElements(PrimType::TriangleStrip, index_num_[mipmap_level], IndexType::UnsignedInt);
       CreateConnectors(pos, camPos);
   }
 
@@ -444,7 +444,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
           // Draw
           vao_[mipmap_level].bind();
           indices_[mipmap_level].bind();
-          gl.DrawElements(PrimType::TriangleStrip, index_num_[mipmap_level], WholeDataType::UnsignedInt);
+          gl.DrawElements(PrimType::TriangleStrip, index_num_[mipmap_level], IndexType::UnsignedInt);
           CreateConnectors(pos, camPos);
         }
       }

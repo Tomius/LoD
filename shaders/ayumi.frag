@@ -1,6 +1,13 @@
 #version 120
 #extension GL_EXT_texture_array : enable
 
+#pragma optionNV(fastmath on)
+#pragma optionNV(fastprecision on)
+#pragma optionNV(ifcvt none)
+#pragma optionNV(inline all)
+#pragma optionNV(strict on)
+#pragma optionNV(unroll all)
+
 #define SHADOW_MAP_NUM 32 // The maximum number of shadow maps
 
 varying vec3 c_vNormal;

@@ -1,5 +1,4 @@
 #version 120
-#extension GL_EXT_texture_array : enable
 
 #pragma optionNV(fastmath on)
 #pragma optionNV(fastprecision on)
@@ -15,11 +14,12 @@ varying vec3 w_vPos, c_vPos;
 varying vec2 vTexCoord;
 
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
-uniform sampler2DArrayShadow uShadowMap;
+uniform sampler2DShadow uShadowMap;
 uniform mat4 uCameraMatrix;
 
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int  uNumUsedShadowMaps;
+uniform ivec2 uShadowAtlasSize;
 
 vec3 AmbientDirection();
 float AmbientPower();
@@ -71,6 +71,18 @@ float max(float a, float b) {
   return a > b ? a : b;
 }
 
+vec2 GetShadowAtlasOffset(int i) {
+  return vec2(i / uShadowAtlasSize.x, mod(i, uShadowAtlasSize.y));
+}
+
+vec2 AtlasLookup(vec2 tc, int i) {
+  return (tc + GetShadowAtlasOffset(i)) / uShadowAtlasSize;
+}
+
+bool isValid(vec2 tc) {
+  return 0 <= tc.x && tc.x <= 1 && 0 <= tc.y && tc.y <= 1;
+}
+
 float Visibility() {
   float visibility = 1.0;
   float bias = 0.01;
@@ -80,17 +92,21 @@ float Visibility() {
   for(int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
+    if(!isValid(shadowCoord.xy)) {
+      continue;
+    }
+
     // Self-shadow needs better MSA
     float softness = (i == 0) ? uShadowSoftness : max(uShadowSoftness/2, 1);
     float alpha = kMaxShadow / softness; // Max shadow per sample
 
     // Sample the shadow map kShadowSoftness times.
     for(int j = 0; j < softness; ++j) {
-      visibility -= alpha * (1.0 - shadow2DArray(
+      visibility -= alpha * (1.0 - shadow2D(
         uShadowMap,
-        vec4( // x, y, slice, depth
-          shadowCoord.xy + kPoissonDisk[j] / 256.0,
-          i, (shadowCoord.z - bias) / shadowCoord.w
+        vec3(
+          AtlasLookup(shadowCoord.xy + kPoissonDisk[j] / 256.0, i),
+          (shadowCoord.z - bias) / shadowCoord.w
         )
       ).r);
     }

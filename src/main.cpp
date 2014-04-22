@@ -110,13 +110,14 @@ int main() {
         BloomEffect bloom;
       PrintDebugTime();
 
-      PrintDebugText("Initializing the terrain");
-        Terrain terrain(skybox);
+      PrintDebugText("Initializing the shadow maps");
+        Shadow shadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
       PrintDebugTime();
 
-      PrintDebugText("Initializing the shadow maps");
-        Shadow shadow(PERFORMANCE < 2 ? 512 : 256, 64);
+      PrintDebugText("Initializing the terrain");
+        Terrain terrain(skybox, shadow.getAtlasDimensions());
       PrintDebugTime();
+
 
       PrintDebugText("Initializing the trees");
         Tree tree(skybox, terrain);
@@ -129,7 +130,7 @@ int main() {
       CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
 
       PrintDebugText("Initializing Ayumi");
-        Ayumi ayumi(skybox, charmove);
+        Ayumi ayumi(skybox, charmove, shadow.getAtlasDimensions());
       PrintDebugTime();
 
       ThirdPersonalCamera cam(

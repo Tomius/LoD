@@ -8,7 +8,7 @@ extern const int PERFORMANCE;
 const float xz_scale = (1 << PERFORMANCE)/2.0f;
 static const glm::vec3 scale_vector = glm::vec3(xz_scale, 1.0f, xz_scale);
 
-Terrain::Terrain(Skybox& skybox)
+Terrain::Terrain(Skybox& skybox, glm::ivec2 shadowAtlasDims)
   : vs_("terrain.vert")
   , fs_("terrain.frag")
   , uProjectionMatrix_(prog_, "uProjectionMatrix")
@@ -36,6 +36,7 @@ Terrain::Terrain(Skybox& skybox)
   UniformSampler(prog_, "uGrassMap1").set(3);
   UniformSampler(prog_, "uGrassNormalMap").set(4);
   UniformSampler(prog_, "uShadowMap").set(5);
+  Uniform<glm::ivec2>(prog_, "uShadowAtlasSize").set(shadowAtlasDims);
 
   std::cout << prog_.validate();
 

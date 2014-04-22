@@ -4,7 +4,9 @@ using namespace oglwrap;
 extern Context gl;
 extern bool was_left_click;
 
-Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
+Ayumi::Ayumi(Skybox& skybox,
+             CharacterMovement& charmove,
+             glm::ivec2 shadowAtlasDims)
     : mesh_("models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_MaxQuality |
             aiProcess_FlipUVs)
@@ -58,6 +60,7 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove)
   UniformSampler(prog_, "uSpecularTexture").set(2);
   UniformSampler(prog_, "uShadowMap").set(3);
   uShadowSoftness_ = 1 << clamp(4 - PERFORMANCE, 0, 4);
+  Uniform<glm::ivec2>(prog_, "uShadowAtlasSize").set(shadowAtlasDims);
 
   std::cout << prog_.validate();
 

@@ -23,7 +23,7 @@ class Terrain {
 public:
   const int& w, h;
 
-  Terrain(Skybox& skybox);
+  Terrain(Skybox& skybox, glm::ivec2 shadowAtlasDims);
   void resize(const glm::mat4& projMat);
   glm::vec3 getScales() const;
   void render(float time, const oglwrap::Camera& cam, const Shadow& shadow);

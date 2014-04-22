@@ -1,5 +1,4 @@
 #version 120
-#extension GL_EXT_texture_array : enable
 
 #pragma optionNV(fastmath on)
 #pragma optionNV(fastprecision on)
@@ -19,11 +18,12 @@ varying mat3  vNormalMatrix;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap0, uGrassMap1, uGrassNormalMap;
-uniform sampler2DArrayShadow uShadowMap;
+uniform sampler2DShadow uShadowMap;
 uniform vec3 uScales;
 
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;
+uniform ivec2 uShadowAtlasSize;
 
 // External functions
 vec3 AmbientDirection();
@@ -49,6 +49,18 @@ int min(int a, int b) {
 // shadow is 20% as bright as a lit one.
 const float kMaxShadow = 0.8;
 
+vec2 GetShadowAtlasOffset(int i) {
+  return vec2(i / uShadowAtlasSize.x, mod(i, uShadowAtlasSize.y));
+}
+
+vec2 AtlasLookup(vec2 tc, int i) {
+  return (tc + GetShadowAtlasOffset(i)) / uShadowAtlasSize;
+}
+
+bool isValid(vec2 tc) {
+  return 0 <= tc.x && tc.x <= 1 && 0 <= tc.y && tc.y <= 1;
+}
+
 float Visibility() {
   float bias = 0.01;
   float visibility = 1.0;
@@ -58,10 +70,14 @@ float Visibility() {
   for(int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
-    visibility -= kMaxShadow * (1 - shadow2DArray(
+    if(!isValid(shadowCoord.xy)) {
+      continue;
+    }
+
+    visibility -= kMaxShadow * (1 - shadow2D(
       uShadowMap,
-      vec4( // x, y, slice, depth
-        shadowCoord.xy, i,
+      vec3(
+        AtlasLookup(shadowCoord.xy, i),
         (shadowCoord.z - bias) / shadowCoord.w
       )
     ).r);

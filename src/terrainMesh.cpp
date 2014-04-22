@@ -127,17 +127,18 @@ static inline void distIncr(int mmlev, int& distance) {
 
 // Uses primitive restart if its available, else it uses degenerates.
 void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
-  #ifndef GL_NV_primitive_restart
-    for(int idx = 0; idx < indices.size(); idx++) {
-      if(indices[idx] == RESTART) {
-        if(idx != 0 && indices[idx-1] != RESTART) {
-          indices[idx] = indices[idx-1];
-        } else if (idx != indices.size() - 1 && indices[idx+1] != RESTART) {
-          indices[idx] = indices[idx+1];
-        }
+  #ifdef GL_NV_primitive_restart
+    if(glPrimitiveRestartIndex) return;
+  #endif
+  for(int idx = 0; idx < indices.size(); idx++) {
+    if(indices[idx] == RESTART) {
+      if(idx != 0 && indices[idx-1] != RESTART) {
+        indices[idx] = indices[idx-1];
+      } else if (idx != indices.size() - 1 && indices[idx+1] != RESTART) {
+        indices[idx] = indices[idx+1];
       }
     }
-  #endif
+  }
 }
 
 // Warning this function is nearly impossible to understand just from the code.
@@ -472,14 +473,22 @@ void TerrainMesh::render(const glm::vec3& camPos,
   Context::TemporaryEnable cullface(Capability::CullFace);
 
   #ifdef GL_NV_primitive_restart
-    Context::TemporaryEnable prestart(Capability::PrimitiveRestart);
-    gl.PrimitiveRestartIndex(RESTART);
+    if(glPrimitiveRestartIndex) {
+      gl.Enable(Capability::PrimitiveRestart);
+      gl.PrimitiveRestartIndex(RESTART);
+    }
   #endif
   //gl.PolygonMode(PolyMode::Line);
 
   DrawBlocks(camPos, camFwd, uOffset, uMipmapLevel);
 
   //gl.PolygonMode(PolyMode::Fill);
+
+  #ifdef GL_NV_primitive_restart
+    if(glPrimitiveRestartIndex) {
+      gl.Disable(Capability::PrimitiveRestart);
+    }
+  #endif
 
   VertexArray::Unbind();
   grassNormalMap_.active(4);

@@ -3,36 +3,37 @@
 using namespace oglwrap;
 extern Context gl;
 
-Shadow::Shadow(size_t shadowMapSize, size_t depth)
-  : fbo_(depth), cp_matrices_(depth), size_(shadowMapSize)
-  , curr_depth_(0), max_depth_(depth) {
+Shadow::Shadow(size_t shadow_map_size, size_t atlas_x_size, size_t atlas_y_size)
+  : size_(shadow_map_size)
+  , xsize_(atlas_x_size)
+  , ysize_(atlas_y_size)
+  , curr_depth_(0)
+  , max_depth_(xsize_*ysize_)
+  , cp_matrices_(max_depth_)  {
   using namespace oglwrap;
 
   // Setup the texture array that will serve as storage.
   tex_.bind();
   tex_.upload(
     PixelDataInternalFormat::DepthComponent,
-    size_, size_, depth,
+    size_*xsize_, size_*ysize_,
     PixelDataFormat::DepthComponent,
     PixelDataType::Float, nullptr
   );
-  tex_.minFilter(MinFilter::Linear);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-  tex_.magFilter(MagFilter::Linear);
+  tex_.minFilter(MinFilter::Nearest);
+  tex_.magFilter(MagFilter::Nearest);
   tex_.wrapS(Wrap::ClampToBorder);
   tex_.wrapT(Wrap::ClampToBorder);
   tex_.borderColor(glm::vec4(1.0f));
   tex_.compareFunc(CompFunc::LEqual);
   tex_.compareMode(CompMode::CompareRefToTexture);
 
-  // Setup the FBOs
-  for(int i = 0; i < depth; ++i) {
-    fbo_[i].bind();
-    fbo_[i].attachTextureLayer(FboAttachment::Depth, tex_, 0, i);
-    // No color output in the bound framebuffer, only depth.
-    gl.DrawBuffer(ColorBuffer::None);
-    fbo_[i].validate();
-  }
+  // Setup the FBO
+  fbo_.bind();
+  fbo_.attachTexture(FboAttachment::Depth, tex_, 0);
+  // No color output in the bound framebuffer, only depth.
+  gl.DrawBuffer(ColorBuffer::None);
+  fbo_.validate();
 
   Framebuffer::Unbind();
 }
@@ -76,21 +77,30 @@ const std::vector<glm::mat4>& Shadow::shadowCPs() const {
   return cp_matrices_;
 }
 
-const Texture2D_Array& Shadow::shadowTex() const {
+const Texture2D& Shadow::shadowTex() const {
   return tex_;
 }
 
 void Shadow::begin() {
-  fbo_[0].bind();
+  fbo_.bind();
   curr_depth_ = 0;
-  gl.Viewport(size_, size_);
+
+  // Clear the shadowmap atlas
+  gl.Viewport(size_*xsize_, size_*ysize_);
   gl.Clear().Depth();
+
+  // Setup the 0th shadowmap
+  gl.Viewport(0, 0, size_, size_);
+}
+
+void Shadow::setViewPort() {
+  size_t x = curr_depth_ / xsize_, y = curr_depth_ % xsize_;
+  gl.Viewport(x*size_, y*size_, size_, size_);
 }
 
 void Shadow::push() {
-  if(curr_depth_ + 1 < max_depth_) {
-    fbo_[++curr_depth_].bind();
-    gl.Clear().Depth();
+  if(++curr_depth_ < max_depth_) {
+    setViewPort();
   } else {
     throw std::overflow_error("ShadowMap stack overflow.");
   }

@@ -32,7 +32,7 @@ class Ayumi {
   Skybox& skybox_;
 
 public:
-  Ayumi(Skybox& skybox, CharacterMovement& charmove);
+  Ayumi(Skybox& skybox, CharacterMovement& charmove, glm::ivec2 shadowAtlasDims);
   oglwrap::AnimatedMesh& getMesh();
   void resize(glm::mat4 projMat);
   void updateStatus(float time, const CharacterMovement& charmove);

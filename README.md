@@ -11,7 +11,7 @@ Here's a picture of the program's current capability (click on it, to see a shor
 Dependencies:
 -------------
 * C++11 compiler.
-* OpenGL 2.1, Shader model 120 with GL_EXT_texture_array extension
+* OpenGL 2.1, Shader model 120
 * GLEW - for loading OpenGL extensions
 * [oglwrap](https://github.com/Tomius/oglwrap) - my C++ OpenGL wrapper.
 * SFML 2 - for window handling

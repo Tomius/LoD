@@ -51,6 +51,8 @@ void BloomEffect::render() {
 
   gl.Clear().Color().Depth();
 
+  auto srgb = Context::TemporaryEnable(Capability::FramebufferSrgb);
+
   prog_.use();
   rect_.render();
 

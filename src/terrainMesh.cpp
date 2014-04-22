@@ -128,7 +128,8 @@ static inline void distIncr(int mmlev, int& distance) {
 // Uses primitive restart if its available, else it uses degenerates.
 void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
   static bool prim_resart =
-    Context::IsExtensionSupported("GL_NV_primitive_restart");
+    Context::IsExtensionSupported("GL_NV_primitive_restart") &&
+    glPrimitiveRestartIndex != nullptr;
 
   if(!prim_resart) {
     for(int idx = 0; idx < indices.size(); idx++) {
@@ -475,7 +476,8 @@ void TerrainMesh::render(const glm::vec3& camPos,
   Context::TemporaryEnable cullface(Capability::CullFace);
 
   static bool prim_resart =
-    Context::IsExtensionSupported("GL_NV_primitive_restart");
+    Context::IsExtensionSupported("GL_NV_primitive_restart") &&
+    glPrimitiveRestartIndex != nullptr;
 
   if(prim_resart) {
     gl.Enable(Capability::PrimitiveRestart);

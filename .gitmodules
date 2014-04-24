@@ -1,0 +1,3 @@
+[submodule "include/oglwrap"]
+	path = include/oglwrap
+	url = https://github.com/Tomius/oglwrap.git

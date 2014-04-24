@@ -22,13 +22,13 @@ Dependencies:
 How to build (Debian 64 bit):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && make && sudo make install && cd .. && rm -rf assimp && wget http://www.sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-64bits.tar.bz2 && tar jxf ./SFML-2.1-linux-gcc-64bits.tar.bz2 && sudo cp -r SFML-2.1/* /usr/local/ && rm -rf SFML* && git clone https://github.com/Tomius/LoD.git && git clone https://github.com/Tomius/oglwrap.git && cd LoD/include/ && ln -s ../../oglwrap/oglwrap/ && cd .. && make && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && make && sudo make install && cd .. && rm -rf assimp && wget http://www.sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-64bits.tar.bz2 && tar jxf ./SFML-2.1-linux-gcc-64bits.tar.bz2 && sudo cp -r SFML-2.1/* /usr/local/ && rm -rf SFML* && git clone https://github.com/Tomius/LoD.git && cd LoD && make && ./LoD
 ```
 
 How to build (Debian 32 bit):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && make && sudo make install && cd .. && rm -rf assimp && wget http://www.sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-32bits.tar.bz2 && tar jxf ./SFML-2.1-linux-gcc-32bits.tar.bz2 && sudo cp -r SFML-2.1/* /usr/local/ && rm -rf SFML* && git clone https://github.com/Tomius/LoD.git && git clone https://github.com/Tomius/oglwrap.git && cd LoD/include/ && ln -s ../../oglwrap/oglwrap/ && cd .. && make && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && make && sudo make install && cd .. && rm -rf assimp && wget http://www.sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-32bits.tar.bz2 && tar jxf ./SFML-2.1-linux-gcc-32bits.tar.bz2 && sudo cp -r SFML-2.1/* /usr/local/ && rm -rf SFML* && git clone https://github.com/Tomius/LoD.git && cd LoD && make && ./LoD
 ```
 
 How to build (linux):
@@ -36,14 +36,10 @@ How to build (linux):
 * Get the external dependencies: libmagick++-dev libglew-dev
 * Get libsfml2-dev, or grab it from its [offical website](http://www.sfml-dev.org/download/sfml/2.1/)
 * Get a fresh copy of [assimp](https://github.com/assimp/assimp). (You'd better avoid the libassimp-dev package, it's kinda old).
-* Use the following command
-```
-mkdir LandOfDreams && cd LandOfDreams && git clone https://github.com/Tomius/LoD.git && git clone https://github.com/Tomius/oglwrap.git && cd LoD/include/ && ln -s ../../oglwrap/oglwrap/ && cd .. && make && ./LoD
-```
+* build with make (uses clang++), run with ./LoD
 
 How to build (Windows):
 ----------------------
-* Get [oglwrap](https://github.com/Tomius/oglwrap) and put it into include/
 * Get the 3rd party libraries:
   * [GLEW](http://sourceforge.net/projects/glew/files/glew/1.10.0/) - The prebulilt one only works with MSVC, you probably need to build it yourself.
   * [SFML](http://www.sfml-dev.org/download/sfml/2.1/)

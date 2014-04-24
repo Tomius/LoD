@@ -125,8 +125,7 @@ static inline void distIncr(int mmlev, int& distance) {
   distance += 1 << (mmlev + 1);
 }
 
-// Uses primitive restart if its available, else it uses degenerates.
-void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
+bool IsPrimitiveRestartAvailable() {
   #if GL_NV_primitive_restart
     static bool prim_resart =
       Context::IsExtensionSupported("GL_NV_primitive_restart") &&
@@ -135,7 +134,12 @@ void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
     static bool prim_resart = false;
   #endif
 
-  if(!prim_resart) {
+  return prim_resart;
+}
+
+// Uses primitive restart if its available, else it uses degenerates.
+void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
+  if(!IsPrimitiveRestartAvailable()) {
     for(int idx = 0; idx < indices.size(); idx++) {
       if(indices[idx] == RESTART) {
         if(idx != 0 && indices[idx-1] != RESTART) {
@@ -188,7 +192,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
     indices_[m].bind();
     {
       std::vector<unsigned int> indices_vector;
-      for(int ring = 1; ring < kRingCount - 1; ring++) { // the border indices are separate
+      // the border indices are separate
+      for(int ring = 1; ring < kRingCount - 1; ring++) {
         for(char line = 0; line < 6; line++) {
           for(int segment = 0; segment < ring; segment++) {
             indices_vector.push_back(GetIdx(ring, line, segment));
@@ -318,7 +323,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
 
 // This works with ivec2 rather than svec2, as it's result is
 // uploaded as a uniform which have to an int anyway.
-static inline glm::ivec2 GetBlockPos(int ring, char line, int segment, int distance = 1) {
+static inline glm::ivec2 GetBlockPos(int ring, char line,
+                                     int segment, int distance = 1) {
   if(ring == 0) {
     return glm::ivec2(0);
   }
@@ -350,13 +356,15 @@ static inline glm::ivec2 GetBlockPos(int ring, char line, int segment, int dista
   points[4] = glm::ivec2(-3, 2);
   points[5] = glm::ivec2(0, 4);
 
-  glm::ivec2 prevPoint = distance * points[size_t(line % 6)]; // it's size_t to avoid compiler warning.
+  // The points are indexed with a size_t to avoid compiler warning.
+  glm::ivec2 prevPoint = distance * points[size_t(line % 6)];
   glm::ivec2 nextPoint = distance * points[size_t((line + 1) % 6)];
 
   return prevPoint + (nextPoint - prevPoint) * segment / ring;
 }
 
-static inline int GetBlockMipmapLevel(const glm::ivec2& _pos, const glm::vec2& camPos) {
+static inline int GetBlockMipmapLevel(const glm::ivec2& _pos,
+                                      const glm::vec2& camPos) {
   glm::vec2 pos(_pos.x / 2, _pos.y / 2);
 
   return std::min(
@@ -367,7 +375,9 @@ static inline int GetBlockMipmapLevel(const glm::ivec2& _pos, const glm::vec2& c
          );
 }
 
-static inline bool IsBlockVisible(const glm::ivec2& _blockPos, const glm::vec2& camPos, const glm::vec2& camFwd) {
+static inline bool IsBlockVisible(const glm::ivec2& _blockPos,
+                                  const glm::vec2& camPos,
+                                  const glm::vec2& camFwd) {
   glm::vec2 blockPos = glm::vec2(_blockPos.x/2, _blockPos.y/2);
   glm::vec2 diff = blockPos - camPos;
   float dot = glm::dot(camFwd, glm::normalize(diff));
@@ -402,7 +412,8 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
     int irregular = own_mipmap < neighbour_mipmaps[line] ? 1 : 0;
 
     border_indices_[own_mipmap][line][irregular].bind();
-    size_t indices_num = border_indices_[own_mipmap][line][irregular].size() / sizeof(int);
+    size_t indices_num =
+      border_indices_[own_mipmap][line][irregular].size() / sizeof(int);
 
     if(irregular) {
       gl.DrawElements(PrimType::Triangles, indices_num, IndexType::UnsignedInt);
@@ -431,7 +442,11 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
 
       vao_[mipmap_level].bind();
       indices_[mipmap_level].bind();
-      gl.DrawElements(PrimType::TriangleStrip, index_num_[mipmap_level], IndexType::UnsignedInt);
+      gl.DrawElements(
+        PrimType::TriangleStrip,
+        index_num_[mipmap_level],
+        IndexType::UnsignedInt
+      );
       CreateConnectors(pos, camPos);
   }
 
@@ -452,7 +467,11 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
           // Draw
           vao_[mipmap_level].bind();
           indices_[mipmap_level].bind();
-          gl.DrawElements(PrimType::TriangleStrip, index_num_[mipmap_level], IndexType::UnsignedInt);
+          gl.DrawElements(
+            PrimType::TriangleStrip,
+            index_num_[mipmap_level],
+            IndexType::UnsignedInt
+          );
           CreateConnectors(pos, camPos);
         }
       }
@@ -479,15 +498,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
   gl(FaceOrientation::CW);
   Context::TemporaryEnable cullface(Capability::CullFace);
 
-  #if GL_NV_primitive_restart
-    static bool prim_resart =
-      Context::IsExtensionSupported("GL_NV_primitive_restart") &&
-      glPrimitiveRestartIndex != nullptr;
-  #else
-    static bool prim_resart = false;
-  #endif
-
-  if(prim_resart) {
+  if(IsPrimitiveRestartAvailable()) {
     gl.Enable(Capability::PrimitiveRestart);
     gl.PrimitiveRestartIndex(RESTART);
   }
@@ -497,7 +508,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
 
   //gl.PolygonMode(PolyMode::Fill);
 
-  if(prim_resart) {
+  if(IsPrimitiveRestartAvailable()) {
     gl.Disable(Capability::PrimitiveRestart);
   }
 
@@ -515,7 +526,10 @@ void TerrainMesh::render(const glm::vec3& camPos,
 unsigned char TerrainMesh::fetchHeight(glm::ivec2 v) const {
   // Don't let the user over or under-index.
   glm::ivec2 texcoord = v + glm::ivec2(terrain_.w/2, terrain_.h/2);
-  texcoord = glm::clamp(texcoord, glm::ivec2(0, 0), glm::ivec2(terrain_.w - 1, terrain_.h - 1));
+  texcoord = glm::clamp(
+    texcoord, glm::ivec2(0, 0),
+    glm::ivec2(terrain_.w - 1, terrain_.h - 1)
+  );
 
   return terrain_.heightData[texcoord.y * terrain_.w + texcoord.x];
 }

@@ -4,6 +4,7 @@
 #include "terrainMesh.hpp"
 #include "skybox.hpp"
 #include "shadow.hpp"
+#include "oglwrap_config.hpp"
 #include "oglwrap/utils/camera.hpp"
 
 class Terrain {

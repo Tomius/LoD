@@ -46,8 +46,7 @@ public:
 
 private:
 	/// Returns the next mipmap level of this rtd.
-	/** The caller is responsible to delete the return value. */
-	RawTerrainData* getNextLodLevel() const;
+	std::unique_ptr<RawTerrainData> getNextLodLevel() const;
 
 public:
 	/// Creates a given number of mipmaps for this rtd.

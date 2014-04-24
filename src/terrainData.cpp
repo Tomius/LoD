@@ -106,9 +106,8 @@ void RawTerrainData::save(const std::string& filename) const {
 }
 
 /// Returns the next mipmap level of this rtd.
-/** The caller is responsible to delete the return value. */
-RawTerrainData* RawTerrainData::getNextLodLevel() const {
-  RawTerrainData *rtd = new RawTerrainData(w/2, h/2, level + 1);
+std::unique_ptr<RawTerrainData> RawTerrainData::getNextLodLevel() const {
+ std::unique_ptr<RawTerrainData> rtd{ new RawTerrainData(w/2, h/2, level + 1) };
   for(int x = 0; x < w/2; x++) {
     for(int y = 0; y < h/2; y++) {
       (*rtd)(x, y) = ((short)(*this)(2*x, 2*y) + (*this)(2*x + 1, 2*y) +
@@ -126,12 +125,11 @@ void RawTerrainData::createLoDs(const std::string& filename, int num_levels) con
     return;
   }
 
-  RawTerrainData *r = getNextLodLevel();
+  std::unique_ptr<RawTerrainData> r{ getNextLodLevel() };
   std::stringstream ss;
   ss << r->level;
   r->save(filename + ss.str());
   r->createLoDs(filename, num_levels - 1);
-  delete r;
 }
 
 /// Indexes the terrain data like it was 2D array.

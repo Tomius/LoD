@@ -1,12 +1,5 @@
 #version 120
 
-#pragma optionNV(fastmath on)
-#pragma optionNV(fastprecision on)
-#pragma optionNV(ifcvt none)
-#pragma optionNV(inline all)
-#pragma optionNV(strict on)
-#pragma optionNV(unroll all)
-
 // This might be overwritten by the c++ code.
 #define SHADOW_MAP_NUM 32
 

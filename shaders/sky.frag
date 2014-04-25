@@ -1,12 +1,5 @@
 #version 120
 
-#pragma optionNV(fastmath on)
-#pragma optionNV(fastprecision on)
-#pragma optionNV(ifcvt none)
-#pragma optionNV(inline all)
-#pragma optionNV(strict on)
-#pragma optionNV(unroll all)
-
 const float kWorldRadius = 6371000;
 const float kAtmThickness = 50000;
 const vec3 kAirColor = vec3(0.32, 0.36, 0.45);

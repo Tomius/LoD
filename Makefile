@@ -10,8 +10,10 @@ HEADERS := $(shell find -L $(INCLUDE_DIR) -name '*.hpp')
 MKDIR_P = mkdir -p
 
 CXX = clang++
-CXXFLAGS = -std=c++11 -Iinclude/ -Wall -Qunused-arguments `Magick++-config --cxxflags --cppflags` -g
-LDFLAGS = -lGL -lGLEW -lsfml-window -lsfml-system -lassimp `Magick++-config --ldflags --libs` -g
+CXXFLAGS = -std=c++11 -Iinclude/ -Wall -Qunused-arguments \
+						`Magick++-config --cxxflags --cppflags` -g -rdynamic
+LDFLAGS = -lGL -lGLEW -lsfml-window -lsfml-system -lassimp \
+						`Magick++-config --ldflags --libs` -g -rdynamic
 
 .PHONY: all clean
 

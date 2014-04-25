@@ -26,11 +26,19 @@ class TerrainMesh {
 
   RawTerrainData terrain_;
 
+
+  void DrawOneBlock(const glm::ivec2& offset,
+                    const int mipmap_level,
+                    const glm::vec2& camPos,
+                    const glm::vec2& camFwd,
+                    oglwrap::LazyUniform<glm::ivec2>& uOffset,
+                    oglwrap::LazyUniform<int>& uMipmapLevel);
+
   void DrawBlocks(const glm::vec3& camPos,
                   const glm::vec3& _camFwd,
                   oglwrap::LazyUniform<glm::ivec2>& Offset,
-                  oglwrap::LazyUniform<int>& uMipmapLevel_
-                 );
+                  oglwrap::LazyUniform<int>& uMipmapLevel_);
+
   void CreateConnectors(glm::ivec2 pos, glm::vec2 camPos);
 
   int w_, h_;
@@ -42,8 +50,7 @@ public:
   void render(const glm::vec3& camPos,
               const glm::vec3& camFwd,
               oglwrap::LazyUniform<glm::ivec2>& Offset,
-              oglwrap::LazyUniform<int>& uMipmapLevel_
-             );
+              oglwrap::LazyUniform<int>& uMipmapLevel_);
 
   unsigned char fetchHeight(glm::ivec2 v) const;
   double getHeight(double x, double y) const;

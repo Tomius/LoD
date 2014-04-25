@@ -39,7 +39,7 @@ public:
 
 		oglwrap::UniformSampler(prog_, "uTex").set(0);
 
-		std::cout << prog_.validate();
+		prog_.validate();
 
 		rect_.setupPositions(prog_ | "aPosition");
 		rect_.setupTexCoords(prog_ | "aTexcoord");
@@ -70,7 +70,7 @@ public:
 
 			oglwrap::UniformSampler(prog_, "uTex").set(0);
 
-			std::cout << prog_.validate();
+			prog_.validate();
 
 			rect_.setupPositions(prog_ | "aPosition");
 			rect_.setupTexCoords(prog_ | "aTexcoord");

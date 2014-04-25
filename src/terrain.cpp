@@ -38,7 +38,7 @@ Terrain::Terrain(Skybox& skybox, glm::ivec2 shadowAtlasDims)
   UniformSampler(prog_, "uShadowMap").set(5);
   Uniform<glm::ivec2>(prog_, "uShadowAtlasSize").set(shadowAtlasDims);
 
-  std::cout << prog_.validate();
+  prog_.validate();
 
   uScales_ = scale_vector;
   uTexSize_ = glm::ivec2(mesh_.w, mesh_.h);

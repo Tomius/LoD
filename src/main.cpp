@@ -3,6 +3,8 @@
 #include <iostream>
 #include <SFML/Window.hpp>
 
+#define OGLWRAP_INSTATIATE 1
+
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
@@ -16,6 +18,7 @@
 #include "tree.hpp"
 #include "shadow.hpp"
 #include "map.hpp"
+
 
 using namespace oglwrap;
 Context gl;

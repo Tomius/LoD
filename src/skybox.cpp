@@ -19,7 +19,7 @@ Skybox::Skybox()
 
   UniformSampler(prog_, "uEnvMap").set(0);
 
-  std::cout << prog_.validate();
+  prog_.validate();
 
   cube_.setupPositions(prog_ | "aPosition");
 

@@ -423,21 +423,14 @@ void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
   }
 }
 
-void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
-                             const glm::vec3& _camFwd,
-                             oglwrap::LazyUniform<glm::ivec2>& uOffset,
-                             oglwrap::LazyUniform<int>& uMipmapLevel) {
-
-  // Predeclarations
-  glm::ivec2 pos(0, 0);
-  glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
-  glm::vec2 camFwd = glm::normalize(glm::vec2(_camFwd.x, _camFwd.z));
-  int mipmap_level;
-
-  // The center piece is special.
-  if(IsBlockVisible(pos, camPos, camFwd)) {
-      uOffset = pos;
-      mipmap_level = GetBlockMipmapLevel(pos, camPos);
+void TerrainMesh::DrawOneBlock(const glm::ivec2& offset,
+                               const int mipmap_level,
+                               const glm::vec2& camPos,
+                               const glm::vec2& camFwd,
+                               oglwrap::LazyUniform<glm::ivec2>& uOffset,
+                               oglwrap::LazyUniform<int>& uMipmapLevel) {
+  if(IsBlockVisible(offset, camPos, camFwd)) {
+      uOffset = offset;
       uMipmapLevel = mipmap_level;
 
       vao_[mipmap_level].bind();
@@ -447,33 +440,34 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
         index_num_[mipmap_level],
         IndexType::UnsignedInt
       );
-      CreateConnectors(pos, camPos);
+      CreateConnectors(offset, camPos);
   }
+}
+
+void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
+                             const glm::vec3& _camFwd,
+                             oglwrap::LazyUniform<glm::ivec2>& uOffset,
+                             oglwrap::LazyUniform<int>& uMipmapLevel) {
+
+  // Predeclarations
+  glm::ivec2 offset(0, 0);
+  glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
+  glm::vec2 camFwd = glm::normalize(glm::vec2(_camFwd.x, _camFwd.z));
+  int mipmap_level = 0;
+
+  // The center piece is special.
+  DrawOneBlock(offset, mipmap_level, camPos, camFwd, uOffset, uMipmapLevel);
 
   // All the other ones
   int distance = kBlockRadius;
-  int kRingCount = std::max(w, h) / (2 * kBlockRadius) + 1;
+  const int kRingCount = std::max(w, h) / (2 * kBlockRadius) + 1;
   for(int ring = 1; ring < kRingCount; ring++) {
     for(char line = 0; line < 6; line++) {
       for(int segment = 0; segment < ring ; segment++) {
 
-        pos = GetBlockPos(ring, line, segment, distance);
-        mipmap_level = GetBlockMipmapLevel(pos, camPos);
-
-        if(IsBlockVisible(pos, camPos, camFwd)) {
-          uOffset = pos;
-          uMipmapLevel = mipmap_level;
-
-          // Draw
-          vao_[mipmap_level].bind();
-          indices_[mipmap_level].bind();
-          gl.DrawElements(
-            PrimType::TriangleStrip,
-            index_num_[mipmap_level],
-            IndexType::UnsignedInt
-          );
-          CreateConnectors(pos, camPos);
-        }
+        offset = GetBlockPos(ring, line, segment, distance);
+        mipmap_level = GetBlockMipmapLevel(offset, camPos);
+        DrawOneBlock(offset, mipmap_level, camPos, camFwd, uOffset, uMipmapLevel);
       }
     }
     distance += kBlockRadius;
@@ -534,6 +528,26 @@ unsigned char TerrainMesh::fetchHeight(glm::ivec2 v) const {
   return terrain_.heightData[texcoord.y * terrain_.w + texcoord.x];
 }
 
+// see: http://en.wikipedia.org/wiki/Barycentric_coordinate_system
+static glm::dvec3 countBaryCentricWeights(glm::dvec2 p,
+                                          glm::dvec2 a,
+                                          glm::dvec2 b,
+                                          glm::dvec2 c) {
+
+  double lambda_x_nom = (b.y - c.y) * (p.x - c.x) + (c.x - b.x) * (p.y - c.y);
+  double lambda_y_nom = (c.y - a.y) * (p.x - c.x) + (a.x - c.x) * (p.y - c.y);
+  double lambda_denom = (b.y - c.y) * (a.x - c.x) + (c.x - b.x) * (a.y - c.y);
+
+  double x_lambda = lambda_x_nom / lambda_denom;
+  double y_lambda = lambda_y_nom / lambda_denom;
+  double z_lambda = 1 - x_lambda - y_lambda;
+
+  return glm::dvec3 { x_lambda, y_lambda, z_lambda };
+}
+
+static bool isCoordInsideTriangle(glm::dvec3 bCoords) {
+  return std::min(std::min(bCoords.x, bCoords.y), bCoords.z) >= 0.0;
+}
 double TerrainMesh::getHeight(double x, double y) const {
   using namespace std;
   using namespace glm;
@@ -574,42 +588,32 @@ double TerrainMesh::getHeight(double x, double y) const {
     unsigned char neighbor_a = i;
     unsigned char neighbor_b = (i + 1) % 6;
 
-    // Relative coordinates
-    const ivec2 a_coord = neighbors[neighbor_a];
-    const ivec2 b_coord = neighbors[neighbor_b];
-    const ivec2 c_coord = ivec2(0.0);
-
-    // Heights
-    double a_height = fetchHeight(coord + a_coord);
-    double b_height = fetchHeight(coord + b_coord);
-    double c_height = fetchHeight(coord + c_coord);
-
     // Get the barycentric weights for this point
-    // see: http://en.wikipedia.org/wiki/Barycentric_coordinate_system
     const ivec2 a_geom_coord = geometry_neighbors[neighbor_a];
     const ivec2 b_geom_coord = geometry_neighbors[neighbor_b];
     const ivec2 c_geom_coord = ivec2(0.0);
 
-    dvec2 a = dvec2(a_geom_coord.x, a_geom_coord.y);
-    dvec2 b = dvec2(b_geom_coord.x, b_geom_coord.y);
-    dvec2 c = dvec2(c_geom_coord.x, c_geom_coord.y);
+    dvec2 p { (x - coord.x) * 2, (y - coord.y) * 2};
+    dvec2 a { a_geom_coord.x, a_geom_coord.y };
+    dvec2 b { b_geom_coord.x, b_geom_coord.y };
+    dvec2 c { c_geom_coord.x, c_geom_coord.y };
 
-    double x_diff = 2 * (x - coord.x), y_diff = 2 * (y - coord.y);
-    double lambda_a_nom = (b.y - c.y) * (x_diff - c.x) + (c.x - b.x) * (y_diff - c.y);
-    double lambda_b_nom = (c.y - a.y) * (x_diff - c.x) + (a.x - c.x) * (y_diff - c.y);
-    double lambda_denom = (b.y - c.y) * (a.x    - c.x) + (c.x - b.x) * (a.y    - c.y);
+    glm::dvec3 weights = countBaryCentricWeights(p, a, b, c);
 
-    double a_lambda = lambda_a_nom / lambda_denom;
-    double b_lambda = lambda_b_nom / lambda_denom;
-    double c_lambda = 1 - a_lambda - b_lambda;
+    if(isCoordInsideTriangle(weights)) {
+      // Relative coordinates
+      const ivec2 a_coord = neighbors[neighbor_a];
+      const ivec2 b_coord = neighbors[neighbor_b];
+      const ivec2 c_coord = ivec2(0.0);
 
-    if(std::min(std::min(a_lambda, b_lambda), c_lambda) < 0.0) {
-      continue;
+      glm::dvec3 heights {
+        fetchHeight(coord + a_coord),
+        fetchHeight(coord + b_coord),
+        fetchHeight(coord + c_coord)
+      };
+
+      return dot(weights, heights);
     }
-
-    return a_lambda * a_height +
-           b_lambda * b_height +
-           c_lambda * c_height;
   }
 
   // If all fails

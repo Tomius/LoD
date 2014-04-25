@@ -24,7 +24,7 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   mesh_.setupDiffuseTextures(1);
   UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
 
-  std::cout << shadow_prog_.validate();
+  shadow_prog_.validate();
 
   prog_ << vs_ << fs_ << skybox_.sky_fs;
   prog_.link().use();
@@ -35,7 +35,7 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   UniformSampler(prog_, "uEnvMap").set(0);
   UniformSampler(prog_, "uDiffuseTexture").set(1);
 
-  std::cout << prog_.validate();
+  prog_.validate();
 
   // Get the trees' positions.
   srand(5);

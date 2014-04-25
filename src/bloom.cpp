@@ -13,7 +13,7 @@ BloomEffect::BloomEffect()
 
   UniformSampler(prog_, "uTex").set(0);
 
-  std::cout << prog_.validate();
+  prog_.validate();
 
   rect_.setupPositions(prog_ | "aPosition");
 

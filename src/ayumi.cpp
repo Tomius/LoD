@@ -41,7 +41,7 @@ Ayumi::Ayumi(Skybox& skybox,
   shadow_prog_ << shadow_vs << shadow_fs;
   shadow_prog_.link();
 
-  std::cout << shadow_prog_.validate();
+  shadow_prog_.validate();
 
   prog_ << vs << fs << skybox_.sky_fs;
   prog_.link().use();
@@ -62,7 +62,7 @@ Ayumi::Ayumi(Skybox& skybox,
   uShadowSoftness_ = 1 << clamp(4 - PERFORMANCE, 0, 4);
   Uniform<glm::ivec2>(prog_, "uShadowAtlasSize").set(shadowAtlasDims);
 
-  std::cout << prog_.validate();
+  prog_.validate();
 
   mesh_.addAnimation("models/ayumi/ayumi_idle.dae", "Stand",
                      AnimFlag::Repeat |

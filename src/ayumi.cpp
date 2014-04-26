@@ -64,45 +64,62 @@ Ayumi::Ayumi(Skybox& skybox,
 
   prog_.validate();
 
-  mesh_.addAnimation("models/ayumi/ayumi_idle.dae", "Stand",
-                     AnimFlag::Repeat |
-                     AnimFlag::Interruptable);
+  using namespace _AnimFlag;
 
-  mesh_.addAnimation("models/ayumi/ayumi_walk.dae", "Walk",
-                     AnimFlag::Repeat |
-                     AnimFlag::Interruptable);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_idle.dae", "Stand",
+    {Repeat, Interruptable}
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_walk.dae", "MoonWalk",
-                     AnimFlag::Repeat |
-                     AnimFlag::Mirrored |
-                     AnimFlag::Interruptable);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_walk.dae", "Walk",
+    {Repeat, Interruptable}
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_run.dae", "Run",
-                     AnimFlag::Repeat |
-                     AnimFlag::Interruptable);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_walk.dae", "MoonWalk",
+    {Repeat, Mirrored, Interruptable}
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_jump_rise.dae", "JumpRise",
-                     AnimFlag::MirroredRepeat |
-                     AnimFlag::Interruptable, 0.5f);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_run.dae", "Run",
+    {Repeat, Interruptable}
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_jump_fall.dae", "JumpFall",
-                     AnimFlag::MirroredRepeat |
-                     AnimFlag::Interruptable, 0.5f);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_jump_rise.dae", "JumpRise",
+    {MirroredRepeat, Interruptable}, 0.5f
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_flip.dae", "Flip",
-                     AnimFlag::None, 1.5f);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_jump_fall.dae", "JumpFall",
+    {MirroredRepeat, Interruptable}, 0.5f
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_attack.dae", "Attack",
-                     AnimFlag::None, 2.5f);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_flip.dae", "Flip",
+    None, 1.5f
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_attack2.dae", "Attack2",
-                     AnimFlag::None, 1.4f);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_attack.dae", "Attack",
+    None, 2.5f
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_attack3.dae", "Attack3",
-                     AnimFlag::None, 3.0f);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_attack2.dae", "Attack2",
+    None, 1.4f
+  );
 
-  mesh_.addAnimation("models/ayumi/ayumi_attack_chain0.dae", "Attack_Chain0",
-                     AnimFlag::None, 0.9f);
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_attack3.dae", "Attack3",
+    None, 3.0f
+  );
+
+  mesh_.addAnimation(
+    "models/ayumi/ayumi_attack_chain0.dae", "Attack_Chain0",
+    None, 0.9f
+  );
 
   mesh_.setDefaultAnimation("Stand", 0.3f);
   mesh_.forceAnimToDefault(0);

@@ -55,10 +55,10 @@ public:
   void createLoDs(const std::string& filename, int num_levels) const;
 
   /// Indexes the terrain data like it was 2D array.
-  const unsigned char& operator()(int x, int y) const;
+  const unsigned char& operator()(size_t x, size_t y) const;
 
   /// Indexes the terrain data like it was 2D array.
-  unsigned char& operator()(int x, int y);
+  unsigned char& operator()(size_t x, size_t y);
 
 private:
 	/// Loads in a terrain data, from a '.rtd' file.

@@ -125,7 +125,7 @@ Ayumi::Ayumi(Skybox& skybox,
   mesh_.forceAnimToDefault(0);
 
   mesh_.setAnimationEndedCallback(
-    [this](const std::string& current_anim){return animationEndedCallback(current_anim);}
+    [this](const std::string& str){return animationEndedCallback(str);}
   );
 }
 
@@ -181,10 +181,12 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
   mesh_.updateBoneInfo(time);
 }
 
-void Ayumi::shadowRender(float time, Shadow& shadow, const CharacterMovement& charmove) {
+void Ayumi::shadowRender(float time, Shadow& shadow,
+                         const CharacterMovement& charmove) {
   shadow_prog_.use();
   shadow_uMCP_ = shadow.modelCamProjMat(
-    skybox_.getSunPos(time), mesh_.bSphere(), charmove.getModelMatrix(), mesh_.worldTransform()
+    skybox_.getSunPos(time), mesh_.bSphere(),
+    charmove.getModelMatrix(), mesh_.worldTransform()
   );
   mesh_.uploadBoneInfo(shadow_uBones_);
 
@@ -205,7 +207,7 @@ void Ayumi::render(float time, const Camera& cam,
   prog_.use();
   uCameraMatrix_.set(cam.cameraMatrix());
   uModelMatrix_.set(charmove.getModelMatrix() * mesh_.worldTransform());
-  for(int i = 0; i < shadow.getDepth(); ++i) {
+  for(size_t i = 0; i < shadow.getDepth(); ++i) {
     uShadowCP_[i] = shadow.shadowCPs()[i];
   }
   uNumUsedShadowMaps_ = shadow.getDepth();
@@ -239,8 +241,10 @@ bool Ayumi::canFlip() {
 
 AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
 
-  if(current_anim == "Attack" && (attack2_ || sf::Mouse::isButtonPressed(sf::Mouse::Left))) {
-    return AnimParams("Attack2", 0.1f);
+  if(current_anim == "Attack") {
+    if(attack2_ || sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+      return AnimParams("Attack2", 0.1f);
+    }
   } else if(current_anim == "Attack2") {
     attack2_ = false;
     if(attack3_ || sf::Mouse::isButtonPressed(sf::Mouse::Left)) {

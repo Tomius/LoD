@@ -108,8 +108,8 @@ void RawTerrainData::save(const std::string& filename) const {
 /// Returns the next mipmap level of this rtd.
 std::unique_ptr<RawTerrainData> RawTerrainData::getNextLodLevel() const {
  std::unique_ptr<RawTerrainData> rtd{ new RawTerrainData(w/2, h/2, level + 1) };
-  for(int x = 0; x < w/2; x++) {
-    for(int y = 0; y < h/2; y++) {
+  for(size_t x = 0; x < w/2; x++) {
+    for(size_t y = 0; y < h/2; y++) {
       (*rtd)(x, y) = ((short)(*this)(2*x, 2*y) + (*this)(2*x + 1, 2*y) +
                   (*this)(2*x, 2*y + 1) + (*this)(2*x + 1, 2*y + 1)) / 4;
     }
@@ -133,8 +133,8 @@ void RawTerrainData::createLoDs(const std::string& filename, int num_levels) con
 }
 
 /// Indexes the terrain data like it was 2D array.
-const unsigned char& RawTerrainData::operator()(int x, int y) const {
-  if(0 <= x && x < w && 0 <= y && y < h) {
+const unsigned char& RawTerrainData::operator()(size_t x, size_t y) const {
+  if(x < w && y < h) {
     return heightData[x*h + y];
   } else {
     throw std::out_of_range("OverIndexing in RawTerrainData::operator()");
@@ -142,8 +142,8 @@ const unsigned char& RawTerrainData::operator()(int x, int y) const {
 }
 
 /// Indexes the terrain data like it was 2D array.
-unsigned char& RawTerrainData::operator()(int x, int y) {
-  if(0 <= x && x < w && 0 <= y && y < h) {
+unsigned char& RawTerrainData::operator()(size_t x, size_t y) {
+  if(x < w && y < h) {
     return heightData[x*h + y];
   } else {
     throw std::out_of_range("OverIndexing in RawTerrainData::operator()");

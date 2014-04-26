@@ -140,7 +140,7 @@ bool IsPrimitiveRestartAvailable() {
 // Uses primitive restart if its available, else it uses degenerates.
 void HandlePrimitiveRestart(std::vector<unsigned int>& indices) {
   if(!IsPrimitiveRestartAvailable()) {
-    for(int idx = 0; idx < indices.size(); idx++) {
+    for(size_t idx = 0; idx < indices.size(); idx++) {
       if(indices[idx] == RESTART) {
         if(idx != 0 && indices[idx-1] != RESTART) {
           indices[idx] = indices[idx-1];
@@ -489,7 +489,7 @@ void TerrainMesh::render(const glm::vec3& camPos,
   grassNormalMap_.active(4);
   grassNormalMap_.bind();
 
-  gl(FaceOrientation::CW);
+  gl.FrontFace(FaceOrientation::CW);
   Context::TemporaryEnable cullface(Capability::CullFace);
 
   if(IsPrimitiveRestartAvailable()) {

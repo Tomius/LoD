@@ -57,7 +57,7 @@ void Terrain::render(float time, const Camera& cam, const Shadow& shadow) {
   prog_.use();
   uCameraMatrix_.set(cam.cameraMatrix());
   uSunData_.set(skybox_.getSunData(time));
-  for(int i = 0; i < shadow.getDepth(); ++i) {
+  for(size_t i = 0; i < shadow.getDepth(); ++i) {
     uShadowCP_[i] = shadow.shadowCPs()[i];
   }
   uNumUsedShadowMaps_ = shadow.getDepth();

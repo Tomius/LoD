@@ -36,7 +36,7 @@ void main() {
   vec3 texel = fetch(texcoord);
 
   float lumiosity = length(texel) / sqrt(3.0);
-  vec3 color = pow(sum * 0.5*(1.2-lumiosity) + texel, vec3(1.4));
+  vec3 color = sum * 0.5*(1.2-lumiosity) + texel;
 
   gl_FragColor = clamp(vec4(color, 1.0), vec4(0.0), vec4(1.0));
 }

@@ -38,7 +38,7 @@ Shadow::Shadow(size_t shadow_map_size, size_t atlas_x_size, size_t atlas_y_size)
   Framebuffer::Unbind();
 }
 
-void Shadow::resize(size_t width, size_t height) {
+void Shadow::screenResized(size_t width, size_t height) {
   w_ = width;
   h_ = height;
 }
@@ -107,10 +107,9 @@ void Shadow::setViewPort() {
 }
 
 void Shadow::push() {
-  if(++curr_depth_ < max_depth_) {
+  if(curr_depth_ + 1 < max_depth_) {
+    ++curr_depth_;
     setViewPort();
-  } else {
-    throw std::overflow_error("ShadowMap stack overflow.");
   }
 }
 

@@ -11,8 +11,9 @@
 #include "oglwrap/shapes/fullScreenRect.hpp"
 #include "oglwrap/utils/camera.hpp"
 #include "oglwrap/textures/texture_2D.hpp"
+#include "../engine/gameobject.hpp"
 
-class Map {
+class Map : public engine::GameObject {
 	bool open_;
 	glm::vec2 terrain_size_;
 	oglwrap::Texture2D tex_;
@@ -113,7 +114,7 @@ public:
 		return glm::vec2(cam.getForward().x, cam.getForward().z);
 	}
 
-	void render(const oglwrap::Camera& cam) {
+	void render(float time, const oglwrap::Camera& cam) override {
 		using namespace oglwrap;
 
 		if(open_) {

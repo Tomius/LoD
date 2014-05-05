@@ -5,7 +5,7 @@
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/assimp.hpp"
-#include "oglwrap/mesh/skinningData.hpp"
+#include "../engine/mesh/skinning_data.hpp"
 #include "charmove.hpp"
 
 const float kHairSimulationDrag = 0.1f;
@@ -19,23 +19,23 @@ class Hair {
   };
 
   struct HairSegment : public BasicHairSegment {
-    oglwrap::ExternalBone bone;
+    engine::ExternalBone bone;
     glm::vec3 velocity, pos;
     float length;
 
     BasicHairSegment* parent;
 
     HairSegment(BasicHairSegment* _parent,
-                oglwrap::ExternalBone& ebone,
+                engine::ExternalBone& ebone,
                 const Hair* hair);
   };
 
   friend HairSegment;
 
   struct RootHairSegment : public BasicHairSegment {
-    oglwrap::ExternalBoneTree bone;
+    engine::ExternalBoneTree bone;
 
-    RootHairSegment(const oglwrap::ExternalBoneTree& root_ebone)
+    RootHairSegment(const engine::ExternalBoneTree& root_ebone)
       : bone(root_ebone)
     { }
   };
@@ -51,7 +51,7 @@ class Hair {
 
 public:
 
-  Hair(const oglwrap::ExternalBoneTree& root_ebone,
+  Hair(const engine::ExternalBoneTree& root_ebone,
        const CharacterMovement& charmove);
 
   void update(float time, float gravity);

@@ -1,7 +1,7 @@
 #include "hair.hpp"
 
 Hair::HairSegment::HairSegment(BasicHairSegment* _parent,
-                               oglwrap::ExternalBone& ebone,
+                               engine::ExternalBone& ebone,
                                const Hair* hair)
     : bone(ebone)
     , parent(_parent) {
@@ -30,7 +30,7 @@ Hair::HairSegment::HairSegment(BasicHairSegment* _parent,
   }
 }
 
-Hair::Hair(const oglwrap::ExternalBoneTree& root_ebone,
+Hair::Hair(const engine::ExternalBoneTree& root_ebone,
            const CharacterMovement& charmove)
      : root_(root_ebone)
      , charmove_(charmove) {

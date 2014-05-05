@@ -5,6 +5,7 @@
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/framebuffer.hpp"
+#include "../engine/gameobject.hpp"
 
 class Shadow {
     oglwrap::Texture2D tex_;
@@ -16,7 +17,7 @@ class Shadow {
 
 public:
     Shadow(size_t shadow_map_size, size_t atlas_x_size, size_t atlas_y_size);
-    void resize(size_t width, size_t height);
+    void screenResized(size_t width, size_t height);
     glm::mat4 projMat(float size) const;
     glm::mat4 camMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const;
     glm::mat4 modelCamProjMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere,

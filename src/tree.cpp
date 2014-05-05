@@ -2,7 +2,7 @@
 
 using namespace oglwrap;
 
-Tree::Tree(Skybox& skybox, const Terrain& terrain)
+Tree::Tree(Skybox& skybox, Shadow& shadow, const Terrain& terrain)
   : mesh_("models/trees/tree.obj",
           aiProcessPreset_TargetRealtime_MaxQuality |
           aiProcess_FlipUVs
@@ -16,7 +16,8 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   , uNormalMatrix_(prog_, "uNormalMatrix")
   , shadow_uMCP_(shadow_prog_, "uMCP")
   , uSunData_(prog_, "uSunData")
-  , skybox_(skybox) {
+  , skybox_(skybox)
+  , shadow_(shadow) {
 
   shadow_prog_ << shadow_vs_ << shadow_fs_;
   shadow_prog_.link().use();
@@ -45,7 +46,8 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
     for(int j = -terrain.w / 2; j < terrain.w / 2; j += kTreeDist) {
       glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
                                     j + rand()%(kTreeDist/2) - kTreeDist/4);
-      glm::vec3 pos = scales_ * glm::vec3(coord.x, terrain.fetchHeight(coord), coord.y);
+      glm::vec3 pos = scales_ *
+        glm::vec3(coord.x, terrain.fetchHeight(coord), coord.y);
       glm::vec3 scale = glm::vec3(
                           1.0f + rand() / RAND_MAX,
                           1.0f + rand() / RAND_MAX,
@@ -63,28 +65,34 @@ Tree::Tree(Skybox& skybox, const Terrain& terrain)
   }
 }
 
-void Tree::resize(glm::mat4 projMat) {
+void Tree::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
   prog_.use();
   uProjectionMatrix_ = projMat;
 }
 
-void Tree::shadowRender(float time, const Camera& cam, Shadow& shadow) {
+void Tree::shadowRender(float time, const Camera& cam) {
   shadow_prog_.use();
 
   auto campos = cam.getPos();
-  for(size_t i = 0; i < trees_.size() && shadow.getDepth() + 1 < shadow.getMaxDepth(); i++) {
-    if(glm::length(campos - trees_[i].pos) < std::max(scales_.x, scales_.z) * (300 - PERFORMANCE * 50)) {
-      shadow_uMCP_ =
-        shadow.modelCamProjMat(skybox_.getSunPos(time), mesh_.bSphere(), trees_[i].mat, mesh_.worldTransform());
+  for(size_t i = 0; i < trees_.size() &&
+      shadow_.getDepth() + 1 < shadow_.getMaxDepth(); i++) {
+    if(glm::length(campos - trees_[i].pos) <
+          std::max(scales_.x, scales_.z) * (300 - PERFORMANCE * 50)) {
+      shadow_uMCP_ = shadow_.modelCamProjMat(
+        skybox_.getSunPos(),
+        mesh_.bSphere(),
+        trees_[i].mat,
+        mesh_.worldTransform()
+      );
       mesh_.render();
-      shadow.push();
+      shadow_.push();
     }
   }
 }
 
 void Tree::render(float time, const Camera& cam) {
   prog_.use();
-  uSunData_.set(skybox_.getSunData(time));
+  uSunData_.set(skybox_.getSunData());
   skybox_.env_map.active(0);
   skybox_.env_map.bind();
 

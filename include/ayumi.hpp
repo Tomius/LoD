@@ -4,8 +4,9 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/mesh/animatedMesh.hpp"
 #include "oglwrap/utils/camera.hpp"
+#include "../engine/mesh/animated_mesh_renderer.hpp"
+#include "../engine/gameobject.hpp"
 
 #include "charmove.hpp"
 #include "skybox.hpp"
@@ -16,8 +17,8 @@ extern const float GRAVITY;
    2 -> max performance */
 extern const int PERFORMANCE;
 
-class Ayumi {
-  oglwrap::AnimatedMesh mesh_;
+class Ayumi : public engine::GameObject {
+  engine::AnimatedMeshRenderer mesh_;
   oglwrap::Program prog_, shadow_prog_;
 
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_, uShadowCP_;
@@ -31,20 +32,20 @@ class Ayumi {
 
   Skybox& skybox_;
 
-public:
-  Ayumi(Skybox& skybox, CharacterMovement& charmove, glm::ivec2 shadowAtlasDims);
-  oglwrap::AnimatedMesh& getMesh();
-  void resize(glm::mat4 projMat);
-  void updateStatus(float time, const CharacterMovement& charmove);
-  void shadowRender(float time, Shadow& shadow, const CharacterMovement& charmove);
-  void render(float time, const oglwrap::Camera& cam,
-              const CharacterMovement& charmove, const Shadow& shadow);
+  Shadow& shadow_;
 
+public:
+  Ayumi(Skybox& skybox, CharacterMovement& charmove, Shadow& shadow);
+  engine::AnimatedMeshRenderer& getMesh();
+  void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
+  void update(float time) override;
+  void shadowRender(float time, const oglwrap::Camera& cam) override;
+  void render(float time, const oglwrap::Camera& cam) override;
 
 private: // Callbacks
   CharacterMovement::CanDoCallback canJump;
   CharacterMovement::CanDoCallback canFlip;
-  oglwrap::AnimatedMesh::AnimationEndedCallback animationEndedCallback;
+  engine::AnimatedMeshRenderer::AnimationEndedCallback animationEndedCallback;
 };
 
 #endif // LOD_AYUMI_HPP_

@@ -9,6 +9,8 @@
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/utils/camera.hpp"
+#include "../engine/mesh/animated_mesh_renderer.hpp"
+#include "terrain.hpp"
 
 extern const float GRAVITY;
 
@@ -23,6 +25,10 @@ class CharacterMovement {
 
   bool walking_, jumping_, flip_, can_flip_, transition_;
 
+  engine::AnimatedMeshRenderer *anim_mesh_;
+  oglwrap::Camera *camera_;
+  const Terrain& terrain_;
+
 public:
   using CanDoCallback = bool();
 
@@ -32,7 +38,8 @@ private:
   std::function<CanDoCallback> can_flip_functor_;
 
 public:
-  CharacterMovement(glm::vec3 pos = glm::vec3(),
+  CharacterMovement(glm::vec3 pos,
+                    const Terrain& terrain,
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f);
 
@@ -42,9 +49,9 @@ public:
   void setCanFlipCallback(std::function<CanDoCallback> can_flip_functor) {
     can_flip_functor_ = can_flip_functor;
   }
-  void update(const oglwrap::Camera& cam, glm::vec2 character_offset);
+  void update(float time);
   void handleSpacePressed();
-  void updateHeight(float groundHeight);
+  void updateHeight(float time, float groundHeight);
   bool isJumping() const;
   bool isJumpingRise() const;
   bool isJumpingFall() const;
@@ -53,6 +60,13 @@ public:
   bool isWalking() const;
   glm::mat4 getModelMatrix() const;
   glm::vec3 getPos() const;
+  void setAnimatedMesh(engine::AnimatedMeshRenderer* mesh) {
+    anim_mesh_ = mesh;
+  }
+
+  void setCamera(oglwrap::Camera* cam) {
+    camera_ = cam;
+  }
 };
 
 #endif // LOD_CHARMOVE_HPP_

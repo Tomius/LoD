@@ -4,9 +4,7 @@ using namespace oglwrap;
 extern Context gl;
 extern bool was_left_click;
 
-Ayumi::Ayumi(Skybox& skybox,
-             CharacterMovement& charmove,
-             glm::ivec2 shadowAtlasDims)
+Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove, Shadow& shadow)
     : mesh_("models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_MaxQuality |
             aiProcess_FlipUVs)
@@ -22,7 +20,8 @@ Ayumi::Ayumi(Skybox& skybox,
     , uShadowSoftness_(prog_, "uShadowSoftness")
     , attack2_(false)
     , charmove_(charmove)
-    , skybox_(skybox) {
+    , skybox_(skybox)
+    , shadow_(shadow) {
 
   charmove.setCanJumpCallback(std::bind(&Ayumi::canJump, this));
   charmove.setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
@@ -60,11 +59,11 @@ Ayumi::Ayumi(Skybox& skybox,
   UniformSampler(prog_, "uSpecularTexture").set(2);
   UniformSampler(prog_, "uShadowMap").set(3);
   uShadowSoftness_ = 1 << clamp(4 - PERFORMANCE, 0, 4);
-  Uniform<glm::ivec2>(prog_, "uShadowAtlasSize").set(shadowAtlasDims);
+  Uniform<glm::ivec2>(prog_, "uShadowAtlasSize").set(shadow.getAtlasDimensions());
 
   prog_.validate();
 
-  using namespace _AnimFlag;
+  using namespace engine::_AnimFlag;
 
   mesh_.addAnimation(
     "models/ayumi/ayumi_idle.dae", "Stand",
@@ -129,17 +128,21 @@ Ayumi::Ayumi(Skybox& skybox,
   );
 }
 
-AnimatedMesh& Ayumi::getMesh() {
+engine::AnimatedMeshRenderer& Ayumi::getMesh() {
   return mesh_;
 }
 
-void Ayumi::resize(glm::mat4 projMat) {
+void Ayumi::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
   prog_.use();
   uProjectionMatrix_ = projMat;
 }
 
-void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
+void Ayumi::update(float time) {
+  charmove_.update(time);
+
   std::string curr_anim = mesh_.getCurrentAnimation();
+
+  using engine::AnimParams;
 
   if(was_left_click) {
     was_left_click = false;
@@ -154,14 +157,14 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
         mesh_.setCurrentAnimation(AnimParams("Attack", 0.3f), time);
       }
     }
-  } else if(charmove.isJumping()) {
-    if(charmove.isDoingFlip()) {
+  } else if(charmove_.isJumping()) {
+    if(charmove_.isDoingFlip()) {
       if(curr_anim == "JumpRise") {
         mesh_.setCurrentAnimation(AnimParams("Flip", 0.05f), time);
       } else {
         mesh_.setCurrentAnimation(AnimParams("Flip", 0.2f), time);
       }
-    } else if(charmove.isJumpingRise()) {
+    } else if(charmove_.isJumpingRise()) {
       mesh_.setCurrentAnimation(AnimParams("JumpRise", 0.3f), time);
     } else {
       mesh_.setCurrentAnimation(AnimParams("JumpFall", 0.3f), time);
@@ -181,12 +184,11 @@ void Ayumi::updateStatus(float time, const CharacterMovement& charmove) {
   mesh_.updateBoneInfo(time);
 }
 
-void Ayumi::shadowRender(float time, Shadow& shadow,
-                         const CharacterMovement& charmove) {
+void Ayumi::shadowRender(float time, const Camera& cam) {
   shadow_prog_.use();
-  shadow_uMCP_ = shadow.modelCamProjMat(
-    skybox_.getSunPos(time), mesh_.bSphere(),
-    charmove.getModelMatrix(), mesh_.worldTransform()
+  shadow_uMCP_ = shadow_.modelCamProjMat(
+    skybox_.getSunPos(), mesh_.bSphere(),
+    charmove_.getModelMatrix(), mesh_.worldTransform()
   );
   mesh_.uploadBoneInfo(shadow_uBones_);
 
@@ -197,26 +199,23 @@ void Ayumi::shadowRender(float time, Shadow& shadow,
   mesh_.render();
 
   mesh_.enableTextures();
-  if(shadow.getDepth() < shadow.getMaxDepth()) {
-    shadow.push();
-  }
+  shadow_.push();
 }
 
-void Ayumi::render(float time, const Camera& cam,
-                   const CharacterMovement& charmove, const Shadow& shadow) {
+void Ayumi::render(float time, const Camera& cam) {
   prog_.use();
   uCameraMatrix_.set(cam.cameraMatrix());
-  uModelMatrix_.set(charmove.getModelMatrix() * mesh_.worldTransform());
-  for(size_t i = 0; i < shadow.getDepth(); ++i) {
-    uShadowCP_[i] = shadow.shadowCPs()[i];
+  uModelMatrix_.set(charmove_.getModelMatrix() * mesh_.worldTransform());
+  for(size_t i = 0; i < shadow_.getDepth(); ++i) {
+    uShadowCP_[i] = shadow_.shadowCPs()[i];
   }
-  uNumUsedShadowMaps_ = shadow.getDepth();
-  uSunData_.set(skybox_.getSunData(time));
+  uNumUsedShadowMaps_ = shadow_.getDepth();
+  uSunData_.set(skybox_.getSunData());
 
   skybox_.env_map.active(0);
   skybox_.env_map.bind();
-  shadow.shadowTex().active(3);
-  shadow.shadowTex().bind();
+  shadow_.shadowTex().active(3);
+  shadow_.shadowTex().bind();
 
   mesh_.uploadBoneInfo(uBones_);
 
@@ -225,8 +224,8 @@ void Ayumi::render(float time, const Camera& cam,
 
   mesh_.render();
 
-  shadow.shadowTex().active(3);
-  shadow.shadowTex().unbind();
+  shadow_.shadowTex().active(3);
+  shadow_.shadowTex().unbind();
   skybox_.env_map.active(0);
   skybox_.env_map.unbind();
 }
@@ -239,7 +238,9 @@ bool Ayumi::canFlip() {
   return mesh_.isInterrupable();
 }
 
-AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
+engine::AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
+
+  using engine::AnimParams;
 
   if(current_anim == "Attack") {
     if(attack2_ || sf::Mouse::isButtonPressed(sf::Mouse::Left)) {

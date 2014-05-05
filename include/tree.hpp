@@ -4,8 +4,9 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/mesh/mesh.hpp"
 #include "oglwrap/utils/camera.hpp"
+#include "../engine/mesh/mesh_renderer.hpp"
+#include "../engine/gameobject.hpp"
 
 #include "charmove.hpp"
 #include "skybox.hpp"
@@ -16,8 +17,8 @@
    2 -> max performance */
 extern const int PERFORMANCE;
 
-class Tree {
-  oglwrap::Mesh mesh_;
+class Tree : public engine::GameObject {
+  engine::MeshRenderer mesh_;
   oglwrap::Program prog_, shadow_prog_;
 
   oglwrap::VertexShader vs_, shadow_vs_;
@@ -30,6 +31,7 @@ class Tree {
 
   glm::vec3 scales_;
   Skybox& skybox_;
+  Shadow& shadow_;
 
   struct TreeInfo {
     glm::vec3 pos;
@@ -40,10 +42,10 @@ class Tree {
   std::vector<TreeInfo> trees_;
 
 public:
-  Tree(Skybox& skybox, const Terrain& terrain);
-  void resize(glm::mat4 projMat);
-  void shadowRender(float time, const oglwrap::Camera& cam, Shadow& shadow);
-  void render(float time, const oglwrap::Camera& cam);
+  Tree(Skybox& skybox, Shadow& shadow, const Terrain& terrain);
+  void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
+  void shadowRender(float time, const oglwrap::Camera& cam) override;
+  void render(float time, const oglwrap::Camera& cam) override;
 };
 
 #endif // LOD_TREE_HPP_

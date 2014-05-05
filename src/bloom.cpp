@@ -24,7 +24,7 @@ BloomEffect::BloomEffect()
   tex_.unbind();
 }
 
-void BloomEffect::resize(GLuint w, GLuint h) {
+void BloomEffect::screenResized(const glm::mat4&, GLuint w, GLuint h) {
   width_ = w;
   height_ = h;
   prog_.use();
@@ -43,7 +43,7 @@ void BloomEffect::resize(GLuint w, GLuint h) {
   tex_.unbind();
 }
 
-void BloomEffect::render() {
+void BloomEffect::render(float, const oglwrap::Camera&) {
   // Copy the backbuffer to the texture that our shader can fetch.
   tex_.active(0);
   tex_.bind();

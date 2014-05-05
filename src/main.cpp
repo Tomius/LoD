@@ -8,7 +8,6 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/utils/camera.hpp"
 
 #include "charmove.hpp"
 #include "skybox.hpp"
@@ -18,7 +17,9 @@
 #include "tree.hpp"
 #include "shadow.hpp"
 #include "map.hpp"
-
+#include "camera.hpp"
+#include "../engine/time.hpp"
+#include "../engine/scene.hpp"
 
 using namespace oglwrap;
 Context gl;
@@ -32,14 +33,17 @@ double ogl_version;
 bool was_left_click = false;
 
 void glInit() {
-  gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  gl.ClearColor(1.0f, 0.0f, 0.0f, 0.0f);
   gl.ClearDepth(1.0f);
   gl.Enable(Capability::DepthTest);
   gl.Enable(Capability::DepthClamp);
   gl.CullFace(Face::Back);
 }
 
-void FpsDisplay(float time) {
+void FpsDisplay() {
+  static sf::Clock clock;
+  float time = clock.getElapsedTime().asSeconds();
+
   static float accum_time = 0.0f;
   static float last_call = time;
   float dt = time - last_call;
@@ -92,7 +96,7 @@ int main() {
   window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(false);
 
-  sf::Clock clock;
+  engine::Scene scene;
   bool fixMouse = false;
 
   GLenum err = glewInit();
@@ -106,41 +110,53 @@ int main() {
 
       dbg_clock.restart();
       PrintDebugText("Initializing the skybox");
-        Skybox skybox;
-      PrintDebugTime();
-
-      PrintDebugText("Initializing the resources for the bloom effect");
-        BloomEffect bloom;
+        Skybox *skybox = scene.addSkybox(new Skybox{});
       PrintDebugTime();
 
       PrintDebugText("Initializing the shadow maps");
-        Shadow shadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
+        Shadow *shadow = scene.addShadow(
+          new Shadow{PERFORMANCE < 2 ? 512 : 256, 8, 8}
+        );
       PrintDebugTime();
 
       PrintDebugText("Initializing the terrain");
-        Terrain terrain(skybox, shadow.getAtlasDimensions());
+        Terrain *terrain = scene.addGameObject(new Terrain{*skybox, *shadow});
       PrintDebugTime();
 
-
       PrintDebugText("Initializing the trees");
-        Tree tree(skybox, terrain);
+        scene.addGameObject(new Tree{*skybox, *shadow, *terrain});
+      PrintDebugTime();
+
+      PrintDebugText("Initializing Ayumi");
+        CharacterMovement charmove{
+          glm::vec3(0, terrain->getScales().y * 13, 0), *terrain
+        };
+
+        Ayumi *ayumi = scene.addGameObject(
+          new Ayumi{*skybox, charmove, *shadow}
+        );
+      PrintDebugTime();
+
+      charmove.setAnimatedMesh(&ayumi->getMesh());
+
+      TPCamera cam(
+        window, fixMouse, charmove, ayumi->getMesh().bSphereCenter(),
+        ayumi->getMesh().bSphereCenter() +
+          glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
+        ayumi->getMesh().bSphereCenter(),
+        1.5f
+      );
+
+      charmove.setCamera(&cam);
+      scene.addCamera(&cam);
+
+      PrintDebugText("Initializing the resources for the bloom effect");
+        scene.addAfterEffect(new BloomEffect{});
       PrintDebugTime();
 
       PrintDebugText("Initializing the map");
-        Map map(glm::vec2(terrain.w, terrain.h));
+        Map *map = scene.addAfterEffect(new Map{glm::vec2(terrain->w, terrain->h)});
       PrintDebugTime();
-
-      CharacterMovement charmove(glm::vec3(0, terrain.getScales().y * 13, 0));
-
-      PrintDebugText("Initializing Ayumi");
-        Ayumi ayumi(skybox, charmove, shadow.getAtlasDimensions());
-      PrintDebugTime();
-
-      ThirdPersonalCamera cam(
-        ayumi.getMesh().bSphereCenter() + glm::vec3(ayumi.getMesh().bSphereRadius() * 2),
-        ayumi.getMesh().bSphereCenter(),
-        1.5f
-      );
 
       std::cout << "\nStarting the main loop.\n" << std::endl;
 
@@ -159,27 +175,26 @@ int main() {
               } else if(event.key.code == sf::Keyboard::F11) {
                 fixMouse = !fixMouse;
                 window.setMouseCursorVisible(!fixMouse);
+              } else if(event.key.code == sf::Keyboard::F1) {
+                scene.game_time_.toggle();
+              } else if(event.key.code == sf::Keyboard::F2) {
+                scene.environment_time_.toggle();
               } else if(event.key.code == sf::Keyboard::Space) {
                 charmove.handleSpacePressed();
               } else if(event.key.code == sf::Keyboard::M) {
-                map.toggle();
+                map->toggle();
               }
               break;
             case sf::Event::Resized: {
                 int width = event.size.width, height = event.size.height;
 
                 gl.Viewport(width, height);
-                bloom.resize(width, height);
-                shadow.resize(width, height);
 
                 auto projMat = glm::perspectiveFov<float>(
                   kFieldOfView, width, height, 0.5, 3000
                 );
 
-                ayumi.resize(projMat);
-                skybox.resize(projMat);
-                terrain.resize(projMat);
-                tree.resize(projMat);
+                scene.screenResized(projMat, width, height);
               }
               break;
             case sf::Event::MouseWheelMoved:
@@ -197,34 +212,9 @@ int main() {
 
         gl.Clear().Color().Depth();
 
-        // Updates
-        cam.updateRotation(window, fixMouse);
-        float time = clock.getElapsedTime().asSeconds();
-        charmove.update(cam, ayumi.getMesh().offsetSinceLastFrame());
-        cam.updateTarget(charmove.getPos() + ayumi.getMesh().bSphereCenter());
-        auto scales = terrain.getScales();
-        charmove.updateHeight(
-          scales.y * terrain.getHeight(
-            charmove.getPos().x / (double)scales.x,
-            charmove.getPos().z / (double)scales.z
-          )
-        );
-        ayumi.updateStatus(time, charmove);
-        FpsDisplay(time);
+        FpsDisplay();
 
-        // Create shadow data
-        shadow.begin(); {
-          ayumi.shadowRender(time, shadow, charmove);
-          tree.shadowRender(time, cam, shadow);
-        } shadow.end();
-
-        // Actual renders
-        skybox.render(time, cam.cameraMatrix());
-        terrain.render(time, cam, shadow);
-        ayumi.render(time, cam, charmove, shadow);
-        tree.render(time, cam);
-        bloom.render();
-        map.render(cam);
+        scene.turn();
 
         window.display();
 

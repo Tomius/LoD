@@ -6,8 +6,9 @@
 #include "shadow.hpp"
 #include "oglwrap_config.hpp"
 #include "oglwrap/utils/camera.hpp"
+#include "../engine/gameobject.hpp"
 
-class Terrain {
+class Terrain : public engine::GameObject {
   oglwrap::Program prog_;
   oglwrap::VertexShader vs_;
   oglwrap::FragmentShader fs_;
@@ -20,16 +21,18 @@ class Terrain {
   TerrainMesh mesh_;
 
   Skybox& skybox_;
+  Shadow& shadow_;
   int w_, h_;
 public:
   const int& w, h;
 
-  Terrain(Skybox& skybox, glm::ivec2 shadowAtlasDims);
-  void resize(const glm::mat4& projMat);
+  Terrain(Skybox& skybox, Shadow& shadow);
   glm::vec3 getScales() const;
-  void render(float time, const oglwrap::Camera& cam, const Shadow& shadow);
   unsigned char fetchHeight(glm::ivec2 v) const;
   double getHeight(double x, double y) const;
+
+  void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
+  void render(float time, const oglwrap::Camera& cam) override;
 };
 
 #endif // LOD_TERRAIN_HPP_

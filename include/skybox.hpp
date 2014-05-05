@@ -6,8 +6,11 @@
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/shapes/cube.hpp"
 #include "oglwrap/textures/texture_cube.hpp"
+#include "oglwrap/utils/camera.hpp"
+#include "../engine/gameobject.hpp"
 
-class Skybox {
+class Skybox : public engine::GameObject {
+  float time_;
   oglwrap::Cube cube_;
 
   oglwrap::VertexShader vs_;
@@ -22,13 +25,14 @@ class Skybox {
   oglwrap::FragmentShader sky_fs_;
 public:
   Skybox();
-  void resize(const glm::mat4& projMat);
-  void render(float time, const glm::mat4& camMatrix);
+  void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
+  void render(float time, const oglwrap::Camera& cam) override;
 
   const oglwrap::TextureCube& env_map;
   const oglwrap::FragmentShader& sky_fs;
-  glm::vec3 getSunPos(float time) const;
-  glm::vec4 getSunData(float time) const;
+  void update(float time) override;
+  glm::vec3 getSunPos() const;
+  glm::vec4 getSunData() const;
 };
 
 

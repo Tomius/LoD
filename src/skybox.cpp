@@ -5,7 +5,8 @@ extern Context gl;
 using namespace glm;
 
 Skybox::Skybox()
-  : vs_("skybox.vert")
+  : time_(0)
+  , vs_("skybox.vert")
   , fs_("skybox.frag")
   , uProjectionMatrix_(prog_, "uProjectionMatrix")
   , uCameraMatrix_(prog_, "uCameraMatrix")
@@ -39,36 +40,40 @@ Skybox::Skybox()
   }
 }
 
-void Skybox::resize(const glm::mat4& projMat) {
+void Skybox::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
   prog_.use();
   uProjectionMatrix_.set(projMat);
 }
 
-const float day_duration = 256.0f;
-
-glm::vec3 Skybox::getSunPos(float time) const {
-  return vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time * 2 * M_PI / day_duration)) +
-         vec3(0.f, 0.f, -1.f) * float(1e10 * cos(time * 2 * M_PI / day_duration));
+void Skybox::update(float time) {
+  time_ = time;
 }
 
-glm::vec4 Skybox::getSunData(float time) const {
+constexpr float day_duration = 256.0f;
 
-  float daytime = fmod(time, day_duration) / day_duration;
+glm::vec3 Skybox::getSunPos() const {
+  return vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time_ * 2 * M_PI / day_duration)) +
+         vec3(0.f, 0.f, -1.f) * float(1e10 * cos(time_ * 2 * M_PI / day_duration));
+}
+
+glm::vec4 Skybox::getSunData() const {
+
+  float daytime = fmod(time_, day_duration) / day_duration;
 
   static bool day = true; // day/night
   static float lastSwitch = 0.0f;
-  if(0.7f < daytime && daytime < 0.8f && 0.5f < (time - lastSwitch) / day_duration) {
+  if(0.7f < daytime && daytime < 0.8f && 0.5f < (time_ - lastSwitch) / day_duration) {
     day = !day;
-    lastSwitch = time;
+    lastSwitch = time_;
   }
 
   static float dayLerp = 1.0f;
   // The transition happens between the daytimes of 0.7 and 0.8
   const float day_Night_Transition_Lenght = 0.1f * day_duration;
 
-  static float lastTime = time;
-  float timeDiff = time - lastTime;
-  lastTime = time;
+  static float lastTime = time_;
+  float timeDiff = time_ - lastTime;
+  lastTime = time_;
 
   if(day && dayLerp < 1.0f) {
     dayLerp += timeDiff / day_Night_Transition_Lenght;
@@ -82,22 +87,22 @@ glm::vec4 Skybox::getSunData(float time) const {
     }
   }
 
-  return vec4(getSunPos(time), dayLerp);
+  return vec4(getSunPos(), dayLerp);
 }
 
-void Skybox::render(float time, const glm::mat4& cameraMat) {
+void Skybox::render(float time, const oglwrap::Camera& cam) {
 
   // We don't need the camMat's translation part for the skybox
-  const float* f = value_ptr(cameraMat);
+  const float* f = value_ptr(cam.cameraMatrix());
   mat3 camRot = mat3(
-                  f[0], f[1], f[2],
-                  f[4], f[5], f[6],
-                  f[8], f[9], f[10]
-                );
+    f[0], f[1], f[2],
+    f[4], f[5], f[6],
+    f[8], f[9], f[10]
+  );
 
   prog_.use();
   uCameraMatrix_.set(camRot);
-  uSunData_.set(getSunData(time));
+  uSunData_.set(getSunData());
 
   env_map_.active(0);
   env_map_.bind();

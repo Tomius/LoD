@@ -62,7 +62,7 @@ void Terrain::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
   uProjectionMatrix_ = projMat;
 }
 
-void Terrain::render(float time, const Camera& cam) {
+void Terrain::render(float time, const engine::Camera& cam) {
   prog_.use();
   uCameraMatrix_.set(cam.cameraMatrix());
   uSunData_.set(skybox_.getSunData());

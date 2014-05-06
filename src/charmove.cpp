@@ -46,7 +46,7 @@ void CharacterMovement::handleSpacePressed() {
 void CharacterMovement::update(float time) {
   using namespace glm;
 
-  const Camera& cam = *camera_;
+  const engine::Camera& cam = *camera_;
   glm::vec2 character_offset = anim_->offsetSinceLastFrame();
 
   static float prevTime = 0;

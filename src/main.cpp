@@ -9,6 +9,9 @@
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 
+#include "../engine/time.hpp"
+#include "../engine/scene.hpp"
+
 #include "charmove.hpp"
 #include "skybox.hpp"
 #include "terrain.hpp"
@@ -17,9 +20,7 @@
 #include "tree.hpp"
 #include "shadow.hpp"
 #include "map.hpp"
-#include "camera.hpp"
-#include "../engine/time.hpp"
-#include "../engine/scene.hpp"
+#include "tpcamera.hpp"
 
 using namespace oglwrap;
 Context gl;

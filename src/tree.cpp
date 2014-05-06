@@ -70,7 +70,7 @@ void Tree::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
   uProjectionMatrix_ = projMat;
 }
 
-void Tree::shadowRender(float time, const Camera& cam) {
+void Tree::shadowRender(float time, const engine::Camera& cam) {
   shadow_prog_.use();
 
   auto campos = cam.getPos();
@@ -90,7 +90,7 @@ void Tree::shadowRender(float time, const Camera& cam) {
   }
 }
 
-void Tree::render(float time, const Camera& cam) {
+void Tree::render(float time, const engine::Camera& cam) {
   prog_.use();
   uSunData_.set(skybox_.getSunData());
   skybox_.env_map.active(0);

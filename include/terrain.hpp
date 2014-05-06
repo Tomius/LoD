@@ -5,7 +5,7 @@
 #include "skybox.hpp"
 #include "shadow.hpp"
 #include "oglwrap_config.hpp"
-#include "oglwrap/utils/camera.hpp"
+
 #include "../engine/gameobject.hpp"
 
 class Terrain : public engine::GameObject {
@@ -32,7 +32,7 @@ public:
   double getHeight(double x, double y) const;
 
   void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
-  void render(float time, const oglwrap::Camera& cam) override;
+  void render(float time, const engine::Camera& cam) override;
 };
 
 #endif // LOD_TERRAIN_HPP_

@@ -8,9 +8,10 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
+
 #include "oglwrap/shapes/fullScreenRect.hpp"
-#include "oglwrap/utils/camera.hpp"
 #include "oglwrap/textures/texture_2D.hpp"
+
 #include "../engine/gameobject.hpp"
 
 class Map : public engine::GameObject {
@@ -105,16 +106,16 @@ public:
 
 	} mark_;
 
-	glm::vec2 getMarkPos(const oglwrap::Camera& cam) {
+	glm::vec2 getMarkPos(const engine::Camera& cam) {
 		glm::vec2 cam_target = glm::vec2(cam.getTarget().x, cam.getTarget().z);
 		return cam_target / terrain_size_ * 0.6f * 2.0f;
 	}
 
-	glm::vec2 getMarkOrientation(const oglwrap::Camera& cam) {
+	glm::vec2 getMarkOrientation(const engine::Camera& cam) {
 		return glm::vec2(cam.getForward().x, cam.getForward().z);
 	}
 
-	void render(float time, const oglwrap::Camera& cam) override {
+	void render(float time, const engine::Camera& cam) override {
 		using namespace oglwrap;
 
 		if(open_) {

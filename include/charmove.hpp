@@ -8,8 +8,10 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/utils/camera.hpp"
+
+#include "../engine/camera.hpp"
 #include "../engine/mesh/animated_mesh_renderer.hpp"
+
 #include "terrain.hpp"
 
 extern const float GRAVITY;
@@ -26,7 +28,7 @@ class CharacterMovement {
   bool walking_, jumping_, flip_, can_flip_, transition_;
 
   engine::Animation *anim_;
-  oglwrap::Camera *camera_;
+  engine::Camera *camera_;
   const Terrain& terrain_;
 
 public:
@@ -64,7 +66,7 @@ public:
     anim_ = anim;
   }
 
-  void setCamera(oglwrap::Camera* cam) {
+  void setCamera(engine::Camera* cam) {
     camera_ = cam;
   }
 };

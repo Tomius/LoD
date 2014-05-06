@@ -43,7 +43,7 @@ void BloomEffect::screenResized(const glm::mat4&, GLuint w, GLuint h) {
   tex_.unbind();
 }
 
-void BloomEffect::render(float, const oglwrap::Camera&) {
+void BloomEffect::render(float, const engine::Camera&) {
   // Copy the backbuffer to the texture that our shader can fetch.
   tex_.active(0);
   tex_.bind();

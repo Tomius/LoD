@@ -6,7 +6,7 @@
 #include "oglwrap/oglwrap.hpp"
 #include "oglwrap/shapes/cube.hpp"
 #include "oglwrap/textures/texture_cube.hpp"
-#include "oglwrap/utils/camera.hpp"
+
 #include "../engine/gameobject.hpp"
 
 class Skybox : public engine::GameObject {
@@ -26,7 +26,7 @@ class Skybox : public engine::GameObject {
 public:
   Skybox();
   void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
-  void render(float time, const oglwrap::Camera& cam) override;
+  void render(float time, const engine::Camera& cam) override;
 
   const oglwrap::TextureCube& env_map;
   const oglwrap::FragmentShader& sky_fs;

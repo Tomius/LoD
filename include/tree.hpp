@@ -4,9 +4,9 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/utils/camera.hpp"
-#include "../engine/mesh/mesh_renderer.hpp"
+
 #include "../engine/gameobject.hpp"
+#include "../engine/mesh/mesh_renderer.hpp"
 
 #include "charmove.hpp"
 #include "skybox.hpp"
@@ -44,8 +44,8 @@ class Tree : public engine::GameObject {
 public:
   Tree(Skybox& skybox, Shadow& shadow, const Terrain& terrain);
   void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
-  void shadowRender(float time, const oglwrap::Camera& cam) override;
-  void render(float time, const oglwrap::Camera& cam) override;
+  void shadowRender(float time, const engine::Camera& cam) override;
+  void render(float time, const engine::Camera& cam) override;
 };
 
 #endif // LOD_TREE_HPP_

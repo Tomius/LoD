@@ -189,7 +189,7 @@ void Ayumi::update(float time) {
   mesh_.updateBoneInfo(anim_, time);
 }
 
-void Ayumi::shadowRender(float time, const Camera& cam) {
+void Ayumi::shadowRender(float time, const engine::Camera& cam) {
   shadow_prog_.use();
   shadow_uMCP_ = shadow_.modelCamProjMat(
     skybox_.getSunPos(), mesh_.bSphere(),
@@ -207,7 +207,7 @@ void Ayumi::shadowRender(float time, const Camera& cam) {
   shadow_.push();
 }
 
-void Ayumi::render(float time, const Camera& cam) {
+void Ayumi::render(float time, const engine::Camera& cam) {
   prog_.use();
   uCameraMatrix_.set(cam.cameraMatrix());
   uModelMatrix_.set(charmove_.getModelMatrix() * mesh_.worldTransform());

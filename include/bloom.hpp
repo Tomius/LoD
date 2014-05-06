@@ -4,9 +4,10 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
+
 #include "oglwrap/shapes/fullScreenRect.hpp"
 #include "oglwrap/textures/texture_2D.hpp"
-#include "oglwrap/utils/camera.hpp"
+
 #include "../engine/gameobject.hpp"
 
 class BloomEffect : public engine::GameObject {
@@ -22,7 +23,7 @@ class BloomEffect : public engine::GameObject {
 public:
   BloomEffect();
   void screenResized(const glm::mat4&, GLuint width, GLuint height) override;
-  void render(float, const oglwrap::Camera&) override;
+  void render(float, const engine::Camera&) override;
 };
 
 

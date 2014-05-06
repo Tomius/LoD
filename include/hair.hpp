@@ -4,7 +4,7 @@
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
-#include "oglwrap/assimp.hpp"
+#include "../engine/assimp.hpp"
 #include "../engine/mesh/skinning_data.hpp"
 #include "charmove.hpp"
 

@@ -25,7 +25,7 @@ class CharacterMovement {
 
   bool walking_, jumping_, flip_, can_flip_, transition_;
 
-  engine::AnimatedMeshRenderer *anim_mesh_;
+  engine::Animation *anim_;
   oglwrap::Camera *camera_;
   const Terrain& terrain_;
 
@@ -60,8 +60,8 @@ public:
   bool isWalking() const;
   glm::mat4 getModelMatrix() const;
   glm::vec3 getPos() const;
-  void setAnimatedMesh(engine::AnimatedMeshRenderer* mesh) {
-    anim_mesh_ = mesh;
+  void setAnimation(engine::Animation* anim) {
+    anim_ = anim;
   }
 
   void setCamera(oglwrap::Camera* cam) {

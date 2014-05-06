@@ -8,6 +8,7 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove, Shadow& shadow)
     : mesh_("models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_MaxQuality |
             aiProcess_FlipUVs)
+    , anim_(mesh_.getAnimData())
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")
@@ -120,16 +121,20 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove, Shadow& shadow)
     None, 0.9f
   );
 
-  mesh_.setDefaultAnimation("Stand", 0.3f);
-  mesh_.forceAnimToDefault(0);
+  anim_.setDefaultAnimation("Stand", 0.3f);
+  anim_.forceAnimToDefault(0);
 
-  mesh_.setAnimationEndedCallback(
+  anim_.setAnimationEndedCallback(
     [this](const std::string& str){return animationEndedCallback(str);}
   );
 }
 
 engine::AnimatedMeshRenderer& Ayumi::getMesh() {
   return mesh_;
+}
+
+engine::Animation& Ayumi::getAnimation() {
+  return anim_;
 }
 
 void Ayumi::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
@@ -140,7 +145,7 @@ void Ayumi::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
 void Ayumi::update(float time) {
   charmove_.update(time);
 
-  std::string curr_anim = mesh_.getCurrentAnimation();
+  std::string curr_anim = anim_.getCurrentAnimation();
 
   using engine::AnimParams;
 
@@ -152,36 +157,36 @@ void Ayumi::update(float time) {
       attack3_ = true;
     } else if(curr_anim != "Attack3") {
       if(curr_anim == "JumpRise" || curr_anim == "JumpFall") {
-        mesh_.forceCurrentAnimation(AnimParams("Attack", 0.2f), time);
+        anim_.forceCurrentAnimation(AnimParams("Attack", 0.2f), time);
       } else {
-        mesh_.setCurrentAnimation(AnimParams("Attack", 0.3f), time);
+        anim_.setCurrentAnimation(AnimParams("Attack", 0.3f), time);
       }
     }
   } else if(charmove_.isJumping()) {
     if(charmove_.isDoingFlip()) {
       if(curr_anim == "JumpRise") {
-        mesh_.setCurrentAnimation(AnimParams("Flip", 0.05f), time);
+        anim_.setCurrentAnimation(AnimParams("Flip", 0.05f), time);
       } else {
-        mesh_.setCurrentAnimation(AnimParams("Flip", 0.2f), time);
+        anim_.setCurrentAnimation(AnimParams("Flip", 0.2f), time);
       }
     } else if(charmove_.isJumpingRise()) {
-      mesh_.setCurrentAnimation(AnimParams("JumpRise", 0.3f), time);
+      anim_.setCurrentAnimation(AnimParams("JumpRise", 0.3f), time);
     } else {
-      mesh_.setCurrentAnimation(AnimParams("JumpFall", 0.3f), time);
+      anim_.setCurrentAnimation(AnimParams("JumpFall", 0.3f), time);
     }
   } else {
     if(charmove_.isWalking()) {
       if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-        mesh_.setCurrentAnimation(AnimParams("Run", 0.3f), time);
+        anim_.setCurrentAnimation(AnimParams("Run", 0.3f), time);
       } else {
-        mesh_.setCurrentAnimation(AnimParams("Walk", 0.3f), time);
+        anim_.setCurrentAnimation(AnimParams("Walk", 0.3f), time);
       }
     } else {
-      mesh_.setAnimToDefault(time);
+      anim_.setAnimToDefault(time);
     }
   }
 
-  mesh_.updateBoneInfo(time);
+  mesh_.updateBoneInfo(anim_, time);
 }
 
 void Ayumi::shadowRender(float time, const Camera& cam) {
@@ -231,11 +236,11 @@ void Ayumi::render(float time, const Camera& cam) {
 }
 
 bool Ayumi::canJump() {
-  return mesh_.isInterrupable();
+  return anim_.isInterrupable();
 }
 
 bool Ayumi::canFlip() {
-  return mesh_.isInterrupable();
+  return anim_.isInterrupable();
 }
 
 engine::AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {

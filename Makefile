@@ -1,7 +1,7 @@
 BINARY = LoD
 SRC_DIR = src
 OBJ_DIR = obj
-INCLUDE_DIR = include
+INCLUDE_DIR = .
 
 CPP_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS = $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))

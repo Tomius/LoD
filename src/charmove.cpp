@@ -18,7 +18,7 @@ CharacterMovement::CharacterMovement(glm::vec3 pos,
   , flip_(false)
   , can_flip_(true)
   , transition_(false)
-  , anim_mesh_(nullptr)
+  , anim_(nullptr)
   , camera_(nullptr)
   , terrain_(terrain)
   , can_jump_functor_(nullptr)
@@ -47,7 +47,7 @@ void CharacterMovement::update(float time) {
   using namespace glm;
 
   const Camera& cam = *camera_;
-  glm::vec2 character_offset = anim_mesh_->offsetSinceLastFrame();
+  glm::vec2 character_offset = anim_->offsetSinceLastFrame();
 
   static float prevTime = 0;
   float dt =  time - prevTime;

@@ -137,7 +137,7 @@ int main() {
         );
       PrintDebugTime();
 
-      charmove.setAnimatedMesh(&ayumi->getMesh());
+      charmove.setAnimation(&ayumi->getAnimation());
 
       TPCamera cam(
         window, fixMouse, charmove, ayumi->getMesh().bSphereCenter(),

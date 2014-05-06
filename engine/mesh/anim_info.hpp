@@ -92,10 +92,14 @@ struct AnimData {
   }
 
   AnimInfo& operator[](const std::string& anim_name) {
-    return data[names[anim_name]];
+    return data[names.at(anim_name)];
   }
 
-  bool canFind(const std::string& anim_name) {
+  const AnimInfo& operator[](const std::string& anim_name) const {
+    return data[names.at(anim_name)];
+  }
+
+  bool canFind(const std::string& anim_name) const {
     return names.find(anim_name) != names.end();
   }
 };

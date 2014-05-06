@@ -11,6 +11,7 @@
 #include "skinning_data.hpp"
 #include "anim_info.hpp"
 #include "oglwrap/uniform.hpp"
+#include "animation.hpp"
 
 namespace engine {
 
@@ -23,17 +24,7 @@ class AnimatedMeshRenderer : public MeshRenderer {
   /// The animations.
   AnimData anims_;
 
-  /// Stores data to handle animation transitions.
-  AnimMetaInfo anim_meta_info_;
-
-  /// The current animation.
-  AnimationState current_anim_;
-
-  /// The name of the current animation
-  std::string current_anim_name_;
-
-  /// The last animation.
-  AnimationState last_anim_;
+  friend class Animation;
 
 public:
   /**
@@ -45,6 +36,11 @@ public:
    */
   AnimatedMeshRenderer(const std::string& filename,
                        oglwrap::Bitfield<aiPostProcessSteps> flags);
+
+  /// Returns a reference to the animation resources
+  const AnimData& getAnimData() const {
+    return anims_;
+  }
 
 private:
   /// It shouldn't be copyable.
@@ -276,6 +272,7 @@ private:
    * externally do the object's movement, as normally it will stay right where
    * it was at the start of the animation.
    *
+   * @param animation          The animation to update.
    * @param anim_time          The current animation time.
    * @param node               The node (bone) whose, and whose child's
    *                           transformation should be updated. You should call
@@ -283,7 +280,8 @@ private:
    * @param parent_transform   The transformation of the parent node. You should
    *                           call it with an identity matrix.
    */
-  void updateBoneTree(float anim_time,
+  void updateBoneTree(Animation& animation,
+                      float anim_time,
                       const aiNode* node,
                       const glm::mat4& parent_transform = glm::mat4());
 
@@ -292,6 +290,7 @@ private:
    *        transitions between animations, so it interpolates between four
    *        keyframes not two.
    *
+   * @param animation             The animation to update.
    * @param prev_animation_time   The animation time of when, the last animation
    *                              was interrupted.
    * @param next_animation_time   The current animation time.
@@ -301,7 +300,8 @@ private:
    * @param parent_transform      The transformation of the parent node. You
    *                              should call it with an identity matrix.
    */
-  void updateBoneTreeInTransition(float prev_animation_time,
+  void updateBoneTreeInTransition(Animation& animation,
+                                  float prev_animation_time,
                                   float next_animation_time,
                                   float factor,
                                   const aiNode* node,
@@ -310,10 +310,12 @@ private:
 public:
 
   /// Updates the bones' transformations.
-  void updateBoneInfo(float time_in_seconds);
+  void updateBoneInfo(Animation& animation,
+                      float time_in_seconds);
 
   /**
    * @brief Uploads the bones' transformations into the given uniform array.
+   *
    * @param bones - The uniform naming the bones array. It should be indexable.
    */
   void uploadBoneInfo(oglwrap::LazyUniform<glm::mat4>& bones);
@@ -322,66 +324,20 @@ public:
    * @brief Updates the bones transformation and uploads them into the given
    *        uniforms.
    *
+   * @param animation        The animation to update.
    * @param time_in_seconds  Expect a time value as a float, optimally since
    *                         the start of the program.
    * @param bones            The uniform naming the bones array. It should be
    *                         indexable.
    */
-  void updateAndUploadBoneInfo(float time_in_seconds,
+  void updateAndUploadBoneInfo(Animation& animation,
+                               float time_in_seconds,
                                oglwrap::LazyUniform<glm::mat4>& bones);
 
   /*       //=====:==-==-==:=====\\                                   //=====:==-==-==:=====\\
     <---<}>==~=~=~==--==--==~=~=~==<{>----- Animation Control -----<}>==~=~=~==--==--==~=~=~==<{>--->
            \\=====:==-==-==:=====//                                   \\=====:==-==-==:=====//       */
 
-public:
-  /**
-   * @brief A callback function, that is called everytime an animation ends
-   *        The function should return the name of the new animation. If it
-   *        returns a string that isn't a name of an animation, then the default
-   *        animation will be played.
-   *
-   * It is typically created using std::bind, like this:
-   *
-   * using std::placeholders::_1;
-   * auto callback = std::bind(&MyClass::animationEndedCallback, this, _1);
-   *
-   * Or, if you prefer you can use lambdas, to create the callback:
-   *
-   * auto callback2 = [this](const std::string& current_anim){
-   *   return animationEndedCallback(current_anim);
-   *  };
-   *
-   * @param current_anim  The name of the currently playing animation, that is
-   *                      about to be changed.
-   * @return The parameters of the new animation.
-   */
-  using AnimationEndedCallback =
-    AnimParams(const std::string& current_anim);
-
-private:
-  /// The callback functor
-  std::function<AnimationEndedCallback> anim_ended_callback_;
-
-  /**
-   * @brief The function that changes animations when they end.
-   *
-   * @param current_time  The current time.
-   */
-  void animationEnded(float current_time);
-
-public:
-  /**
-   * @brief Sets the callback functor for choosing the next anim.
-   *
-   * Sets a callback functor that is called everytime an animation ends,
-   * and is responsible for choosing the next animation.
-   *
-   * @param callback - The functor to use for the callbacks.
-   */
-  void setAnimationEndedCallback(std::function<AnimationEndedCallback> callback) {
-    anim_ended_callback_ = callback;
-  }
 
   /**
    * @brief Adds an external animation from a file.
@@ -405,123 +361,6 @@ public:
                     oglwrap::Bitfield<AnimFlag> flags = AnimFlag::None,
                     float speed = 1.0f);
 
-  /**
-   * @brief Sets the default animation, that will be played if you don't set to
-   *        play another one.
-   *
-   * @param anim_name                 The user-defined name of the animation
-   *                                  that should be set to be default.
-   * @param default_transition_time   The fading time that should be used when
-   *                                  changing to the default animation.
-   */
-  void setDefaultAnimation(const std::string& anim_name,
-                           float default_transition_time = 0.0f);
-
-private:
-  /**
-   * @brief Changes the current animation to a specified one.
-   *
-   * @param anim_idx          The index of the new animation.
-   * @param current_time      The current time in seconds, optimally since the
-   *                          start of the program.
-   * @param transition_time   The fading time to be used for the transition.
-   * @param flags             A bitfield containing the animation specifier flags.
-   * @param speed             Sets the speed of the animation. If it's 0, will
-   *                          play with the speed specified at the addAnim. If
-   *                          it's negative, it will be played backwards.
-   */
-  void changeAnimation(size_t anim_idx,
-                       float current_time,
-                       float transition_time,
-                       oglwrap::Bitfield<AnimFlag> flags,
-                       float speed = 1.0f);
-
-public:
-  /**
-   * @brief Tries to change the current animation to a specified one.
-   *
-   * Only changes it if the current animation is interruptable,
-   * it's not currently in a transition, and new animation is
-   * not the same as the one currently playing.
-   *
-   * @param new_anim       The parameters of the new animation.
-   * @param current_time   The current time in seconds, optimally since the
-   *                       start of the program.
-   */
-  void setCurrentAnimation(AnimParams new_anim,
-                           float current_time);
-
-  /**
-   * @brief Forces the current animation to a specified one.
-   *
-   * Only changes it if the new animation is not the same as the one
-   * currently playing.
-   *
-   * @param new_anim       The parameters of the new animation.
-   * @param current_time   The current time in seconds, optimally since the
-   *                       start of the program.
-   */
-  void forceCurrentAnimation(AnimParams new_anim,
-                             float current_time);
-
-  /// Returns the currently running animation's name.
-  std::string getCurrentAnimation() const {
-    return current_anim_name_;
-  }
-
-  /// Returns the currently running animation's state.
-  AnimationState getCurrentAnimState() const {
-    return current_anim_;
-  }
-
-  /// Returns the currently running animation's AnimFlags.
-  oglwrap::Bitfield<AnimFlag> getCurrentAnimFlags() const {
-    return current_anim_.flags;
-  }
-
-  /// Returns if the currently running animation is interruptable.
-  bool isInterrupable() const {
-    return current_anim_.flags.test(AnimFlag::Interruptable);
-  }
-
-  /**
-   * Tries to change the current animation to the default one.
-   *
-   * Only changes it if the current animation is interruptable,
-   * it's not currently in a transition, and new animation is
-   * not the same as the one currently playing. Will use the default
-   * anim modifier flags for the default anim.
-   *
-   * @param current_time  The current time in seconds, optimally since the
-   *                      start of the program.
-   */
-  void setAnimToDefault(float current_time);
-
-  /**
-   * @brief Forces the current animation to the default one.
-   *
-   * Only changes it if the new animation is not the same as the one currently
-   * playing. Will use the default anim modifier flags for the default anim.
-   *
-   * @param current_time    The current time in seconds, optimally since the
-   *                        start of the program.
-   */
-  void forceAnimToDefault(float current_time);
-
-  /// Returns the name of the default animation
-  std::string getDefaultAnim() const {
-    return anims_[anim_meta_info_.default_idx].name;
-  }
-
-  /**
-   * @brief Returns the offset of the root bone, since it was last queried.
-   *
-   * It should be queried every frame (hence the name),
-   * but it works even if you only query every 10th frame,
-   * just the animation will "lag", and will look bad.
-   */
-  glm::vec2 offsetSinceLastFrame();
-
 }; // AnimatedMeshRenderer
 
 } // namespace engine
@@ -529,6 +368,5 @@ public:
 #include "animated_mesh_renderer_general-inl.hpp"
 #include "animated_mesh_renderer_skinning-inl.hpp"
 #include "animated_mesh_renderer_animation-inl.hpp"
-#include "animated_mesh_renderer_animation-control-inl.hpp"
 
 #endif // ENGINE_MESH_ANIMATED_MESH_RENDERER_HPP_

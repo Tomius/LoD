@@ -19,6 +19,7 @@ extern const int PERFORMANCE;
 
 class Ayumi : public engine::GameObject {
   engine::AnimatedMeshRenderer mesh_;
+  engine::Animation anim_;
   oglwrap::Program prog_, shadow_prog_;
 
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_, uBones_, uShadowCP_;
@@ -37,6 +38,7 @@ class Ayumi : public engine::GameObject {
 public:
   Ayumi(Skybox& skybox, CharacterMovement& charmove, Shadow& shadow);
   engine::AnimatedMeshRenderer& getMesh();
+  engine::Animation& getAnimation();
   void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
   void update(float time) override;
   void shadowRender(float time, const oglwrap::Camera& cam) override;
@@ -45,7 +47,7 @@ public:
 private: // Callbacks
   CharacterMovement::CanDoCallback canJump;
   CharacterMovement::CanDoCallback canFlip;
-  engine::AnimatedMeshRenderer::AnimationEndedCallback animationEndedCallback;
+  engine::Animation::AnimationEndedCallback animationEndedCallback;
 };
 
 #endif // LOD_AYUMI_HPP_

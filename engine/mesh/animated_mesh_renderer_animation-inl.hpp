@@ -3,6 +3,7 @@
 
 #include "oglwrap/global.hpp"
 #include "animated_mesh_renderer.hpp"
+#include "animation.hpp"
 
 namespace engine {
 
@@ -110,11 +111,12 @@ inline const aiNodeAnim* AnimatedMeshRenderer::findNodeAnim(const aiAnimation* a
    return nullptr;
 }
 
-inline void AnimatedMeshRenderer::updateBoneTree(float anim_time,
+inline void AnimatedMeshRenderer::updateBoneTree(Animation& anim,
+                                                 float anim_time,
                                                  const aiNode* node,
                                                  const glm::mat4& parent_transform) {
    std::string node_name(node->mName.data);
-   const aiAnimation* animation = current_anim_.handle->mAnimations[0];
+   const aiAnimation* animation = anim.current_anim_.handle->mAnimations[0];
    const aiNodeAnim* node_anim = findNodeAnim(animation, node_name);
    glm::mat4 local_transform = engine::convertMatrix(node->mTransformation);
 
@@ -133,9 +135,9 @@ inline void AnimatedMeshRenderer::updateBoneTree(float anim_time,
       glm::mat4 translationM;
 
       if(node_name == skinning_data_.root_bone) {
-         current_anim_.offset = glm::vec3(translation.x, 0, translation.z);
-         if(current_anim_.flags.test(AnimFlag::Mirrored)) {
-            current_anim_.offset *= -1;
+         anim.current_anim_.offset = glm::vec3(translation.x, 0, translation.z);
+         if(anim.current_anim_.flags.test(AnimFlag::Mirrored)) {
+            anim.current_anim_.offset *= -1;
          }
          translationM = glm::translate(glm::mat4(), glm::vec3(0, translation.y, 0));
       } else {
@@ -160,18 +162,20 @@ inline void AnimatedMeshRenderer::updateBoneTree(float anim_time,
       }
    }
    for(unsigned i = 0; i < node->mNumChildren; i++) {
-      updateBoneTree(anim_time, node->mChildren[i], global_transform);
+      updateBoneTree(anim, anim_time, node->mChildren[i], global_transform);
    }
 }
 
-inline void AnimatedMeshRenderer::updateBoneTreeInTransition(float prev_anim_time,
-                                                     float next_anim_time,
-                                                     float factor,
-                                                     const aiNode* node,
-                                                     const glm::mat4& parent_transform) {
+inline void AnimatedMeshRenderer::updateBoneTreeInTransition(
+                                             Animation& anim,
+                                             float prev_anim_time,
+                                             float next_anim_time,
+                                             float factor,
+                                             const aiNode* node,
+                                             const glm::mat4& parent_transform) {
    std::string node_name(node->mName.data);
-   const aiAnimation* prev_animation = last_anim_.handle->mAnimations[0];
-   const aiAnimation* next_animation = current_anim_.handle->mAnimations[0];
+   const aiAnimation* prev_animation = anim.last_anim_.handle->mAnimations[0];
+   const aiAnimation* next_animation = anim.current_anim_.handle->mAnimations[0];
    const aiNodeAnim* prev_node_anim = findNodeAnim(prev_animation, node_name);
    const aiNodeAnim* next_node_anim = findNodeAnim(next_animation, node_name);
 
@@ -199,9 +203,10 @@ inline void AnimatedMeshRenderer::updateBoneTreeInTransition(float prev_anim_tim
       aiVector3D translation = interpolate(prev_translation, next_translation, factor);
       glm::mat4 translationM;
       if(node_name == skinning_data_.root_bone) {
-         current_anim_.offset = glm::vec3(next_translation.x, 0, next_translation.z);
-         if(current_anim_.flags.test(AnimFlag::Mirrored)) {
-            current_anim_.offset *= -1;
+         anim.current_anim_.offset =
+            glm::vec3(next_translation.x, 0, next_translation.z);
+         if(anim.current_anim_.flags.test(AnimFlag::Mirrored)) {
+            anim.current_anim_.offset *= -1;
          }
          translationM = glm::translate(glm::mat4(), glm::vec3(0, translation.y, 0));
       } else {
@@ -227,87 +232,89 @@ inline void AnimatedMeshRenderer::updateBoneTreeInTransition(float prev_anim_tim
    }
    for(unsigned i = 0; i < node->mNumChildren; i++) {
       updateBoneTreeInTransition(
-         prev_anim_time, next_anim_time, factor, node->mChildren[i], global_transform
+         anim, prev_anim_time, next_anim_time, factor,
+         node->mChildren[i], global_transform
       );
    }
 }
 
-inline void AnimatedMeshRenderer::updateBoneInfo(float time) {
-   if(!current_anim_.handle || current_anim_.handle->mAnimations == 0
-      || !last_anim_.handle || last_anim_.handle->mAnimations == 0) {
+inline void AnimatedMeshRenderer::updateBoneInfo(Animation& anim,
+                                                 float time) {
+   if(!anim.current_anim_.handle || anim.current_anim_.handle->mAnimations == 0
+      || !anim.last_anim_.handle || anim.last_anim_.handle->mAnimations == 0) {
       throw std::runtime_error("Tried to run an invalid animation.");
    }
 
-   float last_ticks_per_second = last_anim_.handle->mAnimations[0]->mTicksPerSecond > 1e-10 ? // != 0
-                                 last_anim_.handle->mAnimations[0]->mTicksPerSecond : 24.0f;
-   float last_time_in_ticks = anim_meta_info_.last_period_time * (last_anim_.speed * last_ticks_per_second);
+   float last_ticks_per_second = anim.last_anim_.handle->mAnimations[0]->mTicksPerSecond > 1e-10 ? // != 0
+                                 anim.last_anim_.handle->mAnimations[0]->mTicksPerSecond : 24.0f;
+   float last_time_in_ticks = anim.anim_meta_info_.last_period_time * (anim.last_anim_.speed * last_ticks_per_second);
    float last_anim_time;
-   if(last_anim_.flags.test(AnimFlag::Repeat)) {
-      last_anim_time = fmod(last_time_in_ticks, (float)last_anim_.handle->mAnimations[0]->mDuration);
+   if(anim.last_anim_.flags.test(AnimFlag::Repeat)) {
+      last_anim_time = fmod(last_time_in_ticks, (float)anim.last_anim_.handle->mAnimations[0]->mDuration);
    } else {
-      last_anim_time = std::min(last_time_in_ticks, (float)last_anim_.handle->mAnimations[0]->mDuration);
+      last_anim_time = std::min(last_time_in_ticks, (float)anim.last_anim_.handle->mAnimations[0]->mDuration);
    }
-   if(last_anim_.flags.test(AnimFlag::Backwards)) {
-      last_anim_time = (float)last_anim_.handle->mAnimations[0]->mDuration - last_anim_time;
+   if(anim.last_anim_.flags.test(AnimFlag::Backwards)) {
+      last_anim_time = (float)anim.last_anim_.handle->mAnimations[0]->mDuration - last_anim_time;
    }
 
-   float current_ticks_per_second = current_anim_.handle->mAnimations[0]->mTicksPerSecond > 1e-10 ? // != 0
-                                    current_anim_.handle->mAnimations[0]->mTicksPerSecond : 24.0f;
+   float current_ticks_per_second = anim.current_anim_.handle->mAnimations[0]->mTicksPerSecond > 1e-10 ? // != 0
+                                    anim.current_anim_.handle->mAnimations[0]->mTicksPerSecond : 24.0f;
    float current_time_in_ticks =
-      (time - anim_meta_info_.end_of_last_anim) * (current_anim_.speed * current_ticks_per_second);
+      (time - anim.anim_meta_info_.end_of_last_anim) * (anim.current_anim_.speed * current_ticks_per_second);
    float current_anim_time;
-   if(current_anim_.flags.test(AnimFlag::Repeat)) {
-      current_anim_time = fmod(current_time_in_ticks, (float)current_anim_.handle->mAnimations[0]->mDuration);
+   if(anim.current_anim_.flags.test(AnimFlag::Repeat)) {
+      current_anim_time = fmod(current_time_in_ticks, (float)anim.current_anim_.handle->mAnimations[0]->mDuration);
    } else {
-      if(current_time_in_ticks < (float)current_anim_.handle->mAnimations[0]->mDuration) {
+      if(current_time_in_ticks < (float)anim.current_anim_.handle->mAnimations[0]->mDuration) {
          current_anim_time = current_time_in_ticks;
       } else {
-         animationEnded(time);
-         updateBoneInfo(time);
+         anim.animationEnded(time);
+         updateBoneInfo(anim, time);
          return;
       }
    }
 
-   if(current_anim_.flags.test(AnimFlag::Backwards)) {
-      current_anim_time = (float)current_anim_.handle->mAnimations[0]->mDuration - current_anim_time;
+   if(anim.current_anim_.flags.test(AnimFlag::Backwards)) {
+      current_anim_time = (float)anim.current_anim_.handle->mAnimations[0]->mDuration - current_anim_time;
    }
 
    bool in_transition =
-      anim_meta_info_.transition_time < time - anim_meta_info_.end_of_last_anim;
+      anim.anim_meta_info_.transition_time < time - anim.anim_meta_info_.end_of_last_anim;
    float transition_factor =
-      (time - anim_meta_info_.end_of_last_anim) / anim_meta_info_.transition_time;
+      (time - anim.anim_meta_info_.end_of_last_anim) / anim.anim_meta_info_.transition_time;
 
    if(in_transition) {
       // Normal animation
-      updateBoneTree(current_anim_time, scene_->mRootNode);
+      updateBoneTree(anim, current_anim_time, scene_->mRootNode);
    } else {
       // Transition between two animations.
-      updateBoneTreeInTransition(last_anim_time, current_anim_time,
+      updateBoneTreeInTransition(anim, last_anim_time, current_anim_time,
                                  transition_factor, scene_->mRootNode);
    }
 
    // Start a new loop if necessary
-   if(current_anim_.flags.test(AnimFlag::Repeat)) {
+   if(anim.current_anim_.flags.test(AnimFlag::Repeat)) {
       unsigned loop_count = current_time_in_ticks /
-                        (float)current_anim_.handle->mAnimations[0]->mDuration;
-      if(loop_count > anim_meta_info_.last_loop_count) {
-         if(current_anim_.flags.test(AnimFlag::MirroredRepeat)) {
-            current_anim_.flags ^= AnimFlag::Mirrored;
-            current_anim_.flags ^= AnimFlag::Backwards;
+                        (float)anim.current_anim_.handle->mAnimations[0]->mDuration;
+      if(loop_count > anim.anim_meta_info_.last_loop_count) {
+         if(anim.current_anim_.flags.test(AnimFlag::MirroredRepeat)) {
+            anim.current_anim_.flags ^= AnimFlag::Mirrored;
+            anim.current_anim_.flags ^= AnimFlag::Backwards;
          }
-         if(current_anim_.flags.test(AnimFlag::Backwards)) {
-            last_anim_.offset = current_anim_.offset =
-               anims_[current_anim_.idx].end_offset;
+         if(anim.current_anim_.flags.test(AnimFlag::Backwards)) {
+            anim.last_anim_.offset = anim.current_anim_.offset =
+               anims_[anim.current_anim_.idx].end_offset;
          } else {
-            last_anim_.offset = current_anim_.offset =
-               anims_[current_anim_.idx].start_offset;
+            anim.last_anim_.offset = anim.current_anim_.offset =
+               anims_[anim.current_anim_.idx].start_offset;
          }
-         if(current_anim_.flags.test(AnimFlag::Mirrored)) {
-            last_anim_.offset *= -1;
-            current_anim_.offset *= -1;
+         if(anim.current_anim_.flags.test(AnimFlag::Mirrored)) {
+            anim.last_anim_.offset *= -1;
+            anim.current_anim_.offset *= -1;
          }
       }
-      anim_meta_info_.last_loop_count = loop_count;
+      anim.anim_meta_info_.last_loop_count = loop_count;
    }
 }
 
@@ -321,9 +328,10 @@ inline void AnimatedMeshRenderer::uploadBoneInfo(
 }
 
 inline void AnimatedMeshRenderer::updateAndUploadBoneInfo(
+                                    Animation& anim,
                                     float time,
                                     oglwrap::LazyUniform<glm::mat4>& bones) {
-  updateBoneInfo(time);
+  updateBoneInfo(anim, time);
   uploadBoneInfo(bones);
 }
 

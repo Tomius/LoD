@@ -213,11 +213,25 @@ inline void MeshRenderer::setupTexCoords(oglwrap::VertexAttribArray attrib,
 }
 
 #if OGLWRAP_USE_IMAGEMAGICK
-template<aiTextureType tex_type>
-/// Sets arbitrary type of textures to a specified texture unit.
-/** Changes the currently active texture unit and Texture2D binding.
-  * @param texture_unit - Specifies the texture unit to use for the textures. */
-void MeshRenderer::setupTextures(unsigned short texture_unit) {
+/**
+ * @brief Loads in a specified type of texture for every mesh. If no texture but
+ *        a single color is specified, then sets up an 1x1 texture with that
+ *        color (so you can use the same shader).
+ *
+ * Changes the currently active texture unit and Texture2D binding.
+ * @param texture_unit      Specifies the texture unit to use for the textures.
+ * @param tex_type          The type of the texture to load in. For ex
+ *                          aiTextureType_DIFFUSE.
+ * @param pKey, type, idx   These parameters identify the color parameter to
+ *                          load in case there isn't any texture specified.
+ *                          Use the assimp macros to fill these 3 parameters
+ *                          all at once, for ex: AI_MATKEY_COLOR_DIFFUSE
+ */
+inline void MeshRenderer::setupTextures(unsigned short texture_unit,
+                                        aiTextureType tex_type,
+                                        const char *pKey,
+                                        unsigned int type,
+                                        unsigned int idx) {
   oglwrap::Texture2D::Active(texture_unit);
 
   materials_[tex_type].active = true;
@@ -227,27 +241,41 @@ void MeshRenderer::setupTextures(unsigned short texture_unit) {
   if(scene_->mNumMaterials) {
 
     // Extract the directory part from the file name
-    std::string::size_type SlashIndex = filename_.find_last_of("/");
+    std::string::size_type slash_idx = filename_.find_last_of("/");
     std::string dir;
 
-    if(SlashIndex == std::string::npos) {
+    if(slash_idx == std::string::npos) {
       dir = "./";
-    } else if(SlashIndex == 0) {
+    } else if(slash_idx == 0) {
       dir = "/";
     } else {
-      dir = filename_.substr(0, SlashIndex + 1);
+      dir = filename_.substr(0, slash_idx + 1);
     }
 
     // Initialize the materials
     for(unsigned int i = 0; i < scene_->mNumMaterials; i++) {
-      const aiMaterial* pMaterial = scene_->mMaterials[i];
+      const aiMaterial* mat = scene_->mMaterials[i];
 
       aiString filepath;
-      if(pMaterial->GetTexture(tex_type, 0, &filepath) == AI_SUCCESS) {
+      if(mat->GetTexture(tex_type, 0, &filepath) == AI_SUCCESS) {
         materials_[tex_type].textures[i].bind();
         materials_[tex_type].textures[i].loadTexture(dir + filepath.data);
         materials_[tex_type].textures[i].minFilter(oglwrap::MinFilter::Linear);
         materials_[tex_type].textures[i].magFilter(oglwrap::MagFilter::Linear);
+      } else {
+        aiColor4D color(0.f, 0.f, 0.f, 1.0f);
+        mat->Get(pKey, type, idx, color);
+
+        materials_[tex_type].textures[i].bind();
+        materials_[tex_type].textures[i].Upload(
+          oglwrap::PixelDataInternalFormat::RGBA32F,
+          1, 1,
+          oglwrap::PixelDataFormat::RGBA,
+          oglwrap::PixelDataType::Float,
+          &color.r
+        );
+        materials_[tex_type].textures[i].minFilter(oglwrap::MinFilter::Nearest);
+        materials_[tex_type].textures[i].magFilter(oglwrap::MagFilter::Nearest);
       }
     }
   }
@@ -258,16 +286,16 @@ void MeshRenderer::setupTextures(unsigned short texture_unit) {
 
 /// Sets the diffuse textures up to a specified texture unit.
 /** Changes the currently active texture unit and Texture2D binding.
-  * @param texture_unit - Specifies the texture unit to use for the diffuse textures. */
+  * @param texture_unit Specifies the texture unit to use for the diffuse textures. */
 inline void MeshRenderer::setupDiffuseTextures(unsigned short texture_unit) {
-  setupTextures<aiTextureType_DIFFUSE>(texture_unit);
+  setupTextures(texture_unit, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
 }
 
 /// Sets the specular textures up to a specified texture unit.
 /** Changes the currently active texture unit and Texture2D binding.
-  * @param texture_unit - Specifies the texture unit to use for the specular textures. */
+  * @param texture_unit Specifies the texture unit to use for the specular textures. */
 inline void MeshRenderer::setupSpecularTextures(unsigned short texture_unit) {
-  setupTextures<aiTextureType_SPECULAR>(texture_unit);
+  setupTextures(texture_unit, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
 }
 
 /// Renders the mesh.

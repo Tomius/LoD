@@ -117,15 +117,29 @@ public:
     * the mesh. May write to the stderr if a material is missing.
     * Calling this function changes the currently active VAO and ArrayBuffer.
     * @param attrib - The attribute array to use as destination.
-    * @param texCoordSet - Specifies the index of the texture coordinate set that should be used */
+    * @param texCoordSet Specifies the index of the texture coordinate set that should be used */
   void setupTexCoords(oglwrap::VertexAttribArray attrib,
                       unsigned char texCoordSet = 0);
 
-  template<aiTextureType tex_type>
-  /// Sets arbitrary type of textures to a specified texture unit.
-  /** Changes the currently active texture unit and Texture2D binding.
-    * @param texture_unit - Specifies the texture unit to use for the textures. */
-  void setupTextures(unsigned short texture_unit);
+  /**
+   * @brief Loads in a specified type of texture for every mesh. If no texture
+   *        but a single color is specified, then sets up an 1x1 texture with
+   *        that color (so you can use the same shader).
+   *
+   * Changes the currently active texture unit and Texture2D binding.
+   * @param texture_unit      Specifies the texture unit to use for the textures.
+   * @param tex_type          The type of the texture to load in. For ex
+   *                          aiTextureType_DIFFUSE.
+   * @param pKey, type, idx   These parameters identify the color parameter to
+   *                          load in case there isn't any texture specified.
+   *                          Use the assimp macros to fill these 3 parameters
+   *                          all at once, for ex: AI_MATKEY_COLOR_DIFFUSE
+   */
+  void setupTextures(unsigned short texture_unit,
+                     aiTextureType tex_type,
+                     const char *pKey,
+                     unsigned int type,
+                     unsigned int idx);
 
   /// Sets the diffuse textures up to a specified texture unit.
   /** Changes the currently active texture unit and Texture2D binding.

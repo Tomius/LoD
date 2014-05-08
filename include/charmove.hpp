@@ -29,9 +29,9 @@ class CharacterMovement {
 
   engine::Animation *anim_;
   engine::Camera *camera_;
-  const Terrain& terrain_;
 
 public:
+  const Terrain& terrain_;
   using CanDoCallback = bool();
 
 private:

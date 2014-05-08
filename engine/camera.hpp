@@ -342,4 +342,3 @@ public:
 } // namespace engine
 
 #endif // ENGINE_CAMERA_HPP_
-

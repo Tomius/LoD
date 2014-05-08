@@ -6,13 +6,21 @@
 #include "oglwrap/oglwrap.hpp"
 
 #include "camera.hpp"
-
-#include "time.hpp"
+#include "rigid_body.hpp"
 
 namespace engine {
 
 class GameObject {
 public:
+  Transform transform;
+  std::unique_ptr<RigidBody> rigid_body;
+
+  void addRigidBody(const std::function<double(double, double)>& getTerrainHeight) {
+    rigid_body = std::unique_ptr<RigidBody>(
+      new RigidBody{transform, getTerrainHeight}
+    );
+  }
+
   virtual void screenResized(const glm::mat4& projMat,
                              GLuint width, GLuint height) {}
   virtual void update(float t) {}

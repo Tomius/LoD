@@ -1,12 +1,11 @@
 /** @file camera.hpp
-    @brief Implements a basic cameras, useful for testing.
+    @brief Implements the camera classes.
 */
 
 #ifndef ENGINE_CAMERA_HPP_
 #define ENGINE_CAMERA_HPP_
 
 #include <cmath>
-#include <SFML/Window.hpp>
 #include "oglwrap/oglwrap.hpp"
 
 #include "transform.hpp"

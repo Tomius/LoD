@@ -54,7 +54,7 @@ unsigned char Terrain::fetchHeight(glm::ivec2 v) const {
 }
 
 double Terrain::getHeight(double x, double y) const {
-  return mesh_.getHeight(x, y);
+  return scale_vector.y * mesh_.getHeight(x / scale_vector.x, y / scale_vector.z);
 }
 
 void Terrain::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
@@ -64,7 +64,7 @@ void Terrain::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
 
 void Terrain::render(float time, const engine::Camera& cam) {
   prog_.use();
-  uCameraMatrix_.set(cam.cameraMatrix());
+  uCameraMatrix_.set(cam);
   uSunData_.set(skybox_.getSunData());
   for(size_t i = 0; i < shadow_.getDepth(); ++i) {
     uShadowCP_[i] = shadow_.shadowCPs()[i];
@@ -75,7 +75,7 @@ void Terrain::render(float time, const engine::Camera& cam) {
   shadow_.shadowTex().active(5);
   shadow_.shadowTex().bind();
 
-  mesh_.render(cam.getPos(), cam.getForward(), uOffset_, uMipmapLevel_);
+  mesh_.render(cam.pos(), cam.forward(), uOffset_, uMipmapLevel_);
 
   shadow_.shadowTex().active(5);
   shadow_.shadowTex().unbind();

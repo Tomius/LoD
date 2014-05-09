@@ -107,12 +107,14 @@ public:
 	} mark_;
 
 	glm::vec2 getMarkPos(const engine::Camera& cam) {
-		glm::vec2 cam_target = glm::vec2(cam.getTarget().x, cam.getTarget().z);
+		glm::vec3 camTarget = cam.getParent()->pos();
+		glm::vec2 cam_target = glm::vec2(camTarget.x, camTarget.z);
 		return cam_target / terrain_size_ * 0.6f * 2.0f;
 	}
 
 	glm::vec2 getMarkOrientation(const engine::Camera& cam) {
-		return glm::vec2(cam.getForward().x, cam.getForward().z);
+		glm::vec3 camTarget = cam.getParent()->pos();
+		return glm::vec2(camTarget.x, camTarget.z);
 	}
 
 	void render(float time, const engine::Camera& cam) override {

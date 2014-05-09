@@ -11,8 +11,8 @@
 #include "shadow.hpp"
 #include "skybox.hpp"
 
-#include "time.hpp"
-#include "tpcamera.hpp"
+#include "timer.hpp"
+#include "camera.hpp"
 
 class GameObject;
 
@@ -22,7 +22,7 @@ class Scene {
   std::vector<std::unique_ptr<GameObject>> gameobjects_, after_effects_;
 
 public:
-  TPCamera* camera_;
+  Camera* camera_;
   std::unique_ptr<Skybox> skybox_;
   std::unique_ptr<Shadow> shadow_;
   Timer game_time_, environment_time_;
@@ -50,7 +50,7 @@ public:
     return shadow;
   }
 
-  void addCamera(TPCamera* cam) {
+  void addCamera(Camera* cam) {
     camera_ = cam;
   }
 
@@ -89,7 +89,7 @@ private:
       i->update(game_time_.current);
     }
 
-    camera_->update(game_time_.current);
+    camera_->update(game_time_);
   }
 
   void shadowRender() {

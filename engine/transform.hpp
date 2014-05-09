@@ -253,10 +253,6 @@ public:
     rot(vec3(1, 0, 0), new_right);
   }
 
-  operator mat4() const {
-    return localToWorldMatrix();
-  }
-
   mat4 worldToLocalMatrix() const {
     return glm::inverse(localToWorldMatrix());
   }
@@ -270,6 +266,15 @@ public:
     } else {
       return local_transf;
     }
+  }
+
+  // To help the users a little
+  mat4 matrix() const {
+    return localToWorldMatrix();
+  }
+
+  operator mat4() const {
+    return localToWorldMatrix();
   }
 };
 

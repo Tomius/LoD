@@ -73,7 +73,7 @@ void Tree::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
 void Tree::shadowRender(float time, const engine::Camera& cam) {
   shadow_prog_.use();
 
-  auto campos = cam.getPos();
+  auto campos = cam.pos();
   for(size_t i = 0; i < trees_.size() &&
       shadow_.getDepth() + 1 < shadow_.getMaxDepth(); i++) {
     if(glm::length(campos - trees_[i].pos) <
@@ -99,13 +99,13 @@ void Tree::render(float time, const engine::Camera& cam) {
   auto blend = Context::TemporaryEnable(Capability::Blend);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  auto campos = cam.getPos();
-  auto cam_mx = cam.cameraMatrix();
+  auto campos = cam.pos();
+  auto cam_mx = cam.matrix();
   for(size_t i = 0; i < trees_.size(); i++) {
     // Check for visibility (is it behind to camera?)
     glm::vec3 diff = trees_[i].pos - campos;
     float len_diff = glm::length(diff);
-    if(len_diff > 10 && glm::dot(cam.getForward(), diff) < 0)
+    if(len_diff > 10 && glm::dot(cam.forward(), diff) < 0)
         continue;
 
     // Render only if its in range.

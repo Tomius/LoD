@@ -549,7 +549,6 @@ static bool isCoordInsideTriangle(glm::dvec3 bCoords) {
   return std::min(std::min(bCoords.x, bCoords.y), bCoords.z) >= 0.0;
 }
 double TerrainMesh::getHeight(double x, double y) const {
-  using namespace std;
   using namespace glm;
   ivec2 coord = ivec2(round(x), round(y));
 

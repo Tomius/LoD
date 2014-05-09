@@ -2,12 +2,10 @@
 
 using namespace oglwrap;
 
-CharacterMovement::CharacterMovement(glm::vec3 pos,
-                                     const Terrain& terrain,
+CharacterMovement::CharacterMovement(const Terrain& terrain,
                                      float horizontal_speed,
                                      float rotationSpeed_PerSec)
-  : pos_(pos)
-  , curr_rot_(0)
+  : curr_rot_(0)
   , dest_rot_(0)
   , rot_speed_(rotationSpeed_PerSec)
   , vert_speed_(0)
@@ -78,7 +76,8 @@ void CharacterMovement::update(float time) {
   lastMoveDir = moveDir;
 
   if(walking_) {
-    double cameraRot = -cam.getRoty(); // -z is forward
+    glm::vec3 fwd = cam.forward();
+    double cameraRot = -atan2(fwd.z, fwd.x);
     double moveRot = atan2(moveDir.y, moveDir.x); // +y is forward
     dest_rot_ = ToDegree(cameraRot + moveRot);
     dest_rot_ = fmod(dest_rot_, 360);
@@ -106,24 +105,24 @@ void CharacterMovement::update(float time) {
     }
   }
 
-  mat3 transformation = mat3(rotate(mat4(), (float)fmod(curr_rot_, 360), vec3(0,1,0)));
+  mat4 rotation = rotate(mat4(), (float)fmod(curr_rot_, 360), vec3(0,1,0));
+  transform().rot(glm::quat_cast(rotation));
 
-  pos_ += transformation * vec3(character_offset.x, 0, character_offset.y);
-  if(jumping_) {
-    pos_ += transformation * vec3(0, 0, horiz_speed_ * horiz_speed_factor_ * dt);
+  {
+    auto pos = transform().pos_proxy();
+
+    pos += mat3(rotation) * vec3(character_offset.x, 0, character_offset.y);
+    if(jumping_) {
+      pos += mat3(rotation) * vec3(0, 0, horiz_speed_ * horiz_speed_factor_ * dt);
+    }
   }
 
-  auto scales = terrain_.getScales();
-  updateHeight(
-    time,
-    scales.y * terrain_.getHeight(
-      pos_.x / (double)scales.x,
-      pos_.z / (double)scales.z
-    )
-  );
+  updateHeight(time, terrain_.getHeight(transform().pos().x, transform().pos().z));
 }
 
 void CharacterMovement::updateHeight(float time, float groundHeight) {
+  auto pos = transform().pos_proxy();
+
   static float prevTime = 0;
   float diff_time = time - prevTime;
   prevTime = time;
@@ -133,25 +132,25 @@ void CharacterMovement::updateHeight(float time, float groundHeight) {
     float dt = std::min(time_step, diff_time);
     diff_time -= time_step;
 
-    const float diff = groundHeight - pos_.y;
+    const float diff = groundHeight - pos.y;
     if(diff >= 0 && jumping_ && vert_speed_ < 0) {
       jumping_ = false;
       flip_ = false;
       can_flip_ = true;
-      pos_.y = groundHeight;
+      pos.y = groundHeight;
       return;
     }
     if(!jumping_) {
       const float offs = std::max(fabs(diff / 2.0f), 0.05) * dt * 20.0f;
       if(fabs(diff) > offs) {
-        pos_.y += diff / fabs(diff) * offs;
+        pos.y += diff / fabs(diff) * offs;
       }
     }
     if(jumping_) {
       if(diff > 0) {
-        pos_.y += std::max(diff, vert_speed_) * dt;
+        pos.y += std::max(diff, vert_speed_) * dt;
       } else {
-        pos_.y += vert_speed_ * dt;
+        pos.y += vert_speed_ * dt;
       }
       vert_speed_ -= dt * GRAVITY;
     }
@@ -180,17 +179,4 @@ bool CharacterMovement::isWalking() const {
 
 void CharacterMovement::setFlip(bool flip) {
   flip_ = flip;
-}
-
-glm::mat4 CharacterMovement::getModelMatrix() const {
-  glm::mat4 rot = glm::rotate(
-    glm::mat4(), (float)fmod(curr_rot_, 360), glm::vec3(0,1,0)
-  );
-  // The matrix's last column is responsible for the translation.
-  rot[3] = glm::vec4(pos_, 1.0);
-  return rot;
-}
-
-glm::vec3 CharacterMovement::getPos() const {
-  return pos_;
 }

@@ -9,8 +9,9 @@
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 
-#include "../engine/time.hpp"
+#include "../engine/timer.hpp"
 #include "../engine/scene.hpp"
+#include "../engine/camera.hpp"
 
 #include "charmove.hpp"
 #include "skybox.hpp"
@@ -20,7 +21,6 @@
 #include "tree.hpp"
 #include "shadow.hpp"
 #include "map.hpp"
-#include "tpcamera.hpp"
 
 using namespace oglwrap;
 Context gl;
@@ -130,23 +130,22 @@ int main() {
 
       PrintDebugText("Initializing Ayumi");
         CharacterMovement charmove{
-          glm::vec3(0, terrain->getScales().y * 13, 0), *terrain
+          *terrain
         };
 
         Ayumi *ayumi = scene.addGameObject(
           new Ayumi{*skybox, charmove, *shadow}
         );
+
+        charmove.transform(ayumi->transform);
       PrintDebugTime();
 
       charmove.setAnimation(&ayumi->getAnimation());
 
-      TPCamera cam(
-        window, fixMouse, charmove, ayumi->getMesh().bSphereCenter(),
-        ayumi->getMesh().bSphereCenter() +
-          glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
-        ayumi->getMesh().bSphereCenter(),
-        1.5f
+      engine::ThirdPersonalCamera cam(
+        ayumi->transform, glm::vec3(ayumi->getMesh().bSphereRadius() * 2), 1.5f
       );
+      cam.localPos() = ayumi->getMesh().bSphereCenter();
 
       charmove.setCamera(&cam);
       scene.addCamera(&cam);

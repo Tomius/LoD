@@ -5,11 +5,13 @@
 #ifndef LOD_CHARMOVE_HPP_
 #define LOD_CHARMOVE_HPP_
 
+#include <exception>
 #include "oglwrap_config.hpp"
 #include "oglwrap/glew.hpp"
 #include "oglwrap/oglwrap.hpp"
 
 #include "../engine/camera.hpp"
+#include "../engine/transform.hpp"
 #include "../engine/mesh/animated_mesh_renderer.hpp"
 
 #include "terrain.hpp"
@@ -17,7 +19,7 @@
 extern const float GRAVITY;
 
 class CharacterMovement {
-  glm::vec3 pos_;
+  engine::Transform* transform_;
 
   // Current and destination rotation angles.
   double curr_rot_, dest_rot_;
@@ -40,8 +42,7 @@ private:
   std::function<CanDoCallback> can_flip_functor_;
 
 public:
-  CharacterMovement(glm::vec3 pos,
-                    const Terrain& terrain,
+  CharacterMovement(const Terrain& terrain,
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f);
 
@@ -60,14 +61,14 @@ public:
   bool isDoingFlip() const;
   void setFlip(bool flip);
   bool isWalking() const;
-  glm::mat4 getModelMatrix() const;
-  glm::vec3 getPos() const;
-  void setAnimation(engine::Animation* anim) {
-    anim_ = anim;
-  }
-
-  void setCamera(engine::Camera* cam) {
-    camera_ = cam;
+  void setAnimation(engine::Animation* anim) { anim_ = anim; }
+  void setCamera(engine::Camera* cam) { camera_ = cam; }
+  void transform(engine::Transform& t) { transform_ = &t; }
+  engine::Transform& transform() const {
+    if(transform_)
+     return *transform_;
+    else
+      throw std::runtime_error("CharacterMovement's transform not set.");
   }
 };
 

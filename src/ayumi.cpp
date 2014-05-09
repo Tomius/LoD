@@ -193,7 +193,7 @@ void Ayumi::shadowRender(float time, const engine::Camera& cam) {
   shadow_prog_.use();
   shadow_uMCP_ = shadow_.modelCamProjMat(
     skybox_.getSunPos(), mesh_.bSphere(),
-    charmove_.getModelMatrix(), mesh_.worldTransform()
+    transform.matrix(), mesh_.worldTransform()
   );
   mesh_.uploadBoneInfo(shadow_uBones_);
 
@@ -209,8 +209,8 @@ void Ayumi::shadowRender(float time, const engine::Camera& cam) {
 
 void Ayumi::render(float time, const engine::Camera& cam) {
   prog_.use();
-  uCameraMatrix_.set(cam.cameraMatrix());
-  uModelMatrix_.set(charmove_.getModelMatrix() * mesh_.worldTransform());
+  uCameraMatrix_.set(cam.matrix());
+  uModelMatrix_.set(transform.matrix() * mesh_.worldTransform());
   for(size_t i = 0; i < shadow_.getDepth(); ++i) {
     uShadowCP_[i] = shadow_.shadowCPs()[i];
   }

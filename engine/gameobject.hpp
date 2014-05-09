@@ -15,9 +15,10 @@ public:
   Transform transform;
   std::unique_ptr<RigidBody> rigid_body;
 
-  void addRigidBody(const std::function<double(double, double)>& getTerrainHeight) {
+  void addRigidBody(RigidBody::CallBack getTerrainHeight,
+                    double starting_height = NAN) {
     rigid_body = std::unique_ptr<RigidBody>(
-      new RigidBody{transform, getTerrainHeight}
+      new RigidBody{transform, getTerrainHeight, starting_height}
     );
   }
 

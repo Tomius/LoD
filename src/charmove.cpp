@@ -2,10 +2,14 @@
 
 using namespace oglwrap;
 
-CharacterMovement::CharacterMovement(const Terrain& terrain,
-                                     float horizontal_speed,
-                                     float rotationSpeed_PerSec)
-  : curr_rot_(0)
+CharacterMovement::CharacterMovement(
+                  engine::Transform& transform,
+                  engine::RigidBody& rigid_body,
+                  float horizontal_speed,
+                  float rotationSpeed_PerSec)
+  : transform_(transform)
+  , rigid_body_(rigid_body)
+  , curr_rot_(0)
   , dest_rot_(0)
   , rot_speed_(rotationSpeed_PerSec)
   , vert_speed_(0)
@@ -18,7 +22,6 @@ CharacterMovement::CharacterMovement(const Terrain& terrain,
   , transition_(false)
   , anim_(nullptr)
   , camera_(nullptr)
-  , terrain_(terrain)
   , can_jump_functor_(nullptr)
   , can_flip_functor_(nullptr)
 { }
@@ -106,10 +109,10 @@ void CharacterMovement::update(float time) {
   }
 
   mat4 rotation = rotate(mat4(), (float)fmod(curr_rot_, 360), vec3(0,1,0));
-  transform().rot(glm::quat_cast(rotation));
+  transform_.rot(glm::quat_cast(rotation));
 
   {
-    auto pos = transform().pos_proxy();
+    auto pos = transform_.pos_proxy();
 
     pos += mat3(rotation) * vec3(character_offset.x, 0, character_offset.y);
     if(jumping_) {
@@ -117,11 +120,12 @@ void CharacterMovement::update(float time) {
     }
   }
 
-  updateHeight(time, terrain_.getHeight(transform().pos().x, transform().pos().z));
+  rigid_body_.update();
+  updateHeight(time);
 }
 
-void CharacterMovement::updateHeight(float time, float groundHeight) {
-  auto pos = transform().pos_proxy();
+void CharacterMovement::updateHeight(float time) {
+  auto& pos = transform_.localPos();
 
   static float prevTime = 0;
   float diff_time = time - prevTime;
@@ -132,23 +136,22 @@ void CharacterMovement::updateHeight(float time, float groundHeight) {
     float dt = std::min(time_step, diff_time);
     diff_time -= time_step;
 
-    const float diff = groundHeight - pos.y;
-    if(diff >= 0 && jumping_ && vert_speed_ < 0) {
+    if(pos.y < 0 && jumping_ && vert_speed_ < 0) {
       jumping_ = false;
       flip_ = false;
       can_flip_ = true;
-      pos.y = groundHeight;
+      pos.y = 0;
       return;
     }
+
     if(!jumping_) {
-      const float offs = std::max(fabs(diff / 2.0f), 0.05) * dt * 20.0f;
-      if(fabs(diff) > offs) {
-        pos.y += diff / fabs(diff) * offs;
+      const float offs = std::max(fabs(pos.y / 2.0f), 0.05) * dt * 20.0f;
+      if(fabs(pos.y) > offs) {
+        pos.y -= pos.y / fabs(pos.y) * offs;
       }
-    }
-    if(jumping_) {
-      if(diff > 0) {
-        pos.y += std::max(diff, vert_speed_) * dt;
+    } else {
+      if(pos.y < 0) {
+        pos.y += std::max(pos.y, vert_speed_) * dt;
       } else {
         pos.y += vert_speed_ * dt;
       }

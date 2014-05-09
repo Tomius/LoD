@@ -69,7 +69,7 @@ public:
     return WorldSpacePositionProxy(*this);
   }
 
-  const vec3 pos() const {
+  virtual const vec3 pos() const {
     if(parent_) {
       return vec3(
         parent_->localToWorldMatrix() * vec4(pos_, 1)
@@ -79,7 +79,7 @@ public:
     }
   }
 
-  void pos(const vec3& new_pos) {
+  virtual void pos(const vec3& new_pos) {
     if(parent_) {
       pos_ = vec3(parent_->worldToLocalMatrix() * vec4(new_pos - parent_->pos(), 0));
     } else {
@@ -112,7 +112,7 @@ public:
     return WorldSpaceScaleProxy(*this);
   }
 
-  const vec3 scale() const {
+  virtual const vec3 scale() const {
     if(parent_) {
       return mat3(parent_->localToWorldMatrix()) * scale_;
     } else {
@@ -120,7 +120,7 @@ public:
     }
   }
 
-  void scale(const vec3& new_scale) {
+  virtual void scale(const vec3& new_scale) {
     if(parent_) {
       scale_ = mat3(parent_->worldToLocalMatrix()) * new_scale;
     } else {
@@ -149,7 +149,7 @@ public:
     ~WorldSpaceRotationProxy() { tf.rot(*this); }
   };
 
-  const quat rot() const {
+  virtual const quat rot() const {
     if(parent_) {
       return parent_->rot() * rot_;
     } else {
@@ -157,7 +157,7 @@ public:
     }
   }
 
-  void rot(const quat& new_rot) {
+  virtual void rot(const quat& new_rot) {
     if(parent_) {
       rot_ = glm::inverse(parent_->rot()) * new_rot;
     } else {
@@ -179,7 +179,7 @@ public:
 
   // Sets the rotation, so that 'local_space_vec' in local space will be
   // equivalent to 'world_space_vec' in world space.
-  void rot(const vec3& local_space_vec, const vec3& world_space_vec) {
+  virtual void rot(const vec3& local_space_vec, const vec3& world_space_vec) {
     vec3 local = glm::normalize(local_space_vec);
     vec3 world = glm::normalize(world_space_vec);
 
@@ -229,27 +229,27 @@ public:
     }
   }
 
-  vec3 forward() const {
+  virtual vec3 forward() const {
     return glm::normalize(rot() * vec3(0, 0, -1));
   }
 
-  void forward(const vec3& new_fwd) {
+  virtual void forward(const vec3& new_fwd) {
     rot(vec3(0, 0, -1), new_fwd);
   }
 
-  vec3 up() const {
+  virtual vec3 up() const {
     return glm::normalize(rot() * vec3(0, 1, 0));
   }
 
-  void up(const vec3& new_up) {
+  virtual void up(const vec3& new_up) {
      rot(vec3(0, 1, 0), new_up);
   }
 
-  vec3 right() const {
+  virtual vec3 right() const {
     return glm::normalize(rot() * vec3(1, 0, 0));
   }
 
-  void right(const vec3& new_right) {
+  virtual void right(const vec3& new_right) {
     rot(vec3(1, 0, 0), new_right);
   }
 
@@ -257,7 +257,7 @@ public:
     return glm::inverse(localToWorldMatrix());
   }
 
-  mat4 localToWorldMatrix() const {
+  virtual mat4 localToWorldMatrix() const {
     mat4 local_transf = glm::scale(glm::mat4_cast(rot_), scale_);
     local_transf[3] = vec4(pos_, 1);
 

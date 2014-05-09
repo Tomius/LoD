@@ -6,37 +6,20 @@
 #define ENGINE_CAMERA_HPP_
 
 #include <cmath>
+#include <iostream>
 #include "oglwrap/oglwrap.hpp"
 
-#include "transform.hpp"
 #include "timer.hpp"
+#include "transform.hpp"
+#include "rigid_body.hpp"
 
 namespace engine {
 
-/// The base class for all cameras
+/// The base class for all cameras (basically a Transform)
 class Camera : public Transform {
 public:
   virtual void update(const Timer& timer) = 0;
   virtual void scrolling(int mouse_wheel_ticks) {}
-
-  virtual const glm::vec3 pos() const { return Transform::pos(); }
-  virtual void pos(const glm::vec3& new_pos) { return Transform::pos(new_pos); }
-
-  virtual const glm::quat rot() const { return Transform::rot(); }
-  virtual void rot(const glm::quat& new_rot) { return Transform::rot(new_rot); }
-
-  virtual const glm::vec3 scale() const { return glm::vec3{1, 1, 1}; }
-  virtual void scale(const glm::vec3&) { }
-
-  virtual glm::vec3 forward() const { return Transform::forward(); }
-  virtual void forward(const glm::vec3& new_fwd) { Transform::forward(new_fwd); }
-  virtual glm::vec3 up() const { return Transform::up(); }
-  virtual void up(const glm::vec3& new_up) { Transform::up(new_up); }
-  virtual glm::vec3 right() const { return Transform::right(); }
-  virtual void right(const glm::vec3& new_right) { Transform::right(new_right); }
-
-  virtual glm::mat4 matrix() const {return Transform::matrix(); };
-  operator glm::mat4() const { return matrix(); }
 };
 
 /**
@@ -51,11 +34,15 @@ class ThirdPersonalCamera : public Camera {
   bool first_call_;
 
   // For scrolling interpolation
-  float curr_dist_mod_, dest_dist_mod_;
+  double curr_dist_mod_, dest_dist_mod_;
 
   // Private constant number
-  const float initial_distance_, cos_max_pitch_angle_,
+  const double initial_distance_, cos_max_pitch_angle_,
               mouse_sensitivity_, mouse_scroll_sensitivity_;
+
+  // The camera should collide with the terrain.
+  std::function<double(double, double)> getTerrainHeight_;
+
 public:
   /**
    * @brief Creates the third-personal camera.
@@ -70,37 +57,35 @@ public:
    */
   ThirdPersonalCamera(Transform& target,
                       const glm::vec3& position,
-                      float mouse_sensitivity = 1.0f,
-                      float mouse_scroll_sensitivity = 1.0f)
+                      RigidBody::CallBack getTerrainHeight,
+                      double mouse_sensitivity = 1.0,
+                      double mouse_scroll_sensitivity = 1.0)
     : first_call_(true)
-    , curr_dist_mod_(1.0f)
-    , dest_dist_mod_(1.0f)
+    , curr_dist_mod_(1.0)
+    , dest_dist_mod_(1.0)
     , initial_distance_(glm::length(target.pos() - position))
-    , cos_max_pitch_angle_(0.95f)
+    , cos_max_pitch_angle_(0.95)
     , mouse_sensitivity_(mouse_sensitivity)
-    , mouse_scroll_sensitivity_(mouse_scroll_sensitivity) {
+    , mouse_scroll_sensitivity_(mouse_scroll_sensitivity)
+    , getTerrainHeight_(getTerrainHeight) {
 
     target.addChild(*this);
     pos(position);
-    forward((target.pos()-position) / initial_distance_);
+    forward((target.pos()-position) / float(initial_distance_));
   }
 
   Transform& target() const {
     return *getParent();
   }
 
-  // The camera's localPos can be used as an offset for the target.
-  glm::vec3 targetPos() const {
-    return Transform::pos();
-  }
-
   // The position is counted in a different way
   const glm::vec3 pos() const override {
-    return targetPos() - forward() * curr_dist_mod_*initial_distance_;
+    return target().pos() - forward() * float(curr_dist_mod_*initial_distance_);
   }
 
   void pos(const glm::vec3& new_pos) override {
-    Transform::pos(new_pos + forward() * curr_dist_mod_*initial_distance_);
+    localPos(new_pos - target().pos() + forward() *
+      float(curr_dist_mod_*initial_distance_));
   }
 
   // The forward value is cached
@@ -128,8 +113,8 @@ public:
     forward(glm::cross(up(), new_right));
   }
 
-  glm::mat4 matrix() const override {
-    return glm::lookAt(pos(), targetPos(), up());
+  glm::mat4 localToWorldMatrix() const override {
+    return glm::lookAt(pos(), target().pos(), up());
   }
 
   /// Updates the camera's position and rotation.
@@ -149,8 +134,8 @@ public:
 
     // Mouse movement - update the coordinate system
     if(diff.x || diff.y) {
-      float dx ( diff.x * mouse_sensitivity_ * 0.0035f );
-      float dy ( -diff.y * mouse_sensitivity_ * 0.0035f );
+      float dx ( diff.x * mouse_sensitivity_ * 0.0035 );
+      float dy ( -diff.y * mouse_sensitivity_ * 0.0035 );
 
       // If we are looking up / down, we don't want to be able
       // to rotate to the other side
@@ -166,14 +151,43 @@ public:
       forward(glm::normalize(forward() + right()*dx + up()*dy));
     }
 
-    // Interpolate the scrolling
-    float dist_diff_mod = dest_dist_mod_ - curr_dist_mod_;
-    if(fabs(dist_diff_mod) > timer.dt * mouse_scroll_sensitivity_) {
-      int sign = dist_diff_mod / fabs(dist_diff_mod);
-      curr_dist_mod_ += sign * timer.dt * mouse_scroll_sensitivity_;
+    updateDistance(timer);
+  }
+
+private:
+  void updateDistance(const Timer& timer) {
+    glm::dvec3 tpos(target().pos()), fwd(forward());
+    glm::dvec3 pos(tpos - fwd*curr_dist_mod_*initial_distance_);
+
+    if(isOverTerrain(pos, 1.0)) {
+      // Interpolate the scrolling if there isn't any collision
+      double dist_diff_mod = dest_dist_mod_ - curr_dist_mod_;
+      if(fabs(dist_diff_mod) > timer.dt * mouse_scroll_sensitivity_) {
+        int sign = dist_diff_mod / fabs(dist_diff_mod);
+        curr_dist_mod_ += sign * timer.dt * mouse_scroll_sensitivity_;
+      }
+    } else {
+      // If the camera collides the terrain, some magic is needed.
+      double collision_dist_mod = curr_dist_mod_;
+      do {
+        double dist =  collision_dist_mod*initial_distance_;
+        pos = tpos - fwd*dist;
+        if(isOverTerrain(pos, 0.8)) {
+          break;
+        } else {
+          collision_dist_mod *= 0.999;
+        }
+      } while(collision_dist_mod > 0.001);
+
+      curr_dist_mod_ += 15.0*timer.dt*(collision_dist_mod - curr_dist_mod_);
     }
   }
 
+  double isOverTerrain(const glm::dvec3& pos, double offset) const {
+    return getTerrainHeight_(pos.x, pos.z) + offset < pos.y;
+  }
+
+public:
   /**
    * @brief Changes the distance in which the camera should follow the target.
    *

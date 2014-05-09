@@ -29,20 +29,24 @@ class Ayumi : public engine::GameObject {
 
   bool attack2_, attack3_;
 
-  CharacterMovement& charmove_;
+  CharacterMovement *charmove_;
 
   Skybox& skybox_;
-
   Shadow& shadow_;
 
 public:
-  Ayumi(Skybox& skybox, CharacterMovement& charmove, Shadow& shadow);
+  Ayumi(Skybox& skybox, Shadow& shadow);
   engine::AnimatedMeshRenderer& getMesh();
   engine::Animation& getAnimation();
   void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
   void update(float time) override;
   void shadowRender(float time, const engine::Camera& cam) override;
   void render(float time, const engine::Camera& cam) override;
+  void charmove(CharacterMovement& charmove) {
+    charmove_ = &charmove;
+    charmove_->setCanJumpCallback(std::bind(&Ayumi::canJump, this));
+    charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
+  }
 
 private: // Callbacks
   CharacterMovement::CanDoCallback canJump;

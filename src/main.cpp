@@ -12,6 +12,7 @@
 #include "../engine/timer.hpp"
 #include "../engine/scene.hpp"
 #include "../engine/camera.hpp"
+#include "../engine/gameobject.hpp"
 
 #include "charmove.hpp"
 #include "skybox.hpp"
@@ -111,41 +112,50 @@ int main() {
 
       dbg_clock.restart();
       PrintDebugText("Initializing the skybox");
-        Skybox *skybox = scene.addSkybox(new Skybox{});
+        Skybox& skybox = scene.addSkybox(new Skybox{});
       PrintDebugTime();
 
       PrintDebugText("Initializing the shadow maps");
-        Shadow *shadow = scene.addShadow(
+        Shadow& shadow = scene.addShadow(
           new Shadow{PERFORMANCE < 2 ? 512 : 256, 8, 8}
         );
       PrintDebugTime();
 
       PrintDebugText("Initializing the terrain");
-        Terrain *terrain = scene.addGameObject(new Terrain{*skybox, *shadow});
+        Terrain& terrain = scene.addGameObject(new Terrain{skybox, shadow});
+        auto terrain_height =
+          [&terrain](double x, double y) {return terrain.getHeight(x, y);};
       PrintDebugTime();
 
       PrintDebugText("Initializing the trees");
-        scene.addGameObject(new Tree{*skybox, *shadow, *terrain});
+        scene.addGameObject(new Tree{skybox, shadow, terrain});
       PrintDebugTime();
 
       PrintDebugText("Initializing Ayumi");
-        CharacterMovement charmove{
-          *terrain
-        };
-
-        Ayumi *ayumi = scene.addGameObject(
-          new Ayumi{*skybox, charmove, *shadow}
+        Ayumi& ayumi = scene.addGameObject(
+          new Ayumi{skybox, shadow}
         );
 
-        charmove.transform(ayumi->transform);
+        ayumi.addRigidBody(terrain_height, ayumi.transform.pos().y);
+
+        CharacterMovement charmove {
+          ayumi.transform, *ayumi.rigid_body
+        };
+
+        ayumi.charmove(charmove);
       PrintDebugTime();
 
-      charmove.setAnimation(&ayumi->getAnimation());
+      charmove.setAnimation(&ayumi.getAnimation());
+
+      engine::Transform& cam_offset =
+        scene.addGameObject(new engine::GameObject{}).transform;
+      ayumi.transform.addChild(cam_offset);
+      cam_offset.localPos(ayumi.getMesh().bSphereCenter());
 
       engine::ThirdPersonalCamera cam(
-        ayumi->transform, glm::vec3(ayumi->getMesh().bSphereRadius() * 2), 1.5f
+        cam_offset, cam_offset.pos() + glm::vec3(ayumi.getMesh().bSphereRadius() * 2),
+        terrain_height, 1.5f
       );
-      cam.localPos() = ayumi->getMesh().bSphereCenter();
 
       charmove.setCamera(&cam);
       scene.addCamera(&cam);
@@ -155,7 +165,7 @@ int main() {
       PrintDebugTime();
 
       PrintDebugText("Initializing the map");
-        Map *map = scene.addAfterEffect(new Map{glm::vec2(terrain->w, terrain->h)});
+        Map &map = scene.addAfterEffect(new Map{glm::vec2(terrain.w, terrain.h)});
       PrintDebugTime();
 
       std::cout << "\nStarting the main loop.\n" << std::endl;
@@ -182,7 +192,7 @@ int main() {
               } else if(event.key.code == sf::Keyboard::Space) {
                 charmove.handleSpacePressed();
               } else if(event.key.code == sf::Keyboard::M) {
-                map->toggle();
+                map.toggle();
               }
               break;
             case sf::Event::Resized: {

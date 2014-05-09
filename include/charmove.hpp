@@ -19,7 +19,8 @@
 extern const float GRAVITY;
 
 class CharacterMovement {
-  engine::Transform* transform_;
+  engine::Transform& transform_;
+  engine::RigidBody& rigid_body_;
 
   // Current and destination rotation angles.
   double curr_rot_, dest_rot_;
@@ -33,16 +34,15 @@ class CharacterMovement {
   engine::Camera *camera_;
 
 public:
-  const Terrain& terrain_;
   using CanDoCallback = bool();
 
 private:
-
   std::function<CanDoCallback> can_jump_functor_;
   std::function<CanDoCallback> can_flip_functor_;
 
 public:
-  CharacterMovement(const Terrain& terrain,
+  CharacterMovement(engine::Transform& transform,
+                    engine::RigidBody& rigid_body,
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f);
 
@@ -54,7 +54,7 @@ public:
   }
   void update(float time);
   void handleSpacePressed();
-  void updateHeight(float time, float groundHeight);
+  void updateHeight(float time);
   bool isJumping() const;
   bool isJumpingRise() const;
   bool isJumpingFall() const;
@@ -63,13 +63,6 @@ public:
   bool isWalking() const;
   void setAnimation(engine::Animation* anim) { anim_ = anim; }
   void setCamera(engine::Camera* cam) { camera_ = cam; }
-  void transform(engine::Transform& t) { transform_ = &t; }
-  engine::Transform& transform() const {
-    if(transform_)
-     return *transform_;
-    else
-      throw std::runtime_error("CharacterMovement's transform not set.");
-  }
 };
 
 #endif // LOD_CHARMOVE_HPP_

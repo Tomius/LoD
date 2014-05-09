@@ -4,7 +4,7 @@ using namespace oglwrap;
 extern Context gl;
 extern bool was_left_click;
 
-Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove, Shadow& shadow)
+Ayumi::Ayumi(Skybox& skybox, Shadow& shadow)
     : mesh_("models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_MaxQuality |
             aiProcess_FlipUVs)
@@ -20,12 +20,9 @@ Ayumi::Ayumi(Skybox& skybox, CharacterMovement& charmove, Shadow& shadow)
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowSoftness_(prog_, "uShadowSoftness")
     , attack2_(false)
-    , charmove_(charmove)
+    , charmove_(nullptr)
     , skybox_(skybox)
     , shadow_(shadow) {
-
-  charmove.setCanJumpCallback(std::bind(&Ayumi::canJump, this));
-  charmove.setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
 
   ShaderSource vs_source("ayumi.vert");
   vs_source.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
@@ -143,7 +140,7 @@ void Ayumi::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
 }
 
 void Ayumi::update(float time) {
-  charmove_.update(time);
+  charmove_->update(time);
 
   std::string curr_anim = anim_.getCurrentAnimation();
 
@@ -162,20 +159,20 @@ void Ayumi::update(float time) {
         anim_.setCurrentAnimation(AnimParams("Attack", 0.3f), time);
       }
     }
-  } else if(charmove_.isJumping()) {
-    if(charmove_.isDoingFlip()) {
+  } else if(charmove_->isJumping()) {
+    if(charmove_->isDoingFlip()) {
       if(curr_anim == "JumpRise") {
         anim_.setCurrentAnimation(AnimParams("Flip", 0.05f), time);
       } else {
         anim_.setCurrentAnimation(AnimParams("Flip", 0.2f), time);
       }
-    } else if(charmove_.isJumpingRise()) {
+    } else if(charmove_->isJumpingRise()) {
       anim_.setCurrentAnimation(AnimParams("JumpRise", 0.3f), time);
     } else {
       anim_.setCurrentAnimation(AnimParams("JumpFall", 0.3f), time);
     }
   } else {
-    if(charmove_.isWalking()) {
+    if(charmove_->isWalking()) {
       if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
         anim_.setCurrentAnimation(AnimParams("Run", 0.3f), time);
       } else {
@@ -261,17 +258,17 @@ engine::AnimParams Ayumi::animationEndedCallback(const std::string& current_anim
   }
 
   if(current_anim == "Flip") {
-    charmove_.setFlip(false);
+    charmove_->setFlip(false);
     return AnimParams("JumpFall", 0.2f);
   }
 
-  if(charmove_.isJumping()) {
-    if(charmove_.isJumpingRise()) {
+  if(charmove_->isJumping()) {
+    if(charmove_->isJumpingRise()) {
       return AnimParams("JumpRise", 0.3f);
     } else {
       return AnimParams("JumpFall", 0.3f);
     }
-  } else if(charmove_.isWalking()) {
+  } else if(charmove_->isWalking()) {
     AnimParams params;
 
     if(current_anim == "Attack2") {

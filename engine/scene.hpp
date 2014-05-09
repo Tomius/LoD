@@ -30,33 +30,33 @@ public:
   Scene() { }
 
   template<typename T>
-  T* addGameObject(T* gameobj) {
+  T& addGameObject(T* gameobj) {
     auto go = dynamic_cast<GameObject*>(gameobj);
     assert(go);
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
-    return gameobj;
+    return *gameobj;
   }
 
   template<typename T>
-  T* addAfterEffect(T* after_effect) {
+  T& addAfterEffect(T* after_effect) {
     auto go = dynamic_cast<GameObject*>(after_effect);
     assert(go);
     after_effects_.push_back(std::unique_ptr<GameObject>(go));
-    return after_effect;
+    return *after_effect;
   }
 
-  Shadow* addShadow(Shadow* shadow) {
+  Shadow& addShadow(Shadow* shadow) {
     shadow_ = std::unique_ptr<Shadow>(shadow);
-    return shadow;
+    return *shadow;
   }
 
   void addCamera(Camera* cam) {
     camera_ = cam;
   }
 
-  Skybox* addSkybox(Skybox* skybox) {
+  Skybox& addSkybox(Skybox* skybox) {
     skybox_ = std::unique_ptr<Skybox>(skybox);
-    return skybox;
+    return *skybox;
   }
 
   void screenResized(const glm::mat4& projMat, GLuint w, GLuint h) {

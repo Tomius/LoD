@@ -12,7 +12,8 @@
 #include "oglwrap/config.hpp"
 #include "oglwrap/general.hpp"
 #include "oglwrap/buffer.hpp"
-#include "oglwrap/vertexAttrib.hpp"
+#include "oglwrap/enums/index_type.hpp"
+#include "oglwrap/vertex_attrib.hpp"
 #include "oglwrap/textures/texture_2D.hpp"
 #include "../assimp.hpp"
 

@@ -2,8 +2,10 @@
 #define LOD_TERRAINMESH_HPP_
 
 #include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
+#include "oglwrap/shader.hpp"
+#include "oglwrap/uniform.hpp"
+#include "oglwrap/context.hpp"
+#include "oglwrap/vertex_attrib.hpp"
 #include "oglwrap/textures/texture_2D.hpp"
 
 #include "terrainData.hpp"

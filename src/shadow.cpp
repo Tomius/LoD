@@ -1,4 +1,5 @@
 #include "shadow.hpp"
+#include "oglwrap/context.hpp"
 
 using namespace oglwrap;
 extern Context gl;

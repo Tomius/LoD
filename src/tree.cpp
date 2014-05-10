@@ -65,7 +65,7 @@ Tree::Tree(Skybox& skybox, Shadow& shadow, const Terrain& terrain)
   }
 }
 
-void Tree::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
+void Tree::screenResized(const glm::mat4& projMat, size_t, size_t) {
   prog_.use();
   uProjectionMatrix_ = projMat;
 }

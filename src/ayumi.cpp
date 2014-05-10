@@ -56,7 +56,7 @@ Ayumi::Ayumi(Skybox& skybox, Shadow& shadow)
   UniformSampler(prog_, "uDiffuseTexture").set(1);
   UniformSampler(prog_, "uSpecularTexture").set(2);
   UniformSampler(prog_, "uShadowMap").set(3);
-  uShadowSoftness_ = 1 << clamp(4 - PERFORMANCE, 0, 4);
+  uShadowSoftness_ = 1 << engine::clamp(4 - PERFORMANCE, 0, 4);
   Uniform<glm::ivec2>(prog_, "uShadowAtlasSize").set(shadow.getAtlasDimensions());
 
   prog_.validate();
@@ -134,7 +134,7 @@ engine::Animation& Ayumi::getAnimation() {
   return anim_;
 }
 
-void Ayumi::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
+void Ayumi::screenResized(const glm::mat4& projMat, size_t, size_t) {
   prog_.use();
   uProjectionMatrix_ = projMat;
 }

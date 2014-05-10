@@ -1,7 +1,6 @@
 #ifndef ENGINE_MESH_ANIMATED_MESH_RENDERER_ANIMATION_INL_HPP_
 #define ENGINE_MESH_ANIMATED_MESH_RENDERER_ANIMATION_INL_HPP_
 
-#include "oglwrap/global.hpp"
 #include "animated_mesh_renderer.hpp"
 #include "animation.hpp"
 

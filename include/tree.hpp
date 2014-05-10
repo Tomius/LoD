@@ -2,8 +2,8 @@
 #define LOD_TREE_HPP_
 
 #include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
+#include "oglwrap/shader.hpp"
+#include "oglwrap/uniform.hpp"
 
 #include "../engine/gameobject.hpp"
 #include "../engine/mesh/mesh_renderer.hpp"
@@ -43,7 +43,7 @@ class Tree : public engine::GameObject {
 
 public:
   Tree(Skybox& skybox, Shadow& shadow, const Terrain& terrain);
-  void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
+  void screenResized(const glm::mat4& projMat, size_t, size_t) override;
   void shadowRender(float time, const engine::Camera& cam) override;
   void render(float time, const engine::Camera& cam) override;
 };

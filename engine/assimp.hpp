@@ -36,6 +36,32 @@ static inline aiMatrix4x4 convertMatrix(const glm::mat4& m) {
   };
 }
 
+// Some random templates
+
+template<class T>
+/// Interpolates two things.
+/// @param a - the first thing.
+/// @param b - the second thing.
+/// @param alpha - Specifies how 'b' will the result be.
+T interpolate(const T& a, const T& b, float alpha) {
+  return a + alpha * (b - a);
+}
+
+template <typename T>
+/// Clamps a value to a given range.
+/** @param val - The value to clamp.
+  * @param min - The lower bound of the range.
+  * @param max - The upper bound of the range. */
+inline T clamp(const T& val, const T& min, const T& max) {
+  if(val < min) {
+    return min;
+  } else if(val > max) {
+    return max;
+  } else {
+    return val;
+  }
+}
+
 }
 
 #endif // ENGINE_ASSIMP_HPP_

@@ -38,7 +38,7 @@ public:
   Ayumi(Skybox& skybox, Shadow& shadow);
   engine::AnimatedMeshRenderer& getMesh();
   engine::Animation& getAnimation();
-  void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
+  void screenResized(const glm::mat4& projMat, size_t, size_t) override;
   void update(float time) override;
   void shadowRender(float time, const engine::Camera& cam) override;
   void render(float time, const engine::Camera& cam) override;

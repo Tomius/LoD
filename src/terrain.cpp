@@ -57,7 +57,7 @@ double Terrain::getHeight(double x, double y) const {
   return scale_vector.y * mesh_.getHeight(x / scale_vector.x, y / scale_vector.z);
 }
 
-void Terrain::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
+void Terrain::screenResized(const glm::mat4& projMat, size_t, size_t) {
   prog_.use();
   uProjectionMatrix_ = projMat;
 }

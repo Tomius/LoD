@@ -1,10 +1,7 @@
 #ifndef ENGINE_GAMEOBJECT_HPP_
 #define ENGINE_GAMEOBJECT_HPP_
 
-#include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
-
+#include <memory>
 #include "camera.hpp"
 #include "rigid_body.hpp"
 
@@ -23,7 +20,7 @@ public:
   }
 
   virtual void screenResized(const glm::mat4& projMat,
-                             GLuint width, GLuint height) {}
+                             size_t width, size_t height) {}
   virtual void update(float t) {}
   virtual void shadowRender(float time, const Camera& cam) {}
   virtual void render(float time, const Camera& cam) {}

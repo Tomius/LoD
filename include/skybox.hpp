@@ -2,8 +2,8 @@
 #define LOD_SKYBOX_HPP_
 
 #include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
+#include "oglwrap/shader.hpp"
+#include "oglwrap/uniform.hpp"
 #include "oglwrap/shapes/cube.hpp"
 #include "oglwrap/textures/texture_cube.hpp"
 
@@ -25,7 +25,7 @@ class Skybox : public engine::GameObject {
   oglwrap::FragmentShader sky_fs_;
 public:
   Skybox();
-  void screenResized(const glm::mat4& projMat, GLuint, GLuint) override;
+  void screenResized(const glm::mat4& projMat, size_t, size_t) override;
   void render(float time, const engine::Camera& cam) override;
 
   const oglwrap::TextureCube& env_map;

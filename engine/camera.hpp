@@ -6,8 +6,6 @@
 #define ENGINE_CAMERA_HPP_
 
 #include <cmath>
-#include <iostream>
-#include "oglwrap/oglwrap.hpp"
 
 #include "timer.hpp"
 #include "transform.hpp"

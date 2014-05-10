@@ -4,10 +4,6 @@
 #include <vector>
 #include <memory>
 
-#include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
-
 #include "shadow.hpp"
 #include "skybox.hpp"
 

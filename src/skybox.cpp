@@ -40,7 +40,7 @@ Skybox::Skybox()
   }
 }
 
-void Skybox::screenResized(const glm::mat4& projMat, GLuint, GLuint) {
+void Skybox::screenResized(const glm::mat4& projMat, size_t, size_t) {
   prog_.use();
   uProjectionMatrix_.set(projMat);
 }

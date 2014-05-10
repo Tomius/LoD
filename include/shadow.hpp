@@ -2,8 +2,8 @@
 #define LOD_SHADOW_HPP_
 
 #include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
+#include "oglwrap/shader.hpp"
+#include "oglwrap/uniform.hpp"
 #include "oglwrap/framebuffer.hpp"
 #include "../engine/gameobject.hpp"
 

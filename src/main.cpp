@@ -6,8 +6,6 @@
 #define OGLWRAP_INSTATIATE 1
 
 #include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
 
 #include "../engine/timer.hpp"
 #include "../engine/scene.hpp"

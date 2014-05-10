@@ -29,9 +29,9 @@ Skybox::Skybox()
     env_map_.bind();
     env_map_.minFilter(MinFilter::Linear);
     env_map_.magFilter(MagFilter::Linear);
-    env_map_.wrapS(Wrap::ClampToEdge);
-    env_map_.wrapT(Wrap::ClampToEdge);
-    env_map_.wrapR(Wrap::ClampToEdge);
+    env_map_.wrapS(WrapMode::ClampToEdge);
+    env_map_.wrapT(WrapMode::ClampToEdge);
+    env_map_.wrapP(WrapMode::ClampToEdge);
 
     for(int i = 0; i < 6; i++) {
       char c[2] = {char('0' + i), 0};

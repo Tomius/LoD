@@ -22,15 +22,15 @@ Shadow::Shadow(size_t shadow_map_size, size_t atlas_x_size, size_t atlas_y_size)
   );
   tex_.minFilter(MinFilter::Nearest);
   tex_.magFilter(MagFilter::Nearest);
-  tex_.wrapS(Wrap::ClampToBorder);
-  tex_.wrapT(Wrap::ClampToBorder);
+  tex_.wrapS(WrapMode::ClampToBorder);
+  tex_.wrapT(WrapMode::ClampToBorder);
   tex_.borderColor(glm::vec4(1.0f));
-  tex_.compareFunc(CompFunc::LEqual);
-  tex_.compareMode(CompMode::CompareRefToTexture);
+  tex_.compareFunc(CompareFunc::LEqual);
+  tex_.compareMode(CompareMode::CompareRefToTexture);
 
   // Setup the FBO
   fbo_.bind();
-  fbo_.attachTexture(FboAttachment::Depth, tex_, 0);
+  fbo_.attachTexture(FramebufferAttachment::Depth, tex_, 0);
   // No color output in the bound framebuffer, only depth.
   gl.DrawBuffer(ColorBuffer::None);
   fbo_.validate();

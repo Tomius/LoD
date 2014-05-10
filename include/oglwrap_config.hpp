@@ -7,4 +7,6 @@
 #define OGLWRAP_INITIALIZE_GLOBAL_GL_OBJECTS_ON_USE 0
 #define OGLWRAP_DEFAULT_SHADER_PATH "shaders/"
 
+#include "oglwrap/glew.hpp"
+
 #endif // LOD_OGLWRAP_CONFIG_HPP_

@@ -2,8 +2,8 @@
 #define LOD_AYUMI_HPP_
 
 #include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
+#include "oglwrap/shader.hpp"
+#include "oglwrap/uniform.hpp"
 
 #include "../engine/gameobject.hpp"
 #include "../engine/mesh/animated_mesh_renderer.hpp"

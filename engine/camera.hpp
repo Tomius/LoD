@@ -64,7 +64,7 @@ public:
     , curr_dist_mod_(1.0)
     , dest_dist_mod_(1.0)
     , initial_distance_(glm::length(target.pos() - position))
-    , cos_max_pitch_angle_(0.95)
+    , cos_max_pitch_angle_(0.8)
     , mouse_sensitivity_(mouse_sensitivity)
     , mouse_scroll_sensitivity_(mouse_scroll_sensitivity)
     , getTerrainHeight_(getTerrainHeight) {
@@ -159,12 +159,22 @@ private:
     glm::dvec3 tpos(target().pos()), fwd(forward());
     glm::dvec3 pos(tpos - fwd*curr_dist_mod_*initial_distance_);
 
-    if(isOverTerrain(pos, 1.0)) {
+    constexpr double collision_offset = 1.2;
+
+    if(distanceOverTerrain(pos) > collision_offset) {
       // Interpolate the scrolling if there isn't any collision
       double dist_diff_mod = dest_dist_mod_ - curr_dist_mod_;
+      double last_dist_mod = curr_dist_mod_;
       if(fabs(dist_diff_mod) > timer.dt * mouse_scroll_sensitivity_) {
         int sign = dist_diff_mod / fabs(dist_diff_mod);
         curr_dist_mod_ += sign * timer.dt * mouse_scroll_sensitivity_;
+      }
+
+      // Check if we have just made the camera collide with the terrain
+      pos = tpos - fwd*curr_dist_mod_*initial_distance_;
+      if(distanceOverTerrain(pos) < collision_offset) {
+        // if we did, do the interpolation back
+        curr_dist_mod_ = last_dist_mod;
       }
     } else {
       // If the camera collides the terrain, some magic is needed.
@@ -172,19 +182,35 @@ private:
       do {
         double dist =  collision_dist_mod*initial_distance_;
         pos = tpos - fwd*dist;
-        if(isOverTerrain(pos, 0.8)) {
+        if(distanceOverTerrain(pos) > collision_offset) {
           break;
         } else {
-          collision_dist_mod *= 0.999;
+          collision_dist_mod *= 0.99;
         }
       } while(collision_dist_mod > 0.001);
 
-      curr_dist_mod_ += 15.0*timer.dt*(collision_dist_mod - curr_dist_mod_);
+      double dist_over_terrain = fabs(collision_offset - distanceOverTerrain());
+      if(2 * dist_over_terrain >
+          fabs((collision_dist_mod - curr_dist_mod_)*initial_distance_)) {
+        curr_dist_mod_ += 15.0*timer.dt*(collision_dist_mod - curr_dist_mod_);
+      } else  {
+        raiseDistanceOverTerrain(dist_over_terrain);
+      }
     }
   }
 
-  double isOverTerrain(const glm::dvec3& pos, double offset) const {
-    return getTerrainHeight_(pos.x, pos.z) + offset < pos.y;
+  double distanceOverTerrain(const glm::dvec3& pos) const {
+    return pos.y - getTerrainHeight_(pos.x, pos.z);
+  }
+
+  double distanceOverTerrain() const {
+    glm::dvec3 tpos(target().pos()), fwd(forward());
+    return distanceOverTerrain(tpos - fwd*curr_dist_mod_*initial_distance_);
+  }
+
+  void raiseDistanceOverTerrain(double diff) {
+    glm::dvec3 fwd(forward());
+    fwd_ = glm::normalize(fwd*curr_dist_mod_*initial_distance_ - glm::dvec3(0, diff, 0));
   }
 
 public:
@@ -196,7 +222,7 @@ public:
    *                            upward scroll.
    */
   void scrolling(int mouse_wheel_ticks) {
-    dest_dist_mod_ -= mouse_wheel_ticks / 5.0f * mouse_scroll_sensitivity_;
+    dest_dist_mod_ -= mouse_wheel_ticks / 4.0f * mouse_scroll_sensitivity_;
     if(dest_dist_mod_ < 0.25f) {
       dest_dist_mod_ = 0.25f;
     } else if(dest_dist_mod_ > 2.0f) {

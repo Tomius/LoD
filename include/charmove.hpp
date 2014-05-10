@@ -6,10 +6,8 @@
 #define LOD_CHARMOVE_HPP_
 
 #include <exception>
-#include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
 
+#include "oglwrap_config.hpp"
 #include "../engine/camera.hpp"
 #include "../engine/transform.hpp"
 #include "../engine/mesh/animated_mesh_renderer.hpp"

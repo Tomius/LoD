@@ -299,8 +299,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
     grassMaps_[i].maxAnisotropy();
     grassMaps_[i].minFilter(MinFilter::LinearMipmapLinear);
     grassMaps_[i].magFilter(MagFilter::Linear);
-    grassMaps_[i].wrapS(Wrap::Repeat);
-    grassMaps_[i].wrapT(Wrap::Repeat);
+    grassMaps_[i].wrapS(WrapMode::Repeat);
+    grassMaps_[i].wrapT(WrapMode::Repeat);
   }
 
   grassNormalMap_.bind();
@@ -309,8 +309,8 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
     grassNormalMap_.generateMipmap();
     grassNormalMap_.minFilter(MinFilter::LinearMipmapLinear);
     grassNormalMap_.magFilter(MagFilter::Linear);
-    grassNormalMap_.wrapS(Wrap::Repeat);
-    grassNormalMap_.wrapT(Wrap::Repeat);
+    grassNormalMap_.wrapS(WrapMode::Repeat);
+    grassNormalMap_.wrapT(WrapMode::Repeat);
   }
 
   VertexArray::Unbind();

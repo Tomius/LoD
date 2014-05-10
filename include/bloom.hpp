@@ -2,9 +2,8 @@
 #define LOD_BLOOM_HPP_
 
 #include "oglwrap_config.hpp"
-#include "oglwrap/glew.hpp"
-#include "oglwrap/oglwrap.hpp"
-
+#include "oglwrap/shader.hpp"
+#include "oglwrap/uniform.hpp"
 #include "oglwrap/shapes/fullScreenRect.hpp"
 #include "oglwrap/textures/texture_2D.hpp"
 

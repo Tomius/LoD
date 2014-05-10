@@ -5,9 +5,8 @@
 
 namespace engine {
 
-namespace _AnimFlag {
 /// Animation modifying flags.
-enum AnimFlag : GLbitfield {
+enum class AnimFlag : GLbitfield {
   /// Doesn't do anything.
   None = 0x0,
 
@@ -34,8 +33,6 @@ enum AnimFlag : GLbitfield {
     * but it can help to make your code easier to read. */
   Interruptable = 0x10
 };
-}
-typedef _AnimFlag::AnimFlag AnimFlag;
 
 /// A class storing an animation's state.
 struct AnimationState {

@@ -3,9 +3,9 @@ SRC_DIR = src
 OBJ_DIR = obj
 INCLUDE_DIR = .
 
-CPP_FILES = $(wildcard $(SRC_DIR)/*.cpp)
-OBJECTS = $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))
-HEADERS := $(shell find -L $(INCLUDE_DIR) -name '*.hpp')
+CPP_FILES = $(wildcard $(SRC_DIR)/*.cc)
+OBJECTS = $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cc=.o)))
+HEADERS := $(shell find -L $(INCLUDE_DIR) -name '*.h')
 
 MKDIR_P = mkdir -p
 
@@ -25,7 +25,7 @@ clean:
 $(BINARY): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $^ -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADERS)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJ_DIR):

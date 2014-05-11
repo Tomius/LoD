@@ -21,7 +21,7 @@ float kFogMax = xz_scale * 2048.0;
 
 void main() {
   float alpha = 1.0, l = length(c_vPos);
-  if(l > kMaxVisibleDist) {
+  if (l > kMaxVisibleDist) {
     discard;
   } else if (l > kMaxOpaqueDist) {
     alpha = 1 - (l - kMaxOpaqueDist) / (kMaxVisibleDist - kMaxOpaqueDist);
@@ -34,7 +34,7 @@ void main() {
 
   float actual_alpha = min(color.a, alpha);
 
-  if(actual_alpha < 1e-3) {
+  if (actual_alpha < 1e-3) {
     discard;
   }
 

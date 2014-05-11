@@ -83,10 +83,10 @@ float Visibility() {
   int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
 
   // For every shadow casters
-  for(int i = 0; i < num_shadow_casters; ++i) {
+  for (int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
-    if(!isValid(shadowCoord.xy)) {
+    if (!isValid(shadowCoord.xy)) {
       continue;
     }
 
@@ -95,7 +95,7 @@ float Visibility() {
     float alpha = kMaxShadow / softness; // Max shadow per sample
 
     // Sample the shadow map kShadowSoftness times.
-    for(int j = 0; j < softness; ++j) {
+    for (int j = 0; j < softness; ++j) {
       visibility -= alpha * (1.0 - shadow2D(
         uShadowMap,
         vec3(
@@ -117,7 +117,7 @@ void main() {
   float diffuse_power = dot(c_normal, c_lightDir);
 
   float specular_power;
-  if(diffuse_power <= 0.0) {
+  if (diffuse_power <= 0.0) {
     diffuse_power = 0.0;
     specular_power = 0.0;
   } else {

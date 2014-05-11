@@ -22,7 +22,7 @@ float fetchHeight(ivec2 texCoord) {
 void main() {
   vec2 w_offsPos = (aPosition + uOffset) / 2.0;
 
-  if(int(abs(w_offsPos.x)) - 1 >= uTexSize.x / 2 || int(abs(w_offsPos.y)) - 1 >= uTexSize.y / 2) {
+  if (int(abs(w_offsPos.x)) - 1 >= uTexSize.x / 2 || int(abs(w_offsPos.y)) - 1 >= uTexSize.y / 2) {
     vInvalid = 1e10;
     gl_Position = vec4(0.0);
     return;
@@ -49,7 +49,7 @@ void main() {
   );
 
   vec3 neighbours[6];
-  for(int i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++) {
     int neighbourDistance = int(pow(2, (uMipmapLevel + 1))); // no << in #version 120
     ivec2 nPos = (aPosition + uOffset + (neighbourDistance * iNeighbours[i])) / 2;
     ivec2 nTexcoord = nPos + uTexSize / 2;

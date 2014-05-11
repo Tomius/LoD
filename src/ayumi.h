@@ -1,16 +1,16 @@
-#ifndef LOD_AYUMI_H_
-#define LOD_AYUMI_H_
+#ifndef LOD_INCLUDE_AYUMI_H_
+#define LOD_INCLUDE_AYUMI_H_
 
-#include "oglwrap_config.h"
+#include "./oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 
-#include "../engine/gameobject.h"
-#include "../engine/mesh/animated_mesh_renderer.h"
+#include "engine/gameobject.h"
+#include "engine/mesh/animated_mesh_renderer.h"
 
-#include "charmove.h"
-#include "skybox.h"
-#include "shadow.h"
+#include "./charmove.h"
+#include "./skybox.h"
+#include "./shadow.h"
 
 extern const float GRAVITY;
 /* 0 -> max quality
@@ -34,7 +34,7 @@ class Ayumi : public engine::GameObject {
   Skybox* skybox_;
   Shadow* shadow_;
 
-public:
+ public:
   Ayumi(Skybox* skybox, Shadow* shadow);
   virtual ~Ayumi() {}
   engine::AnimatedMeshRenderer& getMesh();
@@ -49,10 +49,10 @@ public:
     charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
   }
 
-private: // Callbacks
+ private:
   CharacterMovement::CanDoCallback canJump;
   CharacterMovement::CanDoCallback canFlip;
   engine::Animation::AnimationEndedCallback animationEndedCallback;
 };
 
-#endif // LOD_AYUMI_H_
+#endif  // LOD_INCLUDE_AYUMI_H_

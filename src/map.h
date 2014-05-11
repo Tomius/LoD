@@ -1,18 +1,17 @@
 /**
- * @file map.hpp
+ * @file map.h
  * @brief Renders the map (toggle it with 'm').
  */
 #ifndef MAP_H_
 #define MAP_H_
 
-#include "oglwrap_config.h"
+#include "./oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
-
 #include "oglwrap/shapes/fullScreenRect.h"
 #include "oglwrap/textures/texture_2D.h"
 
-#include "../engine/gameobject.h"
+#include "engine/gameobject.h"
 
 class Map : public engine::GameObject {
 	bool open_;

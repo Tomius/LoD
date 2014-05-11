@@ -1,4 +1,4 @@
-/** @file charmove.hpp
+/** @file charmove.h
     @brief Implements features related to character movement.
 */
 
@@ -8,9 +8,9 @@
 #include <exception>
 
 #include "oglwrap_config.h"
-#include "../engine/camera.h"
-#include "../engine/transform.h"
-#include "../engine/mesh/animated_mesh_renderer.h"
+#include "engine/camera.h"
+#include "engine/transform.h"
+#include "engine/mesh/animated_mesh_renderer.h"
 
 #include "terrain.h"
 

@@ -1,4 +1,4 @@
-/** @file camera.hpp
+/** @file camera.h
     @brief Implements the camera classes.
 */
 

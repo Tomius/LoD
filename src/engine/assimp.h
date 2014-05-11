@@ -5,9 +5,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "oglwrap/glm/glm/glm.hpp"
-#include "oglwrap/glm/glm/gtc/type_ptr.hpp"
-#include "oglwrap/glm/glm/gtc/matrix_transform.hpp"
+#include "../oglwrap/glm/glm/glm.hpp"
+#include "../oglwrap/glm/glm/gtc/type_ptr.hpp"
+#include "../oglwrap/glm/glm/gtc/matrix_transform.hpp"
 
 // Conversion between assimp and glm matrices
 

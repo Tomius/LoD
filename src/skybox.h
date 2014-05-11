@@ -7,7 +7,7 @@
 #include "oglwrap/shapes/cube.h"
 #include "oglwrap/textures/texture_cube.h"
 
-#include "../engine/gameobject.h"
+#include "engine/gameobject.h"
 
 class Skybox : public engine::GameObject {
   float time_;

@@ -2,9 +2,10 @@
 #define ENGINE_MESH_ANIM_INFO_H_
 
 #include <map>
-
 #include <memory>
-#include "oglwrap/general.h"
+
+#include "../../oglwrap/general.h"
+
 #include "anim_state.h"
 #include "../assimp.h"
 

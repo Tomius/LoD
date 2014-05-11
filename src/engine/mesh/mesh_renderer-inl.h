@@ -2,9 +2,7 @@
 #define ENGINE_MESH_MESH_RENDERER_INL_H_
 
 #include "mesh_renderer.h"
-#include "oglwrap/context.h"
-
-#include "oglwrap/define_internal_macros.h"
+#include "../../oglwrap/context.h"
 
 namespace engine {
 
@@ -415,7 +413,5 @@ inline float MeshRenderer::bSphereRadius() const {
 }
 
 } // namespace engine
-
-#include "oglwrap/undefine_internal_macros.h"
 
 #endif // ENGINE_MESH_MESH_RENDERER_INL_H_

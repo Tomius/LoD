@@ -4,8 +4,8 @@
 #include <vector>
 #include <memory>
 
-#include "shadow.h"
-#include "skybox.h"
+#include "../shadow.h"
+#include "../skybox.h"
 
 #include "timer.h"
 #include "camera.h"

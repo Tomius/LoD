@@ -5,7 +5,7 @@
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/framebuffer.h"
-#include "../engine/gameobject.h"
+#include "engine/gameobject.h"
 
 class Shadow {
     oglwrap::Texture2D tex_;

@@ -6,7 +6,7 @@
 #include "shadow.h"
 #include "oglwrap_config.h"
 
-#include "../engine/gameobject.h"
+#include "engine/gameobject.h"
 
 class Terrain : public engine::GameObject {
   oglwrap::Program prog_;

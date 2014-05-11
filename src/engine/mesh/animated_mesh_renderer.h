@@ -1,4 +1,4 @@
-/** @file animated_mesh_renderer.hpp
+/** @file animated_mesh_renderer.h
     @brief An animation loader using assimp
 */
 
@@ -6,11 +6,13 @@
 #define ENGINE_MESH_ANIMATED_MESH_RENDERER_H_
 
 #include <functional>
+
+#include "../../oglwrap/uniform.h"
+
 #include "mesh_renderer.h"
 #include "anim_state.h"
 #include "skinning_data.h"
 #include "anim_info.h"
-#include "oglwrap/uniform.h"
 #include "animation.h"
 
 namespace engine {

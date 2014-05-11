@@ -7,19 +7,19 @@
 
 #include "oglwrap_config.h"
 
-#include "../engine/timer.h"
-#include "../engine/scene.h"
-#include "../engine/camera.h"
-#include "../engine/gameobject.h"
+#include "engine/timer.h"
+#include "engine/scene.h"
+#include "engine/camera.h"
+#include "engine/gameobject.h"
 
-#include "charmove.h"
-#include "skybox.h"
-#include "terrain.h"
-#include "bloom.h"
-#include "ayumi.h"
-#include "tree.h"
-#include "shadow.h"
-#include "map.h"
+#include "./charmove.h"
+#include "./skybox.h"
+#include "./terrain.h"
+#include "./bloom.h"
+#include "./ayumi.h"
+#include "./tree.h"
+#include "./shadow.h"
+#include "./map.h"
 
 using namespace oglwrap;
 Context gl;

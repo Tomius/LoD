@@ -1,4 +1,4 @@
-/** @file mesh_renderer.hpp
+/** @file mesh_renderer.h
     @brief A Mesh loader and renderer using assimp
 */
 
@@ -9,12 +9,12 @@
 #include <memory>
 #include <climits>
 
-#include "oglwrap/config.h"
-#include "oglwrap/general.h"
-#include "oglwrap/buffer.h"
-#include "oglwrap/enums/index_type.h"
-#include "oglwrap/vertex_attrib.h"
-#include "oglwrap/textures/texture_2D.h"
+#include "../../oglwrap_config.h"
+#include "../../oglwrap/buffer.h"
+#include "../../oglwrap/enums/index_type.h"
+#include "../../oglwrap/vertex_attrib.h"
+#include "../../oglwrap/textures/texture_2D.h"
+
 #include "../assimp.h"
 
 namespace engine {

@@ -1,5 +1,5 @@
 /**
- * @file terrainData.hpp
+ * @file terrainData.h
  * @brief Implements raw terrain data (.rtd) importer and exporter.
  */
 

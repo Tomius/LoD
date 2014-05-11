@@ -1,13 +1,13 @@
-/** @file transform.hpp
+/** @file transform.h
     @brief Implements Transformation
 */
 
 #include <vector>
 #include <algorithm>
 
-#include "oglwrap/glm/glm/glm.hpp"
-#include "oglwrap/glm/glm/gtc/type_ptr.hpp"
-#include "oglwrap/glm/glm/gtc/matrix_transform.hpp"
+#include "../oglwrap/glm/glm/glm.hpp"
+#include "../oglwrap/glm/glm/gtc/type_ptr.hpp"
+#include "../oglwrap/glm/glm/gtc/matrix_transform.hpp"
 
 #ifndef ENGINE_TRANSFORM_H_
 #define ENGINE_TRANSFORM_H_

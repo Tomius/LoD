@@ -105,8 +105,6 @@ int main() {
     return -1;
   }
 
-  gl.DrawArrays(PrimitiveType::Triangles, 0, -1);
-
   try {
       glInit();
 

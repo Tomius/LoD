@@ -1,13 +1,12 @@
-#ifndef ENGINE_MESH_ANIMATION_INL_H_
-#define ENGINE_MESH_ANIMATION_INL_H_
+// Copyright (c) 2014, Tamas Csala
 
 #include "animation.h"
 #include "anim_info.h"
 
 namespace engine {
 
-inline void Animation::setDefaultAnimation(const std::string& anim_name,
-                                           float default_transition_time) {
+void Animation::setDefaultAnimation(const std::string& anim_name,
+                                    float default_transition_time) {
   if (!anims_.canFind(anim_name)) {
     throw std::invalid_argument(
       "Tried to set default animation to '" + anim_name + "', "
@@ -24,11 +23,11 @@ inline void Animation::setDefaultAnimation(const std::string& anim_name,
   }
 }
 
-inline void Animation::changeAnimation(size_t anim_idx,
-                                       float current_time,
-                                       float transition_time,
-                                       oglwrap::Bitfield<AnimFlag> flags,
-                                       float speed) {
+void Animation::changeAnimation(size_t anim_idx,
+                                float current_time,
+                                float transition_time,
+                                oglwrap::Bitfield<AnimFlag> flags,
+                                float speed) {
   bool was_last_invalid = (last_anim_.handle == nullptr);
 
   last_anim_ = current_anim_;
@@ -67,8 +66,8 @@ inline void Animation::changeAnimation(size_t anim_idx,
   anim_meta_info_.end_of_last_anim = current_time;
 }
 
-inline void Animation::setCurrentAnimation(AnimParams new_anim,
-                                           float current_time) {
+void Animation::setCurrentAnimation(AnimParams new_anim,
+                                    float current_time) {
   if ((anim_meta_info_.end_of_last_anim + anim_meta_info_.transition_time)
       <= current_time && current_anim_.flags.test(AnimFlag::Interruptable)) {
     if (!anims_.canFind(new_anim.name)) {
@@ -84,8 +83,8 @@ inline void Animation::setCurrentAnimation(AnimParams new_anim,
   }
 }
 
-inline void Animation::forceCurrentAnimation(AnimParams new_anim,
-                                             float current_time) {
+void Animation::forceCurrentAnimation(AnimParams new_anim,
+                                      float current_time) {
   if (!anims_.canFind(new_anim.name)) {
     throw std::invalid_argument(
       "Tried to set current animation to '" + new_anim.name + "', "
@@ -111,14 +110,14 @@ inline void Animation::forceCurrentAnimation(AnimParams new_anim,
   );
 }
 
-inline void Animation::setAnimToDefault(float current_time) {
+void Animation::setAnimToDefault(float current_time) {
   if (current_anim_.flags.test(AnimFlag::Interruptable) &&
      current_anim_.handle != anims_[anim_meta_info_.default_idx].handle) {
     forceAnimToDefault(current_time);
   }
 }
 
-inline void Animation::forceAnimToDefault(float current_time) {
+void Animation::forceAnimToDefault(float current_time) {
   changeAnimation(
     anim_meta_info_.default_idx,
     current_time,
@@ -128,7 +127,7 @@ inline void Animation::forceAnimToDefault(float current_time) {
   );
 }
 
-inline void Animation::animationEnded(float current_time) {
+void Animation::animationEnded(float current_time) {
   if (anim_ended_callback_ == nullptr) {
     forceAnimToDefault(current_time);
   } else {
@@ -146,12 +145,10 @@ inline void Animation::animationEnded(float current_time) {
   }
 }
 
-inline glm::vec2 Animation::offsetSinceLastFrame() {
+glm::vec2 Animation::offsetSinceLastFrame() {
   auto ret = current_anim_.offset - last_anim_.offset;
   last_anim_.offset = current_anim_.offset;
   return glm::vec2(ret.x, ret.z);
 }
 
 } // namespace engine
-
-#endif // ENGINE_MESH_ANIMATION_INL_H_

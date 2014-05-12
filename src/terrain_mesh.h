@@ -1,14 +1,16 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef LOD_TERRAINMESH_H_
 #define LOD_TERRAINMESH_H_
 
-#include "oglwrap_config.h"
+#include "./lod_oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/context.h"
 #include "oglwrap/vertex_attrib.h"
 #include "oglwrap/textures/texture_2D.h"
 
-#include "terrainData.h"
+#include "terrain_data.h"
 
 // Selecting the Blocks' size is really essential but not trivial. Selecting the
 // good number can prove you about twice as much performance as with selecting a

@@ -1,7 +1,4 @@
-/**
- * @file terrainData.h
- * @brief Implements raw terrain data (.rtd) importer and exporter.
- */
+// Copyright (c) 2014, Tamas Csala
 
 #ifndef LOD_TERRAINDATA_H_
 #define LOD_TERRAINDATA_H_

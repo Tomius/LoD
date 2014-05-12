@@ -1,11 +1,9 @@
-/**
- * @file map.h
- * @brief Renders the map (toggle it with 'm').
- */
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef MAP_H_
 #define MAP_H_
 
-#include "./oglwrap_config.h"
+#include "./lod_oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/shapes/fullScreenRect.h"

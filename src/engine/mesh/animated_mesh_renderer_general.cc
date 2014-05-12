@@ -1,21 +1,20 @@
-#ifndef ENGINE_MESH_ANIMATED_MESH_RENDERER_GENERAL_INL_H_
-#define ENGINE_MESH_ANIMATED_MESH_RENDERER_GENERAL_INL_H_
+// Copyright (c) 2014, Tamas Csala
 
 #include "animated_mesh_renderer.h"
 
 namespace engine {
 
-inline AnimatedMeshRenderer::AnimatedMeshRenderer(
+AnimatedMeshRenderer::AnimatedMeshRenderer(
                                   const std::string& filename,
                                   oglwrap::Bitfield<aiPostProcessSteps> flags)
   : MeshRenderer(filename, flags)
   , skinning_data_(scene_->mNumMeshes) {
 }
 
-inline void AnimatedMeshRenderer::addAnimation(const std::string& filename,
-                                               const std::string& anim_name,
-                                               oglwrap::Bitfield<AnimFlag> flags,
-                                               float speed) {
+void AnimatedMeshRenderer::addAnimation(const std::string& filename,
+                                        const std::string& anim_name,
+                                        oglwrap::Bitfield<AnimFlag> flags,
+                                        float speed) {
   if (anims_.canFind(anim_name)) {
     throw std::runtime_error(
       "Animation name '" + anim_name + "' isn't unique for '" + filename + "'"
@@ -50,5 +49,3 @@ inline void AnimatedMeshRenderer::addAnimation(const std::string& filename,
 }
 
 } // namespace engine
-
-#endif // ENGINE_MESH_ANIMATED_MESH_RENDERER_GENERAL_INL_H_

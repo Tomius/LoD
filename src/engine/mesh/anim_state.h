@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef ENGINE_MESH_ANIM_STATE_H_
 #define ENGINE_MESH_ANIM_STATE_H_
 

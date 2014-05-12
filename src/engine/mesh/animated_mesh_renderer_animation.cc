@@ -1,13 +1,12 @@
-#ifndef ENGINE_MESH_ANIMATED_MESH_RENDERER_ANIMATION_INL_H_
-#define ENGINE_MESH_ANIMATED_MESH_RENDERER_ANIMATION_INL_H_
+// Copyright (c) 2014, Tamas Csala
 
 #include "animated_mesh_renderer.h"
 #include "animation.h"
 
 namespace engine {
 
-inline unsigned AnimatedMeshRenderer::findPosition(float anim_time,
-                                                   const aiNodeAnim* node_anim) {
+unsigned AnimatedMeshRenderer::findPosition(float anim_time,
+                                            const aiNodeAnim* node_anim) {
    // Find the first one that is bigger or equals
    for (unsigned i = 0; i < node_anim->mNumPositionKeys - 1; i++) {
       if (anim_time <= (float)node_anim->mPositionKeys[i + 1].mTime) {
@@ -18,8 +17,8 @@ inline unsigned AnimatedMeshRenderer::findPosition(float anim_time,
    assert(0);
 }
 
-inline unsigned AnimatedMeshRenderer::findRotation(float anim_time,
-                                                   const aiNodeAnim* node_anim) {
+unsigned AnimatedMeshRenderer::findRotation(float anim_time,
+                                            const aiNodeAnim* node_anim) {
    for (unsigned i = 0; i < node_anim->mNumRotationKeys - 1; i++) {
       if (anim_time <= (float)node_anim->mRotationKeys[i + 1].mTime) {
          return i;
@@ -28,8 +27,8 @@ inline unsigned AnimatedMeshRenderer::findRotation(float anim_time,
    assert(0);
 }
 
-inline unsigned AnimatedMeshRenderer::findScaling(float anim_time,
-                                                  const aiNodeAnim* node_anim) {
+unsigned AnimatedMeshRenderer::findScaling(float anim_time,
+                                           const aiNodeAnim* node_anim) {
    for (unsigned i = 0; i < node_anim->mNumScalingKeys - 1; i++) {
       if (anim_time <= (float)node_anim->mScalingKeys[i + 1].mTime) {
          return i;
@@ -38,7 +37,7 @@ inline unsigned AnimatedMeshRenderer::findScaling(float anim_time,
    assert(0);
 }
 
-inline void AnimatedMeshRenderer::calcInterpolatedPosition(
+void AnimatedMeshRenderer::calcInterpolatedPosition(
                                                 aiVector3D& out,
                                                 float anim_time,
                                                 const aiNodeAnim* node_anim) {
@@ -58,7 +57,7 @@ inline void AnimatedMeshRenderer::calcInterpolatedPosition(
    out = interpolate(start, end, factor);
 }
 
-inline void AnimatedMeshRenderer::calcInterpolatedRotation(
+void AnimatedMeshRenderer::calcInterpolatedRotation(
                                                 aiQuaternion& out,
                                                 float anim_time,
                                                 const aiNodeAnim* node_anim) {
@@ -79,7 +78,7 @@ inline void AnimatedMeshRenderer::calcInterpolatedRotation(
    out = out.Normalize();
 }
 
-inline void AnimatedMeshRenderer::calcInterpolatedScaling(
+void AnimatedMeshRenderer::calcInterpolatedScaling(
                                                 aiVector3D& out,
                                                 float anim_time,
                                                 const aiNodeAnim* node_anim) {
@@ -99,8 +98,8 @@ inline void AnimatedMeshRenderer::calcInterpolatedScaling(
    out = interpolate(start, end, factor);
 }
 
-inline const aiNodeAnim* AnimatedMeshRenderer::findNodeAnim(const aiAnimation* animation,
-                                                            const std::string node_name) {
+const aiNodeAnim* AnimatedMeshRenderer::findNodeAnim(const aiAnimation* animation,
+                                                     const std::string node_name) {
    for (unsigned i = 0; i < animation->mNumChannels; i++) {
       const aiNodeAnim* node_anim = animation->mChannels[i];
       if (std::string(node_anim->mNodeName.data) == node_name) {
@@ -110,10 +109,10 @@ inline const aiNodeAnim* AnimatedMeshRenderer::findNodeAnim(const aiAnimation* a
    return nullptr;
 }
 
-inline void AnimatedMeshRenderer::updateBoneTree(Animation& anim,
-                                                 float anim_time,
-                                                 const aiNode* node,
-                                                 const glm::mat4& parent_transform) {
+void AnimatedMeshRenderer::updateBoneTree(Animation& anim,
+                                          float anim_time,
+                                          const aiNode* node,
+                                          const glm::mat4& parent_transform) {
    std::string node_name(node->mName.data);
    const aiAnimation* animation = anim.current_anim_.handle->mAnimations[0];
    const aiNodeAnim* node_anim = findNodeAnim(animation, node_name);
@@ -165,7 +164,7 @@ inline void AnimatedMeshRenderer::updateBoneTree(Animation& anim,
    }
 }
 
-inline void AnimatedMeshRenderer::updateBoneTreeInTransition(
+void AnimatedMeshRenderer::updateBoneTreeInTransition(
                                              Animation& anim,
                                              float prev_anim_time,
                                              float next_anim_time,
@@ -237,8 +236,8 @@ inline void AnimatedMeshRenderer::updateBoneTreeInTransition(
    }
 }
 
-inline void AnimatedMeshRenderer::updateBoneInfo(Animation& anim,
-                                                 float time) {
+void AnimatedMeshRenderer::updateBoneInfo(Animation& anim,
+                                          float time) {
    if (!anim.current_anim_.handle || anim.current_anim_.handle->mAnimations == 0
       || !anim.last_anim_.handle || anim.last_anim_.handle->mAnimations == 0) {
       throw std::runtime_error("Tried to run an invalid animation.");
@@ -319,14 +318,14 @@ inline void AnimatedMeshRenderer::updateBoneInfo(Animation& anim,
 
 /// Updates the bones transformations.
 /** @param time_in_seconds - Expected to be a time value in seconds. */
-inline void AnimatedMeshRenderer::uploadBoneInfo(
+void AnimatedMeshRenderer::uploadBoneInfo(
                                     oglwrap::LazyUniform<glm::mat4>& bones) {
   for (unsigned i = 0; i < skinning_data_.num_bones; i++) {
       bones[i] = skinning_data_.bone_info[i].final_transform;
   }
 }
 
-inline void AnimatedMeshRenderer::updateAndUploadBoneInfo(
+void AnimatedMeshRenderer::updateAndUploadBoneInfo(
                                     Animation& anim,
                                     float time,
                                     oglwrap::LazyUniform<glm::mat4>& bones) {
@@ -335,5 +334,3 @@ inline void AnimatedMeshRenderer::updateAndUploadBoneInfo(
 }
 
 } // namespace engine
-
-#endif // ENGINE_MESH_ANIMATED_MESH_RENDERER_ANIMATION_INL_H_

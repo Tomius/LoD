@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef LOD_OGLWRAP_CONFIG_H_
 #define LOD_OGLWRAP_CONFIG_H_
 

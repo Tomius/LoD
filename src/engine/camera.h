@@ -1,6 +1,4 @@
-/** @file camera.h
-    @brief Implements the camera classes.
-*/
+// Copyright (c) 2014, Tamas Csala
 
 #ifndef ENGINE_CAMERA_H_
 #define ENGINE_CAMERA_H_
@@ -188,7 +186,7 @@ private:
         } else {
           collision_dist_mod *= 0.99;
         }
-      } while(collision_dist_mod > 0.001);
+      } while (collision_dist_mod > 0.001);
 
       double dist_over_terrain = fabs(collision_offset - distanceOverTerrain());
       if (2 * dist_over_terrain >

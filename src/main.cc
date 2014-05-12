@@ -1,11 +1,14 @@
+// Copyright (c) 2014, Tamas Csala
+
 #include <vector>
 #include <string>
 #include <iostream>
+
 #include <SFML/Window.hpp>
 
 #define OGLWRAP_INSTATIATE 1
 
-#include "oglwrap_config.h"
+#include "./lod_oglwrap_config.h"
 
 #include "engine/timer.h"
 #include "engine/scene.h"
@@ -21,8 +24,9 @@
 #include "./shadow.h"
 #include "./map.h"
 
-using namespace oglwrap;
-Context gl;
+using oglwrap::Capability;
+using oglwrap::Face;
+oglwrap::Context gl;
 
 extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
@@ -71,24 +75,22 @@ static void PrintDebugTime() {
 
 int main() {
   PrintDebugText("Creating the OpenGL context");
-  sf::Window window(
-    sf::VideoMode(800, 600),
-    "Land of Dreams",
-    sf::Style::Default,
-    sf::ContextSettings(32, 0, 0, 2, 1)
-  );
+  sf::Window window(sf::VideoMode(800, 600), "Land of Dreams",
+                    sf::Style::Default, sf::ContextSettings(32, 0, 0, 2, 1));
   PrintDebugTime();
 
   sf::ContextSettings settings = window.getSettings();
-  std::cout << " - Depth bits: " << settings.depthBits << std::endl;
-  std::cout << " - Stencil bits: " << settings.stencilBits << std::endl;
-  std::cout << " - Anti-aliasing level: " << settings.antialiasingLevel << std::endl;
-  std::cout << " - OpenGL version: " << settings.majorVersion << "." << settings.minorVersion << std::endl;
+  std::cout <<
+    " - Depth bits: "          << settings.depthBits         << std::endl <<
+    " - Stencil bits: "        << settings.stencilBits       << std::endl <<
+    " - Anti-aliasing level: " << settings.antialiasingLevel << std::endl <<
+    " - OpenGL version: "      << settings.majorVersion      << "."
+                               << settings.minorVersion      << std::endl;
 
   ogl_version = settings.majorVersion + settings.minorVersion/10.0;
 
   if (ogl_version < 2.1) {
-    std::cout << "At least OpenGL version 2.1 is required to run this program" << std::endl;
+    std::cout << "At least OpenGL version 2.1 is required to run this program\n";
     return -1;
   }
 
@@ -115,8 +117,7 @@ int main() {
 
       PrintDebugText("Initializing the shadow maps");
         Shadow *shadow = scene.addShadow(
-          new Shadow{PERFORMANCE < 2 ? 512 : 256, 8, 8}
-        );
+          new Shadow{PERFORMANCE < 2 ? 512 : 256, 8, 8});
       PrintDebugTime();
 
       PrintDebugText("Initializing the terrain");
@@ -130,16 +131,10 @@ int main() {
       PrintDebugTime();
 
       PrintDebugText("Initializing Ayumi");
-        Ayumi *ayumi = scene.addGameObject(
-          new Ayumi{skybox, shadow}
-        );
-
+        Ayumi *ayumi = scene.addGameObject(new Ayumi{skybox, shadow});
         ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
 
-        CharacterMovement charmove {
-          ayumi->transform, *ayumi->rigid_body
-        };
-
+        CharacterMovement charmove{ayumi->transform, *ayumi->rigid_body};
         ayumi->charmove(&charmove);
       PrintDebugTime();
 
@@ -150,10 +145,8 @@ int main() {
       ayumi->transform.addChild(cam_offset);
       cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
-      engine::ThirdPersonalCamera cam(
-        cam_offset, cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
-        terrain_height, 1.5f
-      );
+      engine::ThirdPersonalCamera cam(cam_offset, cam_offset.pos()
+        + glm::vec3(ayumi->getMesh().bSphereRadius() * 2), terrain_height, 1.5f);
 
       charmove.setCamera(&cam);
       scene.addCamera(&cam);
@@ -170,10 +163,9 @@ int main() {
 
       sf::Event event;
       bool running = true;
-      while(running) {
-
-        while(window.pollEvent(event)) {
-          switch(event.type) {
+      while (running) {
+        while (window.pollEvent(event)) {
+          switch (event.type) {
             case sf::Event::Closed:
               running = false;
               break;
@@ -198,9 +190,8 @@ int main() {
 
                 gl.Viewport(width, height);
 
-                auto projMat = glm::perspectiveFov<float>(
-                  kFieldOfView, width, height, 0.5, 3000
-                );
+                auto projMat = glm::perspectiveFov<float>(kFieldOfView, width,
+                                                          height, 0.5, 3000);
 
                 scene.screenResized(projMat, width, height);
               }
@@ -225,11 +216,9 @@ int main() {
         scene.turn();
 
         window.display();
-
       }
 
       return 0;
-
     } catch(std::exception& err) {
       std::cerr << err.what();
     }

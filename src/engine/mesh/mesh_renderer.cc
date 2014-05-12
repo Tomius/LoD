@@ -1,5 +1,4 @@
-#ifndef ENGINE_MESH_MESH_RENDERER_INL_H_
-#define ENGINE_MESH_MESH_RENDERER_INL_H_
+// Copyright (c) 2014, Tamas Csala
 
 #include "mesh_renderer.h"
 #include "../../oglwrap/context.h"
@@ -9,8 +8,8 @@ namespace engine {
 /// Loads in the mesh from a file, and does some post-processing on it.
 /** @param filename - The name of the file to load in.
   * @param flags - The assimp post-process flags. */
-inline MeshRenderer::MeshRenderer(const std::string& filename,
-                                  oglwrap::Bitfield<aiPostProcessSteps> flags)
+MeshRenderer::MeshRenderer(const std::string& filename,
+                           oglwrap::Bitfield<aiPostProcessSteps> flags)
   : scene_(importer_.ReadFile(
              filename.c_str(),
              flags | aiProcess_Triangulate
@@ -64,7 +63,7 @@ void MeshRenderer::setIndices(size_t index) {
   * Calling this function changes the currently active VAO, ArrayBuffer and IndexBuffer.
   * The mesh cannot be drawn without calling this function.
   * @param attrib - The attribute array to use as destination. */
-inline void MeshRenderer::setupPositions(oglwrap::VertexAttribArray attrib) {
+void MeshRenderer::setupPositions(oglwrap::VertexAttribArray attrib) {
   if (is_setup_positions_) {
     throw std::logic_error(
       "MeshRenderer::setup_position is called multiply times on the same object"
@@ -114,7 +113,7 @@ inline void MeshRenderer::setupPositions(oglwrap::VertexAttribArray attrib) {
 /** Uploads the vertex normals data to an attribute array, and sets it up for use.
   * Calling this function changes the currently active VAO and ArrayBuffer.
   * @param attrib - The attribute array to use as destination. */
-inline void MeshRenderer::setupNormals(oglwrap::VertexAttribArray attrib) {
+void MeshRenderer::setupNormals(oglwrap::VertexAttribArray attrib) {
 
   if (is_setup_normals_) {
     throw std::logic_error(
@@ -152,7 +151,7 @@ inline void MeshRenderer::setupNormals(oglwrap::VertexAttribArray attrib) {
   * coordinates in the specified texture coordinate set.
   * @param texCoordSet  Specifies the index of the texture coordinate
   *                     set that should be inspected */
-inline bool MeshRenderer::hasTexCoords(unsigned char texCoordSet) {
+bool MeshRenderer::hasTexCoords(unsigned char texCoordSet) {
   for (size_t i = 0; i < entries_.size(); i++) {
     if (!scene_->mMeshes[i]->HasTextureCoords(texCoordSet)) {
       return false;
@@ -170,8 +169,8 @@ inline bool MeshRenderer::hasTexCoords(unsigned char texCoordSet) {
   * @param attrib - The attribute array to use as destination.
   * @param texCoordSet  Specifies the index of the texture coordinate set
   *                     that should be used */
-inline void MeshRenderer::setupTexCoords(oglwrap::VertexAttribArray attrib,
-                                         unsigned char texCoordSet) {
+void MeshRenderer::setupTexCoords(oglwrap::VertexAttribArray attrib,
+                                  unsigned char texCoordSet) {
 
   if (is_setup_texcoords_) {
     throw std::logic_error(
@@ -225,11 +224,11 @@ inline void MeshRenderer::setupTexCoords(oglwrap::VertexAttribArray attrib,
  *                          Use the assimp macros to fill these 3 parameters
  *                          all at once, for ex: AI_MATKEY_COLOR_DIFFUSE
  */
-inline void MeshRenderer::setupTextures(unsigned short texture_unit,
-                                        aiTextureType tex_type,
-                                        const char *pKey,
-                                        unsigned int type,
-                                        unsigned int idx) {
+void MeshRenderer::setupTextures(unsigned short texture_unit,
+                                 aiTextureType tex_type,
+                                 const char *pKey,
+                                 unsigned int type,
+                                 unsigned int idx) {
   oglwrap::Texture2D::Active(texture_unit);
 
   materials_[tex_type].active = true;
@@ -285,20 +284,20 @@ inline void MeshRenderer::setupTextures(unsigned short texture_unit,
 /// Sets the diffuse textures up to a specified texture unit.
 /** Changes the currently active texture unit and Texture2D binding.
   * @param texture_unit Specifies the texture unit to use for the diffuse textures. */
-inline void MeshRenderer::setupDiffuseTextures(unsigned short texture_unit) {
+void MeshRenderer::setupDiffuseTextures(unsigned short texture_unit) {
   setupTextures(texture_unit, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
 }
 
 /// Sets the specular textures up to a specified texture unit.
 /** Changes the currently active texture unit and Texture2D binding.
   * @param texture_unit Specifies the texture unit to use for the specular textures. */
-inline void MeshRenderer::setupSpecularTextures(unsigned short texture_unit) {
+void MeshRenderer::setupSpecularTextures(unsigned short texture_unit) {
   setupTextures(texture_unit, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
 }
 
 /// Renders the mesh.
 /** Changes the currently active VAO and may change the Texture2D binding */
-inline void MeshRenderer::render() {
+void MeshRenderer::render() {
   if (!is_setup_positions_) {
     return;
   }
@@ -341,14 +340,14 @@ inline void MeshRenderer::render() {
 /** i.e if you see that a character is laying on ground instead of standing, it is probably
   * because the character is defined in a space where XY is flat, and Z is up. Right
   * multiplying your model matrix with this matrix will solve that problem. */
-inline glm::mat4 MeshRenderer::worldTransform() const {
+glm::mat4 MeshRenderer::worldTransform() const {
   return world_transformation_;
 }
 
 /// Gives information about the mesh's bounding cuboid.
 /** @param center - The vec3 where bounding cuboid's center is to be returned.
   * @param edges - The vec3 where bounding cuboid's edge lengths are to be returned. */
-inline void MeshRenderer::bCuboid(glm::vec3& center, glm::vec3& edges) const {
+void MeshRenderer::bCuboid(glm::vec3& center, glm::vec3& edges) const {
   // Idea: get the minimums and maximums of the vertex positions
   // in each coordinate. Then the average of the mins and maxes
   // will be the center of the cuboid
@@ -384,7 +383,7 @@ inline void MeshRenderer::bCuboid(glm::vec3& center, glm::vec3& edges) const {
 }
 
 /// Returns the center (as xyz) and radius (as w) of the bounding sphere.
-inline glm::vec4 MeshRenderer::bSphere() const {
+glm::vec4 MeshRenderer::bSphere() const {
   glm::vec3 center, edges;
   bCuboid(center, edges);
   return glm::vec4(center, sqrt(glm::dot(edges, edges)) / 2); // Pythagoras.
@@ -392,26 +391,24 @@ inline glm::vec4 MeshRenderer::bSphere() const {
 
 /// Returns the center offseted by the model matrix (as xyz) and radius (as w) of the bounding sphere.
 /** @param modelMatrix - The matrix to use to offset the center of the bounding sphere. */
-inline glm::vec4 MeshRenderer::bSphere(const glm::mat4& modelMatrix) const {
+glm::vec4 MeshRenderer::bSphere(const glm::mat4& modelMatrix) const {
   glm::vec4 m_bSphere = bSphere();
   return glm::vec4(glm::vec3(modelMatrix *
                    glm::vec4(glm::vec3(m_bSphere), 1)), m_bSphere.w);
 }
 
 /// Returns the center of the bounding sphere.
-inline glm::vec3 MeshRenderer::bSphereCenter() const {
+glm::vec3 MeshRenderer::bSphereCenter() const {
   glm::vec3 center, edges;
   bCuboid(center, edges);
   return center;
 }
 
 /// Returns the radius of the bounding sphere.
-inline float MeshRenderer::bSphereRadius() const {
+float MeshRenderer::bSphereRadius() const {
   glm::vec3 center, edges;
   bCuboid(center, edges);
   return sqrt(glm::dot(edges, edges)) / 2; // Pythagoras.
 }
 
 } // namespace engine
-
-#endif // ENGINE_MESH_MESH_RENDERER_INL_H_

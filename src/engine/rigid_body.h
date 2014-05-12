@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef ENGINE_RIGID_BODY_H_
 #define ENGINE_RIGID_BODY_H_
 

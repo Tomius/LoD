@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef ENGINE_ASSIMP_H_
 #define ENGINE_ASSIMP_H_
 

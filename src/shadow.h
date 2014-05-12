@@ -1,7 +1,9 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef LOD_SHADOW_H_
 #define LOD_SHADOW_H_
 
-#include "oglwrap_config.h"
+#include "./lod_oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/framebuffer.h"

@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #include "charmove.h"
 
 using namespace oglwrap;
@@ -89,7 +91,7 @@ void CharacterMovement::update(float time) {
     double sign = diff / fabs(diff);
 
     // Take the shorter path.
-    while(fabs(diff) > 180) {
+    while (fabs(diff) > 180) {
       dest_rot_ -= sign * 360;
 
       diff = dest_rot_ - curr_rot_;
@@ -131,7 +133,7 @@ void CharacterMovement::updateHeight(float time) {
   float diff_time = time - prevTime;
   prevTime = time;
 
-  while(diff_time > 0) {
+  while (diff_time > 0) {
     float time_step = 0.01f;
     float dt = std::min(time_step, diff_time);
     diff_time -= time_step;

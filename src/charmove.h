@@ -1,13 +1,11 @@
-/** @file charmove.h
-    @brief Implements features related to character movement.
-*/
+// Copyright (c) 2014, Tamas Csala
 
 #ifndef LOD_CHARMOVE_H_
 #define LOD_CHARMOVE_H_
 
 #include <exception>
 
-#include "oglwrap_config.h"
+#include "./lod_oglwrap_config.h"
 #include "engine/camera.h"
 #include "engine/transform.h"
 #include "engine/mesh/animated_mesh_renderer.h"

@@ -1,12 +1,11 @@
-#ifndef ENGINE_MESH_ANIMATED_MESH_RENDERER_SKINNING_INL_H_
-#define ENGINE_MESH_ANIMATED_MESH_RENDERER_SKINNING_INL_H_
+// Copyright (c) 2014, Tamas Csala
 
 #include "animated_mesh_renderer.h"
 
 namespace engine {
 
 /// Fills the bone_mapping with data.
-inline void AnimatedMeshRenderer::mapBones() {
+void AnimatedMeshRenderer::mapBones() {
   for (size_t entry = 0; entry < entries_.size(); entry++) {
     const aiMesh* pMesh = scene_->mMeshes[entry];
 
@@ -31,7 +30,8 @@ inline void AnimatedMeshRenderer::mapBones() {
 /// A recursive functions that should be started from the root node, and it returns the first bone under it.
 /** @param node - The current root node.
   * @param anim - The animation to seek the root bone in. */
-inline const aiNodeAnim* AnimatedMeshRenderer::getRootBone(const aiNode* node, const aiScene* anim) {
+const aiNodeAnim* AnimatedMeshRenderer::getRootBone(const aiNode* node,
+                                                    const aiScene* anim) {
   std::string node_name(node->mName.data);
 
   const aiAnimation* animation = anim->mAnimations[0];
@@ -188,7 +188,7 @@ void AnimatedMeshRenderer::loadBones() {
 
 /// Creates the bone attributes data (the skinning.)
 /** It actually just calls the loadBones function with the appropriate template parameter */
-inline void AnimatedMeshRenderer::createBonesData() {
+void AnimatedMeshRenderer::createBonesData() {
   mapBones();
 
   if (skinning_data_.num_bones < UCHAR_MAX) {
@@ -265,8 +265,8 @@ void AnimatedMeshRenderer::shaderPlumbBones(oglwrap::IndexType idx_t,
   * @param currentRoot - The bone under which to search.
   * @param name - The name of the bone that is to be found.
   * @return the handle to the bone that is called name, or nullptr. */
-inline aiNode* AnimatedMeshRenderer::findNode(aiNode* currentRoot,
-                                              const std::string& name) {
+aiNode* AnimatedMeshRenderer::findNode(aiNode* currentRoot,
+                                       const std::string& name) {
   if (currentRoot->mName.data == name)
     return currentRoot;
 
@@ -283,9 +283,9 @@ inline aiNode* AnimatedMeshRenderer::findNode(aiNode* currentRoot,
 /** @param parent - A pointer to the parent ExternalBone struct.
     @param node - The current node.
     @param should_be_external - Should be false if called from outside, true if called recursively. */
-inline ExternalBone AnimatedMeshRenderer::markChildExternal(ExternalBone* parent,
-                                                            aiNode* node,
-                                                            bool should_be_external) {
+ExternalBone AnimatedMeshRenderer::markChildExternal(ExternalBone* parent,
+                                                     aiNode* node,
+                                                     bool should_be_external) {
   size_t bidx = skinning_data_.bone_mapping[node->mName.data];
   SkinningData::BoneInfo& binfo = skinning_data_.bone_info[bidx];
   binfo.external = should_be_external;
@@ -307,7 +307,7 @@ inline ExternalBone AnimatedMeshRenderer::markChildExternal(ExternalBone* parent
 /// Marks a bone to be modified from outside.
 /** @return A structure, which through the bone, and all of its child can be moved.
   * @param bone_name - The name of the bone. */
-inline ExternalBoneTree AnimatedMeshRenderer::markBoneExternal(const std::string& bone_name) {
+ExternalBoneTree AnimatedMeshRenderer::markBoneExternal(const std::string& bone_name) {
   if (skinning_data_.bone_mapping.find(bone_name) == skinning_data_.bone_mapping.end()) {
     throw std::runtime_error(
       "AnimatedMeshRenderer '" + filename_ + "' doesn't have any bone named '" + bone_name + "'."
@@ -332,7 +332,7 @@ inline ExternalBoneTree AnimatedMeshRenderer::markBoneExternal(const std::string
 
 /// Returns the number of bones this scene has.
 /** May change the currently active VAO and ArrayBuffer at the first call. */
-inline size_t AnimatedMeshRenderer::getNumBones() {
+size_t AnimatedMeshRenderer::getNumBones() {
 
   // If loadBones hasn't been called yet, than have to create
   // the bones data first to know the number of bones.
@@ -345,7 +345,7 @@ inline size_t AnimatedMeshRenderer::getNumBones() {
 
 /// Returns the size that boneIds and BoneWeights attribute arrays should be.
 /** May change the currently active VAO and ArrayBuffer at the first call. */
-inline size_t AnimatedMeshRenderer::getBoneAttribNum() {
+size_t AnimatedMeshRenderer::getBoneAttribNum() {
 
   // If loadBones hasn't been called yet, than have to create
   // the bones data first to know max_bone_attrib_num.
@@ -363,9 +363,9 @@ inline size_t AnimatedMeshRenderer::getBoneAttribNum() {
   * @param boneIDs - The array of attributes array to use as destination for bone IDs.
   * @param bone_weights - The array of attributes array to use as destination for bone weights.
   * @param integerIDs - if true, boneIDs are uploaded as integers (#version 130+) else they are uploaded as floats */
-inline void AnimatedMeshRenderer::setupBones(oglwrap::LazyVertexAttribArray boneIDs,
-                                             oglwrap::LazyVertexAttribArray bone_weights,
-                                             bool integerIDs) {
+void AnimatedMeshRenderer::setupBones(oglwrap::LazyVertexAttribArray boneIDs,
+                                      oglwrap::LazyVertexAttribArray bone_weights,
+                                      bool integerIDs) {
 
   if (skinning_data_.is_setup_bones) {
     throw std::logic_error(
@@ -396,5 +396,3 @@ inline void AnimatedMeshRenderer::setupBones(oglwrap::LazyVertexAttribArray bone
 }
 
 } // namespace engine
-
-#endif // ENGINE_MESH_ANIMATED_MESH_RENDERER_SKINNING_INL_H_

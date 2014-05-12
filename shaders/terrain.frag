@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #version 120
 
 // This might be overwritten by the c++ code.

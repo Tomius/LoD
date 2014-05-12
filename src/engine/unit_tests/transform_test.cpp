@@ -1,8 +1,11 @@
+// Copyright (c) 2014, Tamas Csala
+
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
+
 #include <GL/glew.h>
-#include "oglwrap/global.h"
+#include "../../oglwrap/debug/insertion.h"
 #include "../transform.h"
 
 using Transform = engine::Transformation<double>;

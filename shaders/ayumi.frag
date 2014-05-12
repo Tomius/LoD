@@ -1,5 +1,6 @@
-#version 120
+// Copyright (c) 2014, Tamas Csala
 
+#version 120
 
 #define SHADOW_MAP_NUM 32 // The maximum number of shadow maps
 

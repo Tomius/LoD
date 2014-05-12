@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #include "tree.h"
 
 using namespace oglwrap;

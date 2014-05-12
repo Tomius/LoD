@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef ENGINE_MESH_SKINNING_DATA_H_
 #define ENGINE_MESH_SKINNING_DATA_H_
 
@@ -49,7 +51,7 @@ struct SkinningData {
       // Bone attributes shouldn't use up all the 16 attribute slots.
       // Knowing the positions of the vertices could be useful for
       // rendering too.
-      } while(data.size() < 8);
+      } while (data.size() < 8);
     }
   };
 

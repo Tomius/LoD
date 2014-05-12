@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef ENGINE_SCENE_H_
 #define ENGINE_SCENE_H_
 

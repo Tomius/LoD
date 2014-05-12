@@ -1,10 +1,15 @@
+// Copyright (c) 2014, Tamas Csala
+
+#include "terrain_data.h"
+
+#include <cassert>
 #include <fstream>
 #include <iostream>
-#include <cassert>
 #include <stdexcept>
 #include <sstream>
+
+#include <GL/glew.h>
 #include <Magick++.h>
-#include "terrainData.h"
 
 using namespace std;
 
@@ -179,7 +184,7 @@ void RawTerrainData::initFromAsc(const std::string& filename) {
     throw std::runtime_error("Error reading file: " + filename);
   }
   string str;
-  unsigned short iData;
+  GLushort iData;
   double dData;
 
   ifs >> str >> iData;
@@ -202,9 +207,9 @@ void RawTerrainData::initFromAsc(const std::string& filename) {
   assert(str == "NODATA_value");
   int noData = iData;
 
-  std::vector<unsigned short> ushort_heightData;
+  std::vector<GLushort> ushort_heightData;
   ushort_heightData.reserve(w * h);
-  unsigned short max = 0;
+  GLushort max = 0;
   for (size_t i = 0; i < w * h; i++) {
     ifs >> iData;
     assert(iData != noData);

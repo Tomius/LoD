@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef ENGINE_MESH_ANIMATATION_H_
 #define ENGINE_MESH_ANIMATATION_H_
 
@@ -197,7 +199,6 @@ public:
   glm::vec2 offsetSinceLastFrame();
 };
 
-}
+} // namespace engine
 
-#include "animation-inl.h"
 #endif

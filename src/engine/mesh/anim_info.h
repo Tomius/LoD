@@ -1,9 +1,12 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef ENGINE_MESH_ANIM_INFO_H_
 #define ENGINE_MESH_ANIM_INFO_H_
 
 #include <map>
 #include <memory>
 
+#include "../../lod_oglwrap_config.h"
 #include "../../oglwrap/general.h"
 
 #include "anim_state.h"

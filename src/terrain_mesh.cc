@@ -1,4 +1,6 @@
-#include "terrainMesh.h"
+// Copyright (c) 2014, Tamas Csala
+
+#include "terrain_mesh.h"
 
 using namespace oglwrap;
 extern Context gl;
@@ -16,16 +18,16 @@ extern const float kFieldOfView;
 extern double ogl_version;
 const float kCosFieldOfView = cos(kFieldOfView * M_PI / 180);
 
-// ~~~~~~<{ A vector of short values }>~~~~~~
+// ~~~~~~<{ A vector of GLshort values }>~~~~~~
 
 struct svec2 {
-  short x, y;
+  GLshort x, y;
   svec2() :x(0), y(0) {}
-  svec2(short a, short b) : x(a), y(b) {}
+  svec2(GLshort a, GLshort b) : x(a), y(b) {}
   svec2 operator+(const svec2 rhs) { return svec2(x + rhs.x, y + rhs.y); }
 };
 
-inline svec2 operator*(short lhs, const svec2 rhs) {
+inline svec2 operator*(GLshort lhs, const svec2 rhs) {
   return svec2(lhs * rhs.x, lhs * rhs.y);
 }
 
@@ -56,7 +58,7 @@ inline svec2 operator*(short lhs, const svec2 rhs) {
    sqrt(3)/2, which isn't really a whole number, and the mesh can actually be pretty big,
    and floats are not precise. Instead we can use a bit stretched hexagon, so that it's
    width and height are equal. With this we can use integral position coordinates, and
-   short is likely to be enough(which is half the size of a float :) ). There's also
+   GLshort is likely to be enough(which is half the size of a float :) ). There's also
    another problem: The odd rows are shifted with a half texel compared to even rows.
    To handle this, I work with twice as big hexagons, but will fix this in the vs.
 
@@ -95,7 +97,7 @@ static inline svec2 GetPos(int ring, char line, int segment, int distance = 1) {
   svec2 nextPoint = distance * points[size_t((line + 1) % 6)];
 
   return prevPoint + svec2(
-    // This could overflow if done with shorts, even if the result is a valid short
+    // This could overflow if done with GLshorts, even if the result is a valid GLshort
     int(nextPoint.x - prevPoint.x) * segment / ring,
     int(nextPoint.y - prevPoint.y) * segment / ring
   );
@@ -160,7 +162,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
   : terrain_(terrainFile), w_(terrain_.w), h_(terrain_.h), w(w_), h(h_) {
 
   for (int m = 0; m < kBlockMipmapLevel; m++) {
-    const unsigned short kRingCount = kBlockRadius / (1 << (m + 1)) + 1;
+    const GLshort kRingCount = kBlockRadius / (1 << (m + 1)) + 1;
 
     vao_[m].bind();
 
@@ -183,7 +185,7 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
 
       positions_[m].data(vertices_vector);
 
-      // DONT USE: VertexAttribArray(0).setup<short>(2).enable();
+      // DONT USE: VertexAttribArray(0).setup<GLshort>(2).enable();
       // DO NOT USE IPointer! We want the values to be converted to float
       // (You know, #version 120 has no integer attributes)
       VertexAttribArray(0).pointer(2, DataType::Short).enable();
@@ -316,8 +318,6 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
   VertexArray::Unbind();
   Texture2D::Unbind();
 }
-
-
 
 // -------======{[ Functions about creating the map from the blocks ]}======-------
 

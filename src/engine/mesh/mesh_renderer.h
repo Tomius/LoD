@@ -1,6 +1,4 @@
-/** @file mesh_renderer.h
-    @brief A Mesh loader and renderer using assimp
-*/
+// Copyright (c) 2014, Tamas Csala
 
 #ifndef ENGINE_MESH_MESH_RENDERER_H_
 #define ENGINE_MESH_MESH_RENDERER_H_
@@ -9,7 +7,7 @@
 #include <memory>
 #include <climits>
 
-#include "../../oglwrap_config.h"
+#include "../../lod_oglwrap_config.h"
 #include "../../oglwrap/buffer.h"
 #include "../../oglwrap/enums/index_type.h"
 #include "../../oglwrap/vertex_attrib.h"
@@ -188,7 +186,5 @@ public:
 }; // MeshRenderer class
 
 } // namespace engine
-
-#include "mesh_renderer-inl.h"
 
 #endif // ENGINE_MESH_MESH_RENDERER_H_

@@ -3,11 +3,9 @@ SRC_DIR = src
 OBJ_DIR = obj
 
 CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
-OBJECTS = $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cc=.o)))
-DEPS = $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cc=.depends)))
+OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
+DEPS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.dep))
 HEADERS := $(shell find -L $(SRC_DIR) -name '*.h')
-
-MKDIR_P = mkdir -p
 
 CXX = clang++
 CXXFLAGS = -std=c++11 -Wall -Qunused-arguments \
@@ -17,21 +15,19 @@ LDFLAGS = -lGL -lGLEW -lsfml-window -lsfml-system -lassimp \
 
 .PHONY: all clean
 
-all: $(OBJ_DIR) $(BINARY)
+all: $(BINARY)
 
 clean:
-	rm -f $(BINARY) $(OBJECTS) $(DEPS)
+	rm -f $(BINARY) -rf $(OBJ_DIR)
 
-$(OBJ_DIR):
-	${MKDIR_P} ${OBJ_DIR}
-
-$(OBJ_DIR)/%.depends: $(SRC_DIR)/%.cc
-	$(CXX) $(CXXFLAGS) -MM $< -MT $(OBJ_DIR)/$(notdir $(<:.cc=.o)) > $@
+$(OBJ_DIR)/%.dep: $(SRC_DIR)/%.cc
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.dep=.cc)) -MT $(@:.dep=.o) -MF $@
 
 -include $(DEPS)
 
 $(OBJ_DIR)/%.o:
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.o=.cc)) -o $@
 
 $(BINARY): $(DEPS) $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@

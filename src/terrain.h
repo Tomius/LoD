@@ -1,10 +1,12 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef LOD_TERRAIN_H_
 #define LOD_TERRAIN_H_
 
-#include "terrainMesh.h"
+#include "terrain_mesh.h"
 #include "skybox.h"
 #include "shadow.h"
-#include "oglwrap_config.h"
+#include "./lod_oglwrap_config.h"
 
 #include "engine/gameobject.h"
 

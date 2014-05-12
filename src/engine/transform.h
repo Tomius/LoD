@@ -1,6 +1,4 @@
-/** @file transform.h
-    @brief Implements Transformation
-*/
+// Copyright (c) 2014, Tamas Csala
 
 #include <vector>
 #include <algorithm>

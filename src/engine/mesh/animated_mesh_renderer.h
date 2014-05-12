@@ -1,12 +1,11 @@
-/** @file animated_mesh_renderer.h
-    @brief An animation loader using assimp
-*/
+// Copyright (c) 2014, Tamas Csala
 
 #ifndef ENGINE_MESH_ANIMATED_MESH_RENDERER_H_
 #define ENGINE_MESH_ANIMATED_MESH_RENDERER_H_
 
 #include <functional>
 
+#include "../../lod_oglwrap_config.h"
 #include "../../oglwrap/uniform.h"
 
 #include "mesh_renderer.h"
@@ -366,9 +365,5 @@ public:
 }; // AnimatedMeshRenderer
 
 } // namespace engine
-
-#include "animated_mesh_renderer_general-inl.h"
-#include "animated_mesh_renderer_skinning-inl.h"
-#include "animated_mesh_renderer_animation-inl.h"
 
 #endif // ENGINE_MESH_ANIMATED_MESH_RENDERER_H_

@@ -112,26 +112,25 @@ int main() {
 
       dbg_clock.restart();
       PrintDebugText("Initializing the skybox");
-        Skybox *skybox = scene.addSkybox(new Skybox{});
+        Skybox *skybox = scene.addSkybox();
       PrintDebugTime();
 
       PrintDebugText("Initializing the shadow maps");
-        Shadow *shadow = scene.addShadow(
-          new Shadow{PERFORMANCE < 2 ? 512 : 256, 8, 8});
+        Shadow *shadow = scene.addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
       PrintDebugTime();
 
       PrintDebugText("Initializing the terrain");
-        Terrain *terrain = scene.addGameObject(new Terrain{skybox, shadow});
+        Terrain *terrain = scene.addGameObject<Terrain>(skybox, shadow);
         auto terrain_height =
           [terrain](double x, double y) {return terrain->getHeight(x, y);};
       PrintDebugTime();
 
       PrintDebugText("Initializing the trees");
-        scene.addGameObject(new Tree{*terrain, skybox, shadow});
+        scene.addGameObject<Tree>(*terrain, skybox, shadow);
       PrintDebugTime();
 
       PrintDebugText("Initializing Ayumi");
-        Ayumi *ayumi = scene.addGameObject(new Ayumi{skybox, shadow});
+        Ayumi *ayumi = scene.addGameObject<Ayumi>(skybox, shadow);
         ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
 
         CharacterMovement charmove{ayumi->transform, *ayumi->rigid_body};
@@ -140,8 +139,7 @@ int main() {
 
       charmove.setAnimation(&ayumi->getAnimation());
 
-      engine::Transform& cam_offset =
-        scene.addGameObject(new engine::GameObject{})->transform;
+      engine::Transform& cam_offset = scene.addGameObject()->transform;
       ayumi->transform.addChild(cam_offset);
       cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
@@ -152,11 +150,11 @@ int main() {
       scene.addCamera(&cam);
 
       PrintDebugText("Initializing the resources for the bloom effect");
-        scene.addAfterEffect(new BloomEffect{});
+        scene.addAfterEffect<BloomEffect>();
       PrintDebugTime();
 
       PrintDebugText("Initializing the map");
-        Map *map = scene.addAfterEffect(new Map{glm::vec2(terrain->w, terrain->h)});
+        Map *map = scene.addAfterEffect<Map>(glm::vec2(terrain->w, terrain->h));
       PrintDebugTime();
 
       std::cout << "\nStarting the main loop.\n" << std::endl;

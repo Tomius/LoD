@@ -6,7 +6,7 @@
 using namespace oglwrap;
 extern Context gl;
 
-Shadow::Shadow(size_t shadow_map_size, size_t atlas_x_size, size_t atlas_y_size)
+Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
     : size_(shadow_map_size)
     , xsize_(atlas_x_size)
     , ysize_(atlas_y_size)

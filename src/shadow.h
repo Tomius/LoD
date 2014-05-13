@@ -18,7 +18,7 @@ class Shadow {
     std::vector<glm::mat4> cp_matrices_;
 
 public:
-    Shadow(size_t shadow_map_size, size_t atlas_x_size, size_t atlas_y_size);
+    Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size);
     void screenResized(size_t width, size_t height);
     glm::mat4 projMat(float size) const;
     glm::mat4 camMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const;

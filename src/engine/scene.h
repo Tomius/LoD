@@ -27,34 +27,84 @@ public:
 
   Scene() { }
 
-  template<typename T>
-  T* addGameObject(T* gameobj) {
-    auto go = dynamic_cast<GameObject*>(gameobj);
-    assert(go);
+  template<typename T, typename... Args>
+  T* addGameObject(Args&&... args) {
+    static_assert(
+      std::is_base_of<GameObject, T>::value,
+      "Unknown type"
+    );
+
+    T *go{new T{std::forward<Args>(args)...}};
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
-    return gameobj;
+    return go;
   }
 
-  template<typename T>
-  T* addAfterEffect(T* after_effect) {
-    auto go = dynamic_cast<GameObject*>(after_effect);
-    assert(go);
+  template<typename... Args>
+  GameObject* addGameObject(Args&&... args) {
+    GameObject *go{new GameObject{std::forward<Args>(args)...}};
+    gameobjects_.push_back(std::unique_ptr<GameObject>(go));
+    return go;
+  }
+
+  template<typename T, typename... Args>
+  T* addAfterEffect(Args&&... args) {
+    static_assert(
+      std::is_base_of<GameObject, T>::value,
+      "Unknown type"
+    );
+
+    T *go{new T{std::forward<Args>(args)...}};
     after_effects_.push_back(std::unique_ptr<GameObject>(go));
-    return after_effect;
+    return go;
   }
 
-  Shadow* addShadow(Shadow* shadow) {
+  template<typename... Args>
+  GameObject* addAfterEffect(Args&&... args) {
+    GameObject *go{new GameObject{std::forward<Args>(args)...}};
+    after_effects_.push_back(std::unique_ptr<GameObject>(go));
+    return go;
+  }
+
+  template<typename T, typename... Args>
+  T* addShadow(Args&&... args) {
+    static_assert(
+      std::is_base_of<Shadow, T>::value,
+      "Unknown type"
+    );
+
+    auto shadow = new T{std::forward<Args>(args)...};
     shadow_ = std::unique_ptr<Shadow>(shadow);
     return shadow;
   }
 
-  void addCamera(Camera* cam) {
-    camera_ = cam;
+  template<typename... Args>
+  Shadow* addShadow(Args&&... args) {
+    auto shadow = new Shadow{std::forward<Args>(args)...};
+    shadow_ = std::unique_ptr<Shadow>(shadow);
+    return shadow;
   }
 
-  Skybox* addSkybox(Skybox* skybox) {
+  template<typename T, typename... Args>
+  T* addSkybox(Args&&... args) {
+    static_assert(
+      std::is_base_of<Skybox, T>::value,
+      "Unknown type"
+    );
+
+    auto skybox = new T{std::forward<Args>(args)...};
     skybox_ = std::unique_ptr<Skybox>(skybox);
     return skybox;
+  }
+
+  template<typename... Args>
+  Skybox* addSkybox(Args&&... args) {
+    auto skybox = new Skybox{std::forward<Args>(args)...};
+    skybox_ = std::unique_ptr<Skybox>(skybox);
+    return skybox;
+  }
+
+  void addCamera(Camera* cam) {
+    camera_ = cam;
   }
 
   void screenResized(const glm::mat4& projMat, GLuint w, GLuint h) {
@@ -127,7 +177,7 @@ public:
   }
 };
 
-}
+} // namespace engine
 
 
 #endif

@@ -34,14 +34,14 @@ public:
       "Unknown type"
     );
 
-    T *go{new T{std::forward<Args>(args)...}};
+    T *go = new T{std::forward<Args>(args)...};
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }
 
   template<typename... Args>
   GameObject* addGameObject(Args&&... args) {
-    GameObject *go{new GameObject{std::forward<Args>(args)...}};
+    GameObject *go = new GameObject{std::forward<Args>(args)...};
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }
@@ -53,14 +53,14 @@ public:
       "Unknown type"
     );
 
-    T *go{new T{std::forward<Args>(args)...}};
+    T *go = new T{std::forward<Args>(args)...};
     after_effects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }
 
   template<typename... Args>
   GameObject* addAfterEffect(Args&&... args) {
-    GameObject *go{new GameObject{std::forward<Args>(args)...}};
+    GameObject *go = new GameObject{std::forward<Args>(args)...};
     after_effects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }

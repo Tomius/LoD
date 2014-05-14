@@ -99,7 +99,7 @@ void Tree::render(float time, const engine::Camera& cam) {
   skybox_->env_map.bind();
 
   auto blend = Context::TemporaryEnable(Capability::Blend);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  Context::BlendFunc(BlendFunction::SrcAlpha, BlendFunction::OneMinusSrcAlpha);
 
   auto campos = cam.pos();
   auto cam_mx = cam.matrix();

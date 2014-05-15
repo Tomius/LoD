@@ -35,7 +35,7 @@ class ThirdPersonalCamera : public Camera {
 
   // Private constant number
   const double initial_distance_, cos_max_pitch_angle_,
-              mouse_sensitivity_, mouse_scroll_sensitivity_;
+               mouse_sensitivity_, mouse_scroll_sensitivity_;
 
   // The camera should collide with the terrain.
   std::function<double(double, double)> getTerrainHeight_;
@@ -189,7 +189,7 @@ private:
       } while (collision_dist_mod > 0.001);
 
       double dist_over_terrain = fabs(collision_offset - distanceOverTerrain());
-      if (2 * dist_over_terrain >
+      if (1.5 * dist_over_terrain >
           fabs((collision_dist_mod - curr_dist_mod_)*initial_distance_)) {
         curr_dist_mod_ += 15.0*timer.dt*(collision_dist_mod - curr_dist_mod_);
       } else  {

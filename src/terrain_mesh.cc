@@ -382,7 +382,7 @@ static inline bool IsBlockVisible(const glm::ivec2& _blockPos,
   glm::vec2 diff = blockPos - camPos;
   float dot = glm::dot(camFwd, glm::normalize(diff));
 
-  if (dot >= kCosFieldOfView || diff.length() < kBlockRadius) {
+  if (dot >= kCosFieldOfView || glm::length(diff) < kBlockRadius) {
     return true;
   } else if (dot < 0) {
     return false;
@@ -400,7 +400,6 @@ static inline bool IsBlockVisible(const glm::ivec2& _blockPos,
 }
 
 void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {
-
   int own_mipmap = GetBlockMipmapLevel(pos, camPos);
   int neighbour_mipmaps[6];
   for (int line = 0; line < 6; line++) {

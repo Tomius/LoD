@@ -6,7 +6,7 @@
 
 #include <SFML/Window.hpp>
 
-#define OGLWRAP_INSTATIATE 1
+#define OGLWRAP_INSTANTIATE 1
 
 #include "./lod_oglwrap_config.h"
 

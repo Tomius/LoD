@@ -3,6 +3,7 @@
 #ifndef ENGINE_RIGID_BODY_H_
 #define ENGINE_RIGID_BODY_H_
 
+#include <functional>
 #include "transform.h"
 
 namespace engine {

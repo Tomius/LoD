@@ -26,18 +26,21 @@ class CharacterMovement {
 
   bool walking_, jumping_, flip_, can_flip_, transition_;
 
+  GLFWwindow* window_;
+
   engine::Animation *anim_;
   engine::Camera *camera_;
 
-public:
+ public:
   using CanDoCallback = bool();
 
-private:
+ private:
   std::function<CanDoCallback> can_jump_functor_;
   std::function<CanDoCallback> can_flip_functor_;
 
-public:
-  CharacterMovement(engine::Transform& transform,
+ public:
+  CharacterMovement(GLFWwindow* window,
+                    engine::Transform& transform,
                     engine::RigidBody& rigid_body,
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = 180.0f);
@@ -48,6 +51,7 @@ public:
   void setCanFlipCallback(std::function<CanDoCallback> can_flip_functor) {
     can_flip_functor_ = can_flip_functor;
   }
+
   void update(float time);
   void handleSpacePressed();
   void updateHeight(float time);

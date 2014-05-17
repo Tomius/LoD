@@ -16,13 +16,16 @@ class Camera : public Transform {
 public:
   virtual ~Camera() {}
   virtual void update(const Timer& timer) = 0;
-  virtual void scrolling(int mouse_wheel_ticks) {}
+  virtual void mouseMoved(const Timer& timer, double xpos, double ypos) {}
+  virtual void mouseScrolled(const Timer& timer, double xoffset, double yoffset) {}
+  virtual void mouseButtonPressed(const Timer& timer, int button,
+                                  int action, int mods) {}
 };
 
 /**
  * @brief A simple camera class, that follows something that has a Transform.
  *
- * It can be controlled with mouse movement, and mouse wheel scrolling.
+ * It can be controlled with mouse movement, and mouse wheel mouseScrolled.
  */
 class ThirdPersonalCamera : public Camera {
   glm::vec3 fwd_;
@@ -30,7 +33,7 @@ class ThirdPersonalCamera : public Camera {
   // We shouldn't interpolate at the first call.
   bool first_call_;
 
-  // For scrolling interpolation
+  // For mouseScrolled interpolation
   double curr_dist_mod_, dest_dist_mod_;
 
   // Private constant number
@@ -50,7 +53,7 @@ public:
    * @param target                    The position of the camera's target (what
    *                                  it is looking at).
    * @param mouse_sensitivity         The relative sensitivity to mouse movement.
-   * @param mouse_scroll_sensitivity  The relative sensitivity to mouse scrolling.
+   * @param mouse_scroll_sensitivity  The relative sensitivity to mouse mouseScrolled.
    */
   ThirdPersonalCamera(Transform& target,
                       const glm::vec3& position,
@@ -117,17 +120,17 @@ public:
   }
 
   /// Updates the camera's position and rotation.
-  virtual void update(const Timer& timer) override {
+  virtual void mouseMoved(const Timer& timer, double xpos, double ypos) override {
     using namespace glm;
 
-    static sf::Vector2i prev_loc;
-    sf::Vector2i loc = sf::Mouse::getPosition();
-    sf::Vector2i diff = loc - prev_loc;
-    prev_loc = loc;
+    static glm::dvec2 prev_pos;
+    glm::dvec2 pos {xpos, ypos};
+    glm::dvec2 diff = pos - prev_pos;
+    prev_pos = pos;
 
     // We get invalid diff values at the startup
     if (first_call_) {
-      diff = sf::Vector2i(0, 0);
+      diff = glm::dvec2(0, 0);
       first_call_ = false;
     }
 
@@ -149,19 +152,17 @@ public:
       // Modify the forward vector
       forward(glm::normalize(forward() + right()*dx + up()*dy));
     }
-
-    updateDistance(timer);
   }
 
 private:
-  void updateDistance(const Timer& timer) {
+  virtual void update(const Timer& timer) override {
     glm::dvec3 tpos(target().pos()), fwd(forward());
     glm::dvec3 pos(tpos - fwd*curr_dist_mod_*initial_distance_);
 
     constexpr double collision_offset = 1.2;
 
     if (distanceOverTerrain(pos) > collision_offset) {
-      // Interpolate the scrolling if there isn't any collision
+      // Interpolate the mouseScrolled if there isn't any collision
       double dist_diff_mod = dest_dist_mod_ - curr_dist_mod_;
       double last_dist_mod = curr_dist_mod_;
       if (fabs(dist_diff_mod) > timer.dt * mouse_scroll_sensitivity_) {
@@ -213,15 +214,8 @@ private:
   }
 
 public:
-  /**
-   * @brief Changes the distance in which the camera should follow the target.
-   *
-   * @param mouse_wheel_ticks   The number of ticks, the mouse wheel was scrolled.
-   *                            This function expects a positive value for an
-   *                            upward scroll.
-   */
-  virtual void scrolling(int mouse_wheel_ticks) override {
-    dest_dist_mod_ -= mouse_wheel_ticks / 4.0f * mouse_scroll_sensitivity_;
+  virtual void mouseScrolled(const Timer&, double, double yoffset) override {
+    dest_dist_mod_ -= yoffset / 4.0f * mouse_scroll_sensitivity_;
     if (dest_dist_mod_ < 0.25f) {
       dest_dist_mod_ = 0.25f;
     } else if (dest_dist_mod_ > 2.0f) {

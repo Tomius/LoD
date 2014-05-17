@@ -14,28 +14,20 @@ Dependencies:
 * OpenGL 2.1, Shader model 120
 * GLEW - for loading OpenGL extensions
 * [oglwrap](https://github.com/Tomius/oglwrap) - my C++ OpenGL wrapper.
-* SFML 2 - for window handling
+* GLFW3 - for window handling
 * Magick++ - for image loading.
 * Assimp - for loading the character in. (An up-to-date copy of assimp is prefered, or else Ayumi might not get loaded correctly.)
 
 
-How to build (Debian 64 bit):
+How to build (Debian/Ubuntu):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && make && sudo make install && cd .. && rm -rf assimp && wget http://www.sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-64bits.tar.bz2 && tar jxf ./SFML-2.1-linux-gcc-64bits.tar.bz2 && sudo cp -r SFML-2.1/* /usr/local/ && rm -rf SFML* && git clone https://github.com/Tomius/LoD.git && cd LoD && git submodule init && git submodule update && make -j8 && ./LoD
-```
-
-How to build (Debian 32 bit):
---------------------
-```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && make && sudo make install && cd .. && rm -rf assimp && wget http://www.sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-32bits.tar.bz2 && tar jxf ./SFML-2.1-linux-gcc-32bits.tar.bz2 && sudo cp -r SFML-2.1/* /usr/local/ && rm -rf SFML* && git clone https://github.com/Tomius/LoD.git && cd LoD && git submodule init && git submodule update && make -j8 && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && sudo make -j4 install && cd .. && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD && make -j4 && ./LoD
 ```
 
 How to build (linux):
 ---------------------
-* Get the external dependencies: libmagick++-dev libglew-dev
-* Get libsfml2-dev, or grab it from its [offical website](http://www.sfml-dev.org/download/sfml/2.1/)
-* Get a fresh copy of [assimp](https://github.com/assimp/assimp). (You'd better avoid the libassimp-dev package, it's kinda old).
+* get the external dependencies: libmagick++-dev libglew-dev [assimp](https://github.com/assimp/assimp) [glfw](https://github.com/glfw/glfw)
 * initialize the oglwrap submodule: git submodule init && git submodule update
 * build with make (uses clang++), run with ./LoD
 
@@ -43,7 +35,7 @@ How to build (Windows):
 ----------------------
 * Get the 3rd party libraries:
   * [GLEW](http://sourceforge.net/projects/glew/files/glew/1.10.0/) - The prebulilt one only works with MSVC, you probably need to build it yourself.
-  * [SFML](http://www.sfml-dev.org/download/sfml/2.1/)
+  * [GLFW](https://github.com/glfw/glfw)
   * [Magick++](http://www.imagemagick.org/script/binary-releases.php) - Download the dynamic link Q16, install to compiler's path
   * [Assimp](http://sourceforge.net/projects/assimp/files/assimp-3.0/) - You need the SDK exe.
 * Add the librarires to link:

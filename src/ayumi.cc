@@ -2,6 +2,7 @@
 
 #include "ayumi.h"
 #include <string>
+#include <GLFW/glfw3.h>
 
 using oglwrap::ShaderSource;
 using oglwrap::VertexShader;
@@ -17,9 +18,9 @@ using engine::AnimParams;
 extern Context gl;
 extern bool was_left_click;
 
-Ayumi::Ayumi(Skybox* skybox, Shadow* shadow)
+Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     : mesh_("models/ayumi/ayumi.dae",
-            aiProcessPreset_TargetRealtime_MaxQuality |
+            aiProcessPreset_TargetRealtime_Quality |
             aiProcess_FlipUVs)
     , anim_(mesh_.getAnimData())
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
@@ -33,6 +34,7 @@ Ayumi::Ayumi(Skybox* skybox, Shadow* shadow)
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowSoftness_(prog_, "uShadowSoftness")
     , attack2_(false)
+    , window_(window)
     , charmove_(nullptr)
     , skybox_((assert(skybox), skybox))
     , shadow_((assert(shadow), shadow)) {
@@ -163,7 +165,7 @@ void Ayumi::update(float time) {
     }
   } else {
     if (charmove_->isWalking()) {
-      if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+      if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
         anim_.setCurrentAnimation(AnimParams("Run", 0.3f), time);
       } else {
         anim_.setCurrentAnimation(AnimParams("Walk", 0.3f), time);
@@ -221,6 +223,12 @@ void Ayumi::render(float time, const engine::Camera& cam) {
   skybox_->env_map.unbind();
 }
 
+void Ayumi::keyAction(int key, int scancode, int action, int mods) {
+  if(key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+    charmove_->handleSpacePressed();
+  }
+}
+
 bool Ayumi::canJump() {
   return anim_.isInterrupable();
 }
@@ -231,12 +239,14 @@ bool Ayumi::canFlip() {
 
 AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
   if (current_anim == "Attack") {
-    if (attack2_ || sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+    if (attack2_ ||
+        glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
       return AnimParams("Attack2", 0.1f);
     }
   } else if (current_anim == "Attack2") {
     attack2_ = false;
-    if (attack3_ || sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+    if (attack3_ ||
+        glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
       return AnimParams("Attack3", 0.05f);
     }
   } else if (current_anim == "Attack3") {
@@ -264,7 +274,7 @@ AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
     } else {
       params.transition_time = 0.3f;
     }
-    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+    if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
       params.name = "Run";
       return params;
     } else {

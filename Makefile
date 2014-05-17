@@ -8,10 +8,10 @@ DEPS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.dep))
 HEADERS := $(shell find -L $(SRC_DIR) -name '*.h')
 
 CXX = clang++
-CXXFLAGS = -std=c++11 -Wall -Qunused-arguments \
-						`Magick++-config --cxxflags --cppflags` -g -rdynamic
-LDFLAGS = -lGL -lGLEW -lsfml-window -lsfml-system -lassimp \
-						`Magick++-config --ldflags --libs` -g -rdynamic
+CXXFLAGS = -g -rdynamic -std=c++11 -Wall -Qunused-arguments \
+					 `pkg-config --cflags glfw3` `Magick++-config --cxxflags --cppflags`
+LDFLAGS = -g -rdynamic -lGL -lGLU -lGLEW -lassimp -lglfw3 -lXxf86vm -lX11 -lXrandr \
+					-lXi -lm -lXcursor -lpthread `Magick++-config --ldflags --libs`
 
 .PHONY: all clean
 
@@ -30,7 +30,7 @@ $(OBJ_DIR)/%.o:
 	$(CXX) $(CXXFLAGS) -c $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.o=.cc)) -o $@
 
 $(BINARY): $(DEPS) $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
 
 

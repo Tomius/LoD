@@ -3,21 +3,19 @@
 #ifndef ENGINE_TIMER_H_
 #define ENGINE_TIMER_H_
 
-#include <SFML/Window.hpp>
+#include <GLFW/glfw3.h>
 
 namespace engine {
 
 class Timer {
-  sf::Clock clock_;
-  float last_time_ = 0;
+  double last_time_ = 0;
   bool stopped_ = false;
-public:
+ public:
+  double current = 0, dt = 0;
 
-  float current = 0, dt = 0;
-
-  float tick() {
+  double tick() {
     if (!stopped_) {
-      float time = clock_.getElapsedTime().asSeconds();
+      double time = glfwGetTime();
       dt = time - last_time_;
       last_time_ = time;
       current += dt;
@@ -32,7 +30,7 @@ public:
 
   void start() {
     stopped_ = false;
-    last_time_ = clock_.getElapsedTime().asSeconds();
+    last_time_ = glfwGetTime();
   }
 
   void toggle() {

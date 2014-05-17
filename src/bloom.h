@@ -6,7 +6,7 @@
 #include "./lod_oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
-#include "oglwrap/shapes/fullScreenRect.h"
+#include "oglwrap/shapes/full_screen_rect.h"
 #include "oglwrap/textures/texture_2D.h"
 
 #include "engine/gameobject.h"

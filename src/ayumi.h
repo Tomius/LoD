@@ -32,12 +32,14 @@ class Ayumi : public engine::GameObject {
 
   bool attack2_, attack3_;
 
+  GLFWwindow* window_;
+
   CharacterMovement *charmove_;
   Skybox* skybox_;
   Shadow* shadow_;
 
  public:
-  Ayumi(Skybox* skybox, Shadow* shadow);
+  Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow);
   virtual ~Ayumi() {}
   engine::AnimatedMeshRenderer& getMesh();
   engine::Animation& getAnimation();
@@ -50,6 +52,7 @@ class Ayumi : public engine::GameObject {
     charmove_->setCanJumpCallback(std::bind(&Ayumi::canJump, this));
     charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
   }
+  virtual void keyAction(int key, int scancode, int action, int mods) override;
 
  private:
   CharacterMovement::CanDoCallback canJump;

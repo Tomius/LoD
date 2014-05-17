@@ -23,11 +23,17 @@ public:
     );
   }
 
-  virtual void screenResized(const glm::mat4& projMat,
-                             size_t width, size_t height) {}
   virtual void update(float t) {}
   virtual void shadowRender(float time, const Camera& cam) {}
   virtual void render(float time, const Camera& cam) {}
+
+  virtual void screenResized(const glm::mat4& projMat,
+                             size_t width, size_t height) {}
+  virtual void keyAction(int key, int scancode, int action, int mods) {}
+  virtual void mouseScrolled(const Timer& timer, double xoffset, double yoffset) {}
+  virtual void mouseButtonPressed(const Timer& timer, int button,
+                                  int action, int mods) {}
+  virtual void mouseMoved(const Timer& timer, double xpos, double ypos) {}
 };
 
 }

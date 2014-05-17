@@ -1,15 +1,17 @@
 // Copyright (c) 2014, Tamas Csala
 
-#ifndef MAP_H_
-#define MAP_H_
+#ifndef LOD_MAP_H_
+#define LOD_MAP_H_
 
 #include "./lod_oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
-#include "oglwrap/shapes/fullScreenRect.h"
+#include "oglwrap/shapes/full_screen_rect.h"
 #include "oglwrap/textures/texture_2D.h"
 
 #include "engine/gameobject.h"
+
+extern oglwrap::Context gl;
 
 class Map : public engine::GameObject {
 	bool open_;
@@ -22,8 +24,7 @@ class Map : public engine::GameObject {
 public:
 	Map(glm::vec2 terrain_size)
 			: open_(false)
-			, terrain_size_(terrain_size)
-	{
+			, terrain_size_(terrain_size) {
 		oglwrap::VertexShader vs("map.vert");
 		oglwrap::FragmentShader fs("map.frag");
 		prog_ << vs << fs;
@@ -45,10 +46,6 @@ public:
 	}
 
 	virtual ~Map() {}
-
-	void toggle() {
-		open_ = !open_;
-	}
 
 	struct MapMark {
 		oglwrap::Program prog_;
@@ -117,19 +114,20 @@ public:
 	}
 
 	virtual void render(float time, const engine::Camera& cam) override {
-		using namespace oglwrap;
+		using oglwrap::Capability;
+		using oglwrap::BlendFunction;
 
 		if (open_) {
 			prog_.use();
 			tex_.active(0);
 			tex_.bind();
 
-			auto capabilies = Context::TemporarySet({
+			auto capabilies = oglwrap::Context::TemporarySet({
 				{Capability::Blend, true},
 				{Capability::CullFace, false},
 				{Capability::DepthTest, false}
 			});
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			gl.BlendFunc(BlendFunction::SrcAlpha, BlendFunction::OneMinusSrcAlpha);
 
 			rect_.render();
 			tex_.unbind();
@@ -138,6 +136,12 @@ public:
 		}
 	}
 
+	virtual void keyAction(int key, int scancode, int action, int mods) override {
+		if(key == GLFW_KEY_M && action == GLFW_PRESS) {
+			open_ = !open_;
+		}
+	}
+
 };
 
-#endif // MAP_H_
+#endif // LOD_MAP_H_

@@ -136,6 +136,9 @@ private:
     for (auto& i : gameobjects_) {
       i->update(game_time_.current);
     }
+    for (auto& i : after_effects_) {
+      i->update(game_time_.current);
+    }
 
     camera_->update(game_time_);
   }
@@ -174,6 +177,68 @@ public:
     update();
     shadowRender();
     render();
+  }
+
+  void keyAction(GLFWwindow* window, int key, int scancode,
+                                     int action, int mods) {
+    for (auto& i : gameobjects_) {
+      i->keyAction(key, scancode, action, mods);
+    }
+    for (auto& i : after_effects_) {
+      i->keyAction(key, scancode, action, mods);
+    }
+
+    if (action == GLFW_PRESS) {
+      switch (key) {
+        case GLFW_KEY_F1:
+          game_time_.toggle();
+          break;
+        case GLFW_KEY_F2:
+          environment_time_.toggle();
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  void mouseScrolled(GLFWwindow* window, double xoffset, double yoffset) {
+    if (camera_) {
+      camera_->mouseScrolled(game_time_, xoffset, yoffset);
+    }
+
+    for (auto& i : gameobjects_) {
+      i->mouseScrolled(game_time_, xoffset, yoffset);
+    }
+    for (auto& i : after_effects_) {
+      i->mouseScrolled(game_time_, xoffset, yoffset);
+    }
+  }
+
+  void mouseButtonPressed(GLFWwindow* window, int button, int action, int mods) {
+    if (camera_) {
+      camera_->mouseButtonPressed(game_time_, button, action, mods);
+    }
+
+    for (auto& i : gameobjects_) {
+      i->mouseButtonPressed(game_time_, button, action, mods);
+    }
+    for (auto& i : after_effects_) {
+      i->mouseButtonPressed(game_time_, button, action, mods);
+    }
+  }
+
+  void mouseMoved(GLFWwindow* window, double xpos, double ypos) {
+    if (camera_) {
+      camera_->mouseMoved(game_time_, xpos, ypos);
+    }
+
+    for (auto& i : gameobjects_) {
+      i->mouseMoved(game_time_, xpos, ypos);
+    }
+    for (auto& i : after_effects_) {
+      i->mouseMoved(game_time_, xpos, ypos);
+    }
   }
 };
 

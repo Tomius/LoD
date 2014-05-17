@@ -3,12 +3,12 @@
 #include <vector>
 #include <string>
 #include <iostream>
-
-#include <SFML/Window.hpp>
+#include <functional>
 
 #define OGLWRAP_INSTANTIATE 1
-
 #include "./lod_oglwrap_config.h"
+
+#include <GLFW/glfw3.h>
 
 #include "engine/timer.h"
 #include "engine/scene.h"
@@ -23,6 +23,7 @@
 #include "./tree.h"
 #include "./shadow.h"
 #include "./map.h"
+#include "./loading_screen.h"
 
 using oglwrap::Capability;
 using oglwrap::Face;
@@ -36,21 +37,23 @@ extern const float kFieldOfView = 60;
 double ogl_version;
 bool was_left_click = false;
 
-void glInit() {
-  gl.ClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+void glInit(GLFWwindow* window) {
+  gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   gl.ClearDepth(1.0f);
   gl.Enable(Capability::DepthTest);
   gl.Enable(Capability::DepthClamp);
   gl.CullFace(Face::Back);
+
+  LoadingScreen().render();
+  glfwSwapBuffers(window);
 }
 
 void FpsDisplay() {
-  static sf::Clock clock;
-  float time = clock.getElapsedTime().asSeconds();
+  double time = glfwGetTime();
 
-  static float accum_time = 0.0f;
-  static float last_call = time;
-  float dt = time - last_call;
+  static double accum_time = 0.0f;
+  static double last_call = time;
+  double dt = time - last_call;
   last_call = time;
   static int calls = 0;
 
@@ -62,45 +65,115 @@ void FpsDisplay() {
   }
 }
 
-static sf::Clock dbg_clock;
+static double last_debug_time = 0;
 
 static void PrintDebugText(const std::string& str) {
   std::cout << str << ": ";
 }
 
 static void PrintDebugTime() {
-  std::cout << dbg_clock.getElapsedTime().asMilliseconds() << " ms" << std::endl;
-  dbg_clock.restart();
+  double curr_time = glfwGetTime();
+  std::cout << curr_time - last_debug_time << " ms" << std::endl;
+  last_debug_time = curr_time;
+}
+
+engine::Scene scene; // FIXME!!
+
+// Callbacks
+static void ErrorCallback(int error, const char* description) {
+    fputs(description, stderr);
+}
+
+static void KeyCallback(GLFWwindow* window, int key, int scancode,
+                                            int action, int mods) {
+  if(action == GLFW_PRESS) {
+    switch(key) {
+      case GLFW_KEY_ESCAPE:
+        glfwSetWindowShouldClose(window, GL_TRUE);
+        break;
+      case GLFW_KEY_F11:
+        static bool fix_mouse = false;
+        fix_mouse = !fix_mouse;
+
+        if (fix_mouse) {
+          glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+          glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  scene.keyAction(window, key, scancode, action, mods);
+}
+
+static void ScreenResizeCallback(GLFWwindow* window, int width, int height) {
+  gl.Viewport(width, height);
+  auto projMat = glm::perspectiveFov<float>(kFieldOfView, width,
+                                            height, 0.5, 3000);
+  scene.screenResized(projMat, width, height);
+}
+
+static void MouseScrolledCallback(GLFWwindow* window, double xoffset,
+                                                      double yoffset) {
+  scene.mouseScrolled(window, xoffset, yoffset);
+}
+
+static void MouseButtonPressed(GLFWwindow* window, int button,
+                               int action, int mods) {
+  if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    was_left_click = true;
+  }
+  scene.mouseButtonPressed(window, button, action, mods);
+}
+
+static void MouseMoved(GLFWwindow* window,  double xpos, double ypos) {
+  scene.mouseMoved(window, xpos, ypos);
 }
 
 int main() {
   PrintDebugText("Creating the OpenGL context");
-  sf::Window window(sf::VideoMode(800, 600), "Land of Dreams",
-                    sf::Style::Default, sf::ContextSettings(32, 0, 0, 2, 1));
+    glfwSetErrorCallback(ErrorCallback);
+
+    // GLFW init
+    if (!glfwInit()) {
+      std::terminate();
+    }
+
+    // Hits
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+
+    // Window creation
+    GLFWwindow* window = glfwCreateWindow(1920, 1080, "Land of Dreams",
+                                          glfwGetPrimaryMonitor(), nullptr);
+    if (!window){
+      glfwTerminate();
+      std::terminate();
+    }
+
+    glfwMakeContextCurrent(window);
   PrintDebugTime();
 
-  sf::ContextSettings settings = window.getSettings();
-  std::cout <<
-    " - Depth bits: "          << settings.depthBits         << std::endl <<
-    " - Stencil bits: "        << settings.stencilBits       << std::endl <<
-    " - Anti-aliasing level: " << settings.antialiasingLevel << std::endl <<
-    " - OpenGL version: "      << settings.majorVersion      << "."
-                               << settings.minorVersion      << std::endl;
-
-  ogl_version = settings.majorVersion + settings.minorVersion/10.0;
+  // Check the created OpenGL context's version
+  ogl_version = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR) +
+                glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
+  std::cout << " - OpenGL version: "  << ogl_version << std::endl;
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+  std::cout << " - Resolution: "  << width << " x " << height << std::endl;
 
   if (ogl_version < 2.1) {
     std::cout << "At least OpenGL version 2.1 is required to run this program\n";
-    return -1;
+    std::terminate();
   }
 
   // No V-sync needed because of multiple draw calls per frame.
-  window.setFramerateLimit(60);
-  window.setVerticalSyncEnabled(false);
+  glfwSwapInterval(0);
 
-  engine::Scene scene;
-  bool fixMouse = false;
-
+  // GLEW init
   GLenum err = glewInit();
   if (err != GLEW_OK) {
     std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
@@ -108,118 +181,84 @@ int main() {
   }
 
   try {
-      glInit();
+    glInit(window);
 
-      dbg_clock.restart();
-      PrintDebugText("Initializing the skybox");
-        Skybox *skybox = scene.addSkybox();
-      PrintDebugTime();
+    PrintDebugText("Initializing the skybox");
+      Skybox *skybox = scene.addSkybox();
+    PrintDebugTime();
 
-      PrintDebugText("Initializing the shadow maps");
-        Shadow *shadow = scene.addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
-      PrintDebugTime();
+    PrintDebugText("Initializing the shadow maps");
+      Shadow *shadow = scene.addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
+    PrintDebugTime();
 
-      PrintDebugText("Initializing the terrain");
-        Terrain *terrain = scene.addGameObject<Terrain>(skybox, shadow);
-        auto terrain_height =
-          [terrain](double x, double y) {return terrain->getHeight(x, y);};
-      PrintDebugTime();
+    PrintDebugText("Initializing the terrain");
+      Terrain *terrain = scene.addGameObject<Terrain>(skybox, shadow);
+      auto terrain_height =
+        [terrain](double x, double y) {return terrain->getHeight(x, y);};
+    PrintDebugTime();
 
-      PrintDebugText("Initializing the trees");
-        scene.addGameObject<Tree>(*terrain, skybox, shadow);
-      PrintDebugTime();
+    PrintDebugText("Initializing the trees");
+      scene.addGameObject<Tree>(*terrain, skybox, shadow);
+    PrintDebugTime();
 
-      PrintDebugText("Initializing Ayumi");
-        Ayumi *ayumi = scene.addGameObject<Ayumi>(skybox, shadow);
-        ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
+    PrintDebugText("Initializing Ayumi");
+      Ayumi *ayumi = scene.addGameObject<Ayumi>(window, skybox, shadow);
+      ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
 
-        CharacterMovement charmove{ayumi->transform, *ayumi->rigid_body};
-        ayumi->charmove(&charmove);
-      PrintDebugTime();
+      CharacterMovement charmove{window, ayumi->transform, *ayumi->rigid_body};
+      ayumi->charmove(&charmove);
+    PrintDebugTime();
 
-      charmove.setAnimation(&ayumi->getAnimation());
+    charmove.setAnimation(&ayumi->getAnimation());
 
-      engine::Transform& cam_offset = scene.addGameObject()->transform;
-      ayumi->transform.addChild(cam_offset);
-      cam_offset.localPos(ayumi->getMesh().bSphereCenter());
+    engine::Transform& cam_offset = scene.addGameObject()->transform;
+    ayumi->transform.addChild(cam_offset);
+    cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
-      engine::ThirdPersonalCamera cam(cam_offset, cam_offset.pos()
-        + glm::vec3(ayumi->getMesh().bSphereRadius() * 2), terrain_height, 1.5f);
+    engine::ThirdPersonalCamera cam(cam_offset, cam_offset.pos()
+      + glm::vec3(ayumi->getMesh().bSphereRadius() * 2), terrain_height, 1.5f);
 
-      charmove.setCamera(&cam);
-      scene.addCamera(&cam);
+    charmove.setCamera(&cam);
+    scene.addCamera(&cam);
 
-      PrintDebugText("Initializing the resources for the bloom effect");
-        scene.addAfterEffect<BloomEffect>();
-      PrintDebugTime();
+    PrintDebugText("Initializing the resources for the bloom effect");
+      scene.addAfterEffect<BloomEffect>();
+    PrintDebugTime();
 
-      PrintDebugText("Initializing the map");
-        Map *map = scene.addAfterEffect<Map>(glm::vec2(terrain->w, terrain->h));
-      PrintDebugTime();
+    PrintDebugText("Initializing the map");
+      scene.addAfterEffect<Map>(glm::vec2(terrain->w, terrain->h));
+    PrintDebugTime();
 
-      std::cout << "\nStarting the main loop.\n" << std::endl;
+    // Callbacks
+    glfwSetKeyCallback(window, KeyCallback);
+    glfwSetFramebufferSizeCallback(window, ScreenResizeCallback);
+    // This manual reset event is needed!
+    ScreenResizeCallback(window, width, height);
+    glfwSetScrollCallback(window, MouseScrolledCallback);
+    glfwSetMouseButtonCallback(window, MouseButtonPressed);
+    glfwSetCursorPosCallback(window, MouseMoved);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-      sf::Event event;
-      bool running = true;
-      while (running) {
-        while (window.pollEvent(event)) {
-          switch (event.type) {
-            case sf::Event::Closed:
-              running = false;
-              break;
-            case sf::Event::KeyPressed:
-              if (event.key.code == sf::Keyboard::Escape) {
-                running = false;
-              } else if (event.key.code == sf::Keyboard::F11) {
-                fixMouse = !fixMouse;
-                window.setMouseCursorVisible(!fixMouse);
-              } else if (event.key.code == sf::Keyboard::F1) {
-                scene.game_time_.toggle();
-              } else if (event.key.code == sf::Keyboard::F2) {
-                scene.environment_time_.toggle();
-              } else if (event.key.code == sf::Keyboard::Space) {
-                charmove.handleSpacePressed();
-              } else if (event.key.code == sf::Keyboard::M) {
-                map->toggle();
-              }
-              break;
-            case sf::Event::Resized: {
-                int width = event.size.width, height = event.size.height;
+    std::cout << "\nStarting the main loop.\n" << std::endl;
 
-                gl.Viewport(width, height);
+    // Main Loop
+    while (!glfwWindowShouldClose(window)) {
+      gl.Clear().Color().Depth();
+      FpsDisplay();
+      scene.turn();
 
-                auto projMat = glm::perspectiveFov<float>(kFieldOfView, width,
-                                                          height, 0.5, 3000);
-
-                scene.screenResized(projMat, width, height);
-              }
-              break;
-            case sf::Event::MouseWheelMoved:
-              cam.scrolling(event.mouseWheel.delta);
-              break;
-            case sf::Event::MouseButtonPressed:
-              if (event.mouseButton.button == sf::Mouse::Left) {
-                was_left_click = true;
-              }
-              break;
-            default:
-              break;
-          }
-        }
-
-        gl.Clear().Color().Depth();
-
-        FpsDisplay();
-
-        scene.turn();
-
-        window.display();
-      }
-
-      return 0;
-    } catch(std::exception& err) {
-      std::cerr << err.what();
+      glfwSwapBuffers(window);
+      glfwPollEvents();
     }
 
-  return 1;
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+
+  } catch(std::exception& err) {
+    std::cerr << err.what();
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    std::terminate();
+  }
 }

@@ -16,7 +16,9 @@ class Timer {
   double tick() {
     if (!stopped_) {
       double time = glfwGetTime();
-      dt = time - last_time_;
+      if(last_time_ != 0) {
+        dt = time - last_time_;
+      }
       last_time_ = time;
       current += dt;
     }

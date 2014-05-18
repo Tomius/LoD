@@ -455,7 +455,7 @@ void TerrainMesh::DrawBlocks(const glm::vec3& _camPos,
   glm::ivec2 offset(0, 0);
   glm::vec2 camPos = glm::vec2(_camPos.x, _camPos.z);
   glm::vec2 camFwd = glm::normalize(glm::vec2(_camFwd.x, _camFwd.z));
-  int mipmap_level = 0;
+  int mipmap_level = GetBlockMipmapLevel(offset, camPos);
 
   // The center piece is special.
   DrawOneBlock(offset, mipmap_level, camPos, camFwd, uOffset, uMipmapLevel);

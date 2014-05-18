@@ -24,7 +24,8 @@ float fetchHeight(ivec2 texCoord) {
 void main() {
   vec2 w_offsPos = (aPosition + uOffset) / 2.0;
 
-  if (int(abs(w_offsPos.x)) - 1 >= uTexSize.x / 2 || int(abs(w_offsPos.y)) - 1 >= uTexSize.y / 2) {
+  if (int(abs(w_offsPos.x)) >= uTexSize.x / 2 ||
+      int(abs(w_offsPos.y)) >= uTexSize.y / 2) {
     vInvalid = 1e10;
     gl_Position = vec4(0.0);
     return;

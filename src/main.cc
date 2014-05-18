@@ -192,7 +192,7 @@ int main() {
     PrintDebugTime();
 
     PrintDebugText("Initializing the terrain");
-      Terrain *terrain = scene.addGameObject<Terrain>(skybox, shadow);
+      /*Terrain *terrain = */scene.addGameObject<Terrain>(skybox, shadow);
       // auto terrain_height =
       //   [terrain](double x, double y) {return terrain->getHeight(x, y);};
     PrintDebugTime();

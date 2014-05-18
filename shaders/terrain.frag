@@ -114,8 +114,12 @@ void main() {
   // Colors
   vec3 grass0_color = texture2D(uGrassMap0, grass_texcoord).rgb;
   vec3 grass1_color = texture2D(uGrassMap1, grass_texcoord).rgb;
+  vec3 grass10_color = texture2D(uGrassMap0, grass_texcoord/16).rgb;
+  vec3 grass11_color = texture2D(uGrassMap1, grass_texcoord/16).rgb;
   float height_factor = clamp(sqrt((w_vPos.y - 15 * uScales.y) / 40), 0, 1);
-  vec3 grass_color = mix(grass0_color, grass1_color, height_factor);
+  vec3 grass_color0 = mix(grass0_color, grass1_color, height_factor);
+  vec3 grass_color1 = mix(grass10_color, grass11_color, height_factor);
+  vec3 grass_color = mix(grass_color0, grass_color1, 0.5);
 
   float length_from_camera = length(c_vPos);
 

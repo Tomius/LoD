@@ -275,7 +275,6 @@ TerrainMesh::TerrainMesh(const std::string& terrainFile)
 
   }
 
-
   // Upload the textures
 
   heightMap_.active(1);
@@ -378,25 +377,29 @@ static inline int GetBlockMipmapLevel(const glm::ivec2& _pos,
 static inline bool IsBlockVisible(const glm::ivec2& _blockPos,
                                   const glm::vec2& camPos,
                                   const glm::vec2& camFwd) {
-  glm::vec2 blockPos = glm::vec2(_blockPos.x/2, _blockPos.y/2);
-  glm::vec2 diff = blockPos - camPos;
-  float dot = glm::dot(camFwd, glm::normalize(diff));
+  return true;
 
-  if (dot >= kCosFieldOfView || glm::length(diff) < kBlockRadius) {
-    return true;
-  } else if (dot < 0) {
-    return false;
-  }
+  // This algoritm definitely doesn't work:
 
-  for (int i = 0; i < 6; ++i) {
-    glm::ivec2 pos = _blockPos + GetBlockPos(1, i, 0, kBlockRadius);
-    diff = glm::normalize(glm::vec2(pos.x/2, pos.y/2) - camPos);
-    if (glm::dot(camFwd, diff) >= kCosFieldOfView) {
-      return true;
-    }
-  }
+  // glm::vec2 blockPos = glm::vec2(_blockPos.x/2, _blockPos.y/2);
+  // glm::vec2 diff = blockPos - camPos;
+  // float dot = glm::dot(camFwd, glm::normalize(diff));
 
-  return false;
+  // if (dot >= kCosFieldOfView || glm::length(diff) < kBlockRadius) {
+  //   return true;
+  // } else if (dot < 0) {
+  //   return false;
+  // }
+
+  // for (int i = 0; i < 6; ++i) {
+  //   glm::ivec2 pos = _blockPos + GetBlockPos(1, i, 0, kBlockRadius);
+  //   diff = glm::normalize(glm::vec2(pos.x/2, pos.y/2) - camPos);
+  //   if (glm::dot(camFwd, diff) >= kCosFieldOfView) {
+  //     return true;
+  //   }
+  // }
+
+  // return false;
 }
 
 void TerrainMesh::CreateConnectors(glm::ivec2 pos, glm::vec2 camPos) {

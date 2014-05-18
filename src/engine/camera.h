@@ -4,6 +4,7 @@
 #define ENGINE_CAMERA_H_
 
 #include <cmath>
+#include <iostream>
 
 #include "timer.h"
 #include "transform.h"
@@ -15,12 +16,113 @@ namespace engine {
 class Camera : public Transform {
 public:
   virtual ~Camera() {}
-  virtual void update(const Timer& timer) = 0;
+  virtual void update(const Timer& timer) {}
   virtual void mouseMoved(const Timer& timer, double xpos, double ypos) {}
   virtual void mouseScrolled(const Timer& timer, double xoffset, double yoffset) {}
   virtual void mouseButtonPressed(const Timer& timer, int button,
                                   int action, int mods) {}
+  virtual void keyAction(const Timer& timer, int key, int scancode,
+                         int action, int mods) {}
 };
+
+class FreeFlyCamera : public Camera {
+  GLFWwindow* window_;
+  bool first_call_;
+
+  /// Private constant numbers
+  const float speed_per_sec_, cos_max_pitch_angle_, mouse_sensitivity_;
+public:
+  /// Creates the free-fly camera.
+  /** @param pos - The position of the camera.
+    * @param target - The position of the camera's target (what it is looking at).
+    * @param speed_per_sec - Move speed in OpenGL units per second
+    * @param mouse_sensitivity - The relative sensitivity to mouse movement. */
+  FreeFlyCamera(GLFWwindow* window,
+                const glm::vec3& pos,
+                const glm::vec3& target = glm::vec3(),
+                float speed_per_sec = 5.0f,
+                float mouse_sensitivity = 1.0f)
+    : window_(window)
+    , first_call_(false)
+    , speed_per_sec_(speed_per_sec)
+    , cos_max_pitch_angle_(0.8)
+    , mouse_sensitivity_(mouse_sensitivity) {
+
+    this->pos(pos);
+    forward(target - pos);
+  }
+
+  // We want the camera to always treat Y as up.
+  virtual glm::vec3 up() const override {
+    return glm::vec3(0, 1, 0);
+  }
+
+  virtual void up(const glm::vec3& new_up) override {}
+
+  // The right vector is treated in a different way too.
+  virtual glm::vec3 right() const override {
+    return glm::cross(forward(), up());
+  }
+
+  virtual void right(const glm::vec3& new_right) override {
+    forward(glm::cross(up(), new_right));
+  }
+
+  virtual glm::mat4 localToWorldMatrix() const override {
+    return glm::lookAt(pos(), pos()+forward(), up());
+  }
+
+  /// Updates the camera's position and rotation.
+  virtual void mouseMoved(const Timer& timer, double xpos, double ypos) override {
+    using namespace glm;
+
+    static glm::dvec2 prev_pos;
+    glm::dvec2 pos {xpos, ypos};
+    glm::dvec2 diff = pos - prev_pos;
+    prev_pos = pos;
+
+    // We get invalid diff values at the startup
+    if (first_call_) {
+      diff = glm::dvec2(0, 0);
+      first_call_ = false;
+    }
+
+    // Mouse movement - update the coordinate system
+    if (diff.x || diff.y) {
+      float dx ( diff.x * mouse_sensitivity_ * 0.0035 );
+      float dy ( -diff.y * mouse_sensitivity_ * 0.0035 );
+
+      // If we are looking up / down, we don't want to be able
+      // to rotate to the other side
+      float dot_up_fwd = dot(up(), forward());
+      if (dot_up_fwd > cos_max_pitch_angle_ && dy > 0) {
+        dy = 0;
+      }
+      if (dot_up_fwd < -cos_max_pitch_angle_ && dy < 0) {
+        dy = 0;
+      }
+
+      // Modify the forward vector
+      forward(glm::normalize(forward() + right()*dx + up()*dy));
+    }
+  }
+
+  virtual void update(const engine::Timer& timer) override {
+    float ds = timer.dt * speed_per_sec_;
+    if(glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
+      localPos() += forward() * ds;
+    }
+    if(glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
+      localPos() -= forward() * ds;
+    }
+    if(glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
+      localPos() += right() * ds;
+    }
+    if(glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
+      localPos() -= right() * ds;
+    }
+  }
+}; // FreeFlyCamera
 
 /**
  * @brief A simple camera class, that follows something that has a Transform.

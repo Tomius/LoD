@@ -193,41 +193,42 @@ int main() {
 
     PrintDebugText("Initializing the terrain");
       Terrain *terrain = scene.addGameObject<Terrain>(skybox, shadow);
-      auto terrain_height =
-        [terrain](double x, double y) {return terrain->getHeight(x, y);};
+      // auto terrain_height =
+      //   [terrain](double x, double y) {return terrain->getHeight(x, y);};
     PrintDebugTime();
 
-    PrintDebugText("Initializing the trees");
-      scene.addGameObject<Tree>(*terrain, skybox, shadow);
-    PrintDebugTime();
+    // PrintDebugText("Initializing the trees");
+    //   scene.addGameObject<Tree>(*terrain, skybox, shadow);
+    // PrintDebugTime();
 
-    PrintDebugText("Initializing Ayumi");
-      Ayumi *ayumi = scene.addGameObject<Ayumi>(window, skybox, shadow);
-      ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
+    // PrintDebugText("Initializing Ayumi");
+    //   Ayumi *ayumi = scene.addGameObject<Ayumi>(window, skybox, shadow);
+    //   ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
 
-      CharacterMovement charmove{window, ayumi->transform, *ayumi->rigid_body};
-      ayumi->charmove(&charmove);
-    PrintDebugTime();
+    //   CharacterMovement charmove{window, ayumi->transform, *ayumi->rigid_body};
+    //   ayumi->charmove(&charmove);
+    // PrintDebugTime();
 
-    charmove.setAnimation(&ayumi->getAnimation());
+    // charmove.setAnimation(&ayumi->getAnimation());
 
-    engine::Transform& cam_offset = scene.addGameObject()->transform;
-    ayumi->transform.addChild(cam_offset);
-    cam_offset.localPos(ayumi->getMesh().bSphereCenter());
+    // engine::Transform& cam_offset = scene.addGameObject()->transform;
+    // ayumi->transform.addChild(cam_offset);
+    // cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
-    engine::ThirdPersonalCamera cam(cam_offset, cam_offset.pos()
-      + glm::vec3(ayumi->getMesh().bSphereRadius() * 2), terrain_height, 1.5f);
+    engine::FreeFlyCamera cam(window, glm::vec3(30, 30, 0), glm::vec3(), 150);
+    // engine::ThirdPersonalCamera cam(cam_offset, cam_offset.pos()
+    //   + glm::vec3(ayumi->getMesh().bSphereRadius() * 2), terrain_height, 1.5f);
 
-    charmove.setCamera(&cam);
+    // charmove.setCamera(&cam);
     scene.addCamera(&cam);
 
-    PrintDebugText("Initializing the resources for the bloom effect");
-      scene.addAfterEffect<BloomEffect>();
-    PrintDebugTime();
+    // PrintDebugText("Initializing the resources for the bloom effect");
+    //   scene.addAfterEffect<BloomEffect>();
+    // PrintDebugTime();
 
-    PrintDebugText("Initializing the map");
-      scene.addAfterEffect<Map>(glm::vec2(terrain->w, terrain->h));
-    PrintDebugTime();
+    // PrintDebugText("Initializing the map");
+    //   scene.addAfterEffect<Map>(glm::vec2(terrain->w, terrain->h));
+    // PrintDebugTime();
 
     // Callbacks
     glfwSetKeyCallback(window, KeyCallback);

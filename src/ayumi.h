@@ -52,7 +52,8 @@ class Ayumi : public engine::GameObject {
     charmove_->setCanJumpCallback(std::bind(&Ayumi::canJump, this));
     charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
   }
-  virtual void keyAction(int key, int scancode, int action, int mods) override;
+  virtual void keyAction(const engine::Timer&, int key, int scancode,
+                         int action, int mods) override;
 
  private:
   CharacterMovement::CanDoCallback canJump;

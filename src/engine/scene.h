@@ -181,11 +181,15 @@ public:
 
   void keyAction(GLFWwindow* window, int key, int scancode,
                                      int action, int mods) {
+    if (camera_) {
+      camera_->keyAction(game_time_, key, scancode, action, mods);
+    }
+
     for (auto& i : gameobjects_) {
-      i->keyAction(key, scancode, action, mods);
+      i->keyAction(game_time_, key, scancode, action, mods);
     }
     for (auto& i : after_effects_) {
-      i->keyAction(key, scancode, action, mods);
+      i->keyAction(game_time_, key, scancode, action, mods);
     }
 
     if (action == GLFW_PRESS) {

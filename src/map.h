@@ -136,7 +136,8 @@ public:
 		}
 	}
 
-	virtual void keyAction(int key, int scancode, int action, int mods) override {
+	virtual void keyAction(const engine::Timer&, int key, int scancode,
+																							 int action, int mods) override {
 		if(key == GLFW_KEY_M && action == GLFW_PRESS) {
 			open_ = !open_;
 		}

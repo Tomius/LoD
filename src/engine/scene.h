@@ -23,7 +23,7 @@ public:
   Camera* camera_;
   std::unique_ptr<Skybox> skybox_;
   std::unique_ptr<Shadow> shadow_;
-  Timer game_time_, environment_time_;
+  Timer game_time_, environment_time_, camera_time_;
 
   Scene() { }
 
@@ -128,6 +128,7 @@ private:
   void update() {
     game_time_.tick();
     environment_time_.tick();
+    camera_time_.tick();
 
     if (skybox_) {
       skybox_->update(environment_time_.current);
@@ -140,7 +141,7 @@ private:
       i->update(game_time_.current);
     }
 
-    camera_->update(game_time_);
+    camera_->update(camera_time_);
   }
 
   void shadowRender() {
@@ -182,7 +183,7 @@ public:
   void keyAction(GLFWwindow* window, int key, int scancode,
                                      int action, int mods) {
     if (camera_) {
-      camera_->keyAction(game_time_, key, scancode, action, mods);
+      camera_->keyAction(camera_time_, key, scancode, action, mods);
     }
 
     for (auto& i : gameobjects_) {
@@ -208,7 +209,7 @@ public:
 
   void mouseScrolled(GLFWwindow* window, double xoffset, double yoffset) {
     if (camera_) {
-      camera_->mouseScrolled(game_time_, xoffset, yoffset);
+      camera_->mouseScrolled(camera_time_, xoffset, yoffset);
     }
 
     for (auto& i : gameobjects_) {
@@ -221,7 +222,7 @@ public:
 
   void mouseButtonPressed(GLFWwindow* window, int button, int action, int mods) {
     if (camera_) {
-      camera_->mouseButtonPressed(game_time_, button, action, mods);
+      camera_->mouseButtonPressed(camera_time_, button, action, mods);
     }
 
     for (auto& i : gameobjects_) {
@@ -234,7 +235,7 @@ public:
 
   void mouseMoved(GLFWwindow* window, double xpos, double ypos) {
     if (camera_) {
-      camera_->mouseMoved(game_time_, xpos, ypos);
+      camera_->mouseMoved(camera_time_, xpos, ypos);
     }
 
     for (auto& i : gameobjects_) {

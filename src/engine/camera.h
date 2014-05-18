@@ -26,6 +26,7 @@ public:
 };
 
 class FreeFlyCamera : public Camera {
+  glm::vec3 fwd_;
   GLFWwindow* window_;
   bool first_call_;
 
@@ -43,13 +44,22 @@ public:
                 float speed_per_sec = 5.0f,
                 float mouse_sensitivity = 1.0f)
     : window_(window)
-    , first_call_(false)
+    , first_call_(true)
     , speed_per_sec_(speed_per_sec)
     , cos_max_pitch_angle_(0.8)
     , mouse_sensitivity_(mouse_sensitivity) {
 
     this->pos(pos);
     forward(target - pos);
+  }
+
+  // The forward value is cached
+  virtual glm::vec3 forward() const override {
+    return fwd_;
+  }
+
+  virtual void forward(const glm::vec3& new_fwd) override {
+    fwd_ = new_fwd;
   }
 
   // We want the camera to always treat Y as up.
@@ -73,13 +83,12 @@ public:
   }
 
   /// Updates the camera's position and rotation.
-  virtual void mouseMoved(const Timer& timer, double xpos, double ypos) override {
-    using namespace glm;
-
-    static glm::dvec2 prev_pos;
-    glm::dvec2 pos {xpos, ypos};
-    glm::dvec2 diff = pos - prev_pos;
-    prev_pos = pos;
+  virtual void update(const Timer& timer) override {
+    static glm::dvec2 prev_cursor_pos;
+    glm::dvec2 cursor_pos;
+    glfwGetCursorPos(window_, &cursor_pos.x, &cursor_pos.y);
+    glm::dvec2 diff = cursor_pos - prev_cursor_pos;
+    prev_cursor_pos = cursor_pos;
 
     // We get invalid diff values at the startup
     if (first_call_) {
@@ -89,12 +98,12 @@ public:
 
     // Mouse movement - update the coordinate system
     if (diff.x || diff.y) {
-      float dx ( diff.x * mouse_sensitivity_ * 0.0035 );
-      float dy ( -diff.y * mouse_sensitivity_ * 0.0035 );
+      float dx ( diff.x * mouse_sensitivity_ * timer.dt / 16 );
+      float dy ( -diff.y * mouse_sensitivity_ * timer.dt / 16 );
 
       // If we are looking up / down, we don't want to be able
       // to rotate to the other side
-      float dot_up_fwd = dot(up(), forward());
+      float dot_up_fwd = glm::dot(up(), forward());
       if (dot_up_fwd > cos_max_pitch_angle_ && dy > 0) {
         dy = 0;
       }
@@ -105,9 +114,8 @@ public:
       // Modify the forward vector
       forward(glm::normalize(forward() + right()*dx + up()*dy));
     }
-  }
 
-  virtual void update(const engine::Timer& timer) override {
+    // Update the position
     float ds = timer.dt * speed_per_sec_;
     if(glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
       localPos() += forward() * ds;
@@ -122,6 +130,7 @@ public:
       localPos() -= right() * ds;
     }
   }
+
 }; // FreeFlyCamera
 
 /**
@@ -145,6 +154,8 @@ class ThirdPersonalCamera : public Camera {
   // The camera should collide with the terrain.
   std::function<double(double, double)> getTerrainHeight_;
 
+  GLFWwindow* window_;
+
 public:
   /**
    * @brief Creates the third-personal camera.
@@ -157,7 +168,8 @@ public:
    * @param mouse_sensitivity         The relative sensitivity to mouse movement.
    * @param mouse_scroll_sensitivity  The relative sensitivity to mouse mouseScrolled.
    */
-  ThirdPersonalCamera(Transform& target,
+  ThirdPersonalCamera(GLFWwindow* window,
+                      Transform& target,
                       const glm::vec3& position,
                       RigidBody::CallBack getTerrainHeight,
                       double mouse_sensitivity = 1.0,
@@ -169,7 +181,8 @@ public:
     , cos_max_pitch_angle_(0.8)
     , mouse_sensitivity_(mouse_sensitivity)
     , mouse_scroll_sensitivity_(mouse_scroll_sensitivity)
-    , getTerrainHeight_(getTerrainHeight) {
+    , getTerrainHeight_(getTerrainHeight)
+    , window_(window) {
 
     target.addChild(*this);
     pos(position);
@@ -221,14 +234,13 @@ public:
     return glm::lookAt(pos(), target().pos(), up());
   }
 
-  /// Updates the camera's position and rotation.
-  virtual void mouseMoved(const Timer& timer, double xpos, double ypos) override {
-    using namespace glm;
-
-    static glm::dvec2 prev_pos;
-    glm::dvec2 pos {xpos, ypos};
-    glm::dvec2 diff = pos - prev_pos;
-    prev_pos = pos;
+private:
+  virtual void update(const Timer& timer) override {
+    static glm::dvec2 prev_cursor_pos;
+    glm::dvec2 cursor_pos;
+    glfwGetCursorPos(window_, &cursor_pos.x, &cursor_pos.y);
+    glm::dvec2 diff = cursor_pos - prev_cursor_pos;
+    prev_cursor_pos = cursor_pos;
 
     // We get invalid diff values at the startup
     if (first_call_) {
@@ -238,12 +250,12 @@ public:
 
     // Mouse movement - update the coordinate system
     if (diff.x || diff.y) {
-      float dx ( diff.x * mouse_sensitivity_ * 0.0035 );
-      float dy ( -diff.y * mouse_sensitivity_ * 0.0035 );
+      float dx ( diff.x * mouse_sensitivity_ * timer.dt / 16 );
+      float dy ( -diff.y * mouse_sensitivity_ * timer.dt / 16 );
 
       // If we are looking up / down, we don't want to be able
       // to rotate to the other side
-      float dot_up_fwd = dot(up(), forward());
+      float dot_up_fwd = glm::dot(up(), forward());
       if (dot_up_fwd > cos_max_pitch_angle_ && dy > 0) {
         dy = 0;
       }
@@ -254,10 +266,8 @@ public:
       // Modify the forward vector
       forward(glm::normalize(forward() + right()*dx + up()*dy));
     }
-  }
 
-private:
-  virtual void update(const Timer& timer) override {
+    // Update the position
     glm::dvec3 tpos(target().pos()), fwd(forward());
     glm::dvec3 pos(tpos - fwd*curr_dist_mod_*initial_distance_);
 

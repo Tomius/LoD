@@ -215,7 +215,7 @@ int main() {
     ayumi->transform.addChild(cam_offset);
     cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
-    engine::ThirdPersonalCamera cam(cam_offset, cam_offset.pos()
+    engine::ThirdPersonalCamera cam(window, cam_offset, cam_offset.pos()
       + glm::vec3(ayumi->getMesh().bSphereRadius() * 2), terrain_height, 1.5f);
 
     charmove.setCamera(&cam);

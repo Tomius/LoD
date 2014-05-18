@@ -10,8 +10,9 @@ HEADERS := $(shell find -L $(SRC_DIR) -name '*.h')
 CXX = clang++
 CXXFLAGS = -g -rdynamic -std=c++11 -Wall -Qunused-arguments \
 					 `pkg-config --cflags glfw3` `Magick++-config --cxxflags --cppflags`
-LDFLAGS = -g -rdynamic -lGL -lGLU -lGLEW -lassimp -lglfw3 -lXxf86vm -lX11 -lXrandr \
-					-lXi -lm -lXcursor -lpthread `Magick++-config --ldflags --libs`
+LDFLAGS = -g -rdynamic -lGL -lGLU -lGLEW -lassimp `pkg-config --libs glfw3` \
+					-lXxf86vm -lX11 -lXrandr -lXi -lm -lXcursor -lpthread \
+					`Magick++-config --ldflags --libs`
 
 .PHONY: all clean
 

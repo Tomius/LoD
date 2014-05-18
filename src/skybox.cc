@@ -6,8 +6,11 @@ using namespace oglwrap;
 extern Context gl;
 using namespace glm;
 
+constexpr float day_duration = 256.0f;
+constexpr float day_start = day_duration/8;
+
 Skybox::Skybox()
-  : time_(0)
+  : time_(day_start)
   , vs_("skybox.vert")
   , fs_("skybox.frag")
   , uProjectionMatrix_(prog_, "uProjectionMatrix")
@@ -48,10 +51,8 @@ void Skybox::screenResized(const glm::mat4& projMat, size_t, size_t) {
 }
 
 void Skybox::update(float time) {
-  time_ = time;
+  time_ = time + day_start;
 }
-
-constexpr float day_duration = 256.0f;
 
 glm::vec3 Skybox::getSunPos() const {
   return vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time_ * 2 * M_PI / day_duration)) +

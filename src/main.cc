@@ -222,9 +222,9 @@ int main() {
     // charmove.setCamera(&cam);
     scene.addCamera(&cam);
 
-    // PrintDebugText("Initializing the resources for the bloom effect");
-    //   scene.addAfterEffect<BloomEffect>();
-    // PrintDebugTime();
+    PrintDebugText("Initializing the resources for the bloom effect");
+      scene.addAfterEffect<BloomEffect>();
+    PrintDebugTime();
 
     // PrintDebugText("Initializing the map");
     //   scene.addAfterEffect<Map>(glm::vec2(terrain->w, terrain->h));

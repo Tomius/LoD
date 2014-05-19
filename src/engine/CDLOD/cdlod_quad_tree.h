@@ -40,7 +40,7 @@ class CDLODQuadTree : public engine::GameObject {
 
     bool collidesWithSphere(const glm::vec3& center, float radius) {
       glm::vec3 own_center(x, 0, z);
-      return 0.95f * glm::length(own_center - center) < radius + size/2;
+      return glm::length(own_center - center) < radius + size/2;
     }
 
     void render(const engine::Camera& cam, GridMeshRenderer& renderer) {

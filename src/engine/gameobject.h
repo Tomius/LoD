@@ -27,8 +27,7 @@ public:
   virtual void shadowRender(float time, const Camera& cam) {}
   virtual void render(float time, const Camera& cam) {}
 
-  virtual void screenResized(const glm::mat4& projMat,
-                             size_t width, size_t height) {}
+  virtual void screenResized(size_t width, size_t height) {}
   virtual void keyAction(const Timer& timer, int key, int scancode,
                                              int action, int mods) {}
   virtual void mouseScrolled(const Timer& timer, double xoffset,

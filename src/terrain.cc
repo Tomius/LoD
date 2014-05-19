@@ -60,14 +60,10 @@ double Terrain::getHeight(double x, double y) const {
   return scale_vector.y * mesh_.getHeight(x/scale_vector.x, y/scale_vector.z);
 }
 
-void Terrain::screenResized(const glm::mat4& projMat, size_t, size_t) {
-  prog_.use();
-  uProjectionMatrix_ = projMat;
-}
-
 void Terrain::render(float time, const engine::Camera& cam) {
   prog_.use();
-  uCameraMatrix_.set(cam);
+  uCameraMatrix_ = cam.matrix();
+  uProjectionMatrix_ = cam.projectionMatrix();
   uSunData_.set(skybox_->getSunData());
   for (size_t i = 0; i < shadow_->getDepth(); ++i) {
     uShadowCP_[i] = shadow_->shadowCPs()[i];

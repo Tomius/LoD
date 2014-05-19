@@ -30,7 +30,7 @@ BloomEffect::BloomEffect()
   tex_.unbind();
 }
 
-void BloomEffect::screenResized(const glm::mat4&, size_t w, size_t h) {
+void BloomEffect::screenResized(size_t w, size_t h) {
   width_ = w;
   height_ = h;
   prog_.use();

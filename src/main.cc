@@ -113,9 +113,7 @@ static void KeyCallback(GLFWwindow* window, int key, int scancode,
 
 static void ScreenResizeCallback(GLFWwindow* window, int width, int height) {
   gl.Viewport(width, height);
-  auto projMat = glm::perspectiveFov<float>(kFieldOfView, width,
-                                            height, 0.5, 3000);
-  scene.screenResized(projMat, width, height);
+  scene.screenResized(width, height);
 }
 
 static void MouseScrolledCallback(GLFWwindow* window, double xoffset,
@@ -191,10 +189,11 @@ int main() {
 
     PrintDebugText("Initializing the terrain");
       //scene.addGameObject<GridMeshRenderer>();
-      scene.addGameObject<CDLODQuadTree>();
+      scene.addGameObject<engine::CDLODQuadTree>();
     PrintDebugTime();
 
-    engine::FreeFlyCamera cam(window, glm::vec3(5, 5, 0), glm::vec3(), 150);
+    engine::FreeFlyCamera cam(window, kFieldOfView, 0.5f, 6000.0f,
+                              glm::vec3(5, 5, 0), glm::vec3(), 200);
 
     scene.addCamera(&cam);
 

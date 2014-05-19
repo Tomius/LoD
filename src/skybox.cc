@@ -45,11 +45,6 @@ Skybox::Skybox()
   }
 }
 
-void Skybox::screenResized(const glm::mat4& projMat, size_t, size_t) {
-  prog_.use();
-  uProjectionMatrix_.set(projMat);
-}
-
 void Skybox::update(float time) {
   time_ = time + day_start;
 }
@@ -104,8 +99,9 @@ void Skybox::render(float time, const engine::Camera& cam) {
   );
 
   prog_.use();
-  uCameraMatrix_.set(camRot);
-  uSunData_.set(getSunData());
+  uCameraMatrix_ = camRot;
+  uProjectionMatrix_ = cam.projectionMatrix();
+  uSunData_ = getSunData();
 
   env_map_.active(0);
   env_map_.bind();

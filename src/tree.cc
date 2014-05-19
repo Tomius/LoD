@@ -67,11 +67,6 @@ Tree::Tree(const Terrain& terrain, Skybox *skybox, Shadow *shadow)
   }
 }
 
-void Tree::screenResized(const glm::mat4& projMat, size_t, size_t) {
-  prog_.use();
-  uProjectionMatrix_ = projMat;
-}
-
 void Tree::shadowRender(float time, const engine::Camera& cam) {
   shadow_prog_.use();
 
@@ -97,6 +92,7 @@ void Tree::render(float time, const engine::Camera& cam) {
   uSunData_.set(skybox_->getSunData());
   skybox_->env_map.active(0);
   skybox_->env_map.bind();
+  uProjectionMatrix_ = cam.projectionMatrix();
 
   auto blend = Context::TemporaryEnable(Capability::Blend);
   Context::BlendFunc(BlendFunction::SrcAlpha, BlendFunction::OneMinusSrcAlpha);

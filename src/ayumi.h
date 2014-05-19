@@ -43,7 +43,6 @@ class Ayumi : public engine::GameObject {
   virtual ~Ayumi() {}
   engine::AnimatedMeshRenderer& getMesh();
   engine::Animation& getAnimation();
-  virtual void screenResized(const glm::mat4& projMat, size_t, size_t) override;
   virtual void update(float time) override;
   virtual void shadowRender(float time, const engine::Camera& cam) override;
   virtual void render(float time, const engine::Camera& cam) override;

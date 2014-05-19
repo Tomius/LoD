@@ -9,12 +9,20 @@
 #include "timer.h"
 #include "transform.h"
 #include "rigid_body.h"
+#include "collision/frustum.h"
+#include "../oglwrap/glm/glm/gtx/rotate_vector.hpp"
+#include "../oglwrap/debug/insertion.h"
 
 namespace engine {
 
 /// The base class for all cameras (basically a Transform)
 class Camera : public Transform {
+  float fovy_, z_near_, z_far_, width_, height_;
+
 public:
+  Camera(float fovy, float z_near, float z_far)
+      : fovy_(fovy), z_near_(z_near), z_far_(z_far), width_(0), height_(0) {
+  }
   virtual ~Camera() {}
   virtual void update(const Timer& timer) {}
   virtual void mouseMoved(const Timer& timer, double xpos, double ypos) {}
@@ -23,6 +31,86 @@ public:
                                   int action, int mods) {}
   virtual void keyAction(const Timer& timer, int key, int scancode,
                          int action, int mods) {}
+
+  void screenResized(size_t width, size_t height) {
+    width_ = width;
+    height_ = height;
+  }
+  glm::mat4 projectionMatrix() const {
+    return glm::perspectiveFov<float>(fovy_, width_, height_, z_near_, z_far_);
+  }
+
+  float fovx() const { return fovy_*width_/height_;}
+  void set_fovx(float fovx) { fovy_ = fovx*height_/width_; }
+  float fovy() const { return fovy_;}
+  void set_fovy(float fovy) { fovy_ = fovy; }
+  float z_near() const { return z_near_;}
+  void set_z_near(float z_near) { z_near_ = z_near; }
+  float z_far() const { return z_far_;}
+  void set_z_far(float z_far) { z_far_ = z_far; }
+
+  Frustum frustum() const {
+    glm::mat4 m = projectionMatrix() * matrix();
+
+    // REMEMBER: m[i][j] is j-th row, i-th column!!!
+
+    return {{{
+
+      // left
+      {glm::vec3{
+      m[0][3] + m[0][0],
+      m[1][3] + m[1][0],
+      m[2][3] + m[2][0]},
+      m[3][3] + m[3][0]},
+
+      // right
+      {glm::vec3{
+      m[0][3] - m[0][0],
+      m[1][3] - m[1][0],
+      m[2][3] - m[2][0]},
+      m[3][3] - m[3][0]},
+
+      // top
+      {glm::vec3{
+      m[0][3] - m[0][1],
+      m[1][3] - m[1][1],
+      m[2][3] - m[2][1]},
+      m[3][3] - m[3][1]},
+
+      // bottom
+      {glm::vec3{
+      m[0][3] + m[0][1],
+      m[1][3] + m[1][1],
+      m[2][3] + m[2][1]},
+      m[3][3] + m[3][1]},
+
+      // near
+      {glm::vec3{
+      m[0][2],
+      m[1][2],
+      m[2][2]},
+      m[3][2]},
+
+      // far
+      {glm::vec3{
+      m[0][3] - m[0][2],
+      m[1][3] - m[1][2],
+      m[2][3] - m[2][2]},
+      m[3][3] - m[3][2]}
+
+    }}};
+
+    // Note: there's no need to normalize the plane parameters
+  }
+
+  bool isPointInsideFrustum(const glm::vec3& p) const {
+    glm::mat4 mat = projectionMatrix() * matrix();
+    glm::vec4 proj = mat * glm::vec4(p, 1);
+    proj /= proj.w;
+
+    return -1 < proj.x && proj.x < 1 && -1 < proj.y && proj.y < 1 &&
+            0 < proj.z && proj.z < 1;
+  }
 };
 
 class FreeFlyCamera : public Camera {
@@ -39,14 +127,18 @@ public:
     * @param speed_per_sec - Move speed in OpenGL units per second
     * @param mouse_sensitivity - The relative sensitivity to mouse movement. */
   FreeFlyCamera(GLFWwindow* window,
+                float fov,
+                float z_near,
+                float z_far,
                 const glm::vec3& pos,
                 const glm::vec3& target = glm::vec3(),
                 float speed_per_sec = 5.0f,
                 float mouse_sensitivity = 1.0f)
-    : window_(window)
+    : Camera(fov, z_near, z_far)
+    , window_(window)
     , first_call_(true)
     , speed_per_sec_(speed_per_sec)
-    , cos_max_pitch_angle_(0.8)
+    , cos_max_pitch_angle_(0.95)
     , mouse_sensitivity_(mouse_sensitivity) {
 
     this->pos(pos);
@@ -169,12 +261,16 @@ public:
    * @param mouse_scroll_sensitivity  The relative sensitivity to mouse mouseScrolled.
    */
   ThirdPersonalCamera(GLFWwindow* window,
+                      float fov,
+                      float z_near,
+                      float z_far,
                       Transform& target,
                       const glm::vec3& position,
                       RigidBody::CallBack getTerrainHeight,
                       double mouse_sensitivity = 1.0,
                       double mouse_scroll_sensitivity = 1.0)
-    : first_call_(true)
+    : Camera(fov, z_near, z_far)
+    , first_call_(true)
     , curr_dist_mod_(1.0)
     , dest_dist_mod_(1.0)
     , initial_distance_(glm::length(target.pos() - position))

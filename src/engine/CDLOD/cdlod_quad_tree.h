@@ -6,7 +6,9 @@
 #include <memory>
 #include <iostream>
 #include "grid_mesh_renderer.h"
-#include "../misc.h"
+#include "../collision/bounding_box.h"
+
+namespace engine {
 
 class CDLODQuadTree : public engine::GameObject {
   GridMeshRenderer renderer_;
@@ -38,16 +40,27 @@ class CDLODQuadTree : public engine::GameObject {
       }
     }
 
-    bool collidesWithSphere(const glm::vec3& center, float radius) {
-      glm::vec3 own_center(x, 0, z);
-      return glm::length(own_center - center) < radius + size/2;
+    BoundingBox boundingBox() const {
+      return BoundingBox(glm::vec3(x-size/2, min_y, z-size/2),
+                         glm::vec3(x+size/2, max_y, z+size/2));
     }
 
-    void render(const engine::Camera& cam, GridMeshRenderer& renderer) {
+    bool collidesWithSphere(const glm::vec3& center, float radius) {
+      return boundingBox().collidesWithSphere(center, radius);
+    }
+
+
+    void render(const engine::Camera& cam, const Frustum& frustum,
+                GridMeshRenderer& renderer) {
       float scale = float(size) / GridMeshRenderer::max_dim;
+      BoundingBox bb = boundingBox();
+
+      if(!bb.collidesWithFrustum(frustum)) {
+        return;
+      }
 
       // if we can cover the whole area or if we are a leaf
-      if (!collidesWithSphere(cam.pos(), size) || level == 0) {
+      if (!bb.collidesWithSphere(cam.pos(), size) || level == 0) {
         renderer.render(cam, glm::vec2(x, z), scale, level);
       } else {
         bool btl = tl->collidesWithSphere(cam.pos(), size);
@@ -57,16 +70,16 @@ class CDLODQuadTree : public engine::GameObject {
 
         // Ask childs to render what we can't
         if (btl) {
-          tl->render(cam, renderer);
+          tl->render(cam, frustum, renderer);
         }
         if (btr) {
-          tr->render(cam, renderer);
+          tr->render(cam, frustum, renderer);
         }
         if (bbl) {
-          bl->render(cam, renderer);
+          bl->render(cam, frustum, renderer);
         }
         if (bbr) {
-          br->render(cam, renderer);
+          br->render(cam, frustum, renderer);
         }
 
         // Render, what the childs didn't do
@@ -80,14 +93,12 @@ class CDLODQuadTree : public engine::GameObject {
       : renderer_(32)
       , root_(0, 0, 5) { }
 
-  virtual void screenResized(const glm::mat4& projMat, size_t, size_t) override {
-    renderer_.screenResized(projMat, 0, 0);
-  }
-
   virtual void render(float time, const engine::Camera& cam) override {
-    root_.render(cam, renderer_);
+    root_.render(cam, cam.frustum(), renderer_);
   }
 
 };
+
+} // namespace engine
 
 #endif

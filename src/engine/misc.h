@@ -13,4 +13,9 @@ std::shared_ptr<T> make_shared(Args&&... args) {
   return std::shared_ptr<T>(new T{std::forward<Args>(args)...});
 }
 
+template<typename T>
+T sqr(const T& x) {
+  return x*x;
+}
+
 #endif

@@ -47,11 +47,6 @@ class GridMeshRenderer : public engine::GameObject {
     mesh_.setupPositions(prog_ | "aPosition", dimension);
   }
 
-  virtual void screenResized(const glm::mat4& projMat, size_t, size_t) override {
-    prog_.use();
-    uProjectionMatrix_ = projMat;
-  }
-
   void render(const engine::Camera& cam, glm::vec2 offset, float scale, int level,
               bool TL = true, bool TR = true, bool BL = true, bool BR = true) {
     using oglwrap::Context;
@@ -60,7 +55,8 @@ class GridMeshRenderer : public engine::GameObject {
     using oglwrap::FaceOrientation;
 
     prog_.use();
-    uCameraMatrix_.set(cam.matrix());
+    uCameraMatrix_ = cam.matrix();
+    uProjectionMatrix_ = cam.projectionMatrix();
     uOffset_ = offset;
     uScale_ = scale * (max_dim/dimension_);
     uLevel_ = level;
@@ -74,7 +70,6 @@ class GridMeshRenderer : public engine::GameObject {
     Context::PolygonMode(PolyMode::Fill);
 
     prog_.unuse();
-
   }
 
   virtual void render(float time, const engine::Camera& cam) override {

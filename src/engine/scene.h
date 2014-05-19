@@ -107,20 +107,24 @@ public:
     camera_ = cam;
   }
 
-  void screenResized(const glm::mat4& projMat, GLuint w, GLuint h) {
+  void screenResized(size_t w, size_t h) {
     if (shadow_) {
       shadow_->screenResized(w, h);
     }
 
     if (skybox_) {
-      skybox_->screenResized(projMat, w, h);
+      skybox_->screenResized(w, h);
+    }
+
+    if (camera_) {
+      camera_->screenResized(w, h);
     }
 
     for (auto& i : gameobjects_) {
-      i->screenResized(projMat, w, h);
+      i->screenResized(w, h);
     }
     for (auto& i : after_effects_) {
-      i->screenResized(projMat, w, h);
+      i->screenResized(w, h);
     }
   }
 

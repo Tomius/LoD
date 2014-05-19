@@ -46,7 +46,6 @@ class Tree : public engine::GameObject {
 public:
   Tree(const Terrain& terrain, Skybox *skybox, Shadow *shadow);
   virtual ~Tree() {}
-  virtual void screenResized(const glm::mat4& projMat, size_t, size_t) override;
   virtual void shadowRender(float time, const engine::Camera& cam) override;
   virtual void render(float time, const engine::Camera& cam) override;
 };

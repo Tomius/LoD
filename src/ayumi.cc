@@ -126,11 +126,6 @@ engine::Animation& Ayumi::getAnimation() {
   return anim_;
 }
 
-void Ayumi::screenResized(const glm::mat4& projMat, size_t, size_t) {
-  prog_.use();
-  uProjectionMatrix_ = projMat;
-}
-
 void Ayumi::update(float time) {
   charmove_->update(time);
 
@@ -197,13 +192,14 @@ void Ayumi::shadowRender(float time, const engine::Camera& cam) {
 
 void Ayumi::render(float time, const engine::Camera& cam) {
   prog_.use();
-  uCameraMatrix_.set(cam.matrix());
-  uModelMatrix_.set(transform.matrix() * mesh_.worldTransform());
+  uCameraMatrix_ = cam.matrix();
+  uProjectionMatrix_ = cam.projectionMatrix();
+  uModelMatrix_ = transform.matrix() * mesh_.worldTransform();
   for (size_t i = 0; i < shadow_->getDepth(); ++i) {
     uShadowCP_[i] = shadow_->shadowCPs()[i];
   }
   uNumUsedShadowMaps_ = shadow_->getDepth();
-  uSunData_.set(skybox_->getSunData());
+  uSunData_ = skybox_->getSunData();
 
   skybox_->env_map.active(0);
   skybox_->env_map.bind();

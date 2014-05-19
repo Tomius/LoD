@@ -18,23 +18,18 @@ vec2 morphVertex(vec2 vertex, float morphK ) {
   return vertex - fracPart * uScale * morphK;
 }
 
-const float morph_area_fudge = 0.9;
-const float morph_start = 0.667;
+const float morph_start = 0.8333;
 
 void main() {
   vec2 pos = uOffset + uScale * aPosition;
 
 
-  float max_dist = morph_area_fudge * pow(2, uLevel+1) * max_node_dim;
-  float min_dist = pow(2, uLevel) * max_node_dim;
-  float dist_diff = max_dist - min_dist;
+  float max_dist = pow(2, uLevel+1) * max_node_dim;
   float dist = length(uCamPos - vec3(pos.x, 0, pos.y));
 
-  float morph = clamp((
-    (dist-min_dist) - morph_start*dist_diff) /
-    ((1-morph_start) * dist_diff),
-    0, 1
-  );
+  float morph =
+    clamp((dist - morph_start*max_dist) / ((1-morph_start) * max_dist), 0, 1);
+
   pos = morphVertex(pos, morph);
 
   gl_Position = uProjectionMatrix * (uCameraMatrix *

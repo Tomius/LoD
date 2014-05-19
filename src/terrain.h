@@ -35,7 +35,6 @@ public:
   unsigned char fetchHeight(glm::ivec2 v) const;
   double getHeight(double x, double y) const;
 
-  virtual void screenResized(const glm::mat4& projMat, size_t, size_t) override;
   virtual void render(float time, const engine::Camera& cam) override;
 };
 

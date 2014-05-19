@@ -3,11 +3,15 @@
 #version 120
 
 attribute vec2 aPosition;
+attribute vec4 aRenderData;
+
+// Vertex attrib divisor works like a uniform
+vec2 uOffset = aRenderData.xy;
+float uScale = aRenderData.z;
+int uLevel = int(aRenderData.w);
+
 uniform mat4 uProjectionMatrix, uCameraMatrix;
-uniform vec2 uOffset = vec2(0);
-uniform float uScale = 1;
 uniform vec3 uCamPos;
-uniform int uLevel;
 
 const float max_node_dim = 128;
 

@@ -3,6 +3,8 @@
 #include <iostream>
 #include "../../oglwrap/context.h"
 
+namespace engine {
+
 static oglwrap::Context gl;
 
 GridMesh::GridMesh() : dimension_(0) { }
@@ -21,7 +23,7 @@ void GridMesh::setupPositions(oglwrap::VertexAttribArray attrib, GLubyte dim) {
 
   GLubyte dim2 = dim/2;
 
-  for (int ysign = -1; ysign <= 1; ysign += 2) {
+  for (int ysign = 1; ysign >= -1; ysign -= 2) {
     for (int xsign = -1; xsign <= 1; xsign += 2) {
       for (int y = 0; y <= dim2; ++y) {
         for (int x = 0; x <= dim2; ++x) {
@@ -36,7 +38,7 @@ void GridMesh::setupPositions(oglwrap::VertexAttribArray attrib, GLubyte dim) {
   indices.reserve(4 * sub_quad_index_cnt);
 
   int sub_quad = 0;
-  for (int ysign = -1; ysign <= 1; ysign += 2) {
+  for (int ysign = 1; ysign >= -1; ysign -= 2) {
     for (int xsign = -1; xsign <= 1; xsign += 2, ++sub_quad) {
       subquad_index_start_[sub_quad] =
         static_cast<GLushort*>(0) + indices.size();
@@ -68,12 +70,20 @@ void GridMesh::setupPositions(oglwrap::VertexAttribArray attrib, GLubyte dim) {
   }
 
   vao_.bind();
-  positions_.bind();
-  positions_.data(positions);
+  aPositions_.bind();
+  aPositions_.data(positions);
   attrib.pointer(2, oglwrap::DataType::Short).enable();
 
-  indices_.bind();
-  indices_.data(indices);
+  aIndices_.bind();
+  aIndices_.data(indices);
+  vao_.unbind();
+}
+
+void GridMesh::setupRenderData(oglwrap::VertexAttribArray attrib) {
+  vao_.bind();
+  aRenderData_.bind();
+  attrib.setup<glm::vec4>().enable();
+  attrib.divisor(1);
   vao_.unbind();
 }
 
@@ -89,13 +99,13 @@ void GridMesh::drawSubquad(int quad_num, int start_quad_idx) const {
 // This is the core of the CDLOD terrain renderer, so it should be fast.
 // Notice, that the all subsets of the 4 sub-quads can be rendered with
 // glDrawElements if we use index offsets.
-void GridMesh::render(bool tl, bool tr, bool bl, bool br) {
-  bool _0 = bl, _1 = br, _2 = tl, _3 = tr;
+void GridMesh::renderImmediately(bool tl, bool tr, bool bl, bool br) {
+  bool _0 = tl, _1 = tr, _2 = bl, _3 = br;
 
   vao_.bind();
   if (_3) {
     if (_2) {
-      if(_1) {
+      if (_1) {
         if (_0) { // 0, 1, 2, 3
           drawSubquad(4, 0);
         } else { // 1, 2, 3
@@ -110,7 +120,7 @@ void GridMesh::render(bool tl, bool tr, bool bl, bool br) {
         }
       }
     } else {
-      if(_1) {
+      if (_1) {
         if (_0) { // 0, 1, 3
           drawSubquad(2, 0);
           drawSubquad(1, 3);
@@ -129,7 +139,7 @@ void GridMesh::render(bool tl, bool tr, bool bl, bool br) {
     }
   } else {
     if (_2) {
-      if(_1) {
+      if (_1) {
         if (_0) { // 0, 1, 2
           drawSubquad(3, 0);
         } else { // 1, 2
@@ -144,7 +154,7 @@ void GridMesh::render(bool tl, bool tr, bool bl, bool br) {
         }
       }
     } else {
-      if(_1) {
+      if (_1) {
         if (_0) { // 0, 1
           drawSubquad(2, 0);
         } else { // 1
@@ -160,3 +170,37 @@ void GridMesh::render(bool tl, bool tr, bool bl, bool br) {
 
   vao_.unbind();
 }
+
+void GridMesh::addToRenderList(const glm::vec4& render_data,
+                               bool tl, bool tr, bool bl, bool br) {
+  if (tl) { render_data_[0].push_back(render_data); }
+  if (tr) { render_data_[1].push_back(render_data); }
+  if (bl) { render_data_[2].push_back(render_data); }
+  if (br) { render_data_[3].push_back(render_data); }
+}
+
+void GridMesh::clearRenderList() {
+  for (int i = 0; i < 4; ++i) {
+    render_data_[i].erase(render_data_[i].begin(), render_data_[i].end());
+  }
+}
+
+void GridMesh::render() const {
+  using oglwrap::PrimType;
+  const int sub_quad_size = 3 * dimension_ * dimension_ / 2;
+  vao_.bind();
+  aRenderData_.bind();
+  for (int i = 0; i < 4; ++i) {
+    aRenderData_.data(render_data_[i]);
+
+    gl.DrawElementsInstanced(PrimType::Triangles,       // type
+                             sub_quad_size,             // count per instance
+                             subquad_index_start_[i],   // idx offset
+                             render_data_[i].size());   // instance count
+
+  }
+  vao_.unbind();
+}
+
+} // namespace engine
+

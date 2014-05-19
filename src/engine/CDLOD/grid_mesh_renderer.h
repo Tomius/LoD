@@ -10,15 +10,13 @@
 
 #include "../gameobject.h"
 
+namespace engine {
 
-class GridMeshRenderer : public engine::GameObject {
+class GridMeshRenderer {
   GridMesh mesh_;
   oglwrap::Program prog_;
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_;
   oglwrap::LazyUniform<glm::vec3> uCamPos_;
-  oglwrap::LazyUniform<glm::vec2> uOffset_;
-  oglwrap::LazyUniform<float> uScale_;
-  oglwrap::LazyUniform<int> uLevel_;
 
  public:
   static constexpr GLubyte max_dim = 128;
@@ -28,9 +26,6 @@ class GridMeshRenderer : public engine::GameObject {
       : uProjectionMatrix_(prog_, "uProjectionMatrix")
       , uCameraMatrix_(prog_, "uCameraMatrix")
       , uCamPos_(prog_, "uCamPos")
-      , uOffset_(prog_, "uOffset")
-      , uScale_(prog_, "uScale")
-      , uLevel_(prog_, "uLevel")
       , dimension_(dimension) {
     oglwrap::VertexShader vs{"grid_mesh_renderer.vert"};
     oglwrap::FragmentShader fs{"grid_mesh_renderer.frag"};
@@ -39,6 +34,7 @@ class GridMeshRenderer : public engine::GameObject {
     prog_.link().use();
 
     mesh_.setupPositions(prog_ | "aPosition", dimension);
+    mesh_.setupRenderData(prog_ | "aRenderData");
     prog_.validate();
   }
 
@@ -47,35 +43,39 @@ class GridMeshRenderer : public engine::GameObject {
     mesh_.setupPositions(prog_ | "aPosition", dimension);
   }
 
-  void render(const engine::Camera& cam, glm::vec2 offset, float scale, int level,
-              bool TL = true, bool TR = true, bool BL = true, bool BR = true) {
+  void clearRenderList() {
+    mesh_.clearRenderList();
+  }
+
+  void addToRenderList(glm::vec2 offset, float scale, int level,
+                       bool tl = true, bool tr = true,
+                       bool bl = true, bool br = true) {
+    scale *= (max_dim/dimension_);
+    mesh_.addToRenderList(glm::vec4(offset, scale, level), tl, tr, bl, br);
+  }
+
+  void render(const Camera& cam) {
     using oglwrap::Context;
     using oglwrap::Capability;
     using oglwrap::PolyMode;
     using oglwrap::FaceOrientation;
 
     prog_.use();
+    uCamPos_ = cam.pos();
     uCameraMatrix_ = cam.matrix();
     uProjectionMatrix_ = cam.projectionMatrix();
-    uOffset_ = offset;
-    uScale_ = scale * (max_dim/dimension_);
-    uLevel_ = level;
-    uCamPos_ = cam.pos();
 
     Context::FrontFace(FaceOrientation::CCW);
     Context::TemporaryEnable cullface(Capability::CullFace);
 
     Context::PolygonMode(PolyMode::Line);
-    mesh_.render(TL, TR, BL, BR);
+    mesh_.render();
     Context::PolygonMode(PolyMode::Fill);
 
     prog_.unuse();
   }
-
-  virtual void render(float time, const engine::Camera& cam) override {
-    render(cam, glm::vec2(0, 0), 1, 0);
-  }
-
 };
+
+}
 
 #endif

@@ -143,8 +143,8 @@ int main() {
     }
 
     // Hits
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     // Window creation
     GLFWwindow* window = glfwCreateWindow(1920, 1080, "Land of Dreams",
@@ -154,31 +154,34 @@ int main() {
       std::terminate();
     }
 
+    // Check the created OpenGL context's version
+    ogl_version = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR) +
+                  glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
+    std::cout << " - OpenGL version: "  << ogl_version << std::endl;
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    std::cout << " - Resolution: "  << width << " x " << height << std::endl;
+
+    if (ogl_version < 2.1) {
+      std::cout << "At least OpenGL version 2.1 is required to run this program\n";
+      std::terminate();
+    }
+
+    // If it's ok, set it for the window
     glfwMakeContextCurrent(window);
+
+    // GLEW init
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+      std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
+      return -1;
+    }
+    oglwrap::Context::GetError();
   PrintDebugTime();
-
-  // Check the created OpenGL context's version
-  ogl_version = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR) +
-                glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
-  std::cout << " - OpenGL version: "  << ogl_version << std::endl;
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  std::cout << " - Resolution: "  << width << " x " << height << std::endl;
-
-  if (ogl_version < 2.1) {
-    std::cout << "At least OpenGL version 2.1 is required to run this program\n";
-    std::terminate();
-  }
 
   // No V-sync needed because of multiple draw calls per frame.
   glfwSwapInterval(0);
-
-  // GLEW init
-  GLenum err = glewInit();
-  if (err != GLEW_OK) {
-    std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
-    return -1;
-  }
 
   try {
     glInit(window);

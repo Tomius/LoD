@@ -7,6 +7,8 @@
 #include "../../oglwrap/buffer.h"
 #include "../../oglwrap/vertex_attrib.h"
 
+namespace engine {
+
 // A two-dimensional vector of GLshort values
 struct svec2 {
   GLshort x, y;
@@ -24,23 +26,33 @@ inline svec2 operator*(GLshort lhs, const svec2 rhs) {
 // that can be rendered separately (it is useful for CDLOD)
 //
 // For performance reasons, GridMesh's maximum size is 255*255 (so that it can
-// use unsigned shorts instead of ints or floats)
+// use unsigned shorts instead of ints or floats), but for CDLOD, you need
+// pow2 sizes, so there 128*128 is the max
 class GridMesh {
   oglwrap::VertexArray vao_;
-  oglwrap::IndexBuffer indices_;
-  oglwrap::ArrayBuffer positions_;
+  oglwrap::IndexBuffer aIndices_;
+  oglwrap::ArrayBuffer aPositions_, aRenderData_;
   GLubyte dimension_;
   GLushort* subquad_index_start_[4];
+  std::vector<glm::vec4> render_data_[4]; // xy: offset, z: scale, w: level
 
   GLushort indexOf(int sub_quad, int x, int y);
   void drawSubquad(int quad_num, int start_quad_idx) const;
+  void renderImmediately(bool tl, bool tr, bool bl, bool br);
 
  public:
   GridMesh();
   void setupPositions(oglwrap::VertexAttribArray attrib, GLubyte dim);
+  void setupRenderData(oglwrap::VertexAttribArray attrib);
+
   // The arguments specify which quarter parts are to be rendered.
-  // TL = top left, BR = bottom right
-  void render(bool TL = true, bool TR = true, bool BL = true, bool BR = true);
+  // tl = top left, br = bottom right
+  void addToRenderList(const glm::vec4& render_data,
+                       bool tl, bool tr, bool bl, bool br);
+  void clearRenderList();
+  void render() const;
 };
+
+} // namespace engine
 
 #endif

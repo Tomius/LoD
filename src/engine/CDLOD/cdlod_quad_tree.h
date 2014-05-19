@@ -4,7 +4,6 @@
 #define ENGINE_CDLOD_QUAD_TREE_H_
 
 #include <memory>
-#include <iostream>
 #include "grid_mesh_renderer.h"
 #include "../collision/bounding_box.h"
 
@@ -50,7 +49,7 @@ class CDLODQuadTree : public engine::GameObject {
     }
 
 
-    void render(const engine::Camera& cam, const Frustum& frustum,
+    void traverse(const glm::vec3& cam_pos, const Frustum& frustum,
                 GridMeshRenderer& renderer) {
       float scale = float(size) / GridMeshRenderer::max_dim;
       BoundingBox bb = boundingBox();
@@ -60,41 +59,41 @@ class CDLODQuadTree : public engine::GameObject {
       }
 
       // if we can cover the whole area or if we are a leaf
-      if (!bb.collidesWithSphere(cam.pos(), size) || level == 0) {
-        renderer.render(cam, glm::vec2(x, z), scale, level);
+      if (!bb.collidesWithSphere(cam_pos, size) || level == 0) {
+        renderer.addToRenderList(glm::vec2(x, z), scale, level);
       } else {
-        bool btl = tl->collidesWithSphere(cam.pos(), size);
-        bool btr = tr->collidesWithSphere(cam.pos(), size);
-        bool bbl = bl->collidesWithSphere(cam.pos(), size);
-        bool bbr = br->collidesWithSphere(cam.pos(), size);
+        bool btl = tl->collidesWithSphere(cam_pos, size);
+        bool btr = tr->collidesWithSphere(cam_pos, size);
+        bool bbl = bl->collidesWithSphere(cam_pos, size);
+        bool bbr = br->collidesWithSphere(cam_pos, size);
 
         // Ask childs to render what we can't
         if (btl) {
-          tl->render(cam, frustum, renderer);
+          tl->traverse(cam_pos, frustum, renderer);
         }
         if (btr) {
-          tr->render(cam, frustum, renderer);
+          tr->traverse(cam_pos, frustum, renderer);
         }
         if (bbl) {
-          bl->render(cam, frustum, renderer);
+          bl->traverse(cam_pos, frustum, renderer);
         }
         if (bbr) {
-          br->render(cam, frustum, renderer);
+          br->traverse(cam_pos, frustum, renderer);
         }
 
         // Render, what the childs didn't do
-        renderer.render(cam, glm::vec2(x, z), scale, level, !btl, !btr, !bbl, !bbr);
+        renderer.addToRenderList(glm::vec2(x, z), scale, level, !btl, !btr, !bbl, !bbr);
       }
     }
   } root_;
 
  public:
-  CDLODQuadTree(/*size_t terrain_size, GLubyte node_resolution*/)
-      : renderer_(32)
-      , root_(0, 0, 5) { }
+  CDLODQuadTree() : renderer_(32), root_(0, 0, 5) { }
 
   virtual void render(float time, const engine::Camera& cam) override {
-    root_.render(cam, cam.frustum(), renderer_);
+    renderer_.clearRenderList();
+    root_.traverse(cam.pos(), cam.frustum(), renderer_);
+    renderer_.render(cam);
   }
 
 };

@@ -142,7 +142,7 @@ int main() {
       std::terminate();
     }
 
-    // Hits
+    // First try an open 3.3 context (for VertexAttribDivisor)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
@@ -150,8 +150,18 @@ int main() {
     GLFWwindow* window = glfwCreateWindow(1920, 1080, "Land of Dreams",
                                           glfwGetPrimaryMonitor(), nullptr);
     if (!window){
-      glfwTerminate();
-      std::terminate();
+      // If it failed, try OpenGL 2.1
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+
+      window = glfwCreateWindow(1920, 1080, "Land of Dreams",
+                                glfwGetPrimaryMonitor(), nullptr);
+
+      // If that one fails too, we can't do much...
+      if (!window) {
+        glfwTerminate();
+        std::terminate();
+      }
     }
 
     // Check the created OpenGL context's version

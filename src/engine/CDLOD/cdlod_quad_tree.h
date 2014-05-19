@@ -92,8 +92,9 @@ class CDLODQuadTree : public engine::GameObject {
 
   virtual void render(float time, const engine::Camera& cam) override {
     renderer_.clearRenderList();
+    renderer_.setup_render(cam);
     root_.traverse(cam.pos(), cam.frustum(), renderer_);
-    renderer_.render(cam);
+    renderer_.render();
   }
 
 };

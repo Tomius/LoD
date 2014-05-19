@@ -80,11 +80,15 @@ void GridMesh::setupPositions(oglwrap::VertexAttribArray attrib, GLubyte dim) {
 }
 
 void GridMesh::setupRenderData(oglwrap::VertexAttribArray attrib) {
-  vao_.bind();
-  aRenderData_.bind();
-  attrib.setup<glm::vec4>().enable();
-  attrib.divisor(1);
-  vao_.unbind();
+#ifdef glVertexAttribDivisor
+  if (glVertexAttribDivisor) {
+    vao_.bind();
+    aRenderData_.bind();
+    attrib.setup<glm::vec4>().enable();
+    attrib.divisor(1);
+    vao_.unbind();
+  }
+#endif
 }
 
 void GridMesh::drawSubquad(int quad_num, int start_quad_idx) const {
@@ -173,33 +177,46 @@ void GridMesh::renderImmediately(bool tl, bool tr, bool bl, bool br) {
 
 void GridMesh::addToRenderList(const glm::vec4& render_data,
                                bool tl, bool tr, bool bl, bool br) {
-  if (tl) { render_data_[0].push_back(render_data); }
-  if (tr) { render_data_[1].push_back(render_data); }
-  if (bl) { render_data_[2].push_back(render_data); }
-  if (br) { render_data_[3].push_back(render_data); }
+#ifdef glVertexAttribDivisor
+  if (glVertexAttribDivisor) {
+    if (tl) { render_data_[0].push_back(render_data); }
+    if (tr) { render_data_[1].push_back(render_data); }
+    if (bl) { render_data_[2].push_back(render_data); }
+    if (br) { render_data_[3].push_back(render_data); }
+  } else
+#endif
+  renderImmediately(tl, tr, bl, br);
 }
 
 void GridMesh::clearRenderList() {
-  for (int i = 0; i < 4; ++i) {
-    render_data_[i].erase(render_data_[i].begin(), render_data_[i].end());
+#ifdef glVertexAttribDivisor
+  if (glVertexAttribDivisor) {
+    for (int i = 0; i < 4; ++i) {
+      render_data_[i].erase(render_data_[i].begin(), render_data_[i].end());
+    }
   }
+#endif
 }
 
 void GridMesh::render() const {
-  using oglwrap::PrimType;
-  const int sub_quad_size = 3 * dimension_ * dimension_ / 2;
-  vao_.bind();
-  aRenderData_.bind();
-  for (int i = 0; i < 4; ++i) {
-    aRenderData_.data(render_data_[i]);
+#if defined(glDrawElementsInstanced) && defined(glVertexAttribDivisor)
+  if (glVertexAttribDivisor) {
+     using oglwrap::PrimType;
+    const int sub_quad_size = 3 * dimension_ * dimension_ / 2;
+    vao_.bind();
+    aRenderData_.bind();
+    for (int i = 0; i < 4; ++i) {
+      aRenderData_.data(render_data_[i]);
 
-    gl.DrawElementsInstanced(PrimType::Triangles,       // type
-                             sub_quad_size,             // count per instance
-                             subquad_index_start_[i],   // idx offset
-                             render_data_[i].size());   // instance count
+      gl.DrawElementsInstanced(PrimType::Triangles,       // type
+                               sub_quad_size,             // count per instance
+                               subquad_index_start_[i],   // idx offset
+                               render_data_[i].size());   // instance count
 
+    }
+    vao_.unbind();
   }
-  vao_.unbind();
+#endif
 }
 
 } // namespace engine

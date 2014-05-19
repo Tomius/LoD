@@ -17,6 +17,9 @@ class GridMeshRenderer {
   oglwrap::Program prog_;
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_;
   oglwrap::LazyUniform<glm::vec3> uCamPos_;
+  oglwrap::LazyUniform<glm::vec2> uOffset_;
+  oglwrap::LazyUniform<float> uScale_;
+  oglwrap::LazyUniform<int> uLevel_;
 
  public:
   static constexpr GLubyte max_dim = 128;
@@ -26,15 +29,33 @@ class GridMeshRenderer {
       : uProjectionMatrix_(prog_, "uProjectionMatrix")
       , uCameraMatrix_(prog_, "uCameraMatrix")
       , uCamPos_(prog_, "uCamPos")
+      , uOffset_(prog_, "uOffset")
+      , uScale_(prog_, "uScale")
+      , uLevel_(prog_, "uLevel")
       , dimension_(dimension) {
-    oglwrap::VertexShader vs{"grid_mesh_renderer.vert"};
+
+    oglwrap::VertexShader vs;
+
+    #ifdef glVertexAttribDivisor
+      if (glVertexAttribDivisor)
+        vs.sourceFile("grid_mesh_renderer.vert");
+      else
+    #endif
+        vs.sourceFile("grid_mesh_renderer_no_vertex_attrib_divisor.vert");
+
     oglwrap::FragmentShader fs{"grid_mesh_renderer.frag"};
 
     prog_ << vs << fs;
     prog_.link().use();
 
     mesh_.setupPositions(prog_ | "aPosition", dimension);
-    mesh_.setupRenderData(prog_ | "aRenderData");
+
+    #ifdef glVertexAttribDivisor
+      if (glVertexAttribDivisor) {
+        mesh_.setupRenderData(prog_ | "aRenderData");
+      }
+    #endif
+
     prog_.validate();
   }
 
@@ -51,10 +72,19 @@ class GridMeshRenderer {
                        bool tl = true, bool tr = true,
                        bool bl = true, bool br = true) {
     scale *= (max_dim/dimension_);
+    #ifdef glVertexAttribDivisor
+      if (!glVertexAttribDivisor)
+    #endif
+    {
+      uOffset_ = offset;
+      uScale_ = scale;
+      uLevel_ = level;
+    }
+
     mesh_.addToRenderList(glm::vec4(offset, scale, level), tl, tr, bl, br);
   }
 
-  void render(const Camera& cam) {
+  void setup_render(const Camera& cam) {
     using oglwrap::Context;
     using oglwrap::Capability;
     using oglwrap::PolyMode;
@@ -67,11 +97,15 @@ class GridMeshRenderer {
 
     Context::FrontFace(FaceOrientation::CCW);
     Context::TemporaryEnable cullface(Capability::CullFace);
-
     Context::PolygonMode(PolyMode::Line);
+  }
+
+  void render() {
+    using oglwrap::Context;
+    using oglwrap::PolyMode;
+
     mesh_.render();
     Context::PolygonMode(PolyMode::Fill);
-
     prog_.unuse();
   }
 };

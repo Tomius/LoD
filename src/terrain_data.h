@@ -51,11 +51,14 @@ public:
 	  * @param num_level - The number of mipmap levels to generate. */
   void createLoDs(const std::string& filename, int num_levels) const;
 
-  /// Indexes the terrain data like it was 2D array.
+  /// Indexes the terrain data like it was 2D array, or throws.
   const unsigned char& operator()(size_t x, size_t y) const;
 
-  /// Indexes the terrain data like it was 2D array.
+  /// Indexes the terrain data like it was 2D array, or throws.
   unsigned char& operator()(size_t x, size_t y);
+
+  // returns an element or zero
+  unsigned char get(size_t x, size_t y) const;
 
 private:
 	/// Loads in a terrain data, from a '.rtd' file.

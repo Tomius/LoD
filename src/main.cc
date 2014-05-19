@@ -142,7 +142,7 @@ int main() {
       std::terminate();
     }
 
-    // First try an open 3.3 context (for VertexAttribDivisor)
+    // First try to open a 3.3 context (for VertexAttribDivisor)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
@@ -150,7 +150,7 @@ int main() {
     GLFWwindow* window = glfwCreateWindow(1920, 1080, "Land of Dreams",
                                           glfwGetPrimaryMonitor(), nullptr);
     if (!window){
-      // If it failed, try OpenGL 2.1
+      // If it failed, try a 2.1 context
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
@@ -190,23 +190,22 @@ int main() {
     oglwrap::Context::GetError();
   PrintDebugTime();
 
-  // No V-sync needed because of multiple draw calls per frame.
+  // No V-sync needed.
   glfwSwapInterval(0);
 
   try {
     glInit(window);
 
     PrintDebugText("Initializing the skybox");
-      scene.addSkybox();
+      Skybox *skybox = scene.addSkybox();
     PrintDebugTime();
 
     PrintDebugText("Initializing the terrain");
-      //scene.addGameObject<GridMeshRenderer>();
-      scene.addGameObject<engine::CDLODQuadTree>();
+      scene.addGameObject<engine::CDLODQuadTree>(skybox);
     PrintDebugTime();
 
     engine::FreeFlyCamera cam(window, kFieldOfView, 0.5f, 6000.0f,
-                              glm::vec3(5, 5, 0), glm::vec3(), 200);
+                              glm::vec3(30, 30, 0), glm::vec3(), 50);
 
     scene.addCamera(&cam);
 

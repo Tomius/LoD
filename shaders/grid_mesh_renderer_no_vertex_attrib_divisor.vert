@@ -3,15 +3,12 @@
 #version 120
 
 attribute vec2 aPosition;
-attribute vec4 aRenderData;
-
-// Vertex attrib divisor works like a uniform
-vec2 uOffset = aRenderData.xy;
-float uScale = aRenderData.z;
-int uLevel = int(aRenderData.w);
 
 uniform mat4 uProjectionMatrix, uCameraMatrix;
+uniform vec2 uOffset = vec2(0);
+uniform float uScale = 1;
 uniform vec3 uCamPos;
+uniform int uLevel;
 
 uniform sampler2D uHeightMap;
 uniform vec2 uTexSize;
@@ -43,15 +40,14 @@ void main() {
   float max_dist = morph_end_fudge * pow(2, uLevel+1) * node_dim;
   float dist = length(uCamPos - vec3(pos.x, 0, pos.y));
 
-
   float morph =
     clamp((dist - morph_start*max_dist) / ((1-morph_start) * max_dist), 0, 1);
 
   pos = morphVertex(pos, morph);
   vec2 texcoord = pos + uTexSize/2;
 
-  if (texcoord.x < 1 || uTexSize.x < texcoord.x + 1 ||
-      texcoord.y < 1 || uTexSize.y < texcoord.y + 1) {
+  if (texcoord.x < 0 || uTexSize.x < texcoord.x ||
+      texcoord.y < 0 || uTexSize.y < texcoord.y) {
     vInvalid = 1e10;
     gl_Position = vec4(0.0);
     return;

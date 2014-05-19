@@ -6,6 +6,7 @@
 #include <memory>
 #include "grid_mesh_renderer.h"
 #include "../collision/bounding_box.h"
+#include "../../skybox.h" // debug
 
 namespace engine {
 
@@ -22,10 +23,8 @@ class CDLODQuadTree : public engine::GameObject {
     Node(GLshort x, GLshort z, GLushort level)
         : x(x)
         , z(z)
-        , min_y(0)
-        , max_y(0)
         , level(level)
-        , size(GridMeshRenderer::max_dim * (1 << level))
+        , size(GridMeshRenderer::node_dim * (1 << level))
         , tl(nullptr)
         , tr(nullptr)
         , bl(nullptr)
@@ -48,15 +47,29 @@ class CDLODQuadTree : public engine::GameObject {
       return boundingBox().collidesWithSphere(center, radius);
     }
 
+    svec2 getMinMaxOfArea(const GridMeshRenderer& renderer) {
+      if (level == 0) {
+        renderer.getMinMaxOfArea(x, z, size, &min_y, &max_y);
+        return svec2{min_y, max_y};
+      } else {
+        svec2 tlb = tl->getMinMaxOfArea(renderer);
+        svec2 trb = tr->getMinMaxOfArea(renderer);
+        svec2 blb = bl->getMinMaxOfArea(renderer);
+        svec2 brb = br->getMinMaxOfArea(renderer);
+        min_y = std::min(tlb.x, std::min(trb.x, std::min(blb.x, brb.x)));
+        max_y = std::min(tlb.y, std::min(trb.y, std::min(blb.y, brb.y)));
+        return svec2{min_y, max_y};
+      }
+    }
 
     void traverse(const glm::vec3& cam_pos, const Frustum& frustum,
                 GridMeshRenderer& renderer) {
-      float scale = float(size) / GridMeshRenderer::max_dim;
+      float scale = float(size) / GridMeshRenderer::node_dim;
       BoundingBox bb = boundingBox();
 
-      if(!bb.collidesWithFrustum(frustum)) {
-        return;
-      }
+      // if(!bb.collidesWithFrustum(frustum)) {
+      //   return;
+      // }
 
       // if we can cover the whole area or if we are a leaf
       if (!bb.collidesWithSphere(cam_pos, size) || level == 0) {
@@ -88,7 +101,11 @@ class CDLODQuadTree : public engine::GameObject {
   } root_;
 
  public:
-  CDLODQuadTree() : renderer_(32), root_(0, 0, 5) { }
+  CDLODQuadTree(Skybox* skybox)
+      : renderer_(skybox, 128)
+      , root_(0, 0, 7) {
+    root_.getMinMaxOfArea(renderer_);
+  }
 
   virtual void render(float time, const engine::Camera& cam) override {
     renderer_.clearRenderList();

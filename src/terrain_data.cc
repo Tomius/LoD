@@ -155,6 +155,14 @@ unsigned char& RawTerrainData::operator()(size_t x, size_t y) {
   }
 }
 
+unsigned char RawTerrainData::get(size_t x, size_t y) const {
+  if (x < w && y < h) {
+    return heightData[x*h + y];
+  } else {
+    return 0;
+  }
+}
+
 /// Loads in a terrain data, from a '.rtd' file.
 /** @param filename - The path to the file to load. */
 void RawTerrainData::initFromRawTerrain(const std::string& filename) {

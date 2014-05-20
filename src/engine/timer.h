@@ -8,10 +8,12 @@
 namespace engine {
 
 class Timer {
-  double last_time_ = 0;
-  bool stopped_ = false;
+  double last_time_;
+  bool stopped_;
  public:
-  double current = 0, dt = 0;
+  double current, dt;
+
+  Timer() : last_time_(0), stopped_(false), current(0), dt(0) {}
 
   double tick() {
     if (!stopped_) {

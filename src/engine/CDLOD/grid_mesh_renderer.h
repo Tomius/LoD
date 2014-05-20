@@ -34,7 +34,7 @@ class GridMeshRenderer {
 
   GridMeshRenderer(Skybox* skybox, GLubyte dimension)
       : skybox_(skybox)
-      , terrain_("terrain/mideu.rtd1") // debug
+      , terrain_("terrain/mideu.rtd0") // debug
       , uProjectionMatrix_(prog_, "uProjectionMatrix")
       , uCameraMatrix_(prog_, "uCameraMatrix")
       , uSunData_(prog_, "uSunData")

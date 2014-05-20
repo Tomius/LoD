@@ -205,7 +205,7 @@ int main() {
     PrintDebugTime();
 
     engine::FreeFlyCamera cam(window, kFieldOfView, 0.5f, 6000.0f,
-                              glm::vec3(30, 30, 0), glm::vec3(), 50);
+                              glm::vec3(30, 30, 0), glm::vec3(), 100);
 
     scene.addCamera(&cam);
 

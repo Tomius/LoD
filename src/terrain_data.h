@@ -57,7 +57,10 @@ public:
   /// Indexes the terrain data like it was 2D array, or throws.
   unsigned char& operator()(size_t x, size_t y);
 
-  // returns an element or zero
+  /// Returns if the coordinates are valid
+  bool isValid(size_t x, size_t y) const;
+
+  /// Returns an element or zero if the coords are invalid
   unsigned char get(size_t x, size_t y) const;
 
 private:

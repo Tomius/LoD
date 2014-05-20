@@ -43,7 +43,6 @@ void main() {
   float max_dist = morph_end_fudge * pow(2, uLevel+1) * node_dim;
   float dist = length(uCamPos - vec3(pos.x, 0, pos.y));
 
-
   float morph =
     clamp((dist - morph_start*max_dist) / ((1-morph_start) * max_dist), 0, 1);
 
@@ -69,10 +68,8 @@ void main() {
   c_vPos = c_pos.xyz;
 
   // Normal approximation from the heightmap
-  vec3 u = vec3(1.0f, 0.0f, fetchHeight(texcoord + vec2(1, 0)) -
-                            fetchHeight(texcoord - vec2(1, 0)));
-  vec3 v = vec3(0.0f, 1.0f, fetchHeight(texcoord + vec2(0, 1)) -
-                            fetchHeight(texcoord - vec2(0, 1)));
+  vec3 u = vec3(1.0f, 0.0f, fetchHeight(texcoord + vec2(1, 0)) - height);
+  vec3 v = vec3(0.0f, 1.0f, fetchHeight(texcoord + vec2(0, 1)) - height);
   vec3 w_normal = normalize(cross(u, v));
   w_vNormal = w_normal;
 

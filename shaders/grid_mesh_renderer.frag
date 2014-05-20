@@ -21,7 +21,7 @@ float isDay();
 float kFogMin = 128.0;
 float kFogMax = 2048.0;
 
-const float kSpecularShininess = 20.0;
+//const float kSpecularShininess = 20.0;
 
 void main() {
   if (vInvalid != 0.0) {
@@ -33,25 +33,25 @@ void main() {
 
   // Normals
   vec3 w_normal = normalize(w_vNormal);
-  vec3 normal_offset = 0.33 * texture2D(uGrassNormalMap, grass_texcoord).rgb;
-  vec3 w_final_normal = normalize(w_normal + vNormalMatrix * normal_offset);
-  vec3 c_normal = (uCameraMatrix * vec4(w_final_normal, 0.0)).xyz;
+  //vec3 normal_offset = texture2D(uGrassNormalMap, grass_texcoord).rgb;
+  //vec3 w_final_normal = normalize(vNormalMatrix * normal_offset);
+  //vec3 c_normal = (uCameraMatrix * vec4(w_final_normal, 0.0)).xyz;
 
   // Lighting directions
-  vec3 c_light_dir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
-  vec3 c_view_direction = normalize(-(uCameraMatrix * vec4(w_vPos, 1)).xyz);
+  //vec3 c_light_dir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
+  //vec3 c_view_direction = normalize(-(uCameraMatrix * vec4(w_vPos, 1)).xyz);
 
   // Lighting values
-  float diffuse_power = dot(c_normal, c_light_dir);
-  float specular_power;
+  float diffuse_power = dot(w_normal, AmbientDirection());
+  //float specular_power;
   if (diffuse_power <= 0.0) {
     diffuse_power = 0;
-    specular_power = 0;
-  } else {
+    //specular_power = 0;
+  } /*else {
     vec3 L = c_light_dir, V = c_view_direction;
     vec3 H = normalize(L + V), N = c_normal;
     specular_power = pow(max(dot(H, N), 0), kSpecularShininess);
-  }
+  }*/
 
   // Colors
   vec3 grass0_color = texture2D(uGrassMap0, grass_texcoord).rgb;
@@ -70,7 +70,7 @@ void main() {
   const float ambient_occlusion = 0.2f;
 
   vec3 final_color = grass_color * AmbientColor() *
-    (SunPower()*(specular_power + diffuse_power + ambient_occlusion) + AmbientPower());
+    (SunPower()*(/*specular_power + */diffuse_power + ambient_occlusion) + AmbientPower());
 
   // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));

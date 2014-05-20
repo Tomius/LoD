@@ -20,6 +20,10 @@ class Timer {
       double time = glfwGetTime();
       if(last_time_ != 0) {
         dt = time - last_time_;
+        // we don't want to take really big bursts into account.
+        if(dt > 0.5) {
+          dt = 0;
+        }
       }
       last_time_ = time;
       current += dt;

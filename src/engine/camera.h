@@ -57,45 +57,39 @@ public:
     return {{{
 
       // left
-      {glm::vec3{
-      m[0][3] + m[0][0],
+     {m[0][3] + m[0][0],
       m[1][3] + m[1][0],
-      m[2][3] + m[2][0]},
+      m[2][3] + m[2][0],
       m[3][3] + m[3][0]},
 
       // right
-      {glm::vec3{
-      m[0][3] - m[0][0],
+     {m[0][3] - m[0][0],
       m[1][3] - m[1][0],
-      m[2][3] - m[2][0]},
+      m[2][3] - m[2][0],
       m[3][3] - m[3][0]},
 
       // top
-      {glm::vec3{
-      m[0][3] - m[0][1],
+     {m[0][3] - m[0][1],
       m[1][3] - m[1][1],
-      m[2][3] - m[2][1]},
+      m[2][3] - m[2][1],
       m[3][3] - m[3][1]},
 
       // bottom
-      {glm::vec3{
-      m[0][3] + m[0][1],
+     {m[0][3] + m[0][1],
       m[1][3] + m[1][1],
-      m[2][3] + m[2][1]},
+      m[2][3] + m[2][1],
       m[3][3] + m[3][1]},
 
       // near
-      {glm::vec3{
-      m[0][2],
+     {m[0][2],
       m[1][2],
-      m[2][2]},
+      m[2][2],
       m[3][2]},
 
       // far
-      {glm::vec3{
-      m[0][3] - m[0][2],
+     {m[0][3] - m[0][2],
       m[1][3] - m[1][2],
-      m[2][3] - m[2][2]},
+      m[2][3] - m[2][2],
       m[3][3] - m[3][2]}
 
     }}};
@@ -151,7 +145,7 @@ public:
   }
 
   virtual void forward(const glm::vec3& new_fwd) override {
-    fwd_ = new_fwd;
+    fwd_ = glm::normalize(new_fwd);
   }
 
   // We want the camera to always treat Y as up.
@@ -204,7 +198,7 @@ public:
       }
 
       // Modify the forward vector
-      forward(glm::normalize(forward() + right()*dx + up()*dy));
+      forward(forward() + right()*dx + up()*dy);
     }
 
     // Update the position
@@ -307,7 +301,7 @@ public:
   }
 
   virtual void forward(const glm::vec3& new_fwd) override {
-    fwd_ = new_fwd;
+    fwd_ = glm::normalize(new_fwd);
   }
 
   // We want the camera to always treat Y as up.
@@ -360,7 +354,7 @@ private:
       }
 
       // Modify the forward vector
-      forward(glm::normalize(forward() + right()*dx + up()*dy));
+      forward(forward() + right()*dx + up()*dy);
     }
 
     // Update the position

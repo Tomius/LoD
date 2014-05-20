@@ -140,7 +140,7 @@ void RawTerrainData::createLoDs(const std::string& filename, int num_levels) con
 /// Indexes the terrain data like it was 2D array.
 const unsigned char& RawTerrainData::operator()(size_t x, size_t y) const {
   if (x < w && y < h) {
-    return heightData[x*h + y];
+    return heightData[y*w + x];
   } else {
     throw std::out_of_range("OverIndexing in RawTerrainData::operator()");
   }
@@ -149,15 +149,19 @@ const unsigned char& RawTerrainData::operator()(size_t x, size_t y) const {
 /// Indexes the terrain data like it was 2D array.
 unsigned char& RawTerrainData::operator()(size_t x, size_t y) {
   if (x < w && y < h) {
-    return heightData[x*h + y];
+    return heightData[y*w + x];
   } else {
     throw std::out_of_range("OverIndexing in RawTerrainData::operator()");
   }
 }
 
+bool RawTerrainData::isValid(size_t x, size_t y) const {
+  return x < w && y < h;
+}
+
 unsigned char RawTerrainData::get(size_t x, size_t y) const {
   if (x < w && y < h) {
-    return heightData[x*h + y];
+    return heightData[y*w + x];
   } else {
     return 0;
   }

@@ -12,6 +12,7 @@
 #include "../../oglwrap/debug/insertion.h"
 #include "../../terrain_data.h" // debug
 #include "../../skybox.h" // debug
+#include "../../shadow.h" // debug
 
 #include "../gameobject.h"
 
@@ -20,40 +21,32 @@ namespace engine {
 class GridMeshRenderer {
   GridMesh mesh_;
   Skybox *skybox_;
-  oglwrap::Cube debug_cube_;
   RawTerrainData terrain_; // debug
-  oglwrap::Texture2D heightMap_, grassMaps_[2]; // debug
-  oglwrap::Program prog_, cube_prog_;
-  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_;
-  oglwrap::LazyUniform<glm::mat4> cube_uProjectionMatrix_, cube_uCameraMatrix_;
+  oglwrap::Texture2D heightMap_, grassMaps_[2], grassNormalMap_; // debug
+  oglwrap::Program prog_;
+  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uShadowCP_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
   oglwrap::LazyUniform<glm::vec3> uCamPos_;
-  oglwrap::LazyUniform<glm::vec2> uOffset_, cube_uOffset_, cube_uMinMax_;
-  oglwrap::LazyUniform<float> uScale_, cube_uScale_;
-  oglwrap::LazyUniform<int> uLevel_, cube_uLevel_;
+  oglwrap::LazyUniform<glm::vec2> uOffset_;
+  oglwrap::LazyUniform<float> uScale_;
+  oglwrap::LazyUniform<int> uLevel_, uNumUsedShadowMaps_;
+  Shadow* shadow_;
 
  public:
-  static constexpr GLubyte node_dim = 128;
-  GLubyte dimension_;
 
-  GridMeshRenderer(Skybox* skybox, GLubyte dimension)
+  GridMeshRenderer(Skybox* skybox, Shadow *shadow, GLubyte dimension)
       : skybox_(skybox)
-      , debug_cube_(node_dim, node_dim, node_dim)
       , terrain_("terrain/mideu.rtd0") // debug
       , uProjectionMatrix_(prog_, "uProjectionMatrix")
       , uCameraMatrix_(prog_, "uCameraMatrix")
-      , cube_uProjectionMatrix_(cube_prog_, "uProjectionMatrix")
-      , cube_uCameraMatrix_(cube_prog_, "uCameraMatrix")
+      , uShadowCP_(prog_, "uShadowCP")
       , uSunData_(prog_, "uSunData")
       , uCamPos_(prog_, "uCamPos")
       , uOffset_(prog_, "uOffset")
-      , cube_uOffset_(cube_prog_, "uOffset")
-      , cube_uMinMax_(cube_prog_, "uMinMax")
       , uScale_(prog_, "uScale")
-      , cube_uScale_(cube_prog_, "uScale")
       , uLevel_(prog_, "uLevel")
-      , cube_uLevel_(cube_prog_, "uLevel")
-      , dimension_(dimension) {
+      , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
+      , shadow_(shadow) {
 
     oglwrap::VertexShader vs;
 
@@ -82,6 +75,12 @@ class GridMeshRenderer {
     using oglwrap::MinFilter;
     using oglwrap::MagFilter;
     using oglwrap::WrapMode;
+    using oglwrap::Context;
+    using oglwrap::PixelStorageMode;
+    using oglwrap::Uniform;
+    using oglwrap::UniformSampler;
+
+    Context::PixelStore(PixelStorageMode::UnpackAlignment, 1);
 
     UniformSampler(prog_, "uEnvMap") = 0;
     oglwrap::UniformSampler(prog_, "uHeightMap") = 1;
@@ -116,132 +115,55 @@ class GridMeshRenderer {
       grassMaps_[i].wrapT(WrapMode::Repeat);
     }
 
+    UniformSampler(prog_, "uGrassNormalMap").set(4);
+    grassNormalMap_.bind();
+    {
+      grassNormalMap_.loadTexture("textures/grass_normal.jpg");
+      grassNormalMap_.generateMipmap();
+      grassNormalMap_.minFilter(MinFilter::LinearMipmapLinear);
+      grassNormalMap_.magFilter(MagFilter::Linear);
+      grassNormalMap_.wrapS(WrapMode::Repeat);
+      grassNormalMap_.wrapT(WrapMode::Repeat);
+    }
+
+    UniformSampler(prog_, "uShadowMap").set(5);
+    Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
+
     oglwrap::Texture2D::Unbind();
     // end(debug)
 
     prog_.validate();
 
     prog_.unuse();
-
-    oglwrap::VertexShader cube_vs{"debug_cube.vert"};
-    oglwrap::FragmentShader cube_fs{"debug_cube.frag"};
-
-    cube_prog_ << cube_vs << cube_fs;
-    cube_prog_.link().use();
-
-    debug_cube_.setupPositions(cube_prog_ | "aPosition");
   }
 
   void set_dimension(GLubyte dimension) {
-    dimension_ = dimension;
+    prog_.use();
     mesh_.setupPositions(prog_ | "aPosition", dimension);
+    clearRenderList();
+    prog_.unuse();
   }
 
   void clearRenderList() {
     mesh_.clearRenderList();
   }
 
-  void addToRenderList(const Camera& cam, glm::vec2 offset,
-                       float scale, int level, glm::vec2 min_max,
+  void addToRenderList(glm::vec2 offset, float scale, int level,
                        bool tl = true, bool tr = true,
                        bool bl = true, bool br = true) {
-    using oglwrap::Context;
-    using oglwrap::Capability;
-    using oglwrap::PolyMode;
-    using oglwrap::FaceOrientation;
-
-    float size = scale * node_dim;
-    scale *= (node_dim/dimension_);
-
     #ifdef glVertexAttribDivisor
       if (!glVertexAttribDivisor)
     #endif
     {
-      prog_.use();
-      uCamPos_ = cam.pos();
-      uCameraMatrix_ = cam.matrix();
-      uProjectionMatrix_ = cam.projectionMatrix();
-
       uOffset_ = offset;
       uScale_ = scale;
       uLevel_ = level;
-
-      // begin(debug)
-      uSunData_ = skybox_->getSunData();
-      skybox_->env_map.active(0);
-      skybox_->env_map.bind();
-      heightMap_.active(1);
-      heightMap_.bind();
-      grassMaps_[0].active(2);
-      grassMaps_[0].bind();
-      grassMaps_[1].active(3);
-      grassMaps_[1].bind();
-      // end(debug)
-
-      Context::FrontFace(FaceOrientation::CCW);
-      Context::Enable(Capability::CullFace);
-      //Context::PolygonMode(PolyMode::Line);
     }
 
     mesh_.addToRenderList(glm::vec4(offset, scale, level), tl, tr, bl, br);
-
-    #ifdef glVertexAttribDivisor
-      if (!glVertexAttribDivisor)
-    #endif
-    {
-      //Context::PolygonMode(PolyMode::Fill);
-      Context::Disable(Capability::CullFace);
-
-      prog_.unuse();
-
-      // begin(debug)
-      skybox_->env_map.active(0);
-      skybox_->env_map.unbind();
-      heightMap_.active(1);
-      heightMap_.unbind();
-      grassMaps_[0].active(2);
-      grassMaps_[0].unbind();
-      grassMaps_[1].active(3);
-      grassMaps_[1].unbind();
-      // end(debug)
-    }
-
-    // Render debug aabb-s
-    cube_prog_.use();
-    cube_uCameraMatrix_ = cam.matrix();
-    cube_uProjectionMatrix_ = cam.projectionMatrix();
-    cube_uScale_ = scale/2;
-    cube_uLevel_ = level;
-    cube_uMinMax_ = min_max;
-
-    Context::Enable(Capability::CullFace);
-    Context::FrontFace(debug_cube_.faceWinding());
-    Context::PolygonMode(PolyMode::Line);
-
-    if(tl) {
-      cube_uOffset_ = offset + glm::vec2(-size/4, size/4);
-      debug_cube_.render();
-    }
-    if(tr) {
-      cube_uOffset_ = offset + glm::vec2(size/4, size/4);
-      debug_cube_.render();
-    }
-    if(bl) {
-      cube_uOffset_ = offset + glm::vec2(-size/4, -size/4);
-      debug_cube_.render();
-    }
-    if(br) {
-      cube_uOffset_ = offset + glm::vec2(size/4, -size/4);
-      debug_cube_.render();
-    }
-
-    Context::PolygonMode(PolyMode::Fill);
-    Context::Disable(Capability::CullFace);
-
-    cube_prog_.unuse();
   }
 
-  void render(const Camera& cam) {
+  void setupRender(const Camera& cam) {
     using oglwrap::Context;
     using oglwrap::Capability;
     using oglwrap::PolyMode;
@@ -254,6 +176,11 @@ class GridMeshRenderer {
 
     // begin(debug)
     uSunData_ = skybox_->getSunData();
+    for (size_t i = 0; i < shadow_->getDepth(); ++i) {
+      uShadowCP_[i] = shadow_->shadowCPs()[i];
+    }
+    uNumUsedShadowMaps_ = shadow_->getDepth();
+
     skybox_->env_map.active(0);
     skybox_->env_map.bind();
     heightMap_.active(1);
@@ -262,17 +189,25 @@ class GridMeshRenderer {
     grassMaps_[0].bind();
     grassMaps_[1].active(3);
     grassMaps_[1].bind();
+    grassNormalMap_.active(4);
+    grassNormalMap_.bind();
+    shadow_->shadowTex().active(5);
+    shadow_->shadowTex().bind();
     // end(debug)
 
     Context::FrontFace(FaceOrientation::CCW);
     Context::Enable(Capability::CullFace);
     //Context::PolygonMode(PolyMode::Line);
+  }
+
+  void render() {
+    using oglwrap::Context;
+    using oglwrap::Capability;
+    using oglwrap::PolyMode;
 
     mesh_.render();
-
     //Context::PolygonMode(PolyMode::Fill);
     Context::Disable(Capability::CullFace);
-
     prog_.unuse();
 
     // begin(debug)
@@ -284,6 +219,10 @@ class GridMeshRenderer {
     grassMaps_[0].unbind();
     grassMaps_[1].active(3);
     grassMaps_[1].unbind();
+    grassNormalMap_.active(4);
+    grassNormalMap_.unbind();
+    shadow_->shadowTex().active(5);
+    shadow_->shadowTex().unbind();
     // end(debug)
   }
 
@@ -319,6 +258,39 @@ class GridMeshRenderer {
 
     *min = curr_min;
     *max = curr_max;
+  }
+
+  static double mix(double x, double y, double a) {
+    return x*(1-a) + y*a;
+  }
+
+  double getHeight(double x, double y) const {
+    // offset the coordinates to match the texture
+    x += terrain_.w / 2;
+    y += terrain_.h / 2;
+
+    /*
+     * fx, cy -- cx, cy
+     *    |        |
+     *    |        |
+     * fx, fy -- cx, fy
+     */
+
+    double fx = floor(x), cx = ceil(x);
+    double fy = floor(y), cy = ceil(y);
+
+    double fh = mix(terrain_.get(fx, fy), terrain_.get(cx, fy), x-fx);
+    double ch = mix(terrain_.get(fx, cy), terrain_.get(cx, cy), x-fx);
+
+    return mix(fh, ch, y-fy);
+  }
+
+  int w() const {
+    return terrain_.w;
+  }
+
+  int h() const {
+    return terrain_.h;
   }
 };
 

@@ -7,34 +7,35 @@
 #include "grid_mesh_renderer.h"
 #include "../collision/bounding_box.h"
 #include "../../skybox.h" // debug
+#include "../../shadow.h" // debug
 
 namespace engine {
 
 class CDLODQuadTree : public engine::GameObject {
   GridMeshRenderer renderer_;
+  GLubyte node_dimension_;
 
   struct Node {
     GLshort x, z;
     GLshort min_y, max_y;
-    GLushort level;
     GLushort size;
+    GLubyte level;
     std::unique_ptr<Node> tl, tr, bl, br;
 
-    Node(GLshort x, GLshort z, GLushort level)
+    Node(GLshort x, GLshort z, GLubyte level, GLubyte dimension)
         : x(x)
         , z(z)
+        , size(dimension * (1 << level))
         , level(level)
-        , size(GridMeshRenderer::node_dim * (1 << level))
         , tl(nullptr)
         , tr(nullptr)
         , bl(nullptr)
         , br(nullptr) {
-
       if (level > 0) {
-        tl = std::unique_ptr<Node>(new Node(x-size/4, z+size/4, level-1));
-        tr = std::unique_ptr<Node>(new Node(x+size/4, z+size/4, level-1));
-        bl = std::unique_ptr<Node>(new Node(x-size/4, z-size/4, level-1));
-        br = std::unique_ptr<Node>(new Node(x+size/4, z-size/4, level-1));
+        tl = std::unique_ptr<Node>(new Node(x-size/4, z+size/4, level-1, dimension));
+        tr = std::unique_ptr<Node>(new Node(x+size/4, z+size/4, level-1, dimension));
+        bl = std::unique_ptr<Node>(new Node(x-size/4, z-size/4, level-1, dimension));
+        br = std::unique_ptr<Node>(new Node(x+size/4, z-size/4, level-1, dimension));
       }
     }
 
@@ -62,9 +63,10 @@ class CDLODQuadTree : public engine::GameObject {
       }
     }
 
-    void traverse(const Camera& cam, const glm::vec3& cam_pos,
-                  const Frustum& frustum, GridMeshRenderer& renderer) {
-      float scale = float(size) / GridMeshRenderer::node_dim;
+    void traverse(const glm::vec3& cam_pos, const Frustum& frustum,
+                  GridMeshRenderer& renderer, int node_dimension) {
+      float scale = 1 << level;
+      float lod_range = scale * 128;
       BoundingBox bb = boundingBox();
 
       if(!bb.collidesWithFrustum(frustum)) {
@@ -72,47 +74,87 @@ class CDLODQuadTree : public engine::GameObject {
       }
 
       // if we can cover the whole area or if we are a leaf
-      if (!bb.collidesWithSphere(cam_pos, size) || level == 0) {
-        renderer.addToRenderList(cam, glm::vec2(x, z), scale,
-                                 level, glm::vec2(min_y, max_y));
+      if (!bb.collidesWithSphere(cam_pos, lod_range) || level == 0) {
+        renderer.addToRenderList(glm::vec2(x, z), scale, level);
       } else {
-        bool btl = tl->collidesWithSphere(cam_pos, size);
-        bool btr = tr->collidesWithSphere(cam_pos, size);
-        bool bbl = bl->collidesWithSphere(cam_pos, size);
-        bool bbr = br->collidesWithSphere(cam_pos, size);
+        bool btl = tl->collidesWithSphere(cam_pos, lod_range);
+        bool btr = tr->collidesWithSphere(cam_pos, lod_range);
+        bool bbl = bl->collidesWithSphere(cam_pos, lod_range);
+        bool bbr = br->collidesWithSphere(cam_pos, lod_range);
 
         // Ask childs to render what we can't
         if (btl) {
-          tl->traverse(cam, cam_pos, frustum, renderer);
+          tl->traverse(cam_pos, frustum, renderer, node_dimension);
         }
         if (btr) {
-          tr->traverse(cam, cam_pos, frustum, renderer);
+          tr->traverse(cam_pos, frustum, renderer, node_dimension);
         }
         if (bbl) {
-          bl->traverse(cam, cam_pos, frustum, renderer);
+          bl->traverse(cam_pos, frustum, renderer, node_dimension);
         }
         if (bbr) {
-          br->traverse(cam, cam_pos, frustum, renderer);
+          br->traverse(cam_pos, frustum, renderer, node_dimension);
         }
 
         // Render, what the childs didn't do
-        renderer.addToRenderList(cam, glm::vec2(x, z), scale, level,
-                                 glm::vec2(min_y, max_y), !btl, !btr, !bbl, !bbr);
+        renderer.addToRenderList(glm::vec2(x, z), scale, level,
+                                 !btl, !btr, !bbl, !bbr);
       }
     }
-  } root_;
+  };
+
+  std::unique_ptr<Node> root_;
 
  public:
-  CDLODQuadTree(Skybox* skybox)
-      : renderer_(skybox, 128)
-      , root_(0, 0, 7) {
-    root_.getMinMaxOfArea(renderer_);
+  CDLODQuadTree(Skybox* skybox, Shadow *shadow, int node_dimension = 32)
+      : renderer_(skybox, shadow, node_dimension)
+      , node_dimension_(node_dimension)
+      , root_(new Node(0, 0, 14 - log2(node_dimension), node_dimension)) {
+    std::cout << "node dimension: " << (int)node_dimension << std::endl;
+    root_->getMinMaxOfArea(renderer_);
+  }
+
+  GLubyte node_dimension() const {
+    return node_dimension_;
+  }
+
+  void set_node_dimension(GLubyte node_dimension) {
+    std::cout << "node dimension: " << (int)node_dimension << std::endl;
+    node_dimension_ = node_dimension;
+    renderer_.set_dimension(node_dimension);
+    root_ = std::unique_ptr<Node>{new Node(0, 0, 14 - log2(node_dimension), node_dimension)};
+    root_->getMinMaxOfArea(renderer_);
+  }
+
+  void inc_node_dimension() {
+    if(node_dimension_ < 128) {
+      set_node_dimension(node_dimension_*2);
+    }
+  }
+
+  void dec_node_dimension() {
+    if(node_dimension_ > 1) {
+      set_node_dimension(node_dimension_/2);
+    }
   }
 
   virtual void render(float time, const engine::Camera& cam) override {
     renderer_.clearRenderList();
-    root_.traverse(cam, cam.pos(), cam.frustum(), renderer_);
-    renderer_.render(cam);
+    renderer_.setupRender(cam);
+    root_->traverse(cam.pos(), cam.frustum(), renderer_, node_dimension_);
+    renderer_.render();
+  }
+
+  double getHeight(double x, double y) const {
+    return renderer_.getHeight(x, y);
+  }
+
+  int w() const {
+    return renderer_.w();
+  }
+
+  int h() const {
+    return renderer_.h();
   }
 
 };

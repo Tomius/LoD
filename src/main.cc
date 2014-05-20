@@ -79,7 +79,7 @@ static void PrintDebugTime() {
   last_debug_time = curr_time;
 }
 
-engine::Scene scene; // FIXME!!
+engine::Scene *scene;
 
 // Callbacks
 static void ErrorCallback(int error, const char* description) {
@@ -108,17 +108,17 @@ static void KeyCallback(GLFWwindow* window, int key, int scancode,
     }
   }
 
-  scene.keyAction(window, key, scancode, action, mods);
+  scene->keyAction(window, key, scancode, action, mods);
 }
 
 static void ScreenResizeCallback(GLFWwindow* window, int width, int height) {
   gl.Viewport(width, height);
-  scene.screenResized(width, height);
+  scene->screenResized(width, height);
 }
 
 static void MouseScrolledCallback(GLFWwindow* window, double xoffset,
                                                       double yoffset) {
-  scene.mouseScrolled(window, xoffset, yoffset);
+  scene->mouseScrolled(window, xoffset, yoffset);
 }
 
 static void MouseButtonPressed(GLFWwindow* window, int button,
@@ -126,11 +126,11 @@ static void MouseButtonPressed(GLFWwindow* window, int button,
   if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     was_left_click = true;
   }
-  scene.mouseButtonPressed(window, button, action, mods);
+  scene->mouseButtonPressed(window, button, action, mods);
 }
 
 static void MouseMoved(GLFWwindow* window,  double xpos, double ypos) {
-  scene.mouseMoved(window, xpos, ypos);
+  scene->mouseMoved(window, xpos, ypos);
 }
 
 int main() {
@@ -196,22 +196,52 @@ int main() {
   try {
     glInit(window);
 
+    scene = new engine::Scene{};
+
     PrintDebugText("Initializing the skybox");
-      Skybox *skybox = scene.addSkybox();
+      Skybox *skybox = scene->addSkybox();
+    PrintDebugTime();
+
+    PrintDebugText("Initializing the shadow maps");
+      Shadow *shadow = scene->addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
     PrintDebugTime();
 
     PrintDebugText("Initializing the terrain");
-      scene.addGameObject<engine::CDLODQuadTree>(skybox);
+      engine::CDLODQuadTree *terrain =
+          scene->addGameObject<engine::CDLODQuadTree>(skybox, shadow);
+      auto terrain_height =
+        [terrain](double x, double y) {return terrain->getHeight(x, y);};
     PrintDebugTime();
 
-    engine::FreeFlyCamera cam(window, kFieldOfView, 0.5f, 6000.0f,
-                              glm::vec3(30, 30, 0), glm::vec3(), 100);
+    PrintDebugText("Initializing the trees");
+      scene->addGameObject<Tree>(*terrain, skybox, shadow);
+    PrintDebugTime();
 
-    scene.addCamera(&cam);
+    PrintDebugText("Initializing Ayumi");
+      Ayumi *ayumi = scene->addGameObject<Ayumi>(window, skybox, shadow);
+      ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
 
-    // PrintDebugText("Initializing the resources for the bloom effect");
-    //   scene.addAfterEffect<BloomEffect>();
-    // PrintDebugTime();
+      CharacterMovement charmove{window, ayumi->transform, *ayumi->rigid_body};
+      ayumi->charmove(&charmove);
+    PrintDebugTime();
+
+    charmove.setAnimation(&ayumi->getAnimation());
+
+    engine::Transform& cam_offset = scene->addGameObject()->transform;
+    ayumi->transform.addChild(cam_offset);
+    cam_offset.localPos(ayumi->getMesh().bSphereCenter());
+
+    engine::ThirdPersonalCamera cam(window, kFieldOfView, 0.5f, 6000.0f,
+      cam_offset,
+      cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
+      terrain_height, 1.5f);
+
+    charmove.setCamera(&cam);
+    scene->addCamera(&cam);
+
+    PrintDebugText("Initializing the resources for the bloom effect");
+      scene->addAfterEffect<BloomEffect>();
+    PrintDebugTime();
 
     // Callbacks
     glfwSetKeyCallback(window, KeyCallback);
@@ -229,18 +259,20 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
       gl.Clear().Color().Depth();
       FpsDisplay();
-      scene.turn();
+      scene->turn();
 
       glfwSwapBuffers(window);
       glfwPollEvents();
     }
 
+    delete scene;
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 
   } catch(std::exception& err) {
     std::cerr << err.what();
+    delete scene;
     glfwDestroyWindow(window);
     glfwTerminate();
     std::terminate();

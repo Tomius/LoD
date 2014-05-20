@@ -7,7 +7,7 @@ extern Context gl;
 using namespace glm;
 
 constexpr float day_duration = 256.0f;
-constexpr float day_start = day_duration/8;
+constexpr float day_start = day_duration/16;
 
 Skybox::Skybox()
   : time_(day_start)

@@ -12,8 +12,8 @@
 
 #include "charmove.h"
 #include "skybox.h"
-#include "terrain.h"
 #include "shadow.h"
+#include "engine/CDLOD/cdlod_quad_tree.h"
 
 /* 0 -> max quality
    2 -> max performance */
@@ -44,7 +44,7 @@ class Tree : public engine::GameObject {
   std::vector<TreeInfo> trees_;
 
 public:
-  Tree(const Terrain& terrain, Skybox *skybox, Shadow *shadow);
+  Tree(const engine::CDLODQuadTree& terrain, Skybox *skybox, Shadow *shadow);
   virtual ~Tree() {}
   virtual void shadowRender(float time, const engine::Camera& cam) override;
   virtual void render(float time, const engine::Camera& cam) override;

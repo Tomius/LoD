@@ -14,7 +14,6 @@ varying mat3  vNormalMatrix;
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap0, uGrassMap1, uGrassNormalMap;
 uniform sampler2DShadow uShadowMap;
-uniform vec3 uScales;
 
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;
@@ -26,11 +25,6 @@ float SunPower();
 float AmbientPower();
 vec3 AmbientColor();
 float isDay();
-
-float kFogMin = max(uScales.x, uScales.z) * 128.0;
-float kFogMax = max(uScales.x, uScales.z) * 2048.0;
-
-const float kSpecularShininess = 20.0;
 
 // We love #version 120
 int min(int a, int b) {
@@ -81,22 +75,23 @@ float Visibility() {
   return max(visibility, 0.0);
 }
 
+const float kFogMin = 128.0;
+const float kFogMax = 2048.0;
+const float kSpecularShininess = 20.0;
+
 void main() {
   if (vInvalid != 0.0) {
     discard;
   }
 
-  // TexCoord
-  vec2 grass_texcoord = vTexcoord * 200;
-
   // Normals
   vec3 w_normal = normalize(w_vNormal);
-  vec3 normal_offset = texture2D(uGrassNormalMap, grass_texcoord).rgb;
+  vec3 normal_offset = texture2D(uGrassNormalMap, vTexcoord*256).rgb;
   vec3 w_final_normal = normalize(vNormalMatrix * normal_offset);
   vec3 c_normal = (uCameraMatrix * vec4(w_final_normal, 0.0)).xyz;
 
   // Lighting directions
-  vec3 c_light_dir = normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
+  vec3 c_light_dir = -normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
   vec3 c_view_direction = normalize(-(uCameraMatrix * vec4(w_vPos, 1)).xyz);
 
   // Lighting values
@@ -111,30 +106,28 @@ void main() {
     specular_power = pow(max(dot(H, N), 0), kSpecularShininess);
   }
 
-  // Colors
-  vec3 grass0_color = texture2D(uGrassMap0, grass_texcoord).rgb;
-  vec3 grass1_color = texture2D(uGrassMap1, grass_texcoord).rgb;
-  vec3 grass10_color = texture2D(uGrassMap0, grass_texcoord/16).rgb;
-  vec3 grass11_color = texture2D(uGrassMap1, grass_texcoord/16).rgb;
-  vec3 grass110_color = texture2D(uGrassMap0, grass_texcoord/64).rgb;
-  vec3 grass111_color = texture2D(uGrassMap1, grass_texcoord/64).rgb;
-  float height_factor = clamp(sqrt(max(w_vPos.y - 15 * uScales.y, 0)) / 40, 0, 1);
-  vec3 grass_color0 = mix(grass0_color, grass1_color, height_factor);
-  vec3 grass_color1 = mix(grass10_color, grass11_color, height_factor);
-  vec3 grass_color11 = mix(grass110_color, grass111_color, height_factor);
-  vec3 grass_color = mix(grass_color0, mix(grass_color1, grass_color11, 0.5), 0.5);
+  vec3 grass_color_0 = texture2D(uGrassMap0, vTexcoord*256).rgb;
+  vec3 grass_color_1 = texture2D(uGrassMap0, vTexcoord*16).rgb;
 
-  float length_from_camera = length(c_vPos);
+  vec3 rock_color_0 = texture2D(uGrassMap1, vTexcoord*256).rgb;
+  vec3 rock_color_1 = texture2D(uGrassMap1, vTexcoord*16).rgb;
+
+  float height_factor = clamp(sqrt(max(w_vPos.y - 15, 0) / 40), 0, 1);
+
+  vec3 color_0 = mix(grass_color_0, rock_color_0, height_factor);
+  vec3 color_1 = mix(grass_color_1, rock_color_1, height_factor);
+  vec3 diffuse_color = mix(color_0, color_1, 0.5);
 
   const float ambient_occlusion = 0.2f;
-
-  vec3 final_color = grass_color * AmbientColor() *
-    (Visibility()*SunPower()*(specular_power + diffuse_power + ambient_occlusion) + AmbientPower());
+  vec3 final_color = diffuse_color * AmbientColor() * (Visibility()*SunPower()*
+      (specular_power + diffuse_power + ambient_occlusion) + AmbientPower());
 
   // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));
   vec3 fog = AmbientColor() * fog_color * (0.005 + SunPower());
-  float alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0, 1) / 4;
+  float length_from_camera = length(c_vPos);
+  float alpha = clamp((length_from_camera - kFogMin) /
+                      (kFogMax - kFogMin), 0, 1) / 4;
 
   gl_FragColor = vec4(mix(pow(final_color, vec3(0.7)), fog, alpha), 1);
 }

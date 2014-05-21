@@ -37,8 +37,7 @@ public:
 	/** @param filename - The path to the file to load. */
   RawTerrainData(const std::string& filename);
 
-  /// Saves the rtd in .rtd format.
-  /** @param filename - The path to the file to save to. Should end with '.rtd' */
+  /// Saves the rtd in .rtd or an image format.
   void save(const std::string& filename) const;
 
 private:

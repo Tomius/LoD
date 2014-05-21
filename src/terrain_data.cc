@@ -95,19 +95,24 @@ RawTerrainData::RawTerrainData(const std::string& filename) : level(0) {
   }
 }
 
-/// Saves the rtd in .rtd format.
-/** @param filename - The path to the file to save to. Should end with '.rtd' */
+/// Saves the rtd in .rtd or an image format.
 void RawTerrainData::save(const std::string& filename) const {
-  ofstream ofs(filename, ios::binary);
+  if(filename.find(".rtd") != std::string::npos) {
+    ofstream ofs(filename, ios::binary);
 
-  size_t temp_w = w, temp_h = h;
-  EndianSwap(temp_w);
-  ofs.write((const char *)&temp_w, sizeof(size_t));
-  EndianSwap(temp_h);
-  ofs.write((const char *)&temp_h, sizeof(size_t));
-  ofs.write((const char *)heightData.data(), heightData.size());
+    size_t temp_w = w, temp_h = h;
+    EndianSwap(temp_w);
+    ofs.write((const char *)&temp_w, sizeof(size_t));
+    EndianSwap(temp_h);
+    ofs.write((const char *)&temp_h, sizeof(size_t));
+    ofs.write((const char *)heightData.data(), heightData.size());
 
-  assert(ofs.good());
+    assert(ofs.good());
+  } else {
+    Magick::Image image;
+    image.read(w, h, "R", MagickCore::CharPixel, heightData.data());
+    image.write(filename);
+  }
 }
 
 /// Returns the next mipmap level of this rtd.

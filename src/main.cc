@@ -14,8 +14,7 @@
 #include "engine/scene.h"
 #include "engine/camera.h"
 #include "engine/gameobject.h"
-#include "engine/CDLOD/grid_mesh_renderer.h"
-#include "engine/CDLOD/cdlod_quad_tree.h"
+#include "engine/cdlod/terrain.h"
 
 #include "./charmove.h"
 #include "./skybox.h"
@@ -207,19 +206,17 @@ int main() {
     PrintDebugTime();
 
     PrintDebugText("Initializing the terrain");
-      engine::CDLODQuadTree *terrain =
-          scene->addGameObject<engine::CDLODQuadTree>(skybox, shadow);
-      auto terrain_height =
-        [terrain](double x, double y) {return terrain->getHeight(x, y);};
+      Terrain *terrain = scene->addGameObject<Terrain>(skybox, shadow);
+      const engine::HeightMapInterface& height_map = terrain->height_map();
     PrintDebugTime();
 
     PrintDebugText("Initializing the trees");
-      scene->addGameObject<Tree>(*terrain, skybox, shadow);
+      scene->addGameObject<Tree>(height_map, skybox, shadow);
     PrintDebugTime();
 
     PrintDebugText("Initializing Ayumi");
       Ayumi *ayumi = scene->addGameObject<Ayumi>(window, skybox, shadow);
-      ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
+      ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
 
       CharacterMovement charmove{window, ayumi->transform, *ayumi->rigid_body};
       ayumi->charmove(&charmove);
@@ -228,13 +225,15 @@ int main() {
     charmove.setAnimation(&ayumi->getAnimation());
 
     engine::Transform& cam_offset = scene->addGameObject()->transform;
+    ayumi->transform.localPos() = glm::vec3(height_map.w()/2,
+        height_map.heightAt(height_map.w()/2, height_map.h()/2), height_map.h()/2);
     ayumi->transform.addChild(cam_offset);
     cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
     engine::ThirdPersonalCamera cam(window, kFieldOfView, 0.5f, 6000.0f,
       cam_offset,
       cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
-      terrain_height, 1.5f);
+      height_map, 1.5f);
 
     charmove.setCamera(&cam);
     scene->addCamera(&cam);

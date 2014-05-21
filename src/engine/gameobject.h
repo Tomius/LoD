@@ -16,10 +16,10 @@ public:
 
   virtual ~GameObject() {}
 
-  void addRigidBody(RigidBody::CallBack getTerrainHeight,
+  void addRigidBody(const HeightMapInterface& height_map,
                     double starting_height = NAN) {
     rigid_body = std::unique_ptr<RigidBody>(
-      new RigidBody{transform, getTerrainHeight, starting_height}
+      new RigidBody{transform, height_map, starting_height}
     );
   }
 

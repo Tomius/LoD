@@ -3,12 +3,18 @@
 #version 120
 
 attribute vec2 aPosition;
-attribute vec4 aRenderData;
 
-// Vertex attrib divisor works like a uniform
-vec2 uOffset = aRenderData.xy;
-float uScale = aRenderData.z;
-int uLevel = int(aRenderData.w);
+#define VERTEX_ATTRIB_DIVISOR true
+
+#ifdef VERTEX_ATTRIB_DIVISOR
+  attribute vec4 uRenderData; // Vertex attrib divisor works like a uniform
+#else
+  uniform vec4 uRenderData;
+#endif
+
+vec2 uOffset = uRenderData.xy;
+float uScale = uRenderData.z;
+int uLevel = int(uRenderData.w);
 
 uniform mat4 uProjectionMatrix, uCameraMatrix;
 uniform vec3 uCamPos;
@@ -23,7 +29,7 @@ varying float vInvalid;
 varying mat3  vNormalMatrix;
 
 float fetchHeight(vec2 texCoord) {
-  return texture2D(uHeightMap, texCoord/vec2(uTexSize)).r * 255;
+  return texture2D(uHeightMap, texCoord).r * 255;
 }
 
 vec2 frac(vec2 x) { return x - floor(x); }
@@ -57,7 +63,9 @@ void main() {
     vInvalid = 0.0;
   }
 
-  vTexcoord = morphed_pos / vec2(uTexSize);
+  texcoord /= vec2(uTexSize);
+
+  vTexcoord = texcoord;
 
   float height = fetchHeight(texcoord);
   vec3 w_pos = vec3(morphed_pos.x, height, morphed_pos.y);

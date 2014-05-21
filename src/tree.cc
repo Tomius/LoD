@@ -4,7 +4,8 @@
 
 using namespace oglwrap;
 
-Tree::Tree(const engine::CDLODQuadTree& terrain, Skybox *skybox, Shadow *shadow)
+Tree::Tree(const engine::HeightMapInterface& height_map,
+           Skybox *skybox, Shadow *shadow)
   : mesh_("models/trees/tree.obj",
           aiProcessPreset_TargetRealtime_MaxQuality |
           aiProcess_FlipUVs
@@ -44,12 +45,12 @@ Tree::Tree(const engine::CDLODQuadTree& terrain, Skybox *skybox, Shadow *shadow)
   srand(5);
   scales_ = glm::vec3(1.0);
   const int kTreeDist = 200;
-  for (int i = -terrain.h() / 2; i < terrain.h() / 2; i += kTreeDist) {
-    for (int j = -terrain.w() / 2; j < terrain.w() / 2; j += kTreeDist) {
+  for (int i = kTreeDist; i + kTreeDist < height_map.h() / 2; i += kTreeDist) {
+    for (int j = kTreeDist; j + kTreeDist < height_map.w() / 2; j += kTreeDist) {
       glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
                                     j + rand()%(kTreeDist/2) - kTreeDist/4);
       glm::vec3 pos = scales_ *
-        glm::vec3(coord.x, terrain.getHeight(coord.x, coord.y), coord.y);
+        glm::vec3(coord.x, height_map.heightAt(coord.x, coord.y), coord.y);
       glm::vec3 scale = glm::vec3(
                           1.0f + rand() / RAND_MAX,
                           1.0f + rand() / RAND_MAX,

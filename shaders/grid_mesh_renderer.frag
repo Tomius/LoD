@@ -14,7 +14,6 @@ varying mat3  vNormalMatrix;
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap0, uGrassMap1, uGrassNormalMap;
 uniform sampler2DShadow uShadowMap;
-uniform vec3 uScales;
 
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;

@@ -238,7 +238,7 @@ class ThirdPersonalCamera : public Camera {
                mouse_sensitivity_, mouse_scroll_sensitivity_;
 
   // The camera should collide with the terrain.
-  std::function<double(double, double)> getTerrainHeight_;
+  const engine::HeightMapInterface& height_map_;
 
   GLFWwindow* window_;
 
@@ -260,7 +260,7 @@ public:
                       float z_far,
                       Transform& target,
                       const glm::vec3& position,
-                      RigidBody::CallBack getTerrainHeight,
+                      const engine::HeightMapInterface& height_map,
                       double mouse_sensitivity = 1.0,
                       double mouse_scroll_sensitivity = 1.0)
     : Camera(fov, z_near, z_far)
@@ -271,7 +271,7 @@ public:
     , cos_max_pitch_angle_(0.8)
     , mouse_sensitivity_(mouse_sensitivity)
     , mouse_scroll_sensitivity_(mouse_scroll_sensitivity)
-    , getTerrainHeight_(getTerrainHeight)
+    , height_map_(height_map)
     , window_(window) {
 
     target.addChild(*this);
@@ -402,7 +402,7 @@ private:
   }
 
   double distanceOverTerrain(const glm::dvec3& pos) const {
-    return pos.y - getTerrainHeight_(pos.x, pos.z);
+    return pos.y - height_map_.heightAt(pos.x, pos.z);
   }
 
   double distanceOverTerrain() const {

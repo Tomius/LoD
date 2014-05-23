@@ -50,8 +50,8 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
 
   // Get the trees' positions.
   const int kTreeDist = 256;
-  for (int i = kTreeDist; i + kTreeDist < height_map.h(); i += kTreeDist) {
-    for (int j = kTreeDist; j + kTreeDist < height_map.w(); j += kTreeDist) {
+  for (int i = 2*kTreeDist; i + 2*kTreeDist < height_map.h(); i += kTreeDist) {
+    for (int j = 2*kTreeDist; j + 2*kTreeDist < height_map.w(); j += kTreeDist) {
       glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
                                     j + rand()%(kTreeDist/2) - kTreeDist/4);
       glm::vec3 pos =
@@ -80,8 +80,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
 void Tree::shadowRender(float time, const engine::Camera& cam) {
   shadow_prog_.use();
 
-  gl::CullFace(Face::Front);
-  auto cullface = gl::TemporaryEnable(Capability::CullFace);
+  auto cullface = gl::TemporaryDisable(Capability::CullFace);
 
   auto frustum = cam.frustum();
   auto campos = cam.pos();

@@ -44,42 +44,42 @@ void Shadow::screenResized(size_t width, size_t height) {
   h_ = height;
 }
 
-glm::mat4 Shadow::projMat(float size) const {
-  return glm::ortho<float>(-size, size, -size, size, 0, 2*size);
+glm::dmat4 Shadow::projMat(double size) const {
+  return glm::ortho<double>(-size, size, -size, size, 0, 2*size);
 }
 
-glm::mat4 Shadow::camMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const {
+glm::dmat4 Shadow::camMat(glm::dvec3 lightSrcPos, glm::dvec4 targetBSphere) const {
   return glm::lookAt(
-    glm::vec3(targetBSphere) + glm::normalize(lightSrcPos) * targetBSphere.w,
-    glm::vec3(targetBSphere),
-    glm::vec3(0, 1, 0)
+    glm::dvec3(targetBSphere) + glm::normalize(lightSrcPos) * targetBSphere.w,
+    glm::dvec3(targetBSphere),
+    glm::dvec3(0, 1, 0)
   );
 }
 
-glm::mat4 Shadow::modelCamProjMat(glm::vec3 lightSrcPos,
-                                  glm::vec4 targetBSphere,
-                                  glm::mat4 modelMatrix,
-                                  glm::mat4 worldTransform) {
+glm::mat4 Shadow::modelCamProjMat(glm::dvec3 lightSrcPos,
+                                  glm::dvec4 targetBSphere,
+                                  glm::dmat4 modelMatrix,
+                                  glm::dmat4 worldTransform) {
   // [-1, 1] -> [0, 1] convert
-  glm::mat4 biasMatrix(
+  glm::dmat4 biasMatrix(
     0.5, 0.0, 0.0, 0.0,
     0.0, 0.5, 0.0, 0.0,
     0.0, 0.0, 0.5, 0.0,
     0.5, 0.5, 0.5, 1.0
   );
 
-  glm::mat4 projMatrix = projMat(targetBSphere.w);
-  glm::vec4 offseted_targetBSphere =
-    glm::vec4(
-      glm::vec3(modelMatrix * glm::vec4(glm::vec3(targetBSphere), 1)),
+  glm::dmat4 projMatrix = projMat(targetBSphere.w);
+  glm::dvec4 offseted_targetBSphere =
+    glm::dvec4(
+      glm::dvec3(modelMatrix * glm::dvec4(glm::dvec3(targetBSphere), 1)),
       targetBSphere.w
     );
 
-  glm::mat4 pc = projMatrix * camMat(lightSrcPos, offseted_targetBSphere);
+  glm::dmat4 pc = projMatrix * camMat(lightSrcPos, offseted_targetBSphere);
 
   cp_matrices_[curr_depth_] = biasMatrix * pc;
 
-  return pc * modelMatrix * worldTransform;
+  return static_cast<glm::mat4>(pc * modelMatrix * worldTransform);
 }
 
 const std::vector<glm::mat4>& Shadow::shadowCPs() const {

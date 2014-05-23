@@ -65,7 +65,7 @@ float Visibility() {
       uShadowMap,
       vec3(
         AtlasLookup(shadowCoord.xy, i),
-        shadowCoord.z / shadowCoord.w
+        (shadowCoord.z - 0.001) / shadowCoord.w
       )
     ).r);
   }

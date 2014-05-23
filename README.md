@@ -41,8 +41,7 @@ How to build (Windows):
 * Add the librarires to link:
   * glew32
   * opengl32
-  * sfml-window
-  * sfml-system
+  * glfw3dll
   * assimp
 * Add ./include to search directories, or specify -Iinclude compiler flag.
 * Add `Magick++-config --cppflags --cxxflags --ldflags` to compiler settings

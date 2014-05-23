@@ -5,83 +5,88 @@
 
 using namespace oglwrap;
 
-/* 0 -> max quality
-   2 -> max performance */
-extern const int PERFORMANCE;
-const float xz_scale = (1 << PERFORMANCE)/2.0f;
-static const glm::vec3 scale_vector = glm::vec3(xz_scale, 1.0f, xz_scale);
-
-Terrain::Terrain(Skybox *skybox, Shadow *shadow)
+Terrain::Terrain(Skybox *skybox/*, Shadow *shadow*/)
   : vs_("terrain.vert")
   , fs_("terrain.frag")
   , uProjectionMatrix_(prog_, "uProjectionMatrix")
   , uCameraMatrix_(prog_, "uCameraMatrix")
-  , uShadowCP_(prog_, "uShadowCP")
+  //, uShadowCP_(prog_, "uShadowCP")
   , uSunData_(prog_, "uSunData")
-  , uScales_(prog_, "uScales")
-  , uOffset_(prog_, "uOffset")
-  , uTexSize_(prog_, "uTexSize")
-  , uMipmapLevel_(prog_, "uMipmapLevel")
-  , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
-  , mesh_(std::string("terrain/mideu.rtd") + char(PERFORMANCE + '0'))
+  //, uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
+  , height_map_("terrain/konserian.png")
+  , mesh_(height_map_)
   , skybox_((assert(skybox), skybox))
-  , shadow_((assert(shadow), shadow))
-  , w_(mesh_.w)
-  , h_(mesh_.h)
-  , w(w_)
-  , h(h_) {
+  /*, shadow_((assert(shadow), shadow))*/ {
 
   prog_ << vs_ << fs_ << skybox_->sky_fs;
-  prog_.link().use();
+  mesh_.setup_and_link(prog_, 1);
+  prog_.use();
 
   UniformSampler(prog_, "uEnvMap").set(0);
-  UniformSampler(prog_, "uHeightMap").set(1);
   UniformSampler(prog_, "uGrassMap0").set(2);
   UniformSampler(prog_, "uGrassMap1").set(3);
+  for (int i = 0; i < 2; ++i) {
+    grassMaps_[i].bind();
+    // no alpha channel here
+    grassMaps_[i].loadTexture(
+      i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg", "SRGBA"
+    );
+    grassMaps_[i].generateMipmap();
+    grassMaps_[i].maxAnisotropy();
+    grassMaps_[i].minFilter(MinFilter::LinearMipmapLinear);
+    grassMaps_[i].magFilter(MagFilter::Linear);
+    grassMaps_[i].wrapS(WrapMode::Repeat);
+    grassMaps_[i].wrapT(WrapMode::Repeat);
+  }
+
   UniformSampler(prog_, "uGrassNormalMap").set(4);
-  UniformSampler(prog_, "uShadowMap").set(5);
-  Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
+  grassNormalMap_.bind();
+  {
+    // the normal map doesn't have an alpha channel, and is not is srgb space
+    grassNormalMap_.loadTexture("textures/grass_normal.jpg", "RGBA");
+    grassNormalMap_.generateMipmap();
+    grassNormalMap_.minFilter(MinFilter::LinearMipmapLinear);
+    grassNormalMap_.magFilter(MagFilter::Linear);
+    grassNormalMap_.wrapS(WrapMode::Repeat);
+    grassNormalMap_.wrapT(WrapMode::Repeat);
+  }
+
+  //UniformSampler(prog_, "uShadowMap").set(5);
+  //Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
 
   prog_.validate();
-
-  uScales_ = scale_vector;
-  uTexSize_ = glm::ivec2(mesh_.w, mesh_.h);
-}
-
-glm::vec3 Terrain::getScales() const {
-  return scale_vector;
-}
-
-unsigned char Terrain::fetchHeight(glm::ivec2 v) const {
-  return mesh_.fetchHeight(v);
-}
-
-double Terrain::getHeight(double x, double y) const {
-  return scale_vector.y * mesh_.getHeight(x/scale_vector.x, y/scale_vector.z);
-}
-
-void Terrain::screenResized(const glm::mat4& projMat, size_t, size_t) {
-  prog_.use();
-  uProjectionMatrix_ = projMat;
 }
 
 void Terrain::render(float time, const engine::Camera& cam) {
   prog_.use();
-  uCameraMatrix_.set(cam);
+  uCameraMatrix_ = cam.matrix();
+  uProjectionMatrix_ = cam.projectionMatrix();
   uSunData_.set(skybox_->getSunData());
-  for (size_t i = 0; i < shadow_->getDepth(); ++i) {
-    uShadowCP_[i] = shadow_->shadowCPs()[i];
-  }
-  uNumUsedShadowMaps_ = shadow_->getDepth();
+  // for (size_t i = 0; i < shadow_->getDepth(); ++i) {
+  //   uShadowCP_[i] = shadow_->shadowCPs()[i];
+  // }
+  // uNumUsedShadowMaps_ = shadow_->getDepth();
   skybox_->env_map.active(0);
   skybox_->env_map.bind();
-  shadow_->shadowTex().active(5);
-  shadow_->shadowTex().bind();
+  grassMaps_[0].active(2);
+  grassMaps_[0].bind();
+  grassMaps_[1].active(3);
+  grassMaps_[1].bind();
+  grassNormalMap_.active(4);
+  grassNormalMap_.bind();
+  // shadow_->shadowTex().active(5);
+  // shadow_->shadowTex().bind();
 
-  mesh_.render(cam.pos(), cam.forward(), uOffset_, uMipmapLevel_);
+  mesh_.render(cam);
 
-  shadow_->shadowTex().active(5);
-  shadow_->shadowTex().unbind();
+  // shadow_->shadowTex().active(5);
+  // shadow_->shadowTex().unbind();
+  grassMaps_[0].active(2);
+  grassMaps_[0].unbind();
+  grassMaps_[1].active(3);
+  grassMaps_[1].unbind();
+  grassNormalMap_.active(4);
+  grassNormalMap_.unbind();
   skybox_->env_map.active(0);
   skybox_->env_map.unbind();
 }

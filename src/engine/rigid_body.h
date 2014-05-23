@@ -3,8 +3,8 @@
 #ifndef ENGINE_RIGID_BODY_H_
 #define ENGINE_RIGID_BODY_H_
 
-#include <functional>
-#include "transform.h"
+#include "./transform.h"
+#include "./height_map_interface.h"
 
 namespace engine {
 
@@ -13,15 +13,14 @@ class RigidBody {
   Transform& local_transform_;
   double last_height_;
 
-  std::function<double(double, double)> getTerrainHeight_;
+  const HeightMapInterface& height_map_;
 
 public:
-  using CallBack = const std::function<double(double, double)>&;
   RigidBody(Transform& local_transform,
-            CallBack getTerrainHeight,
+            const HeightMapInterface& height_map,
             double starting_height = NAN)
               : local_transform_(local_transform)
-              , getTerrainHeight_(getTerrainHeight) {
+              , height_map_(height_map) {
     Transform* parent = local_transform_.getParent();
     if (parent) {
       parent->removeChild(local_transform_);
@@ -31,7 +30,7 @@ public:
 
     if (std::isnan(starting_height)) {
       auto pos = local_transform_.pos();
-      last_height_ = getTerrainHeight(pos.x, pos.z);
+      last_height_ = height_map_.heightAt(pos.x, pos.z);
     } else {
       last_height_ = starting_height;
     }
@@ -40,7 +39,7 @@ public:
 
   void update() {
     auto pos = local_transform_.pos();
-    double new_height = getTerrainHeight_(pos.x, pos.z);
+    double new_height = height_map_.heightAt(pos.x, pos.z);
     float diff = new_height - last_height_;
     last_height_ = new_height;
 

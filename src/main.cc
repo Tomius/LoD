@@ -14,6 +14,7 @@
 #include "engine/scene.h"
 #include "engine/camera.h"
 #include "engine/gameobject.h"
+#include "engine/cdlod/terrain.h"
 
 #include "./charmove.h"
 #include "./skybox.h"
@@ -22,12 +23,11 @@
 #include "./ayumi.h"
 #include "./tree.h"
 #include "./shadow.h"
-#include "./map.h"
 #include "./loading_screen.h"
 
 using oglwrap::Capability;
 using oglwrap::Face;
-oglwrap::Context gl;
+using gl = oglwrap::Context;
 
 extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
@@ -38,11 +38,11 @@ double ogl_version;
 bool was_left_click = false;
 
 void glInit(GLFWwindow* window) {
-  gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  gl.ClearDepth(1.0f);
-  gl.Enable(Capability::DepthTest);
-  gl.Enable(Capability::DepthClamp);
-  gl.CullFace(Face::Back);
+  gl::ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  gl::ClearDepth(1.0f);
+  gl::Enable(Capability::DepthTest);
+  gl::Enable(Capability::DepthClamp);
+  gl::CullFace(Face::Back);
 
   LoadingScreen().render();
   glfwSwapBuffers(window);
@@ -77,7 +77,7 @@ static void PrintDebugTime() {
   last_debug_time = curr_time;
 }
 
-engine::Scene scene; // FIXME!!
+engine::Scene *scene;
 
 // Callbacks
 static void ErrorCallback(int error, const char* description) {
@@ -106,19 +106,17 @@ static void KeyCallback(GLFWwindow* window, int key, int scancode,
     }
   }
 
-  scene.keyAction(window, key, scancode, action, mods);
+  scene->keyAction(window, key, scancode, action, mods);
 }
 
 static void ScreenResizeCallback(GLFWwindow* window, int width, int height) {
-  gl.Viewport(width, height);
-  auto projMat = glm::perspectiveFov<float>(kFieldOfView, width,
-                                            height, 0.5, 3000);
-  scene.screenResized(projMat, width, height);
+  gl::Viewport(width, height);
+  scene->screenResized(width, height);
 }
 
 static void MouseScrolledCallback(GLFWwindow* window, double xoffset,
                                                       double yoffset) {
-  scene.mouseScrolled(window, xoffset, yoffset);
+  scene->mouseScrolled(window, xoffset, yoffset);
 }
 
 static void MouseButtonPressed(GLFWwindow* window, int button,
@@ -126,11 +124,11 @@ static void MouseButtonPressed(GLFWwindow* window, int button,
   if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     was_left_click = true;
   }
-  scene.mouseButtonPressed(window, button, action, mods);
+  scene->mouseButtonPressed(window, button, action, mods);
 }
 
 static void MouseMoved(GLFWwindow* window,  double xpos, double ypos) {
-  scene.mouseMoved(window, xpos, ypos);
+  scene->mouseMoved(window, xpos, ypos);
 }
 
 int main() {
@@ -142,68 +140,82 @@ int main() {
       std::terminate();
     }
 
-    // Hits
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    // First try to open a 3.3 context (for VertexAttribDivisor)
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     // Window creation
     GLFWwindow* window = glfwCreateWindow(1920, 1080, "Land of Dreams",
                                           glfwGetPrimaryMonitor(), nullptr);
     if (!window){
-      glfwTerminate();
+      // If it failed, try a 2.1 context
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+
+      window = glfwCreateWindow(1920, 1080, "Land of Dreams",
+                                glfwGetPrimaryMonitor(), nullptr);
+
+      // If that one fails too, we can't do much...
+      if (!window) {
+        glfwTerminate();
+        std::terminate();
+      }
+    }
+
+    // Check the created OpenGL context's version
+    ogl_version = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR) +
+                  glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
+    std::cout << " - OpenGL version: "  << ogl_version << std::endl;
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    std::cout << " - Resolution: "  << width << " x " << height << std::endl;
+
+    if (ogl_version < 2.1) {
+      std::cout << "At least OpenGL version 2.1 is required to run this program\n";
       std::terminate();
     }
 
+    // If it's ok, set it for the window
     glfwMakeContextCurrent(window);
+
+    // GLEW init
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+      std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
+      return -1;
+    }
+    oglwrap::Context::GetError();
   PrintDebugTime();
 
-  // Check the created OpenGL context's version
-  ogl_version = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR) +
-                glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
-  std::cout << " - OpenGL version: "  << ogl_version << std::endl;
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  std::cout << " - Resolution: "  << width << " x " << height << std::endl;
-
-  if (ogl_version < 2.1) {
-    std::cout << "At least OpenGL version 2.1 is required to run this program\n";
-    std::terminate();
-  }
-
-  // No V-sync needed because of multiple draw calls per frame.
+  // No V-sync needed.
   glfwSwapInterval(0);
-
-  // GLEW init
-  GLenum err = glewInit();
-  if (err != GLEW_OK) {
-    std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
-    return -1;
-  }
 
   try {
     glInit(window);
 
+    scene = new engine::Scene{};
+
     PrintDebugText("Initializing the skybox");
-      Skybox *skybox = scene.addSkybox();
+      Skybox *skybox = scene->addSkybox();
     PrintDebugTime();
 
-    PrintDebugText("Initializing the shadow maps");
-      Shadow *shadow = scene.addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
-    PrintDebugTime();
+    // PrintDebugText("Initializing the shadow maps");
+    //   Shadow *shadow = scene->addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
+    // PrintDebugTime();
 
     PrintDebugText("Initializing the terrain");
-      Terrain *terrain = scene.addGameObject<Terrain>(skybox, shadow);
-      auto terrain_height =
-        [terrain](double x, double y) {return terrain->getHeight(x, y);};
+      Terrain *terrain = scene->addGameObject<Terrain>(skybox/*, shadow*/);
+      const engine::HeightMapInterface& height_map = terrain->height_map();
     PrintDebugTime();
 
     PrintDebugText("Initializing the trees");
-      scene.addGameObject<Tree>(*terrain, skybox, shadow);
+      scene->addGameObject<Tree>(height_map, skybox);
     PrintDebugTime();
 
     PrintDebugText("Initializing Ayumi");
-      Ayumi *ayumi = scene.addGameObject<Ayumi>(window, skybox, shadow);
-      ayumi->addRigidBody(terrain_height, ayumi->transform.pos().y);
+      Ayumi *ayumi = scene->addGameObject<Ayumi>(window, skybox/*, shadow*/);
+      ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
 
       CharacterMovement charmove{window, ayumi->transform, *ayumi->rigid_body};
       ayumi->charmove(&charmove);
@@ -211,22 +223,22 @@ int main() {
 
     charmove.setAnimation(&ayumi->getAnimation());
 
-    engine::Transform& cam_offset = scene.addGameObject()->transform;
+    engine::Transform& cam_offset = scene->addGameObject()->transform;
+    ayumi->transform.localPos() = glm::vec3(height_map.w()/2,
+        height_map.heightAt(height_map.w()/2, height_map.h()/2), height_map.h()/2);
     ayumi->transform.addChild(cam_offset);
     cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
-    engine::ThirdPersonalCamera cam(window, cam_offset, cam_offset.pos()
-      + glm::vec3(ayumi->getMesh().bSphereRadius() * 2), terrain_height, 1.5f);
+    engine::ThirdPersonalCamera cam(window, kFieldOfView, 0.5f, 6000.0f,
+      cam_offset,
+      cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
+      height_map, 1.5f);
 
     charmove.setCamera(&cam);
-    scene.addCamera(&cam);
+    scene->addCamera(&cam);
 
     PrintDebugText("Initializing the resources for the bloom effect");
-      scene.addAfterEffect<BloomEffect>();
-    PrintDebugTime();
-
-    PrintDebugText("Initializing the map");
-      scene.addAfterEffect<Map>(glm::vec2(terrain->w, terrain->h));
+      scene->addAfterEffect<BloomEffect>();
     PrintDebugTime();
 
     // Callbacks
@@ -243,20 +255,22 @@ int main() {
 
     // Main Loop
     while (!glfwWindowShouldClose(window)) {
-      gl.Clear().Color().Depth();
+      gl::Clear().Color().Depth();
       FpsDisplay();
-      scene.turn();
+      scene->turn();
 
       glfwSwapBuffers(window);
       glfwPollEvents();
     }
 
+    delete scene;
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 
   } catch(std::exception& err) {
     std::cerr << err.what();
+    delete scene;
     glfwDestroyWindow(window);
     glfwTerminate();
     std::terminate();

@@ -25,13 +25,13 @@ class Skybox : public engine::GameObject {
 
   oglwrap::TextureCube env_map_;
   oglwrap::FragmentShader sky_fs_;
+
 public:
   const oglwrap::TextureCube& env_map;
   const oglwrap::FragmentShader& sky_fs;
 
   Skybox();
   virtual ~Skybox() {}
-  virtual void screenResized(const glm::mat4& projMat, size_t, size_t) override;
   virtual void render(float time, const engine::Camera& cam) override;
   virtual void update(float time) override;
 

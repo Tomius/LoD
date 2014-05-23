@@ -3,11 +3,10 @@
 #include "skybox.h"
 
 using namespace oglwrap;
-extern Context gl;
-using namespace glm;
+using gl = oglwrap::Context;
 
 constexpr float day_duration = 256.0f;
-constexpr float day_start = day_duration/8;
+constexpr float day_start = day_duration/16;
 
 Skybox::Skybox()
   : time_(day_start)
@@ -39,15 +38,10 @@ Skybox::Skybox()
     env_map_.wrapP(WrapMode::ClampToEdge);
 
     for (int i = 0; i < 6; i++) {
-      char c[2] = {char('0' + i), 0};
-      env_map_.loadTexture(i, "textures/skybox_" + std::string(c) + ".png");
+      // The cloud map is not in srgb
+      env_map_.loadTexture(i, "textures/skybox_" + std::to_string(i) + ".png", "RGBA");
     }
   }
-}
-
-void Skybox::screenResized(const glm::mat4& projMat, size_t, size_t) {
-  prog_.use();
-  uProjectionMatrix_.set(projMat);
 }
 
 void Skybox::update(float time) {
@@ -55,8 +49,8 @@ void Skybox::update(float time) {
 }
 
 glm::vec3 Skybox::getSunPos() const {
-  return vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time_ * 2 * M_PI / day_duration)) +
-         vec3(0.f, 0.f, -1.f) * float(1e10 * cos(time_ * 2 * M_PI / day_duration));
+  return glm::vec3(0.f, 1.f, 0.f) * float(1e10 * sin(time_ * 2 * M_PI / day_duration)) +
+         glm::vec3(0.f, 0.f, -1.f) * float(1e10 * cos(time_ * 2 * M_PI / day_duration));
 }
 
 glm::vec4 Skybox::getSunData() const {
@@ -90,29 +84,31 @@ glm::vec4 Skybox::getSunData() const {
     }
   }
 
-  return vec4(getSunPos(), dayLerp);
+  return glm::vec4(getSunPos(), dayLerp);
 }
 
 void Skybox::render(float time, const engine::Camera& cam) {
 
   // We don't need the camMat's translation part for the skybox
-  const float* f = value_ptr(cam.matrix());
-  mat3 camRot = mat3(
+  const float* f = glm::value_ptr(cam.matrix());
+  glm::mat3 camRot = glm::mat3(
     f[0], f[1], f[2],
     f[4], f[5], f[6],
     f[8], f[9], f[10]
   );
 
   prog_.use();
-  uCameraMatrix_.set(camRot);
-  uSunData_.set(getSunData());
+  uCameraMatrix_ = camRot;
+  uProjectionMatrix_ = cam.projectionMatrix();
+  uSunData_ = getSunData();
 
   env_map_.active(0);
   env_map_.bind();
-  gl.DepthMask(false);
+  gl::DepthMask(false);
 
   cube_.render();
 
-  gl.DepthMask(true);
+  gl::DepthMask(true);
+  env_map_.active(0);
   env_map_.unbind();
 }

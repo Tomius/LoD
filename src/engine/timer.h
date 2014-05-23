@@ -8,15 +8,23 @@
 namespace engine {
 
 class Timer {
-  double last_time_ = 0;
-  bool stopped_ = false;
+  double last_time_;
+  bool stopped_;
  public:
-  double current = 0, dt = 0;
+  double current, dt;
+
+  Timer() : last_time_(0), stopped_(false), current(0), dt(0) {}
 
   double tick() {
     if (!stopped_) {
       double time = glfwGetTime();
-      dt = time - last_time_;
+      if(last_time_ != 0) {
+        dt = time - last_time_;
+        // we don't want to take really big bursts into account.
+        if(dt > 0.5) {
+          dt = 0;
+        }
+      }
       last_time_ = time;
       current += dt;
     }

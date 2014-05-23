@@ -20,33 +20,33 @@
 extern const int PERFORMANCE;
 
 class Tree : public engine::GameObject {
-  engine::MeshRenderer mesh_;
-  oglwrap::Program prog_, shadow_prog_;
+  static constexpr int kTreeTypeNum = 2;
+  engine::MeshRenderer mesh_[kTreeTypeNum];
+  oglwrap::Program prog_/*, shadow_prog_*/;
 
-  oglwrap::VertexShader vs_, shadow_vs_;
-  oglwrap::FragmentShader fs_, shadow_fs_;
+  oglwrap::VertexShader vs_/*, shadow_vs_*/;
+  oglwrap::FragmentShader fs_/*, shadow_fs_*/;
 
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
   oglwrap::LazyUniform<glm::mat3> uNormalMatrix_;
-  oglwrap::LazyUniform<glm::mat4> shadow_uMCP_;
+  //oglwrap::LazyUniform<glm::mat4> shadow_uMCP_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
 
-  glm::vec3 scales_;
   Skybox *skybox_;
-  Shadow *shadow_;
+  //Shadow *shadow_;
 
   struct TreeInfo {
+    int type;
     glm::vec3 pos;
     glm::mat4 mat;
-    TreeInfo(const glm::vec3& pos, const glm::mat4& mat) : pos(pos), mat(mat) { }
   };
 
   std::vector<TreeInfo> trees_;
 
 public:
-  Tree(const engine::HeightMapInterface& height_map, Skybox *skybox, Shadow *shadow);
+  Tree(const engine::HeightMapInterface& height_map, Skybox *skybox/*, Shadow *shadow*/);
   virtual ~Tree() {}
-  virtual void shadowRender(float time, const engine::Camera& cam) override;
+  //virtual void shadowRender(float time, const engine::Camera& cam) override;
   virtual void render(float time, const engine::Camera& cam) override;
 };
 

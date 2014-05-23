@@ -25,6 +25,7 @@ class Skybox : public engine::GameObject {
 
   oglwrap::TextureCube env_map_;
   oglwrap::FragmentShader sky_fs_;
+
 public:
   const oglwrap::TextureCube& env_map;
   const oglwrap::FragmentShader& sky_fs;

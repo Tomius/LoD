@@ -12,7 +12,7 @@ namespace engine {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 class Texture {
-  bool integer_;
+  bool integer_, srgb_;
   std::string format_string_;
   std::vector<std::array<DATA_TYPE, NUM_COMPONENTS>> data_;
   int w_, h_;
@@ -20,7 +20,7 @@ public:
   // Loads in a texture from a file
   // Set integer to true, if you want to fetch texture values as integers
   Texture(const std::string& file_name,
-          const std::string& format_string = "RGBA",
+          std::string format_string = "SRGBA",
           bool integer = false);
 
   virtual ~Texture() {}

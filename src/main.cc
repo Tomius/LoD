@@ -23,12 +23,11 @@
 #include "./ayumi.h"
 #include "./tree.h"
 #include "./shadow.h"
-#include "./map.h"
 #include "./loading_screen.h"
 
 using oglwrap::Capability;
 using oglwrap::Face;
-oglwrap::Context gl;
+using gl = oglwrap::Context;
 
 extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
@@ -39,11 +38,11 @@ double ogl_version;
 bool was_left_click = false;
 
 void glInit(GLFWwindow* window) {
-  gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  gl.ClearDepth(1.0f);
-  gl.Enable(Capability::DepthTest);
-  gl.Enable(Capability::DepthClamp);
-  gl.CullFace(Face::Back);
+  gl::ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  gl::ClearDepth(1.0f);
+  gl::Enable(Capability::DepthTest);
+  gl::Enable(Capability::DepthClamp);
+  gl::CullFace(Face::Back);
 
   LoadingScreen().render();
   glfwSwapBuffers(window);
@@ -111,7 +110,7 @@ static void KeyCallback(GLFWwindow* window, int key, int scancode,
 }
 
 static void ScreenResizeCallback(GLFWwindow* window, int width, int height) {
-  gl.Viewport(width, height);
+  gl::Viewport(width, height);
   scene->screenResized(width, height);
 }
 
@@ -201,21 +200,21 @@ int main() {
       Skybox *skybox = scene->addSkybox();
     PrintDebugTime();
 
-    PrintDebugText("Initializing the shadow maps");
-      Shadow *shadow = scene->addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
-    PrintDebugTime();
+    // PrintDebugText("Initializing the shadow maps");
+    //   Shadow *shadow = scene->addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
+    // PrintDebugTime();
 
     PrintDebugText("Initializing the terrain");
-      Terrain *terrain = scene->addGameObject<Terrain>(skybox, shadow);
+      Terrain *terrain = scene->addGameObject<Terrain>(skybox/*, shadow*/);
       const engine::HeightMapInterface& height_map = terrain->height_map();
     PrintDebugTime();
 
     PrintDebugText("Initializing the trees");
-      scene->addGameObject<Tree>(height_map, skybox, shadow);
+      scene->addGameObject<Tree>(height_map, skybox);
     PrintDebugTime();
 
     PrintDebugText("Initializing Ayumi");
-      Ayumi *ayumi = scene->addGameObject<Ayumi>(window, skybox, shadow);
+      Ayumi *ayumi = scene->addGameObject<Ayumi>(window, skybox/*, shadow*/);
       ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
 
       CharacterMovement charmove{window, ayumi->transform, *ayumi->rigid_body};
@@ -256,7 +255,7 @@ int main() {
 
     // Main Loop
     while (!glfwWindowShouldClose(window)) {
-      gl.Clear().Color().Depth();
+      gl::Clear().Color().Depth();
       FpsDisplay();
       scene->turn();
 

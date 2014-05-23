@@ -6,7 +6,7 @@ namespace engine {
 
 namespace cdlod {
 
-static oglwrap::Context gl;
+using gl = oglwrap::Context;
 
 GridMesh::GridMesh(GLubyte dimension) : dimension_(dimension) { }
 
@@ -86,11 +86,10 @@ void GridMesh::render() const {
     aRenderData_.bind();
     aRenderData_.data(render_data_);
 
-    gl.DrawElementsInstanced(PrimType::Triangles,
+    gl::DrawElementsInstanced(PrimType::Triangles,
                              index_count_,
                              IndexType::UnsignedShort,
                              render_data_.size());   // instance count
-
     vao_.unbind();
   }
 #endif
@@ -103,7 +102,7 @@ void GridMesh::render(oglwrap::UniformObject<glm::vec4> uRenderData) const {
   vao_.bind();
   for(auto& data : render_data_) {
     uRenderData = data;
-    gl.DrawElements(PrimType::Triangles,
+    gl::DrawElements(PrimType::Triangles,
                     index_count_,
                     IndexType::UnsignedShort);
   }

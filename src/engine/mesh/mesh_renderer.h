@@ -133,12 +133,14 @@ public:
    *                          load in case there isn't any texture specified.
    *                          Use the assimp macros to fill these 3 parameters
    *                          all at once, for ex: AI_MATKEY_COLOR_DIFFUSE
+   * @param srgb              Specifies weather the image is in srgb colorspace
    */
   void setupTextures(unsigned short texture_unit,
                      aiTextureType tex_type,
                      const char *pKey,
                      unsigned int type,
-                     unsigned int idx);
+                     unsigned int idx,
+                     bool srgb = true);
 
   /// Sets the diffuse textures up to a specified texture unit.
   /** Changes the currently active texture unit and Texture2D binding.

@@ -9,9 +9,15 @@ namespace engine {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 Texture<DATA_TYPE, NUM_COMPONENTS>::Texture(const std::string& file_name,
-                 const std::string& format_string, bool integer)
+                                        std::string format_string, bool integer)
     : integer_(integer), format_string_(format_string) {
 
+  srgb_ = format_string[0] == 'S';
+  if(srgb_) {
+    format_string = format_string.substr(1);
+    assert(NUM_COMPONENTS >= 3); // only rgb and rgba can be in srgb
+  }
+  assert(NUM_COMPONENTS <= 4);
   assert(format_string.length() == NUM_COMPONENTS);
 
   Magick::Image image(file_name);
@@ -49,21 +55,21 @@ oglwrap::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
 
   if (integer_) {
     if (format_string_ == "R") {
-      return PixelDataFormat::Red_Integer;
+      return PixelDataFormat::RedInteger;
     } else if (format_string_ == "G") {
-      return PixelDataFormat::Green_Integer;
+      return PixelDataFormat::GreenInteger;
     } else if (format_string_ == "B") {
-      return PixelDataFormat::Blue_Integer;
+      return PixelDataFormat::BlueInteger;
     } else if (format_string_ == "RG") {
-      return PixelDataFormat::RG_Integer;
+      return PixelDataFormat::RgInteger;
     } else if (format_string_ == "RGB") {
-      return PixelDataFormat::RGB_Integer;
+      return PixelDataFormat::RgbInteger;
     } else if (format_string_ == "RGBA") {
-      return PixelDataFormat::RGBA_Integer;
+      return PixelDataFormat::RgbaInteger;
     } else if (format_string_ == "BGR") {
-      return PixelDataFormat::BGR_Integer;
+      return PixelDataFormat::BgrInteger;
     } else if (format_string_ == "BGRA") {
-      return PixelDataFormat::BGRA_Integer;
+      return PixelDataFormat::BgraInteger;
     } else {
       abort();
     }
@@ -75,15 +81,15 @@ oglwrap::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
     } else if (format_string_ == "B") {
       return PixelDataFormat::Blue;
     } else if (format_string_ == "RG") {
-      return PixelDataFormat::RG;
+      return PixelDataFormat::Rg;
     } else if (format_string_ == "RGB") {
-      return PixelDataFormat::RGB;
+      return PixelDataFormat::Rgb;
     } else if (format_string_ == "RGBA") {
-      return PixelDataFormat::RGBA;
+      return PixelDataFormat::Rgba;
     } else if (format_string_ == "BGR") {
-      return PixelDataFormat::BGR;
+      return PixelDataFormat::Bgr;
     } else if (format_string_ == "BGRA") {
-      return PixelDataFormat::BGRA;
+      return PixelDataFormat::Bgra;
     } else {
       abort();
     }
@@ -98,11 +104,11 @@ Texture<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
   if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
     return PixelDataInternalFormat::Red;
   } else if (format_string_ == "RG") {
-    return PixelDataInternalFormat::RG;
+    return PixelDataInternalFormat::Rg;
   } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-    return PixelDataInternalFormat::RGB;
+    return srgb_ ? PixelDataInternalFormat::Srgb : PixelDataInternalFormat::Rgb;
   } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-    return PixelDataInternalFormat::RGBA;
+    return srgb_ ? PixelDataInternalFormat::SrgbAlpha : PixelDataInternalFormat::Rgba;
   } else {
     abort();
   }

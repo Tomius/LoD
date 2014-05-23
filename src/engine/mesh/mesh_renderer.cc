@@ -223,12 +223,14 @@ void MeshRenderer::setupTexCoords(oglwrap::VertexAttribArray attrib,
  *                          load in case there isn't any texture specified.
  *                          Use the assimp macros to fill these 3 parameters
  *                          all at once, for ex: AI_MATKEY_COLOR_DIFFUSE
+ * @param srgb              Specifies weather the image is in srgb colorspace
  */
 void MeshRenderer::setupTextures(unsigned short texture_unit,
                                  aiTextureType tex_type,
                                  const char *pKey,
                                  unsigned int type,
-                                 unsigned int idx) {
+                                 unsigned int idx,
+                                 bool srgb) {
   oglwrap::Texture2D::Active(texture_unit);
 
   materials_[tex_type].active = true;
@@ -256,7 +258,8 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
       aiString filepath;
       if (mat->GetTexture(tex_type, 0, &filepath) == AI_SUCCESS) {
         materials_[tex_type].textures[i].bind();
-        materials_[tex_type].textures[i].loadTexture(dir + filepath.data);
+        materials_[tex_type].textures[i].loadTexture(dir + filepath.data,
+                                                     srgb ? "SRGBA" : "RGBA");
         materials_[tex_type].textures[i].minFilter(oglwrap::MinFilter::Linear);
         materials_[tex_type].textures[i].magFilter(oglwrap::MagFilter::Linear);
       } else {
@@ -265,9 +268,9 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
 
         materials_[tex_type].textures[i].bind();
         materials_[tex_type].textures[i].Upload(
-          oglwrap::PixelDataInternalFormat::RGBA32F,
+          oglwrap::PixelDataInternalFormat::Rgba32F,
           1, 1,
-          oglwrap::PixelDataFormat::RGBA,
+          oglwrap::PixelDataFormat::Rgba,
           oglwrap::PixelDataType::Float,
           &color.r
         );
@@ -292,7 +295,7 @@ void MeshRenderer::setupDiffuseTextures(unsigned short texture_unit) {
 /** Changes the currently active texture unit and Texture2D binding.
   * @param texture_unit Specifies the texture unit to use for the specular textures. */
 void MeshRenderer::setupSpecularTextures(unsigned short texture_unit) {
-  setupTextures(texture_unit, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
+  setupTextures(texture_unit, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR, false);
 }
 
 /// Renders the mesh.

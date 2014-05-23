@@ -71,7 +71,7 @@ void Terrain::render(const Camera& cam) {
 
   uCamPos_->set(cam.pos());
 
-  Context::FrontFace(FaceOrientation::CCW);
+  Context::FrontFace(FaceOrientation::Ccw);
   Context::TemporaryEnable cullface{Capability::CullFace};
 
   #ifdef glVertexAttribDivisor

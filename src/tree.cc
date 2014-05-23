@@ -88,7 +88,7 @@ void Tree::shadowRender(float time, const engine::Camera& cam) {
       shadow_->getDepth() < shadow_->getMaxDepth(); i++) {
 
     if (trees_[i].bbox.collidesWithFrustum(frustum) &&
-      glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 256) {
+      glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
       shadow_uMCP_ = shadow_->modelCamProjMat(
         skybox_->getSunPos(),
         mesh_[trees_[i].type].bSphere(),

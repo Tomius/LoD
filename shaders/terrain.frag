@@ -117,7 +117,7 @@ void main() {
   vec3 diffuse_color = mix(color_0, color_1, 0.5);
 
   vec3 final_color = diffuse_color * (Visibility()*SunPower()*
-      (specular_power + diffuse_power) + AmbientPower());
+      (specular_power + diffuse_power + 0.1) + AmbientPower());
 
   // // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));

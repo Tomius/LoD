@@ -2,7 +2,6 @@
 
 #version 120
 
-
 varying vec3 c_vNormal;
 varying vec3 w_vPos, c_vPos;
 varying vec2 vTexCoord;
@@ -13,7 +12,6 @@ uniform sampler2D uDiffuseTexture, uSpecularTexture;
 vec3 AmbientDirection();
 float AmbientPower();
 float SunPower();
-vec3 AmbientColor();
 
 const float kSpecularShininess = 20.0f;
 
@@ -42,7 +40,7 @@ void main() {
   vec3 color = texture2D(uDiffuseTexture, vTexCoord).rgb;
   float spec_mask = texture2D(uSpecularTexture, vTexCoord).r;
 
-  vec3 final_color = color * AmbientColor() *
+  vec3 final_color = color *
     (SunPower()*(diffuse_power + spec_mask*specular_power) + (AmbientPower() + 0.1));
 
   gl_FragColor = vec4(final_color, 1.0);

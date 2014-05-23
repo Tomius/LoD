@@ -150,7 +150,3 @@ float AmbientPower() {
     uDay
   );
 }
-
-vec3 AmbientColor() {
-  return 0.5 * SkyColor(normalize(uSunPos)) + vec3(0.5);
-}

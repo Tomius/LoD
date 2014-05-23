@@ -117,9 +117,8 @@ void main() {
   vec3 color_1 = mix(grass_color_1, rock_color_1, height_factor);
   vec3 diffuse_color = mix(color_0, color_1, 0.5);
 
-  const float ambient_occlusion = 0.2f;
   vec3 final_color = diffuse_color * (Visibility()*SunPower()*
-      (specular_power + diffuse_power + ambient_occlusion) + AmbientPower());
+      (specular_power + diffuse_power) + AmbientPower());
 
   // // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));

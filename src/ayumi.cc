@@ -10,6 +10,7 @@ using oglwrap::FragmentShader;
 using oglwrap::LazyVertexAttribArray;
 using oglwrap::Uniform;
 using oglwrap::UniformSampler;
+using oglwrap::Face;
 using oglwrap::FaceOrientation;
 using oglwrap::Capability;
 using gl = oglwrap::Context;
@@ -61,7 +62,6 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
   LazyVertexAttribArray boneIDs(prog_, "aBoneIDs", false);
   LazyVertexAttribArray weights(prog_, "aWeights", false);
   mesh_.setupBones(boneIDs, weights, false);
-  UniformSampler(prog_, "uEnvMap").set(0);
 
   mesh_.setupDiffuseTextures(1);
   mesh_.setupSpecularTextures(2);
@@ -175,6 +175,7 @@ void Ayumi::shadowRender(float time, const engine::Camera& cam) {
                              transform.matrix(), mesh_.worldTransform());
   mesh_.uploadBoneInfo(shadow_uBones_);
 
+  gl::CullFace(Face::Front);
   gl::FrontFace(FaceOrientation::Ccw);
   auto cullface = gl::TemporaryEnable(Capability::CullFace);
   mesh_.disableTextures();
@@ -182,6 +183,8 @@ void Ayumi::shadowRender(float time, const engine::Camera& cam) {
   mesh_.render();
 
   mesh_.enableTextures();
+  gl::CullFace(Face::Back);
+
   shadow_->push();
 }
 
@@ -192,18 +195,12 @@ void Ayumi::render(float time, const engine::Camera& cam) {
   uModelMatrix_ = transform.matrix() * mesh_.worldTransform();
   uSunData_ = skybox_->getSunData();
 
-  skybox_->env_map.active(0);
-  skybox_->env_map.bind();
-
   mesh_.uploadBoneInfo(uBones_);
 
   gl::FrontFace(FaceOrientation::Ccw);
   auto cullface = gl::TemporaryEnable(Capability::CullFace);
 
   mesh_.render();
-
-  skybox_->env_map.active(0);
-  skybox_->env_map.unbind();
 }
 
 void Ayumi::keyAction(const engine::Timer&, int key, int scancode,

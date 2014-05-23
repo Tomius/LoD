@@ -21,8 +21,8 @@ Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
     oglwrap::PixelDataFormat::DepthComponent,
     oglwrap::PixelDataType::Float, nullptr
   );
-  tex_.minFilter(oglwrap::MinFilter::Nearest);
-  tex_.magFilter(oglwrap::MagFilter::Nearest);
+  tex_.minFilter(oglwrap::MinFilter::Linear);
+  tex_.magFilter(oglwrap::MagFilter::Linear);
   tex_.wrapS(oglwrap::WrapMode::ClampToBorder);
   tex_.wrapT(oglwrap::WrapMode::ClampToBorder);
   tex_.borderColor(glm::vec4(1.0f));

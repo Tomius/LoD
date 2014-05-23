@@ -1,11 +1,13 @@
 // Copyright (c) 2014, Tamas Csala
 
 #include "tree.h"
+#include "oglwrap/debug/insertion.h"
 
 using namespace oglwrap;
+using gl = oglwrap::Context;
 
 Tree::Tree(const engine::HeightMapInterface& height_map,
-           Skybox *skybox/*, Shadow *shadow*/)
+           Skybox *skybox, Shadow *shadow)
   : mesh_{{"models/trees/swamptree.dae",
           aiProcessPreset_TargetRealtime_Quality |
           aiProcess_FlipUVs},
@@ -14,23 +16,23 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
           aiProcess_FlipUVs}
          }
   , vs_("tree.vert")
-  //, shadow_vs_("tree_shadow.vert")
+  , shadow_vs_("tree_shadow.vert")
   , fs_("tree.frag")
-  //, shadow_fs_("tree_shadow.frag")
+  , shadow_fs_("tree_shadow.frag")
   , uProjectionMatrix_(prog_, "uProjectionMatrix")
   , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
   , uNormalMatrix_(prog_, "uNormalMatrix")
-  //, shadow_uMCP_(shadow_prog_, "uMCP")
+  , shadow_uMCP_(shadow_prog_, "uMCP")
   , uSunData_(prog_, "uSunData")
   , skybox_((assert(skybox), skybox))
-  /*, shadow_((assert(shadow), shadow)) */{
+  , shadow_((assert(shadow), shadow)) {
 
-  //shadow_prog_ << shadow_vs_ << shadow_fs_;
-  //shadow_prog_.link().use();
+  shadow_prog_ << shadow_vs_ << shadow_fs_;
+  shadow_prog_.link().use();
 
-  //UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
+  UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
 
-  //shadow_prog_.validate();
+  shadow_prog_.validate();
 
   prog_ << vs_ << fs_ << skybox_->sky_fs;
   prog_.link().use();
@@ -42,7 +44,6 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
     mesh_[i].setupDiffuseTextures(1);
   }
 
-  UniformSampler(prog_, "uEnvMap").set(0);
   UniformSampler(prog_, "uDiffuseTexture").set(1);
 
   prog_.validate();
@@ -54,7 +55,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
       glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
                                     j + rand()%(kTreeDist/2) - kTreeDist/4);
       glm::vec3 pos =
-        glm::vec3(coord.x, height_map.heightAt(coord.x, coord.y), coord.y);
+        glm::vec3(coord.x, height_map.heightAt(coord.x, coord.y)-1.0f, coord.y);
       glm::vec3 scale = glm::vec3(
                           1.0f + rand() / RAND_MAX,
                           1.0f + rand() / RAND_MAX,
@@ -76,35 +77,39 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
   }
 }
 
-// void Tree::shadowRender(float time, const engine::Camera& cam) {
-//   shadow_prog_.use();
+void Tree::shadowRender(float time, const engine::Camera& cam) {
+  shadow_prog_.use();
 
-//   auto campos = cam.pos();
-//   for (size_t i = 0; i < trees_.size() &&
-//       shadow_->getDepth() + 1 < shadow_->getMaxDepth(); i++) {
-//     if (glm::length(campos - trees_[i].pos) < (300 - PERFORMANCE * 50)) {
-//       shadow_uMCP_ = shadow_->modelCamProjMat(
-//         skybox_->getSunPos(),
-//         mesh_.bSphere(),
-//         trees_[i].mat,
-//         glm::mat4()//mesh_.worldTransform()
-//       );
-//       mesh_.render();
-//       shadow_->push();
-//     }
-//   }
-// }
+  gl::CullFace(Face::Front);
+  auto cullface = gl::TemporaryEnable(Capability::CullFace);
+
+  auto frustum = cam.frustum();
+  auto campos = cam.pos();
+  for (size_t i = 0; i < trees_.size() &&
+      shadow_->getDepth() < shadow_->getMaxDepth(); i++) {
+
+    if (trees_[i].bbox.collidesWithFrustum(frustum) &&
+      glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 256) {
+      shadow_uMCP_ = shadow_->modelCamProjMat(
+        skybox_->getSunPos(),
+        mesh_[trees_[i].type].bSphere(),
+        trees_[i].mat,
+        glm::mat4()//mesh_.worldTransform()
+      );
+      mesh_[trees_[i].type].render();
+      shadow_->push();
+    }
+  }
+}
 
 void Tree::render(float time, const engine::Camera& cam) {
   prog_.use();
   uSunData_.set(skybox_->getSunData());
-  skybox_->env_map.active(0);
-  skybox_->env_map.bind();
   uProjectionMatrix_ = cam.projectionMatrix();
 
-  auto blend = Context::TemporaryEnable(Capability::Blend);
-  auto cullface = Context::TemporaryDisable(Capability::CullFace);
-  Context::BlendFunc(BlendFunction::SrcAlpha, BlendFunction::OneMinusSrcAlpha);
+  auto blend = gl::TemporaryEnable(Capability::Blend);
+  auto cullface = gl::TemporaryDisable(Capability::CullFace);
+  gl::BlendFunc(BlendFunction::SrcAlpha, BlendFunction::OneMinusSrcAlpha);
 
   auto cam_mx = cam.matrix();
   auto frustum = cam.frustum();
@@ -119,7 +124,4 @@ void Tree::render(float time, const engine::Camera& cam) {
     uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
     mesh_[trees_[i].type].render();
   }
-
-  skybox_->env_map.active(0);
-  skybox_->env_map.unbind();
 }

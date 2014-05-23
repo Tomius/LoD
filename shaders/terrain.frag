@@ -3,7 +3,7 @@
 #version 120
 
 // This might be overwritten by the c++ code.
-#define SHADOW_MAP_NUM 1
+#define SHADOW_MAP_NUM 16
 
 varying vec3  w_vNormal;
 varying vec3  c_vPos, w_vPos;
@@ -50,7 +50,6 @@ bool isValid(vec2 tc) {
 }
 
 float Visibility() {
-  float bias = 0.01;
   float visibility = 1.0;
   int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
 
@@ -66,7 +65,7 @@ float Visibility() {
       uShadowMap,
       vec3(
         AtlasLookup(shadowCoord.xy, i),
-        (shadowCoord.z - bias) / shadowCoord.w
+        shadowCoord.z / shadowCoord.w
       )
     ).r);
   }
@@ -102,7 +101,7 @@ void main() {
   } else {
     vec3 L = c_light_dir, V = c_view_direction;
     vec3 H = normalize(L + V), N = c_normal;
-    specular_power = 4 * pow(max(dot(H, N), 0), kSpecularShininess);
+    specular_power = pow(max(dot(H, N), 0), kSpecularShininess);
   }
 
   vec3 grass_color_0 = texture2D(uGrassMap0, vTexcoord*128).rgb;

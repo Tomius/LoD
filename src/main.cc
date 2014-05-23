@@ -200,7 +200,7 @@ int main() {
     PrintDebugTime();
 
     PrintDebugText("Initializing the shadow maps");
-      Shadow *shadow = scene->addShadow(512, 1, 1);
+      Shadow *shadow = scene->addShadow(512, 4, 4);
     PrintDebugTime();
 
     PrintDebugText("Initializing the terrain");
@@ -209,7 +209,7 @@ int main() {
     PrintDebugTime();
 
     PrintDebugText("Initializing the trees");
-      scene->addGameObject<Tree>(height_map, skybox);
+      scene->addGameObject<Tree>(height_map, skybox, shadow);
     PrintDebugTime();
 
     PrintDebugText("Initializing Ayumi");

@@ -13,7 +13,7 @@ Terrain::Terrain(Skybox *skybox, Shadow *shadow)
   , uShadowCP_(prog_, "uShadowCP")
   , uSunData_(prog_, "uSunData")
   , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
-  , height_map_("terrain/konserian.png")
+  , height_map_("terrain/terrain.png")
   , mesh_(height_map_)
   , skybox_((assert(skybox), skybox))
   , shadow_((assert(shadow), shadow)) {
@@ -22,7 +22,6 @@ Terrain::Terrain(Skybox *skybox, Shadow *shadow)
   mesh_.setup_and_link(prog_, 1);
   prog_.use();
 
-  UniformSampler(prog_, "uEnvMap").set(0);
   UniformSampler(prog_, "uGrassMap0").set(2);
   UniformSampler(prog_, "uGrassMap1").set(3);
   for (int i = 0; i < 2; ++i) {
@@ -66,8 +65,6 @@ void Terrain::render(float time, const engine::Camera& cam) {
     uShadowCP_[i] = shadow_->shadowCPs()[i];
   }
   uNumUsedShadowMaps_ = shadow_->getDepth();
-  skybox_->env_map.active(0);
-  skybox_->env_map.bind();
   grassMaps_[0].active(2);
   grassMaps_[0].bind();
   grassMaps_[1].active(3);
@@ -87,8 +84,6 @@ void Terrain::render(float time, const engine::Camera& cam) {
   grassMaps_[1].unbind();
   grassNormalMap_.active(4);
   grassNormalMap_.unbind();
-  skybox_->env_map.active(0);
-  skybox_->env_map.unbind();
 }
 
 

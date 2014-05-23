@@ -48,8 +48,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
   prog_.validate();
 
   // Get the trees' positions.
-  srand(5);
-  const int kTreeDist = 128;
+  const int kTreeDist = 256;
   for (int i = kTreeDist; i + kTreeDist < height_map.h(); i += kTreeDist) {
     for (int j = kTreeDist; j + kTreeDist < height_map.w(); j += kTreeDist) {
       glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
@@ -70,7 +69,9 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
 
       int type = rand() % kTreeTypeNum;
 
-      trees_.push_back(TreeInfo{type, pos, matrix});
+      engine::BoundingBox bbox = mesh_[type].boundingBox(matrix);
+
+      trees_.push_back(TreeInfo{type, matrix, bbox});
     }
   }
 }
@@ -105,16 +106,15 @@ void Tree::render(float time, const engine::Camera& cam) {
   auto cullface = Context::TemporaryDisable(Capability::CullFace);
   Context::BlendFunc(BlendFunction::SrcAlpha, BlendFunction::OneMinusSrcAlpha);
 
-  auto campos = cam.pos();
   auto cam_mx = cam.matrix();
+  auto frustum = cam.frustum();
   for (size_t i = 0; i < trees_.size(); i++) {
     // Check for visibility (is it behind to camera?)
-    glm::vec3 diff = trees_[i].pos - campos;
-    float len_diff = glm::length(diff);
-    if (len_diff > 10 && glm::dot(cam.forward(), diff) < 0)
-        continue;
+    if(!trees_[i].bbox.collidesWithFrustum(frustum)) {
+      continue;
+    }
 
-    glm::mat4 model_mx = trees_[i].mat /** mesh_.worldTransform()*/;
+    glm::mat4 model_mx = trees_[i].mat;
     uModelCameraMatrix_.set(cam_mx * model_mx);
     uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
     mesh_[trees_[i].type].render();

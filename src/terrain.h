@@ -17,18 +17,18 @@ class Terrain : public engine::GameObject {
   oglwrap::FragmentShader fs_;
 
   oglwrap::Texture2D grassMaps_[2], grassNormalMap_;
-  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_/*, uShadowCP_*/;
+  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uShadowCP_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
-  //oglwrap::LazyUniform<int> uNumUsedShadowMaps_;
+  oglwrap::LazyUniform<int> uNumUsedShadowMaps_;
 
   engine::HeightMap<unsigned char> height_map_;
   engine::cdlod::Terrain mesh_;
 
   Skybox *skybox_;
-  //Shadow *shadow_;
+  Shadow *shadow_;
 public:
 
-  Terrain(Skybox *skybox/*, Shadow *shadow*/);
+  Terrain(Skybox *skybox, Shadow *shadow);
   virtual ~Terrain() {}
 
   const engine::HeightMapInterface& height_map() { return height_map_; }

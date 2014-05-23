@@ -33,7 +33,6 @@ extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
    2 -> max performance */
 extern const int PERFORMANCE = 1;
-extern const float kFieldOfView = 60;
 double ogl_version;
 bool was_left_click = false;
 
@@ -200,12 +199,12 @@ int main() {
       Skybox *skybox = scene->addSkybox();
     PrintDebugTime();
 
-    // PrintDebugText("Initializing the shadow maps");
-    //   Shadow *shadow = scene->addShadow(PERFORMANCE < 2 ? 512 : 256, 8, 8);
-    // PrintDebugTime();
+    PrintDebugText("Initializing the shadow maps");
+      Shadow *shadow = scene->addShadow(512, 1, 1);
+    PrintDebugTime();
 
     PrintDebugText("Initializing the terrain");
-      Terrain *terrain = scene->addGameObject<Terrain>(skybox/*, shadow*/);
+      Terrain *terrain = scene->addGameObject<Terrain>(skybox, shadow);
       const engine::HeightMapInterface& height_map = terrain->height_map();
     PrintDebugTime();
 
@@ -214,7 +213,7 @@ int main() {
     PrintDebugTime();
 
     PrintDebugText("Initializing Ayumi");
-      Ayumi *ayumi = scene->addGameObject<Ayumi>(window, skybox/*, shadow*/);
+      Ayumi *ayumi = scene->addGameObject<Ayumi>(window, skybox, shadow);
       ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
 
       CharacterMovement charmove{window, ayumi->transform, *ayumi->rigid_body};
@@ -229,7 +228,7 @@ int main() {
     ayumi->transform.addChild(cam_offset);
     cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
-    engine::ThirdPersonalCamera cam(window, kFieldOfView, 0.5f, 6000.0f,
+    engine::ThirdPersonalCamera cam(window, 45, 0.5f, 6000.0f,
       cam_offset,
       cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
       height_map, 1.5f);

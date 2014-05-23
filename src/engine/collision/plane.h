@@ -10,12 +10,13 @@ struct Plane {
   glm::vec3 normal;
   float dist;
   Plane(float nx, float ny, float nz, float dist)
-      : Plane(glm::vec3(nx, ny, nz), dist) { }
+    : normal(nx, ny, nz), dist(dist) { }
+  Plane(const glm::vec3& normal, float dist) : normal(normal), dist(dist) { }
 
-  Plane(const glm::vec3& normal, float dist) {
+  void normalize() {
     float l = glm::length(normal);
-    this->normal = normal / l;
-    this->dist = dist / l;
+    normal /= l;
+    dist /= l;
   }
 };
 

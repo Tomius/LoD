@@ -37,8 +37,8 @@ class Tree : public engine::GameObject {
 
   struct TreeInfo {
     int type;
-    glm::vec3 pos;
     glm::mat4 mat;
+    engine::BoundingBox bbox;
   };
 
   std::vector<TreeInfo> trees_;

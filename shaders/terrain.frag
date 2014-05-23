@@ -3,7 +3,7 @@
 #version 120
 
 // This might be overwritten by the c++ code.
-//#define SHADOW_MAP_NUM 32
+#define SHADOW_MAP_NUM 1
 
 varying vec3  w_vNormal;
 varying vec3  c_vPos, w_vPos;
@@ -13,11 +13,11 @@ varying mat3  vNormalMatrix;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap0, uGrassMap1, uGrassNormalMap;
-// uniform sampler2DShadow uShadowMap;
+uniform sampler2DShadow uShadowMap;
 
-// uniform mat4 uShadowCP[SHADOW_MAP_NUM];
-// uniform int uNumUsedShadowMaps;
-// uniform ivec2 uShadowAtlasSize;
+uniform mat4 uShadowCP[SHADOW_MAP_NUM];
+uniform int uNumUsedShadowMaps;
+uniform ivec2 uShadowAtlasSize;
 
 // External functions
 vec3 AmbientDirection();
@@ -26,54 +26,54 @@ float AmbientPower();
 vec3 AmbientColor();
 float isDay();
 
-// // We love #version 120
-// int min(int a, int b) {
-//   return a > b ? b : a;
-// }
+// We love #version 120
+int min(int a, int b) {
+  return a > b ? b : a;
+}
 
-// // -------======{[ Shadow ]}======-------
+// -------======{[ Shadow ]}======-------
 
-// // The maximum potion of light that should be subtracted
-// // if the object is in shadow. For ex. 0.8 means, object in
-// // shadow is 20% as bright as a lit one.
-// const float kMaxShadow = 0.8;
+// The maximum potion of light that should be subtracted
+// if the object is in shadow. For ex. 0.8 means, object in
+// shadow is 20% as bright as a lit one.
+const float kMaxShadow = 0.8;
 
-// vec2 GetShadowAtlasOffset(int i) {
-//   return vec2(i / uShadowAtlasSize.x, mod(i, uShadowAtlasSize.y));
-// }
+vec2 GetShadowAtlasOffset(int i) {
+  return vec2(i / uShadowAtlasSize.x, mod(i, uShadowAtlasSize.y));
+}
 
-// vec2 AtlasLookup(vec2 tc, int i) {
-//   return (tc + GetShadowAtlasOffset(i)) / uShadowAtlasSize;
-// }
+vec2 AtlasLookup(vec2 tc, int i) {
+  return (tc + GetShadowAtlasOffset(i)) / uShadowAtlasSize;
+}
 
-// bool isValid(vec2 tc) {
-//   return 0 <= tc.x && tc.x <= 1 && 0 <= tc.y && tc.y <= 1;
-// }
+bool isValid(vec2 tc) {
+  return 0 <= tc.x && tc.x <= 1 && 0 <= tc.y && tc.y <= 1;
+}
 
-// float Visibility() {
-//   float bias = 0.01;
-//   float visibility = 1.0;
-//   int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
+float Visibility() {
+  float bias = 0.01;
+  float visibility = 1.0;
+  int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
 
-//   // For every shadow casters
-//   for (int i = 0; i < num_shadow_casters; ++i) {
-//     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
+  // For every shadow casters
+  for (int i = 0; i < num_shadow_casters; ++i) {
+    vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
-//     if (!isValid(shadowCoord.xy)) {
-//       continue;
-//     }
+    if (!isValid(shadowCoord.xy)) {
+      continue;
+    }
 
-//     visibility -= kMaxShadow * (1 - shadow2D(
-//       uShadowMap,
-//       vec3(
-//         AtlasLookup(shadowCoord.xy, i),
-//         (shadowCoord.z - bias) / shadowCoord.w
-//       )
-//     ).r);
-//   }
+    visibility -= kMaxShadow * (1 - shadow2D(
+      uShadowMap,
+      vec3(
+        AtlasLookup(shadowCoord.xy, i),
+        (shadowCoord.z - bias) / shadowCoord.w
+      )
+    ).r);
+  }
 
-//   return max(visibility, 0.0);
-// }
+  return max(visibility, 0.0);
+}
 
 const float kFogMin = 128.0;
 const float kFogMax = 1024.0;
@@ -119,7 +119,7 @@ void main() {
   vec3 diffuse_color = mix(color_0, color_1, 0.5);
 
   const float ambient_occlusion = 0.2f;
-  vec3 final_color = diffuse_color * AmbientColor() * (/*Visibility()**/SunPower()*
+  vec3 final_color = diffuse_color * AmbientColor() * (Visibility()*SunPower()*
       (specular_power + diffuse_power + ambient_occlusion) + AmbientPower());
 
   // Fog

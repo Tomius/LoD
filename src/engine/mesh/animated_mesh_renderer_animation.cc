@@ -5,6 +5,11 @@
 
 namespace engine {
 
+template <typename T, typename U>
+T mix(const T& x, const T& y, const U& a) {
+   return x*(1-a) + y*a;
+}
+
 unsigned AnimatedMeshRenderer::findPosition(float anim_time,
                                             const aiNodeAnim* node_anim) {
    // Find the first one that is bigger or equals
@@ -50,11 +55,11 @@ void AnimatedMeshRenderer::calcInterpolatedPosition(
    size_t i = findPosition(anim_time, node_anim);
    float deltaTime = keys[i + 1].mTime - keys[i].mTime;
    float factor = (anim_time - (float)keys[i].mTime) / deltaTime;
-   factor = clamp(factor, 0.0f, 1.0f);
+   factor = glm::clamp(factor, 0.0f, 1.0f);
 
    const aiVector3D& start = keys[i].mValue;
    const aiVector3D& end   = keys[i + 1].mValue;
-   out = interpolate(start, end, factor);
+   out = mix(start, end, factor);
 }
 
 void AnimatedMeshRenderer::calcInterpolatedRotation(
@@ -70,7 +75,7 @@ void AnimatedMeshRenderer::calcInterpolatedRotation(
    size_t i = findRotation(anim_time, node_anim);
    float deltaTime = keys[i + 1].mTime - keys[i].mTime;
    float factor = (anim_time - (float)keys[i].mTime) / deltaTime;
-   factor = clamp(factor, 0.0f, 1.0f);
+   factor = glm::clamp(factor, 0.0f, 1.0f);
 
    const aiQuaternion& start = keys[i].mValue;
    const aiQuaternion& end   = keys[i + 1].mValue;
@@ -91,11 +96,11 @@ void AnimatedMeshRenderer::calcInterpolatedScaling(
    size_t i = findRotation(anim_time, node_anim);
    float deltaTime = keys[i + 1].mTime - keys[i].mTime;
    float factor = (anim_time - (float)keys[i].mTime) / deltaTime;
-   factor = clamp(factor, 0.0f, 1.0f);
+   factor = glm::clamp(factor, 0.0f, 1.0f);
 
    const aiVector3D& start = keys[i].mValue;
    const aiVector3D& end   = keys[i + 1].mValue;
-   out = interpolate(start, end, factor);
+   out = mix(start, end, factor);
 }
 
 const aiNodeAnim* AnimatedMeshRenderer::findNodeAnim(const aiAnimation* animation,
@@ -184,7 +189,7 @@ void AnimatedMeshRenderer::updateBoneTreeInTransition(
       aiVector3D prev_scaling, next_scaling;
       calcInterpolatedScaling(prev_scaling, prev_anim_time, prev_node_anim);
       calcInterpolatedScaling(next_scaling, next_anim_time, next_node_anim);
-      aiVector3D scaling = interpolate(prev_scaling, next_scaling, factor);
+      aiVector3D scaling = mix(prev_scaling, next_scaling, factor);
       glm::mat4 scalingM = glm::scale(glm::mat4(), glm::vec3(scaling.x, scaling.y, scaling.z));
 
       aiQuaternion prev_rotation, next_rotation, rotation;
@@ -198,7 +203,7 @@ void AnimatedMeshRenderer::updateBoneTreeInTransition(
       aiVector3D prev_translation, next_translation;
       calcInterpolatedPosition(prev_translation, prev_anim_time, prev_node_anim);
       calcInterpolatedPosition(next_translation, next_anim_time, next_node_anim);
-      aiVector3D translation = interpolate(prev_translation, next_translation, factor);
+      aiVector3D translation = mix(prev_translation, next_translation, factor);
       glm::mat4 translationM;
       if (node_name == skinning_data_.root_bone) {
          anim.current_anim_.offset =

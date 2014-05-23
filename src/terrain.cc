@@ -5,18 +5,18 @@
 
 using namespace oglwrap;
 
-Terrain::Terrain(Skybox *skybox/*, Shadow *shadow*/)
+Terrain::Terrain(Skybox *skybox, Shadow *shadow)
   : vs_("terrain.vert")
   , fs_("terrain.frag")
   , uProjectionMatrix_(prog_, "uProjectionMatrix")
   , uCameraMatrix_(prog_, "uCameraMatrix")
-  //, uShadowCP_(prog_, "uShadowCP")
+  , uShadowCP_(prog_, "uShadowCP")
   , uSunData_(prog_, "uSunData")
-  //, uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
+  , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
   , height_map_("terrain/konserian.png")
   , mesh_(height_map_)
   , skybox_((assert(skybox), skybox))
-  /*, shadow_((assert(shadow), shadow))*/ {
+  , shadow_((assert(shadow), shadow)) {
 
   prog_ << vs_ << fs_ << skybox_->sky_fs;
   mesh_.setup_and_link(prog_, 1);
@@ -51,8 +51,8 @@ Terrain::Terrain(Skybox *skybox/*, Shadow *shadow*/)
     grassNormalMap_.wrapT(WrapMode::Repeat);
   }
 
-  //UniformSampler(prog_, "uShadowMap").set(5);
-  //Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
+  UniformSampler(prog_, "uShadowMap").set(5);
+  Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
 
   prog_.validate();
 }
@@ -62,10 +62,10 @@ void Terrain::render(float time, const engine::Camera& cam) {
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uSunData_.set(skybox_->getSunData());
-  // for (size_t i = 0; i < shadow_->getDepth(); ++i) {
-  //   uShadowCP_[i] = shadow_->shadowCPs()[i];
-  // }
-  // uNumUsedShadowMaps_ = shadow_->getDepth();
+  for (size_t i = 0; i < shadow_->getDepth(); ++i) {
+    uShadowCP_[i] = shadow_->shadowCPs()[i];
+  }
+  uNumUsedShadowMaps_ = shadow_->getDepth();
   skybox_->env_map.active(0);
   skybox_->env_map.bind();
   grassMaps_[0].active(2);
@@ -74,13 +74,13 @@ void Terrain::render(float time, const engine::Camera& cam) {
   grassMaps_[1].bind();
   grassNormalMap_.active(4);
   grassNormalMap_.bind();
-  // shadow_->shadowTex().active(5);
-  // shadow_->shadowTex().bind();
+  shadow_->shadowTex().active(5);
+  shadow_->shadowTex().bind();
 
   mesh_.render(cam);
 
-  // shadow_->shadowTex().active(5);
-  // shadow_->shadowTex().unbind();
+  shadow_->shadowTex().active(5);
+  shadow_->shadowTex().unbind();
   grassMaps_[0].active(2);
   grassMaps_[0].unbind();
   grassMaps_[1].active(3);

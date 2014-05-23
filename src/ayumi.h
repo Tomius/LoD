@@ -22,13 +22,12 @@ extern const int PERFORMANCE;
 class Ayumi : public engine::GameObject {
   engine::AnimatedMeshRenderer mesh_;
   engine::Animation anim_;
-  oglwrap::Program prog_/*, shadow_prog_*/;
+  oglwrap::Program prog_, shadow_prog_;
 
   oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_,
-                                  uModelMatrix_, uBones_/*, uShadowCP_,
-                                  shadow_uMCP_, shadow_uBones_*/;
+                                  uModelMatrix_, uBones_,
+                                  shadow_uMCP_, shadow_uBones_;
   oglwrap::LazyUniform<glm::vec4> uSunData_;
-  //oglwrap::LazyUniform<int> uNumUsedShadowMaps_, uShadowSoftness_;
 
   bool attack2_, attack3_;
 
@@ -36,15 +35,15 @@ class Ayumi : public engine::GameObject {
 
   CharacterMovement *charmove_;
   Skybox* skybox_;
-  //Shadow* shadow_;
+  Shadow* shadow_;
 
  public:
-  Ayumi(GLFWwindow* window, Skybox* skybox/*, Shadow* shadow*/);
+  Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow);
   virtual ~Ayumi() {}
   engine::AnimatedMeshRenderer& getMesh();
   engine::Animation& getAnimation();
   virtual void update(float time) override;
-  //virtual void shadowRender(float time, const engine::Camera& cam) override;
+  virtual void shadowRender(float time, const engine::Camera& cam) override;
   virtual void render(float time, const engine::Camera& cam) override;
   void charmove(CharacterMovement* charmove) {
     charmove_ = (assert(charmove), charmove);

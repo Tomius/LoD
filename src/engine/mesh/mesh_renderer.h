@@ -14,6 +14,7 @@
 #include "../../oglwrap/textures/texture_2D.h"
 
 #include "../assimp.h"
+#include "../collision/bounding_box.h"
 
 namespace engine {
 
@@ -157,9 +158,7 @@ public:
   void render();
 
   /// Gives information about the mesh's bounding cuboid.
-  /** @param center - The vec3 where bounding cuboid's center is to be returned.
-    * @param edges - The vec3 where bounding cuboid's edge lengths are to be returned. */
-  void bCuboid(glm::vec3& center, glm::vec3& edges) const;
+  BoundingBox boundingBox(const glm::mat4& matrix = glm::mat4{}) const;
 
   /// Returns the transformation that takes the model's world coordinates to the OpenGL style world coordinates.
   /** i.e if you see that a character is laying on ground instead of standing, it is probably

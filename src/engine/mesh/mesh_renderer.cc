@@ -348,48 +348,49 @@ glm::mat4 MeshRenderer::worldTransform() const {
 }
 
 /// Gives information about the mesh's bounding cuboid.
-/** @param center - The vec3 where bounding cuboid's center is to be returned.
-  * @param edges - The vec3 where bounding cuboid's edge lengths are to be returned. */
-void MeshRenderer::bCuboid(glm::vec3& center, glm::vec3& edges) const {
+BoundingBox MeshRenderer::boundingBox(const glm::mat4& matrix) const {
   // Idea: get the minimums and maximums of the vertex positions
   // in each coordinate. Then the average of the mins and maxes
   // will be the center of the cuboid
   glm::vec3 mins, maxes;
   for (size_t entry = 0; entry < entries_.size(); entry++) {
-    const aiMesh* paiMesh = scene_->mMeshes[entry];
+    const aiMesh* mesh = scene_->mMeshes[entry];
 
-    for (size_t i = 0; i < paiMesh->mNumVertices; i++) {
-      if (paiMesh->mVertices[i].x < mins.x) {
-        mins.x = paiMesh->mVertices[i].x;
+    for (size_t i = 0; i < mesh->mNumVertices; i++) {
+      glm::vec4 vert {mesh->mVertices[i].x, mesh->mVertices[i].y,
+                      mesh->mVertices[i].z, 1};
+      vert = matrix * vert;
+
+      if (vert.x < mins.x) {
+        mins.x = vert.x;
       }
-      if (paiMesh->mVertices[i].y < mins.y) {
-        mins.y = paiMesh->mVertices[i].y;
+      if (vert.y < mins.y) {
+        mins.y = vert.y;
       }
-      if (paiMesh->mVertices[i].z < mins.z) {
-        mins.z = paiMesh->mVertices[i].z;
+      if (vert.z < mins.z) {
+        mins.z = vert.z;
       }
 
-      if (maxes.x < paiMesh->mVertices[i].x) {
-        maxes.x = paiMesh->mVertices[i].x;
+      if (maxes.x < vert.x) {
+        maxes.x = vert.x;
       }
-      if (maxes.y < paiMesh->mVertices[i].y) {
-        maxes.y = paiMesh->mVertices[i].y;
+      if (maxes.y < vert.y) {
+        maxes.y = vert.y;
       }
-      if (maxes.z < paiMesh->mVertices[i].z) {
-        maxes.z = paiMesh->mVertices[i].z;
+      if (maxes.z < vert.z) {
+        maxes.z = vert.z;
       }
     }
   }
 
-  center = (mins + maxes) / 2.0f;
-  edges = glm::abs(maxes - mins);
+  return BoundingBox{mins, maxes};
 }
 
 /// Returns the center (as xyz) and radius (as w) of the bounding sphere.
 glm::vec4 MeshRenderer::bSphere() const {
-  glm::vec3 center, edges;
-  bCuboid(center, edges);
-  return glm::vec4(center, sqrt(glm::dot(edges, edges)) / 2); // Pythagoras.
+  BoundingBox bbox = boundingBox();
+  glm::vec3 center = bbox.center(), extent = bbox.extent();
+  return glm::vec4(center, sqrt(glm::dot(extent, extent)) / 2); // Pythagoras.
 }
 
 /// Returns the center offseted by the model matrix (as xyz) and radius (as w) of the bounding sphere.
@@ -402,16 +403,13 @@ glm::vec4 MeshRenderer::bSphere(const glm::mat4& modelMatrix) const {
 
 /// Returns the center of the bounding sphere.
 glm::vec3 MeshRenderer::bSphereCenter() const {
-  glm::vec3 center, edges;
-  bCuboid(center, edges);
-  return center;
+  return boundingBox().center();
 }
 
 /// Returns the radius of the bounding sphere.
 float MeshRenderer::bSphereRadius() const {
-  glm::vec3 center, edges;
-  bCuboid(center, edges);
-  return sqrt(glm::dot(edges, edges)) / 2; // Pythagoras.
+  glm::vec3 extent = boundingBox().extent();
+  return sqrt(glm::dot(extent, extent)) / 2; // Pythagoras.
 }
 
 } // namespace engine

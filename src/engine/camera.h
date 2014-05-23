@@ -54,7 +54,7 @@ public:
 
     // REMEMBER: m[i][j] is j-th row, i-th column!!!
 
-    return {{{
+    return {{
 
       // left
      {m[0][3] + m[0][0],
@@ -92,7 +92,7 @@ public:
       m[2][3] - m[2][2],
       m[3][3] - m[3][2]}
 
-    }}};
+    }};
 
     // Note: there's no need to normalize the plane parameters
   }

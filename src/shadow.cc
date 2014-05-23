@@ -108,7 +108,7 @@ void Shadow::setViewPort() {
 }
 
 void Shadow::push() {
-  if (curr_depth_ + 1 < max_depth_) {
+  if (curr_depth_ < max_depth_) {
     ++curr_depth_;
     setViewPort();
   }

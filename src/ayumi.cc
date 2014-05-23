@@ -18,7 +18,7 @@ using engine::AnimParams;
 
 extern bool was_left_click;
 
-Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox/*, Shadow* shadow*/)
+Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     : mesh_("models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_Quality |
             aiProcess_FlipUVs)
@@ -27,17 +27,15 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox/*, Shadow* shadow*/)
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")
     , uBones_(prog_, "uBones")
-    //, uShadowCP_(prog_, "uShadowCP")
-    //, shadow_uMCP_(shadow_prog_, "uMCP")
-    //, shadow_uBones_(shadow_prog_, "uBones")
+    , shadow_uMCP_(shadow_prog_, "uMCP")
+    , shadow_uBones_(shadow_prog_, "uBones")
     , uSunData_(prog_, "uSunData")
-    //, uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
-    //, uShadowSoftness_(prog_, "uShadowSoftness")
     , attack2_(false)
     , window_(window)
     , charmove_(nullptr)
-    , skybox_((assert(skybox), skybox))
-    /*, shadow_((assert(shadow), shadow)) */ {
+    , skybox_(skybox)
+    , shadow_(shadow) {
+
   ShaderSource vs_src("ayumi.vert");
   vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
   vs_src.insertMacroValue("BONE_NUM", mesh_.getNumBones());
@@ -49,10 +47,10 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox/*, Shadow* shadow*/)
   VertexShader vs(vs_src), shadow_vs(shadow_vs_src);
   FragmentShader fs("ayumi.frag"), shadow_fs("shadow.frag");
 
-  // shadow_prog_ << shadow_vs << shadow_fs;
-  // shadow_prog_.link();
+  shadow_prog_ << shadow_vs << shadow_fs;
+  shadow_prog_.link();
 
-  // shadow_prog_.validate();
+  shadow_prog_.validate();
 
   prog_ << vs << fs << skybox_->sky_fs;
   prog_.link().use();
@@ -69,9 +67,6 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox/*, Shadow* shadow*/)
   mesh_.setupSpecularTextures(2);
   UniformSampler(prog_, "uDiffuseTexture").set(1);
   UniformSampler(prog_, "uSpecularTexture").set(2);
-  //UniformSampler(prog_, "uShadowMap").set(3);
-  //uShadowSoftness_ = 1 << engine::clamp(4 - PERFORMANCE, 0, 4);
-  //Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
 
   prog_.validate();
 
@@ -173,38 +168,32 @@ void Ayumi::update(float time) {
   mesh_.updateBoneInfo(anim_, time);
 }
 
-// void Ayumi::shadowRender(float time, const engine::Camera& cam) {
-//   shadow_prog_.use();
-//   shadow_uMCP_ =
-//     shadow_->modelCamProjMat(skybox_->getSunPos(), mesh_.bSphere(),
-//                              transform.matrix(), mesh_.worldTransform());
-//   mesh_.uploadBoneInfo(shadow_uBones_);
+void Ayumi::shadowRender(float time, const engine::Camera& cam) {
+  shadow_prog_.use();
+  shadow_uMCP_ =
+    shadow_->modelCamProjMat(skybox_->getSunPos(), mesh_.bSphere(),
+                             transform.matrix(), mesh_.worldTransform());
+  mesh_.uploadBoneInfo(shadow_uBones_);
 
-//   gl::FrontFace(FaceOrientation::CCW);
-//   auto cullface = Context::TemporaryEnable(Capability::CullFace);
-//   mesh_.disableTextures();
+  gl::FrontFace(FaceOrientation::Ccw);
+  auto cullface = gl::TemporaryEnable(Capability::CullFace);
+  mesh_.disableTextures();
 
-//   mesh_.render();
+  mesh_.render();
 
-//   mesh_.enableTextures();
-//   shadow_->push();
-// }
+  mesh_.enableTextures();
+  shadow_->push();
+}
 
 void Ayumi::render(float time, const engine::Camera& cam) {
   prog_.use();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uModelMatrix_ = transform.matrix() * mesh_.worldTransform();
-  // for (size_t i = 0; i < shadow_->getDepth(); ++i) {
-  //   uShadowCP_[i] = shadow_->shadowCPs()[i];
-  // }
-  // uNumUsedShadowMaps_ = shadow_->getDepth();
   uSunData_ = skybox_->getSunData();
 
   skybox_->env_map.active(0);
   skybox_->env_map.bind();
-  // shadow_->shadowTex().active(3);
-  // shadow_->shadowTex().bind();
 
   mesh_.uploadBoneInfo(uBones_);
 
@@ -213,8 +202,6 @@ void Ayumi::render(float time, const engine::Camera& cam) {
 
   mesh_.render();
 
-  // shadow_->shadowTex().active(3);
-  // shadow_->shadowTex().unbind();
   skybox_->env_map.active(0);
   skybox_->env_map.unbind();
 }

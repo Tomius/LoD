@@ -9,14 +9,30 @@ namespace engine {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 Texture<DATA_TYPE, NUM_COMPONENTS>::Texture(const std::string& file_name,
-                                        std::string format_string, bool integer)
-    : integer_(integer), format_string_(format_string) {
+                                            std::string format_string) {
 
-  srgb_ = format_string[0] == 'S';
-  if(srgb_) {
-    format_string = format_string.substr(1);
+  // Preprocess format_string: 'S', 'C' and 'I' have special meaning
+  size_t s_pos = format_string.find('S');
+  if(s_pos != std::string::npos) {
+    srgb_ = true;
+    format_string.erase(format_string.begin() + s_pos);
     assert(NUM_COMPONENTS >= 3); // only rgb and rgba can be in srgb
   }
+
+  size_t c_pos = format_string.find('C');
+  if(c_pos != std::string::npos) {
+    compressed_ = true;
+    format_string.erase(format_string.begin() + c_pos);
+  }
+
+  size_t i_pos = format_string.find('I');
+  if(i_pos != std::string::npos) {
+    integer_ = true;
+    format_string.erase(format_string.begin() + i_pos);
+  }
+
+  format_string_ = format_string;
+
   assert(NUM_COMPONENTS <= 4);
   assert(format_string.length() == NUM_COMPONENTS);
 
@@ -99,18 +115,32 @@ oglwrap::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 oglwrap::PixelDataInternalFormat
 Texture<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
-  using oglwrap::PixelDataInternalFormat;
+  using InternalFormat = oglwrap::PixelDataInternalFormat;
 
-  if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
-    return PixelDataInternalFormat::Red;
-  } else if (format_string_ == "RG") {
-    return PixelDataInternalFormat::Rg;
-  } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-    return srgb_ ? PixelDataInternalFormat::Srgb : PixelDataInternalFormat::Rgb;
-  } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-    return srgb_ ? PixelDataInternalFormat::SrgbAlpha : PixelDataInternalFormat::Rgba;
+  if(compressed_) {
+    if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
+      return InternalFormat::CompressedRed;
+    } else if (format_string_ == "RG") {
+      return InternalFormat::CompressedRg;
+    } else if (format_string_ == "RGB" || format_string_ == "BGR") {
+      return srgb_ ? InternalFormat::CompressedSrgb : InternalFormat::CompressedRgb;
+    } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
+      return srgb_ ? InternalFormat::CompressedSrgbAlpha : InternalFormat::CompressedRgba;
+    } else {
+      abort();
+    }
   } else {
-    abort();
+    if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
+      return InternalFormat::Red;
+    } else if (format_string_ == "RG") {
+      return InternalFormat::Rg;
+    } else if (format_string_ == "RGB" || format_string_ == "BGR") {
+      return srgb_ ? InternalFormat::Srgb : InternalFormat::Rgb;
+    } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
+      return srgb_ ? InternalFormat::SrgbAlpha : InternalFormat::Rgba;
+    } else {
+      abort();
+    }
   }
 }
 
@@ -139,10 +169,16 @@ oglwrap::PixelDataType Texture<DATA_TYPE, NUM_COMPONENTS>::type() const {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(oglwrap::Texture2D& tex) const {
-  using oglwrap::Context;
+  using gl = oglwrap::Context;
+
+  bool bad_alignment = (w_ * sizeof(DATA_TYPE) * NUM_COMPONENTS) % 4 != 0;
   GLint unpack_aligment;
-  glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack_aligment);
-  Context::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, 1);
+
+  if(bad_alignment) {
+    glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack_aligment);
+    gl::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, 1);
+  }
+
   tex.upload(
     internalFormat(),
     w_, h_,
@@ -150,16 +186,25 @@ void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(oglwrap::Texture2D& tex) const {
     type(),
     data().data()
   );
-  Context::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, unpack_aligment);
+
+  if(bad_alignment) {
+    gl::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, unpack_aligment);
+  }
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(oglwrap::Texture2D& tex,
                       oglwrap::PixelDataInternalFormat internal_format) const {
-  using oglwrap::Context;
+  using gl = oglwrap::Context;
+
+  bool bad_alignment = (w_ * sizeof(DATA_TYPE) * NUM_COMPONENTS) % 4 != 0;
   GLint unpack_aligment;
-  glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack_aligment);
-  Context::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, 1);
+
+  if(bad_alignment) {
+    glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack_aligment);
+    gl::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, 1);
+  }
+
   tex.upload(
     internal_format,
     w_, h_,
@@ -167,7 +212,10 @@ void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(oglwrap::Texture2D& tex,
     type(),
     data().data()
   );
-  Context::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, unpack_aligment);
+
+  if(bad_alignment) {
+    gl::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, unpack_aligment);
+  }
 }
 
 } // namespace engine

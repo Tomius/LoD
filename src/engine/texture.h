@@ -12,16 +12,18 @@ namespace engine {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 class Texture {
-  bool integer_, srgb_;
+  bool integer_, srgb_, compressed_;
   std::string format_string_;
   std::vector<std::array<DATA_TYPE, NUM_COMPONENTS>> data_;
   int w_, h_;
 public:
   // Loads in a texture from a file
-  // Set integer to true, if you want to fetch texture values as integers
+  // The format string can contain any of these flags:
+  // - 'S': the image is converted from SRGB to linear colorspace at load.
+  // - 'C': a compressed image will be used.
+  // - 'I': an integer image will be used.
   Texture(const std::string& file_name,
-          std::string format_string = "SRGBA",
-          bool integer = false);
+          std::string format_string = "CSRGBA");
 
   virtual ~Texture() {}
 

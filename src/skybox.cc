@@ -39,7 +39,7 @@ Skybox::Skybox()
 
     for (int i = 0; i < 6; i++) {
       // The cloud map is not in srgb
-      env_map_.loadTexture(i, "textures/skybox_" + std::to_string(i) + ".png", "RGBA");
+      env_map_.loadTexture(i, "textures/skybox_" + std::to_string(i) + ".png", "CRGBA");
     }
   }
 }

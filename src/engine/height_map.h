@@ -13,11 +13,12 @@ class HeightMap : public HeightMapInterface {
   Texture<DATA_TYPE, 1> tex_;
 public:
   // Loads in a texture from a file
-  // Set integer to true, if you want to fetch texture values as integers
+  // The format string may contain any of these two flags:
+  // - 'C': a compressed image will be used.
+  // - 'I': an integer image will be used.
   HeightMap(const std::string& file_name,
-            const std::string& format_string = "R",
-            bool integer = false)
-  : tex_(file_name, format_string, integer) {}
+            const std::string& format_string = "CR")
+  : tex_(file_name, format_string) {}
 
   // The width and height of the texture
   virtual int w() const override { return tex_.w(); }

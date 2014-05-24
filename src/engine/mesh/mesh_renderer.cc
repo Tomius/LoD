@@ -259,7 +259,7 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
       if (mat->GetTexture(tex_type, 0, &filepath) == AI_SUCCESS) {
         materials_[tex_type].textures[i].bind();
         materials_[tex_type].textures[i].loadTexture(dir + filepath.data,
-                                                     srgb ? "SRGBA" : "RGBA");
+                                                     srgb ? "CSRGBA" : "CRGBA");
         materials_[tex_type].textures[i].minFilter(oglwrap::MinFilter::Linear);
         materials_[tex_type].textures[i].magFilter(oglwrap::MagFilter::Linear);
       } else {

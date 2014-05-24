@@ -34,9 +34,8 @@ void GridMesh::setupPositions(oglwrap::VertexAttribArray attrib) {
 
   for (int y = -dim2; y < dim2; ++y) {
     for (int x = -dim2; x <= dim2; ++x) {
-      // We should keep CCW winding order
-        indices.push_back( indexOf(x, y) );
-        indices.push_back( indexOf(x, y+1) );
+      indices.push_back( indexOf(x, y) );
+      indices.push_back( indexOf(x, y+1) );
     }
     // create a degenerate (as primitive restart)
     indices.push_back(indexOf(dim2, y+1));

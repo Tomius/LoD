@@ -110,11 +110,13 @@ void Tree::render(float time, const engine::Camera& cam) {
   auto cullface = gl::TemporaryDisable(Capability::CullFace);
   gl::BlendFunc(BlendFunction::SrcAlpha, BlendFunction::OneMinusSrcAlpha);
 
+  auto campos = cam.pos();
   auto cam_mx = cam.matrix();
   auto frustum = cam.frustum();
   for (size_t i = 0; i < trees_.size(); i++) {
     // Check for visibility (is it behind to camera?)
-    if(!trees_[i].bbox.collidesWithFrustum(frustum)) {
+    if(!trees_[i].bbox.collidesWithFrustum(frustum) ||
+      glm::length(glm::vec3(trees_[i].mat[3]) - campos) > 1500) {
       continue;
     }
 

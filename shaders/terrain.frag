@@ -119,7 +119,7 @@ void main() {
   vec3 final_color = diffuse_color * (Visibility()*SunPower()*
       (specular_power + diffuse_power + 0.1) + AmbientPower());
 
-  // // Fog
+  // Fog
   vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));
   vec3 fog = fog_color * (0.005 + SunPower());
   float length_from_camera = length(c_vPos);

@@ -15,14 +15,23 @@ float isDay();
 
 float kFogMin = 128.0;
 float kFogMax = 2048.0;
+float kMaxVisibleDist = 1450.0;
+float kMaxOpaqueDist = 1350.0;
 
 void main() {
+  float alpha = 1.0, l = length(c_vPos);
+  if (l > kMaxVisibleDist) {
+    discard;
+  } else if (l > kMaxOpaqueDist) {
+    alpha = 1 - (l - kMaxOpaqueDist) / (kMaxVisibleDist - kMaxOpaqueDist);
+  }
+
   float diffuse_power = max(abs(dot(normalize(w_vNormal), normalize(AmbientDirection()))), 0.3);
 
   vec4 color = texture2D(uDiffuseTexture, vTexcoord);
   vec3 final_color = color.rgb * (SunPower() * diffuse_power + AmbientPower()) / 2;
 
-  float actual_alpha = color.a;
+  float actual_alpha = min(color.a, alpha);
 
   if (actual_alpha < 1e-3) {
     discard;

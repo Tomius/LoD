@@ -223,7 +223,8 @@ int main() {
     charmove.setAnimation(&ayumi->getAnimation());
 
     engine::Transform& cam_offset = scene->addGameObject()->transform;
-    ayumi->transform.localPos() = glm::vec3{1078.6, 131, 927.977};
+    ayumi->transform.localPos() =
+      glm::vec3{height_map.w()/2.0f, 13.0f, height_map.h()/2.0f};
     ayumi->transform.addChild(cam_offset);
     cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 

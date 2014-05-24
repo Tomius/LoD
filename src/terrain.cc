@@ -13,7 +13,7 @@ Terrain::Terrain(Skybox *skybox, Shadow *shadow)
   , uShadowCP_(prog_, "uShadowCP")
   , uSunData_(prog_, "uSunData")
   , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
-  , height_map_("terrain/terrain.png")
+  , height_map_("terrain/mideu.png")
   , mesh_(height_map_)
   , skybox_((assert(skybox), skybox))
   , shadow_((assert(shadow), shadow)) {

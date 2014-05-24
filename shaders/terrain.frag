@@ -74,7 +74,7 @@ float Visibility() {
 }
 
 const float kFogMin = 128.0;
-const float kFogMax = 1024.0;
+const float kFogMax = 2048.0;
 const float kSpecularShininess = 32.0;
 
 void main() {

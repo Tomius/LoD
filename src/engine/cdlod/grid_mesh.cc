@@ -29,20 +29,18 @@ void GridMesh::setupPositions(oglwrap::VertexAttribArray attrib) {
   }
 
   std::vector<GLushort> indices;
-  index_count_ = 6*dimension_*dimension_;
+  index_count_ = 2*(dimension_+1)*(dimension_) + 2*dimension_;
   indices.reserve(index_count_);
 
   for (int y = -dim2; y < dim2; ++y) {
-    for (int x = -dim2; x < dim2; ++x) {
+    for (int x = -dim2; x <= dim2; ++x) {
       // We should keep CCW winding order
         indices.push_back( indexOf(x, y) );
         indices.push_back( indexOf(x, y+1) );
-        indices.push_back( indexOf(x+1, y) );
-
-        indices.push_back( indexOf(x+1, y) );
-        indices.push_back( indexOf(x, y+1) );
-        indices.push_back( indexOf(x+1, y+1) );
     }
+    // create a degenerate (as primitive restart)
+    indices.push_back(indexOf(dim2, y+1));
+    indices.push_back(indexOf(-dim2, y+1));
   }
 
   vao_.bind();
@@ -86,7 +84,7 @@ void GridMesh::render() const {
     aRenderData_.bind();
     aRenderData_.data(render_data_);
 
-    gl::DrawElementsInstanced(PrimType::Triangles,
+    gl::DrawElementsInstanced(PrimType::TriangleStrip,
                              index_count_,
                              IndexType::UnsignedShort,
                              render_data_.size());   // instance count
@@ -102,7 +100,7 @@ void GridMesh::render(oglwrap::UniformObject<glm::vec4> uRenderData) const {
   vao_.bind();
   for(auto& data : render_data_) {
     uRenderData = data;
-    gl::DrawElements(PrimType::Triangles,
+    gl::DrawElements(PrimType::TriangleStrip,
                     index_count_,
                     IndexType::UnsignedShort);
   }

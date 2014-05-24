@@ -4,6 +4,7 @@
 #define ENGINE_TEXTURE_INL_H_
 
 #include "texture.h"
+#include "../oglwrap/smart_enums.h"
 
 namespace engine {
 
@@ -67,45 +68,45 @@ Texture<DATA_TYPE, NUM_COMPONENTS>::Texture(const std::string& file_name,
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 oglwrap::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
-  using oglwrap::PixelDataFormat;
+  using gl = oglwrap::SmartEnums;
 
   if (integer_) {
     if (format_string_ == "R") {
-      return PixelDataFormat::RedInteger;
+      return gl::RedInteger;
     } else if (format_string_ == "G") {
-      return PixelDataFormat::GreenInteger;
+      return gl::GreenInteger;
     } else if (format_string_ == "B") {
-      return PixelDataFormat::BlueInteger;
+      return gl::BlueInteger;
     } else if (format_string_ == "RG") {
-      return PixelDataFormat::RgInteger;
+      return gl::RgInteger;
     } else if (format_string_ == "RGB") {
-      return PixelDataFormat::RgbInteger;
+      return gl::RgbInteger;
     } else if (format_string_ == "RGBA") {
-      return PixelDataFormat::RgbaInteger;
+      return gl::RgbaInteger;
     } else if (format_string_ == "BGR") {
-      return PixelDataFormat::BgrInteger;
+      return gl::BgrInteger;
     } else if (format_string_ == "BGRA") {
-      return PixelDataFormat::BgraInteger;
+      return gl::BgraInteger;
     } else {
       abort();
     }
   } else {
     if (format_string_ == "R") {
-      return PixelDataFormat::Red;
+      return gl::Red;
     } else if (format_string_ == "G") {
-      return PixelDataFormat::Green;
+      return gl::Green;
     } else if (format_string_ == "B") {
-      return PixelDataFormat::Blue;
+      return gl::Blue;
     } else if (format_string_ == "RG") {
-      return PixelDataFormat::Rg;
+      return gl::Rg;
     } else if (format_string_ == "RGB") {
-      return PixelDataFormat::Rgb;
+      return gl::Rgb;
     } else if (format_string_ == "RGBA") {
-      return PixelDataFormat::Rgba;
+      return gl::Rgba;
     } else if (format_string_ == "BGR") {
-      return PixelDataFormat::Bgr;
+      return gl::Bgr;
     } else if (format_string_ == "BGRA") {
-      return PixelDataFormat::Bgra;
+      return gl::Bgra;
     } else {
       abort();
     }
@@ -115,29 +116,29 @@ oglwrap::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 oglwrap::PixelDataInternalFormat
 Texture<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
-  using InternalFormat = oglwrap::PixelDataInternalFormat;
+  using gl = oglwrap::SmartEnums;
 
   if(compressed_) {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
-      return InternalFormat::CompressedRed;
+      return gl::CompressedRed;
     } else if (format_string_ == "RG") {
-      return InternalFormat::CompressedRg;
+      return gl::CompressedRg;
     } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-      return srgb_ ? InternalFormat::CompressedSrgb : InternalFormat::CompressedRgb;
+      return srgb_ ? gl::CompressedSrgb : gl::CompressedRgb;
     } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-      return srgb_ ? InternalFormat::CompressedSrgbAlpha : InternalFormat::CompressedRgba;
+      return srgb_ ? gl::CompressedSrgbAlpha : gl::CompressedRgba;
     } else {
       abort();
     }
   } else {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
-      return InternalFormat::Red;
+      return gl::Red;
     } else if (format_string_ == "RG") {
-      return InternalFormat::Rg;
+      return gl::Rg;
     } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-      return srgb_ ? InternalFormat::Srgb : InternalFormat::Rgb;
+      return srgb_ ? gl::Srgb : gl::Rgb;
     } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-      return srgb_ ? InternalFormat::SrgbAlpha : InternalFormat::Rgba;
+      return srgb_ ? gl::SrgbAlpha : gl::Rgba;
     } else {
       abort();
     }
@@ -146,22 +147,22 @@ Texture<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 oglwrap::PixelDataType Texture<DATA_TYPE, NUM_COMPONENTS>::type() const {
-  using oglwrap::PixelDataType;
+  using gl = oglwrap::SmartEnums;
 
   if (std::is_same<DATA_TYPE, char>::value) {
-    return PixelDataType::Byte;
+    return gl::Byte;
   } else if (std::is_same<DATA_TYPE, unsigned char>::value) {
-    return PixelDataType::UnsignedByte;
+    return gl::UnsignedByte;
   } else if (std::is_same<DATA_TYPE, short>::value) {
-    return PixelDataType::Short;
+    return gl::Short;
   } else if (std::is_same<DATA_TYPE, unsigned short>::value) {
-    return PixelDataType::UnsignedShort;
+    return gl::UnsignedShort;
   } else if (std::is_same<DATA_TYPE, int>::value) {
-    return PixelDataType::Int;
+    return gl::Int;
   } else if (std::is_same<DATA_TYPE, unsigned int>::value) {
-    return PixelDataType::UnsignedInt;
+    return gl::UnsignedInt;
   } else if (std::is_same<DATA_TYPE, float>::value) {
-    return PixelDataType::Float;
+    return gl::Float;
   } else {
     abort();
   }

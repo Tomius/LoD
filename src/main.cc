@@ -7,6 +7,7 @@
 
 #define OGLWRAP_INSTANTIATE 1
 #include "./lod_oglwrap_config.h"
+#include "oglwrap/smart_enums.h"
 
 #include <GLFW/glfw3.h>
 
@@ -25,9 +26,8 @@
 #include "./shadow.h"
 #include "./loading_screen.h"
 
-using oglwrap::Capability;
-using oglwrap::Face;
 using gl = oglwrap::Context;
+using glEnum = oglwrap::SmartEnums;
 
 extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
@@ -39,9 +39,9 @@ bool was_left_click = false;
 void glInit(GLFWwindow* window) {
   gl::ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   gl::ClearDepth(1.0f);
-  gl::Enable(Capability::DepthTest);
-  gl::Enable(Capability::DepthClamp);
-  gl::CullFace(Face::Back);
+  gl::Enable(glEnum::DepthTest);
+  gl::Enable(glEnum::DepthClamp);
+  gl::CullFace(glEnum::Back);
 
   LoadingScreen().render();
   glfwSwapBuffers(window);

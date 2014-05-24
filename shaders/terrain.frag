@@ -101,7 +101,7 @@ void main() {
   } else {
     vec3 L = c_light_dir, V = c_view_direction;
     vec3 H = normalize(L + V), N = c_normal;
-    specular_power = pow(max(dot(H, N), 0), kSpecularShininess);
+    specular_power = 5 * pow(max(dot(H, N), 0), kSpecularShininess);
   }
 
   vec3 grass_color_0 = texture2D(uGrassMap0, vTexcoord*128).rgb;

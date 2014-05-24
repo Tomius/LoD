@@ -58,7 +58,7 @@ vec3 CDLODTerrain_normal(vec3 pos) {
   vec3 u = vec3(1.0f, 0.0f, CDLODTerrain_fetchHeight(pos.xz + vec2(1, 0)) -
                             CDLODTerrain_fetchHeight(pos.xz - vec2(1, 0)));
   vec3 v = vec3(0.0f, 1.0f, CDLODTerrain_fetchHeight(pos.xz + vec2(0, 1)) -
-                            CDLODTerrain_fetchHeight(pos.xz + vec2(0, 1)));
+                            CDLODTerrain_fetchHeight(pos.xz - vec2(0, 1)));
   return normalize(cross(u, v));
 }
 

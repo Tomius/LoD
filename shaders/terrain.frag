@@ -50,6 +50,10 @@ bool isValid(vec2 tc) {
 }
 
 float Visibility() {
+  if(AmbientDirection().y < 0) {
+    return 0;
+  }
+
   float visibility = 1.0;
   int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
 
@@ -95,7 +99,7 @@ void main() {
   // Lighting values
   float diffuse_power = dot(c_normal, c_light_dir);
   float specular_power;
-  if (diffuse_power <= 0.0) {
+  if (diffuse_power <= 0.0 || AmbientDirection().y < 0) {
     diffuse_power = 0;
     specular_power = 0;
   } else {
@@ -120,11 +124,10 @@ void main() {
       (specular_power + diffuse_power + 0.1) + AmbientPower());
 
   // Fog
-  vec3 fog_color = vec3(mix(-1.6f, 0.8f, isDay()));
-  vec3 fog = fog_color * (0.005 + SunPower());
+  vec3 fog_color = mix(vec3(0.2), vec3(0.8, 0.8, 0.4), isDay()) * SunPower();
   float length_from_camera = length(c_vPos);
   float alpha = clamp((length_from_camera - kFogMin) /
                       (kFogMax - kFogMin), 0, 1) / 4;
 
-  gl_FragColor = vec4(mix(pow(final_color, vec3(0.7)), fog, alpha), 1);
+  gl_FragColor = vec4(mix(pow(final_color, vec3(0.7)), fog_color, alpha), 1);
 }

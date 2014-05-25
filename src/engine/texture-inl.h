@@ -170,27 +170,7 @@ oglwrap::PixelDataType Texture<DATA_TYPE, NUM_COMPONENTS>::type() const {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(oglwrap::Texture2D& tex) const {
-  using gl = oglwrap::Context;
-
-  bool bad_alignment = (w_ * sizeof(DATA_TYPE) * NUM_COMPONENTS) % 4 != 0;
-  GLint unpack_aligment;
-
-  if(bad_alignment) {
-    glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack_aligment);
-    gl::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, 1);
-  }
-
-  tex.upload(
-    internalFormat(),
-    w_, h_,
-    format(),
-    type(),
-    data().data()
-  );
-
-  if(bad_alignment) {
-    gl::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, unpack_aligment);
-  }
+  upload(tex, internalFormat());
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>

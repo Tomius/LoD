@@ -97,7 +97,7 @@ vec3 SkyColor(vec3 look_dir) {
 
     vec3 air =
       // The sky's base color.
-      0.1 * min(
+      0.256 * min(
           kAirColor * sqrt(pow(moon_power, 0.25) * pow(atm_size, 0.75) + 0.15),
           vec3(moon_power) * 1.5
       ) +
@@ -124,7 +124,7 @@ vec3 SkyColor(vec3 look_dir) {
     night_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r)) + moon * (1.0 - cloud.a);
   }
 
-  vec3 final_color = mix(night_color, day_color, uDay);
+  vec3 final_color = clamp(mix(night_color, day_color, uDay), 0, 1);
   return pow(final_color, vec3(2.2)); // srgb -> linear
 }
 
@@ -138,7 +138,7 @@ float isDay() {
 }
 
 float SunPower() {
-  return max((uDay + 0.1) * (normalize(uSunPos).y), 0.2);
+  return clamp((uDay + 0.1) * normalize(uSunPos).y, 0, 1);
 }
 
 float AmbientPower() {

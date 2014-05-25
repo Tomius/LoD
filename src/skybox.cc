@@ -5,8 +5,8 @@
 using namespace oglwrap;
 using gl = oglwrap::Context;
 
-constexpr float day_duration = 256.0f;
-constexpr float day_start = day_duration/64;
+constexpr float day_duration = 128.0f;
+constexpr float day_start = -day_duration/32;
 
 Skybox::Skybox()
   : time_(day_start)

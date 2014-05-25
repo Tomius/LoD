@@ -42,6 +42,7 @@ void glInit(GLFWwindow* window) {
   gl::Enable(glEnum::DepthTest);
   gl::Enable(glEnum::DepthClamp);
   gl::CullFace(glEnum::Back);
+  gl::Hint(glEnum::TextureCompressionHint, glEnum::Fastest);
 
   LoadingScreen().render();
   glfwSwapBuffers(window);

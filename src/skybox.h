@@ -12,6 +12,19 @@
 #include "engine/gameobject.h"
 
 class Skybox : public engine::GameObject {
+ public:
+  const oglwrap::TextureCube& env_map;
+  const oglwrap::FragmentShader& sky_fs;
+
+  Skybox();
+  virtual ~Skybox() {}
+  virtual void render(float time, const engine::Camera& cam) override;
+  virtual void update(float time) override;
+
+  glm::vec3 getSunPos() const;
+  glm::vec4 getSunData() const;
+
+ private:
   float time_;
   oglwrap::Cube cube_;
 
@@ -25,19 +38,7 @@ class Skybox : public engine::GameObject {
 
   oglwrap::TextureCube env_map_;
   oglwrap::FragmentShader sky_fs_;
-
-public:
-  const oglwrap::TextureCube& env_map;
-  const oglwrap::FragmentShader& sky_fs;
-
-  Skybox();
-  virtual ~Skybox() {}
-  virtual void render(float time, const engine::Camera& cam) override;
-  virtual void update(float time) override;
-
-  glm::vec3 getSunPos() const;
-  glm::vec4 getSunData() const;
 };
 
 
-#endif // LOD_SKYBOX_H_
+#endif  // LOD_SKYBOX_H_

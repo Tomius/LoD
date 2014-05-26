@@ -13,9 +13,6 @@
 
 class Skybox : public engine::GameObject {
  public:
-  const oglwrap::TextureCube& env_map;
-  const oglwrap::FragmentShader& sky_fs;
-
   Skybox();
   virtual ~Skybox() {}
   virtual void render(float time, const engine::Camera& cam) override;
@@ -23,6 +20,9 @@ class Skybox : public engine::GameObject {
 
   glm::vec3 getSunPos() const;
   glm::vec4 getSunData() const;
+
+  const oglwrap::TextureCube& env_map() { return env_map_; };
+  const oglwrap::FragmentShader& sky_fs() { return sky_fs_; };
 
  private:
   float time_;

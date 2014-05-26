@@ -34,7 +34,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
 
   shadow_prog_.validate();
 
-  prog_ << vs_ << fs_ << skybox_->sky_fs;
+  prog_ << vs_ << fs_ << skybox_->sky_fs();
   prog_.link().use();
 
   for(int i = 0; i < kTreeTypeNum; ++i) {

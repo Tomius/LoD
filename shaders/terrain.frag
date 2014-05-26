@@ -51,7 +51,7 @@ bool isValid(vec2 tc) {
 
 float Visibility() {
   if(AmbientDirection().y < 0) {
-    return 0;
+    return 0.0;
   }
 
   float visibility = 1.0;

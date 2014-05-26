@@ -53,7 +53,7 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
 
   shadow_prog_.validate();
 
-  prog_ << vs << fs << skybox_->sky_fs;
+  prog_ << vs << fs << skybox_->sky_fs();
   prog_.link().use();
 
   mesh_.setupPositions(prog_ | "aPosition");

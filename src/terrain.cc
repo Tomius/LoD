@@ -18,7 +18,7 @@ Terrain::Terrain(Skybox *skybox, Shadow *shadow)
   , skybox_((assert(skybox), skybox))
   , shadow_((assert(shadow), shadow)) {
 
-  prog_ << vs_ << fs_ << skybox_->sky_fs;
+  prog_ << vs_ << fs_ << skybox_->sky_fs();
   mesh_.setup_and_link(prog_, 1);
   prog_.use();
 

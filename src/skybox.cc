@@ -17,9 +17,7 @@ Skybox::Skybox()
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uSunData_(prog_, "uSunData")
-    , sky_fs_("sky.frag")
-    , env_map(env_map_)
-    , sky_fs(sky_fs_) {
+    , sky_fs_("sky.frag") {
   prog_ << vs_ << fs_ << sky_fs_;
   prog_.link().use();
 

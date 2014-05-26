@@ -26,7 +26,7 @@
 #include "./shadow.h"
 #include "./loading_screen.h"
 
-using gl = oglwrap::Context;
+namespace gl = oglwrap;
 using glEnum = oglwrap::SmartEnums;
 
 extern const float GRAVITY = 18.0f;
@@ -185,7 +185,7 @@ int main() {
       std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
       return -1;
     }
-    oglwrap::Context::GetError();
+    gl::GetError();
   PrintDebugTime();
 
   // No V-sync needed.

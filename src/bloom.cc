@@ -1,14 +1,10 @@
 // Copyright (c) 2014, Tamas Csala
 
 #include "bloom.h"
+#include "oglwrap/smart_enums.h"
 
-using oglwrap::MinFilter;
-using oglwrap::MagFilter;
-using oglwrap::UniformSampler;
-using oglwrap::PixelDataType;
-using oglwrap::PixelDataFormat;
-using oglwrap::PixelDataInternalFormat;
-using gl = oglwrap::Context;
+namespace gl = oglwrap;
+using glEnum = oglwrap::SmartEnums;
 
 BloomEffect::BloomEffect()
     : vs_("bloom.vert")
@@ -17,7 +13,7 @@ BloomEffect::BloomEffect()
   prog_ << vs_ << fs_;
   prog_.link().use();
 
-  UniformSampler(prog_, "uTex").set(0);
+  gl::UniformSampler(prog_, "uTex").set(0);
 
   prog_.validate();
 
@@ -25,8 +21,8 @@ BloomEffect::BloomEffect()
 
   tex_.active(0);
   tex_.bind();
-  tex_.minFilter(MinFilter::Linear);
-  tex_.magFilter(MagFilter::Linear);
+  tex_.minFilter(glEnum::Linear);
+  tex_.magFilter(glEnum::Linear);
   tex_.unbind();
 }
 
@@ -38,8 +34,7 @@ void BloomEffect::screenResized(size_t w, size_t h) {
 
   tex_.active(0);
   tex_.bind();
-  tex_.upload(PixelDataInternalFormat::Rgb, width_, height_,
-              PixelDataFormat::Rgb, PixelDataType::Float, nullptr);
+  tex_.upload(glEnum::Rgb, width_, height_, glEnum::Rgb, glEnum::Float, nullptr);
   tex_.unbind();
 }
 
@@ -47,7 +42,7 @@ void BloomEffect::render(float, const engine::Camera&) {
   // Copy the backbuffer to the texture that our shader can fetch.
   tex_.active(0);
   tex_.bind();
-  tex_.copy(PixelDataInternalFormat::Rgb, 0, 0, width_, height_);
+  tex_.copy(glEnum::Rgb, 0, 0, width_, height_);
 
   gl::Clear().Color().Depth();
 

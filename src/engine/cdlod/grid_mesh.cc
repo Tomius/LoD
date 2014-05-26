@@ -1,12 +1,12 @@
 #include "grid_mesh.h"
 
 #include "../../oglwrap/context.h"
+#include "../../oglwrap/smart_enums.h"
+
+namespace gl = oglwrap;
 
 namespace engine {
-
 namespace cdlod {
-
-using gl = oglwrap::Context;
 
 GridMesh::GridMesh(GLubyte dimension) : dimension_(dimension) { }
 
@@ -84,9 +84,9 @@ void GridMesh::render() const {
     aRenderData_.data(render_data_);
 
     gl::DrawElementsInstanced(PrimType::TriangleStrip,
-                             index_count_,
-                             IndexType::UnsignedShort,
-                             render_data_.size());   // instance count
+                              index_count_,
+                              IndexType::UnsignedShort,
+                              render_data_.size());   // instance count
     vao_.unbind();
   }
 #endif

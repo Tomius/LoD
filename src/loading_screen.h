@@ -8,6 +8,7 @@
 #include "oglwrap/uniform.h"
 #include "oglwrap/shapes/full_screen_rect.h"
 #include "oglwrap/textures/texture_2D.h"
+#include "oglwrap/smart_enums.h"
 
 #include "engine/gameobject.h"
 
@@ -19,19 +20,22 @@ class LoadingScreen {
 
 public:
   LoadingScreen() {
-    oglwrap::VertexShader vs("loading.vert");
-    oglwrap::FragmentShader fs("loading.frag");
+    namespace gl = oglwrap;
+    using glEnum = oglwrap::SmartEnums;
+
+    gl::VertexShader vs("loading.vert");
+    gl::FragmentShader fs("loading.frag");
     prog_ << vs << fs;
     prog_.link().use();
 
     tex_.active(0);
     tex_.bind();
     tex_.loadTexture("textures/loading.png");
-    tex_.minFilter(oglwrap::MinFilter::Linear);
-    tex_.magFilter(oglwrap::MagFilter::Linear);
+    tex_.minFilter(glEnum::Linear);
+    tex_.magFilter(glEnum::Linear);
     tex_.unbind();
 
-    oglwrap::UniformSampler(prog_, "uTex").set(0);
+    gl::UniformSampler(prog_, "uTex").set(0);
 
     prog_.validate();
 
@@ -40,16 +44,15 @@ public:
   }
 
   void render() {
-    using oglwrap::Capability;
+    namespace gl = oglwrap;
+    using glEnum = oglwrap::SmartEnums;
 
     prog_.use();
     tex_.active(0);
     tex_.bind();
 
-    auto capabilies = oglwrap::Context::TemporarySet({
-      {Capability::CullFace, false},
-      {Capability::DepthTest, false}
-    });
+    auto capabilies = gl::TemporarySet({{glEnum::CullFace, false},
+                                        {glEnum::DepthTest, false}});
 
     rect_.render();
     tex_.unbind();

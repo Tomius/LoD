@@ -2,8 +2,10 @@
 
 #include "shadow.h"
 #include "oglwrap/context.h"
+#include "oglwrap/smart_enums.h"
 
-using gl = oglwrap::Context;
+namespace gl = oglwrap;
+using glEnum = oglwrap::SmartEnums;
 
 Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
     : size_(shadow_map_size)
@@ -16,27 +18,26 @@ Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
   // Setup the texture array that will serve as storage.
   tex_.bind();
   tex_.upload(
-    oglwrap::PixelDataInternalFormat::DepthComponent,
+    glEnum::DepthComponent,
     size_*xsize_, size_*ysize_,
-    oglwrap::PixelDataFormat::DepthComponent,
-    oglwrap::PixelDataType::Float, nullptr
+    glEnum::DepthComponent,
+    glEnum::Float, nullptr
   );
-  tex_.minFilter(oglwrap::MinFilter::Linear);
-  tex_.magFilter(oglwrap::MagFilter::Linear);
-  tex_.wrapS(oglwrap::WrapMode::ClampToBorder);
-  tex_.wrapT(oglwrap::WrapMode::ClampToBorder);
+  tex_.minFilter(glEnum::Linear);
+  tex_.magFilter(glEnum::Linear);
+  tex_.wrapS(glEnum::ClampToBorder);
+  tex_.wrapT(glEnum::ClampToBorder);
   tex_.borderColor(glm::vec4(1.0f));
-  tex_.compareFunc(oglwrap::CompareFunc::Lequal);
-  tex_.compareMode(oglwrap::CompareMode::CompareRefToTexture);
+  tex_.compareFunc(glEnum::Lequal);
+  tex_.compareMode(glEnum::CompareRefToTexture);
 
   // Setup the FBO
   fbo_.bind();
-  fbo_.attachTexture(oglwrap::FramebufferAttachment::DepthAttachment, tex_, 0);
+  fbo_.attachTexture(glEnum::DepthAttachment, tex_, 0);
   // No color output in the bound framebuffer, only depth.
-  gl::DrawBuffer(oglwrap::ColorBuffer::None);
+  gl::DrawBuffer(glEnum::None);
   fbo_.validate();
-
-  oglwrap::Framebuffer::Unbind();
+  fbo_.unbind();
 }
 
 void Shadow::screenResized(size_t width, size_t height) {
@@ -123,6 +124,6 @@ size_t Shadow::getMaxDepth() const {
 }
 
 void Shadow::end() {
-  oglwrap::Framebuffer::Unbind();
+  fbo_.unbind();
   gl::Viewport(w_, h_);
 }

@@ -3,7 +3,8 @@
 #include "terrain.h"
 #include <string>
 
-using namespace oglwrap;
+namespace gl = oglwrap;
+using glEnum = oglwrap::SmartEnums;
 
 Terrain::Terrain(Skybox *skybox, Shadow *shadow)
   : vs_("terrain.vert")
@@ -22,8 +23,8 @@ Terrain::Terrain(Skybox *skybox, Shadow *shadow)
   mesh_.setup_and_link(prog_, 1);
   prog_.use();
 
-  UniformSampler(prog_, "uGrassMap0").set(2);
-  UniformSampler(prog_, "uGrassMap1").set(3);
+  gl::UniformSampler(prog_, "uGrassMap0").set(2);
+  gl::UniformSampler(prog_, "uGrassMap1").set(3);
   for (int i = 0; i < 2; ++i) {
     grassMaps_[i].bind();
     // no alpha channel here
@@ -32,26 +33,26 @@ Terrain::Terrain(Skybox *skybox, Shadow *shadow)
     );
     grassMaps_[i].generateMipmap();
     grassMaps_[i].maxAnisotropy();
-    grassMaps_[i].minFilter(MinFilter::LinearMipmapLinear);
-    grassMaps_[i].magFilter(MagFilter::Linear);
-    grassMaps_[i].wrapS(WrapMode::Repeat);
-    grassMaps_[i].wrapT(WrapMode::Repeat);
+    grassMaps_[i].minFilter(glEnum::LinearMipmapLinear);
+    grassMaps_[i].magFilter(glEnum::Linear);
+    grassMaps_[i].wrapS(glEnum::Repeat);
+    grassMaps_[i].wrapT(glEnum::Repeat);
   }
 
-  UniformSampler(prog_, "uGrassNormalMap").set(4);
+  gl::UniformSampler(prog_, "uGrassNormalMap").set(4);
   grassNormalMap_.bind();
   {
     // the normal map doesn't have an alpha channel, and is not is srgb space
     grassNormalMap_.loadTexture("textures/grass_normal.jpg", "CRGBA");
     grassNormalMap_.generateMipmap();
-    grassNormalMap_.minFilter(MinFilter::LinearMipmapLinear);
-    grassNormalMap_.magFilter(MagFilter::Linear);
-    grassNormalMap_.wrapS(WrapMode::Repeat);
-    grassNormalMap_.wrapT(WrapMode::Repeat);
+    grassNormalMap_.minFilter(glEnum::LinearMipmapLinear);
+    grassNormalMap_.magFilter(glEnum::Linear);
+    grassNormalMap_.wrapS(glEnum::Repeat);
+    grassNormalMap_.wrapT(glEnum::Repeat);
   }
 
-  UniformSampler(prog_, "uShadowMap").set(5);
-  Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
+  gl::UniformSampler(prog_, "uShadowMap").set(5);
+  gl::Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
 
   prog_.validate();
 }

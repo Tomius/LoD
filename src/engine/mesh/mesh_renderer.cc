@@ -319,7 +319,7 @@ void MeshRenderer::render() {
       }
     }
 
-    oglwrap::Context::DrawElements(
+    oglwrap::DrawElements(
       oglwrap::PrimType::Triangles,
       entries_[i].idxCount,
       entries_[i].idxType

@@ -1,4 +1,5 @@
 #include "./terrain.h"
+#include "../../oglwrap/smart_enums.h"
 
 namespace engine {
 
@@ -20,11 +21,8 @@ Terrain::Terrain(const HeightMapInterface& height_map)
 }
 
 void Terrain::setup(oglwrap::Program& program, int tex_unit) {
-  using oglwrap::Uniform;
-  using oglwrap::LazyUniform;
-  using oglwrap::UniformSampler;
-  using oglwrap::MinFilter;
-  using oglwrap::MagFilter;
+  namespace gl = oglwrap;
+  using glEnum = oglwrap::SmartEnums;
 
   program.use();
 
@@ -36,30 +34,29 @@ void Terrain::setup(oglwrap::Program& program, int tex_unit) {
     } else
   #endif
     {
-      uRenderData_ =
-        make_unique<LazyUniform<glm::vec4>>(program, "CDLODTerrain_uRenderData");
+      uRenderData_ = make_unique<gl::LazyUniform<glm::vec4>>(
+          program, "CDLODTerrain_uRenderData");
     }
 
-  uCamPos_ = make_unique<LazyUniform<glm::vec3>>(program, "CDLODTerrain_uCamPos");
+  uCamPos_ = make_unique<gl::LazyUniform<glm::vec3>>(
+      program, "CDLODTerrain_uCamPos");
 
   tex_unit_ = tex_unit;
-  UniformSampler(program, "CDLODTerrain_uHeightMap") = tex_unit;
-  Uniform<glm::vec2>(program, "CDLODTerrain_uTexSize") =
+  gl::UniformSampler(program, "CDLODTerrain_uHeightMap") = tex_unit;
+  gl::Uniform<glm::vec2>(program, "CDLODTerrain_uTexSize") =
       glm::vec2(height_map_.w(), height_map_.h());
 
   height_map_tex_.active(tex_unit);
   height_map_tex_.bind();
   height_map_.upload(height_map_tex_);
-  height_map_tex_.minFilter(MinFilter::Linear);
-  height_map_tex_.magFilter(MagFilter::Linear);
+  height_map_tex_.minFilter(glEnum::Linear);
+  height_map_tex_.magFilter(glEnum::Linear);
   height_map_tex_.unbind();
 }
 
 void Terrain::render(const Camera& cam) {
-  using oglwrap::Context;
-  using oglwrap::Capability;
-  using oglwrap::PolyMode;
-  using oglwrap::FaceOrientation;
+  namespace gl = oglwrap;
+  using glEnum = oglwrap::SmartEnums;
 
   if(!uCamPos_) {
     throw std::logic_error("engine::cdlod::terrain requires a setup() call, "
@@ -71,8 +68,8 @@ void Terrain::render(const Camera& cam) {
 
   uCamPos_->set(cam.pos());
 
-  Context::FrontFace(FaceOrientation::Ccw);
-  Context::TemporaryEnable cullface{Capability::CullFace};
+  gl::FrontFace(glEnum::Ccw);
+  gl::TemporaryEnable cullface{glEnum::CullFace};
 
   #ifdef glVertexAttribDivisor
     if (glVertexAttribDivisor)

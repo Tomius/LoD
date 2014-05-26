@@ -3,8 +3,8 @@
 #include "tree.h"
 #include "oglwrap/debug/insertion.h"
 
-using namespace oglwrap;
-using gl = oglwrap::Context;
+namespace gl = oglwrap;
+using glEnum = oglwrap::SmartEnums;
 
 Tree::Tree(const engine::HeightMapInterface& height_map,
            Skybox *skybox, Shadow *shadow)
@@ -30,7 +30,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
   shadow_prog_ << shadow_vs_ << shadow_fs_;
   shadow_prog_.link().use();
 
-  UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
+  gl::UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
 
   shadow_prog_.validate();
 
@@ -44,7 +44,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
     mesh_[i].setupDiffuseTextures(1);
   }
 
-  UniformSampler(prog_, "uDiffuseTexture").set(1);
+  gl::UniformSampler(prog_, "uDiffuseTexture").set(1);
 
   prog_.validate();
 
@@ -80,7 +80,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
 void Tree::shadowRender(float time, const engine::Camera& cam) {
   shadow_prog_.use();
 
-  auto cullface = gl::TemporaryDisable(Capability::CullFace);
+  auto cullface = gl::TemporaryDisable(glEnum::CullFace);
 
   auto frustum = cam.frustum();
   auto campos = cam.pos();
@@ -106,9 +106,9 @@ void Tree::render(float time, const engine::Camera& cam) {
   uSunData_.set(skybox_->getSunData());
   uProjectionMatrix_ = cam.projectionMatrix();
 
-  auto blend = gl::TemporaryEnable(Capability::Blend);
-  auto cullface = gl::TemporaryDisable(Capability::CullFace);
-  gl::BlendFunc(BlendFunction::SrcAlpha, BlendFunction::OneMinusSrcAlpha);
+  auto blend = gl::TemporaryEnable(glEnum::Blend);
+  auto cullface = gl::TemporaryDisable(glEnum::CullFace);
+  gl::BlendFunc(glEnum::SrcAlpha, glEnum::OneMinusSrcAlpha);
 
   auto campos = cam.pos();
   auto cam_mx = cam.matrix();

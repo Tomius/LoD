@@ -4,16 +4,8 @@
 #include <string>
 #include <GLFW/glfw3.h>
 
-using oglwrap::ShaderSource;
-using oglwrap::VertexShader;
-using oglwrap::FragmentShader;
-using oglwrap::LazyVertexAttribArray;
-using oglwrap::Uniform;
-using oglwrap::UniformSampler;
-using oglwrap::Face;
-using oglwrap::FaceOrientation;
-using oglwrap::Capability;
-using gl = oglwrap::Context;
+namespace gl = oglwrap;
+using glEnum = oglwrap::SmartEnums;
 
 using engine::AnimParams;
 
@@ -37,16 +29,16 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     , skybox_(skybox)
     , shadow_(shadow) {
 
-  ShaderSource vs_src("ayumi.vert");
+  gl::ShaderSource vs_src("ayumi.vert");
   vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
   vs_src.insertMacroValue("BONE_NUM", mesh_.getNumBones());
 
-  ShaderSource shadow_vs_src("ayumi_shadow.vert");
+  gl::ShaderSource shadow_vs_src("ayumi_shadow.vert");
   shadow_vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
   shadow_vs_src.insertMacroValue("BONE_NUM", mesh_.getNumBones());
 
-  VertexShader vs(vs_src), shadow_vs(shadow_vs_src);
-  FragmentShader fs("ayumi.frag"), shadow_fs("shadow.frag");
+  gl::VertexShader vs(vs_src), shadow_vs(shadow_vs_src);
+  gl::FragmentShader fs("ayumi.frag"), shadow_fs("shadow.frag");
 
   shadow_prog_ << shadow_vs << shadow_fs;
   shadow_prog_.link();
@@ -59,14 +51,14 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
   mesh_.setupPositions(prog_ | "aPosition");
   mesh_.setupTexCoords(prog_ | "aTexCoord");
   mesh_.setupNormals(prog_ | "aNormal");
-  LazyVertexAttribArray boneIDs(prog_, "aBoneIDs", false);
-  LazyVertexAttribArray weights(prog_, "aWeights", false);
+  gl::LazyVertexAttribArray boneIDs(prog_, "aBoneIDs", false);
+  gl::LazyVertexAttribArray weights(prog_, "aWeights", false);
   mesh_.setupBones(boneIDs, weights, false);
 
   mesh_.setupDiffuseTextures(1);
   mesh_.setupSpecularTextures(2);
-  UniformSampler(prog_, "uDiffuseTexture").set(1);
-  UniformSampler(prog_, "uSpecularTexture").set(2);
+  gl::UniformSampler(prog_, "uDiffuseTexture").set(1);
+  gl::UniformSampler(prog_, "uSpecularTexture").set(2);
 
   prog_.validate();
 
@@ -175,15 +167,15 @@ void Ayumi::shadowRender(float time, const engine::Camera& cam) {
                              transform.matrix(), mesh_.worldTransform());
   mesh_.uploadBoneInfo(shadow_uBones_);
 
-  gl::CullFace(Face::Front);
-  gl::FrontFace(FaceOrientation::Ccw);
-  auto cullface = gl::TemporaryEnable(Capability::CullFace);
+  gl::CullFace(glEnum::Front);
+  gl::FrontFace(glEnum::Ccw);
+  auto cullface = gl::TemporaryEnable(glEnum::CullFace);
   mesh_.disableTextures();
 
   mesh_.render();
 
   mesh_.enableTextures();
-  gl::CullFace(Face::Back);
+  gl::CullFace(glEnum::Back);
 
   shadow_->push();
 }
@@ -197,8 +189,8 @@ void Ayumi::render(float time, const engine::Camera& cam) {
 
   mesh_.uploadBoneInfo(uBones_);
 
-  gl::FrontFace(FaceOrientation::Ccw);
-  auto cullface = gl::TemporaryEnable(Capability::CullFace);
+  gl::FrontFace(glEnum::Ccw);
+  auto cullface = gl::TemporaryEnable(glEnum::CullFace);
 
   mesh_.render();
 }

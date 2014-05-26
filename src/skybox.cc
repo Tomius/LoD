@@ -3,8 +3,7 @@
 #include "./skybox.h"
 #include "oglwrap/smart_enums.h"
 
-using oglwrap::UniformSampler;
-using gl = oglwrap::Context;
+namespace gl = oglwrap;
 using glEnum = oglwrap::SmartEnums;
 
 constexpr float day_duration = 128.0f;
@@ -21,7 +20,7 @@ Skybox::Skybox()
   prog_ << vs_ << fs_ << sky_fs_;
   prog_.link().use();
 
-  UniformSampler(prog_, "uEnvMap").set(0);
+  gl::UniformSampler(prog_, "uEnvMap").set(0);
 
   prog_.validate();
 

@@ -25,11 +25,11 @@ class Terrain {
   // vec2 CDLODTerrain_texCoord(vec3 pos);
   // vec3 CDLODTerrain_normal(vec3 pos);
   // mat3 CDLODTerrain_normalMatrix(vec3 normal);
-  const oglwrap::VertexShader& vertex_shader() const { return vertex_shader_; }
+  const gl::VertexShader& vertex_shader() const { return vertex_shader_; }
 
-  void setup(oglwrap::Program& program, int tex_unit);
+  void setup(gl::Program& program, int tex_unit);
 
-  void setup_and_link(oglwrap::Program& program, int tex_unit) {
+  void setup_and_link(gl::Program& program, int tex_unit) {
     program << vertex_shader_;
     program.link();
 
@@ -44,10 +44,10 @@ class Terrain {
 
  private:
   QuadTree mesh_;
-  oglwrap::Texture2D height_map_tex_;
-  std::unique_ptr<oglwrap::LazyUniform<glm::vec4>> uRenderData_;
-  std::unique_ptr<oglwrap::LazyUniform<glm::vec3>> uCamPos_;
-  oglwrap::VertexShader vertex_shader_;
+  gl::Texture2D height_map_tex_;
+  std::unique_ptr<gl::LazyUniform<glm::vec4>> uRenderData_;
+  std::unique_ptr<gl::LazyUniform<glm::vec3>> uCamPos_;
+  gl::VertexShader vertex_shader_;
   const HeightMapInterface& height_map_;
   int tex_unit_;
 };

@@ -55,12 +55,12 @@ class QuadTree {
     return node_dimension_;
   }
 
-  void setupPositions(oglwrap::VertexAttribArray attrib) {
+  void setupPositions(gl::VertexAttribArray attrib) {
     mesh_.setupPositions(attrib);
   }
 
   // Uses vertex attrib divisor!
-  void setupRenderData(oglwrap::VertexAttribArray attrib) {
+  void setupRenderData(gl::VertexAttribArray attrib) {
     mesh_.setupRenderData(attrib);
   }
 
@@ -73,7 +73,7 @@ class QuadTree {
 
   // render with uniforms
   void render(const engine::Camera& cam,
-              const oglwrap::UniformObject<glm::vec4>& uRenderData) {
+              const gl::UniformObject<glm::vec4>& uRenderData) {
     mesh_.clearRenderList();
     root_.selectNodes(cam.pos(), cam.frustum(), mesh_, node_dimension_);
     mesh_.render(uRenderData);

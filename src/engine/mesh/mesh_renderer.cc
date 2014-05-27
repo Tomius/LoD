@@ -2,6 +2,7 @@
 
 #include "mesh_renderer.h"
 #include "../../oglwrap/context.h"
+#include "../../oglwrap/smart_enums.h"
 
 namespace engine {
 
@@ -9,7 +10,7 @@ namespace engine {
 /** @param filename - The name of the file to load in.
   * @param flags - The assimp post-process flags. */
 MeshRenderer::MeshRenderer(const std::string& filename,
-                           oglwrap::Bitfield<aiPostProcessSteps> flags)
+                           gl::Bitfield<aiPostProcessSteps> flags)
   : scene_(importer_.ReadFile(
              filename.c_str(),
              flags | aiProcess_Triangulate
@@ -63,7 +64,7 @@ void MeshRenderer::setIndices(size_t index) {
   * Calling this function changes the currently active VAO, ArrayBuffer and IndexBuffer.
   * The mesh cannot be drawn without calling this function.
   * @param attrib - The attribute array to use as destination. */
-void MeshRenderer::setupPositions(oglwrap::VertexAttribArray attrib) {
+void MeshRenderer::setupPositions(gl::VertexAttribArray attrib) {
   if (is_setup_positions_) {
     throw std::logic_error(
       "MeshRenderer::setup_position is called multiply times on the same object"
@@ -94,26 +95,26 @@ void MeshRenderer::setupPositions(oglwrap::VertexAttribArray attrib) {
     // ~~~~~~<{ Load the indices }>~~~~~~
 
     if (paiMesh->mNumFaces * 3 < UCHAR_MAX) {
-      entries_[i].idxType = oglwrap::IndexType::UnsignedByte;
+      entries_[i].idxType = gl::kUnsignedByte;
       setIndices<unsigned char>(i);
     } else if (paiMesh->mNumFaces * 3 < USHRT_MAX) {
-      entries_[i].idxType = oglwrap::IndexType::UnsignedShort;
+      entries_[i].idxType = gl::kUnsignedShort;
       setIndices<unsigned short>(i);
     } else {
-      entries_[i].idxType = oglwrap::IndexType::UnsignedInt;
+      entries_[i].idxType = gl::kUnsignedInt;
       setIndices<unsigned int>(i);
     }
   }
 
-  oglwrap::VertexArray::Unbind();
-  oglwrap::ArrayBuffer::Unbind();
+  gl::VertexArray::Unbind();
+  gl::ArrayBuffer::Unbind();
 }
 
 /// Loads in vertex normals, and uploads it to an attribute array.
 /** Uploads the vertex normals data to an attribute array, and sets it up for use.
   * Calling this function changes the currently active VAO and ArrayBuffer.
   * @param attrib - The attribute array to use as destination. */
-void MeshRenderer::setupNormals(oglwrap::VertexAttribArray attrib) {
+void MeshRenderer::setupNormals(gl::VertexAttribArray attrib) {
 
   if (is_setup_normals_) {
     throw std::logic_error(
@@ -142,8 +143,8 @@ void MeshRenderer::setupNormals(oglwrap::VertexAttribArray attrib) {
     attrib.setup<float>(3).enable();
   }
 
-  oglwrap::VertexArray::Unbind();
-  oglwrap::ArrayBuffer::Unbind();
+  gl::VertexArray::Unbind();
+  gl::ArrayBuffer::Unbind();
 }
 
 /// Checks if every mesh in the scene has texcoords
@@ -169,7 +170,7 @@ bool MeshRenderer::hasTexCoords(unsigned char texCoordSet) {
   * @param attrib - The attribute array to use as destination.
   * @param texCoordSet  Specifies the index of the texture coordinate set
   *                     that should be used */
-void MeshRenderer::setupTexCoords(oglwrap::VertexAttribArray attrib,
+void MeshRenderer::setupTexCoords(gl::VertexAttribArray attrib,
                                   unsigned char texCoordSet) {
 
   if (is_setup_texcoords_) {
@@ -205,8 +206,8 @@ void MeshRenderer::setupTexCoords(oglwrap::VertexAttribArray attrib,
     attrib.setup<float>(2).enable();
   }
 
-  oglwrap::VertexArray::Unbind();
-  oglwrap::ArrayBuffer::Unbind();
+  gl::VertexArray::Unbind();
+  gl::ArrayBuffer::Unbind();
 }
 
 #if OGLWRAP_USE_IMAGEMAGICK
@@ -231,7 +232,7 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
                                  unsigned int type,
                                  unsigned int idx,
                                  bool srgb) {
-  oglwrap::Texture2D::Active(texture_unit);
+  gl::Texture2D::Active(texture_unit);
 
   materials_[tex_type].active = true;
   materials_[tex_type].texUnit = texture_unit;
@@ -260,27 +261,22 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
         materials_[tex_type].textures[i].bind();
         materials_[tex_type].textures[i].loadTexture(dir + filepath.data,
                                                      srgb ? "CSRGBA" : "CRGBA");
-        materials_[tex_type].textures[i].minFilter(oglwrap::MinFilter::Linear);
-        materials_[tex_type].textures[i].magFilter(oglwrap::MagFilter::Linear);
+        materials_[tex_type].textures[i].minFilter(gl::kLinear);
+        materials_[tex_type].textures[i].magFilter(gl::kLinear);
       } else {
         aiColor4D color(0.f, 0.f, 0.f, 1.0f);
         mat->Get(pKey, type, idx, color);
 
         materials_[tex_type].textures[i].bind();
-        materials_[tex_type].textures[i].Upload(
-          oglwrap::PixelDataInternalFormat::Rgba32F,
-          1, 1,
-          oglwrap::PixelDataFormat::Rgba,
-          oglwrap::PixelDataType::Float,
-          &color.r
-        );
-        materials_[tex_type].textures[i].minFilter(oglwrap::MinFilter::Nearest);
-        materials_[tex_type].textures[i].magFilter(oglwrap::MagFilter::Nearest);
+        materials_[tex_type].textures[i].upload(gl::kRgba32F, 1, 1, gl::kRgba,
+                                                gl::kFloat, &color.r);
+        materials_[tex_type].textures[i].minFilter(gl::kNearest);
+        materials_[tex_type].textures[i].magFilter(gl::kNearest);
       }
     }
   }
 
-  oglwrap::Texture2D::Unbind();
+  gl::Texture2D::Unbind();
 }
 #endif
 
@@ -319,11 +315,7 @@ void MeshRenderer::render() {
       }
     }
 
-    oglwrap::DrawElements(
-      oglwrap::PrimType::Triangles,
-      entries_[i].idxCount,
-      entries_[i].idxType
-    );
+    gl::DrawElements(gl::kTriangles, entries_[i].idxCount, entries_[i].idxType);
 
     if (textures_enabled_) {
       for (auto iter = materials_.begin(); iter != materials_.end(); iter++) {
@@ -336,7 +328,7 @@ void MeshRenderer::render() {
     }
   }
 
-  oglwrap::VertexArray::Unbind();
+  gl::VertexArray::Unbind();
 }
 
 /// The transformation that takes the model's world coordinates to the OpenGL style world coordinates.

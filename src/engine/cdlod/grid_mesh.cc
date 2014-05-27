@@ -3,8 +3,6 @@
 #include "../../oglwrap/context.h"
 #include "../../oglwrap/smart_enums.h"
 
-namespace gl = oglwrap;
-
 namespace engine {
 namespace cdlod {
 
@@ -16,7 +14,7 @@ GLushort GridMesh::indexOf(int x, int y) {
   return (dimension_ + 1) * y + x;
 }
 
-void GridMesh::setupPositions(oglwrap::VertexAttribArray attrib) {
+void GridMesh::setupPositions(gl::VertexAttribArray attrib) {
   std::vector<svec2> positions;
   positions.reserve((dimension_+1) * (dimension_+1));
 
@@ -45,14 +43,14 @@ void GridMesh::setupPositions(oglwrap::VertexAttribArray attrib) {
   vao_.bind();
   aPositions_.bind();
   aPositions_.data(positions);
-  attrib.pointer(2, oglwrap::DataType::Short).enable();
+  attrib.pointer(2, gl::DataType::kShort).enable();
 
   aIndices_.bind();
   aIndices_.data(indices);
   vao_.unbind();
 }
 
-void GridMesh::setupRenderData(oglwrap::VertexAttribArray attrib) {
+void GridMesh::setupRenderData(gl::VertexAttribArray attrib) {
 #ifdef glVertexAttribDivisor
   if (glVertexAttribDivisor) {
     vao_.bind();
@@ -75,33 +73,33 @@ void GridMesh::clearRenderList() {
 void GridMesh::render() const {
 #if defined(glDrawElementsInstanced) && defined(glVertexAttribDivisor)
   if (glVertexAttribDivisor) {
-    using oglwrap::PrimType;
-    using oglwrap::IndexType;
+    using gl::PrimType;
+    using gl::IndexType;
 
     vao_.bind();
 
     aRenderData_.bind();
     aRenderData_.data(render_data_);
 
-    gl::DrawElementsInstanced(PrimType::TriangleStrip,
+    gl::DrawElementsInstanced(PrimType::kTriangleStrip,
                               index_count_,
-                              IndexType::UnsignedShort,
+                              IndexType::kUnsignedShort,
                               render_data_.size());   // instance count
     vao_.unbind();
   }
 #endif
 }
 
-void GridMesh::render(oglwrap::UniformObject<glm::vec4> uRenderData) const {
-  using oglwrap::PrimType;
-  using oglwrap::IndexType;
+void GridMesh::render(gl::UniformObject<glm::vec4> uRenderData) const {
+  using gl::PrimType;
+  using gl::IndexType;
 
   vao_.bind();
   for(auto& data : render_data_) {
     uRenderData = data;
-    gl::DrawElements(PrimType::TriangleStrip,
+    gl::DrawElements(PrimType::kTriangleStrip,
                     index_count_,
-                    IndexType::UnsignedShort);
+                    IndexType::kUnsignedShort);
   }
   vao_.unbind();
 }

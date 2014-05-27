@@ -2,13 +2,11 @@
 #include "../../oglwrap/smart_enums.h"
 
 namespace engine {
-
 namespace cdlod {
 
 Terrain::Terrain(const HeightMapInterface& height_map)
     : mesh_(height_map), height_map_(height_map) {
-
-  oglwrap::ShaderSource vs_src{"cdlod_terrain.vert"};
+  gl::ShaderSource vs_src{"cdlod_terrain.vert"};
 
   #ifdef glVertexAttribDivisor
     if (glVertexAttribDivisor)
@@ -20,10 +18,7 @@ Terrain::Terrain(const HeightMapInterface& height_map)
   vertex_shader_.source(vs_src);
 }
 
-void Terrain::setup(oglwrap::Program& program, int tex_unit) {
-  namespace gl = oglwrap;
-  using glEnum = oglwrap::SmartEnums;
-
+void Terrain::setup(gl::Program& program, int tex_unit) {
   program.use();
 
   mesh_.setupPositions(program | "CDLODTerrain_aPosition");
@@ -49,15 +44,12 @@ void Terrain::setup(oglwrap::Program& program, int tex_unit) {
   height_map_tex_.active(tex_unit);
   height_map_tex_.bind();
   height_map_.upload(height_map_tex_);
-  height_map_tex_.minFilter(glEnum::Linear);
-  height_map_tex_.magFilter(glEnum::Linear);
+  height_map_tex_.minFilter(gl::kLinear);
+  height_map_tex_.magFilter(gl::kLinear);
   height_map_tex_.unbind();
 }
 
 void Terrain::render(const Camera& cam) {
-  namespace gl = oglwrap;
-  using glEnum = oglwrap::SmartEnums;
-
   if(!uCamPos_) {
     throw std::logic_error("engine::cdlod::terrain requires a setup() call, "
                            "before the use of the render() function.");
@@ -68,8 +60,8 @@ void Terrain::render(const Camera& cam) {
 
   uCamPos_->set(cam.pos());
 
-  gl::FrontFace(glEnum::Ccw);
-  gl::TemporaryEnable cullface{glEnum::CullFace};
+  gl::FrontFace(gl::kCcw);
+  gl::TemporaryEnable cullface{gl::kCullFace};
 
   #ifdef glVertexAttribDivisor
     if (glVertexAttribDivisor)

@@ -24,11 +24,11 @@ protected:
 
   /// A class to store per mesh data (the class loads in a scene, that might contain multiply meshes).
   struct MeshEntry {
-    oglwrap::VertexArray vao;
-    oglwrap::ArrayBuffer verts, normals, texCoords;
-    oglwrap::IndexBuffer indices;
+    gl::VertexArray vao;
+    gl::ArrayBuffer verts, normals, texCoords;
+    gl::IndexBuffer indices;
     unsigned idxCount, materialIndex;
-    oglwrap::IndexType idxType;
+    gl::IndexType idxType;
 
     MeshEntry() : materialIndex(0xFFFFFFFF) {} // Invalid material
   };
@@ -52,7 +52,7 @@ protected:
   struct MaterialInfo {
     bool active;
     int texUnit;
-    std::vector<oglwrap::Texture2D> textures;
+    std::vector<gl::Texture2D> textures;
 
 
     MaterialInfo()
@@ -82,7 +82,7 @@ public:
   /** @param filename - The name of the file to load in.
     * @param flags - The assimp post-process flags. */
   MeshRenderer(const std::string& filename,
-               oglwrap::Bitfield<aiPostProcessSteps> flags);
+               gl::Bitfield<aiPostProcessSteps> flags);
 
 private:
   template <class IdxType>
@@ -97,13 +97,13 @@ public:
     * Calling this function changes the currently active VAO, ArrayBuffer and IndexBuffer.
     * The mesh cannot be drawn without calling this function.
     * @param attrib - The attribute array to use as destination. */
-  void setupPositions(oglwrap::VertexAttribArray attrib);
+  void setupPositions(gl::VertexAttribArray attrib);
 
   /// Loads in vertex normals, and uploads it to an attribute array.
   /** Uploads the vertex normals data to an attribute array, and sets it up for use.
     * Calling this function changes the currently active VAO and ArrayBuffer.
     * @param attrib - The attribute array to use as destination. */
-  void setupNormals(oglwrap::VertexAttribArray attrib);
+  void setupNormals(gl::VertexAttribArray attrib);
 
   /// Checks if every mesh in the scene has texcoords
   /** Returns true if all of the meshes in the scene have texture
@@ -118,7 +118,7 @@ public:
     * Calling this function changes the currently active VAO and ArrayBuffer.
     * @param attrib - The attribute array to use as destination.
     * @param texCoordSet Specifies the index of the texture coordinate set that should be used */
-  void setupTexCoords(oglwrap::VertexAttribArray attrib,
+  void setupTexCoords(gl::VertexAttribArray attrib,
                       unsigned char texCoordSet = 0);
 
   /**

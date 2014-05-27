@@ -26,9 +26,6 @@
 #include "./shadow.h"
 #include "./loading_screen.h"
 
-namespace gl = oglwrap;
-using glEnum = oglwrap::SmartEnums;
-
 extern const float GRAVITY = 18.0f;
 /* 0 -> max quality
    2 -> max performance */
@@ -39,10 +36,10 @@ bool was_left_click = false;
 void glInit(GLFWwindow* window) {
   gl::ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   gl::ClearDepth(1.0f);
-  gl::Enable(glEnum::DepthTest);
-  gl::Enable(glEnum::DepthClamp);
-  gl::CullFace(glEnum::Back);
-  gl::Hint(glEnum::TextureCompressionHint, glEnum::Fastest);
+  gl::Enable(gl::kDepthTest);
+  gl::Enable(gl::kDepthClamp);
+  gl::CullFace(gl::kBack);
+  gl::Hint(gl::kTextureCompressionHint, gl::kFastest);
 
   LoadingScreen().render();
   glfwSwapBuffers(window);

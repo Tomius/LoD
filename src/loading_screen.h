@@ -13,16 +13,13 @@
 #include "engine/gameobject.h"
 
 class LoadingScreen {
-  oglwrap::Texture2D tex_;
-  oglwrap::FullScreenRectangle rect_;
+  gl::Texture2D tex_;
+  gl::FullScreenRectangle rect_;
 
-  oglwrap::Program prog_;
+  gl::Program prog_;
 
 public:
   LoadingScreen() {
-    namespace gl = oglwrap;
-    using glEnum = oglwrap::SmartEnums;
-
     gl::VertexShader vs("loading.vert");
     gl::FragmentShader fs("loading.frag");
     prog_ << vs << fs;
@@ -31,8 +28,8 @@ public:
     tex_.active(0);
     tex_.bind();
     tex_.loadTexture("textures/loading.png");
-    tex_.minFilter(glEnum::Linear);
-    tex_.magFilter(glEnum::Linear);
+    tex_.minFilter(gl::kLinear);
+    tex_.magFilter(gl::kLinear);
     tex_.unbind();
 
     gl::UniformSampler(prog_, "uTex").set(0);
@@ -44,15 +41,12 @@ public:
   }
 
   void render() {
-    namespace gl = oglwrap;
-    using glEnum = oglwrap::SmartEnums;
-
     prog_.use();
     tex_.active(0);
     tex_.bind();
 
-    auto capabilies = gl::TemporarySet({{glEnum::CullFace, false},
-                                        {glEnum::DepthTest, false}});
+    auto capabilies = gl::TemporarySet({{gl::kCullFace, false},
+                                        {gl::kDepthTest, false}});
 
     rect_.render();
     tex_.unbind();

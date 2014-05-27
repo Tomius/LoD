@@ -12,13 +12,13 @@
 #include "engine/gameobject.h"
 
 class BloomEffect : public engine::GameObject {
-  oglwrap::VertexShader vs_;
-  oglwrap::FragmentShader fs_;
-  oglwrap::Program prog_;
+  gl::VertexShader vs_;
+  gl::FragmentShader fs_;
+  gl::Program prog_;
 
-  oglwrap::Texture2D tex_;
-  oglwrap::LazyUniform<glm::vec2> uScreenSize_;
-  oglwrap::FullScreenRectangle rect_;
+  gl::Texture2D tex_;
+  gl::LazyUniform<glm::vec2> uScreenSize_;
+  gl::FullScreenRectangle rect_;
 
   GLuint width_, height_;
 public:

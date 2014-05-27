@@ -46,15 +46,15 @@ public:
     return glm::mix(fh, ch, y-fy);
   }
 
-  virtual oglwrap::PixelDataFormat format() const override {
+  virtual gl::PixelDataFormat format() const override {
     return tex_.format();
   }
 
-  virtual oglwrap::PixelDataType type() const override {
+  virtual gl::PixelDataType type() const override {
     return tex_.type();
   }
 
-  virtual void upload(oglwrap::Texture2D& tex) const {
+  virtual void upload(gl::Texture2D& tex) const {
     tex_.upload(tex);
   }
 };

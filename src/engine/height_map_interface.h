@@ -27,13 +27,13 @@ public:
   virtual double heightAt(double x, double y) const = 0;
 
   // Returns the format of the height data
-  virtual oglwrap::PixelDataFormat format() const = 0;
+  virtual gl::PixelDataFormat format() const = 0;
 
   // Returns the type of the height data
-  virtual oglwrap::PixelDataType type() const = 0;
+  virtual gl::PixelDataType type() const = 0;
 
   // Uploads the heightmap to a texture object
-  virtual void upload(oglwrap::Texture2D& tex) const = 0;
+  virtual void upload(gl::Texture2D& tex) const = 0;
 
   // Returns dvec2{min, max} of area between (x-w/2, y-h/2) and (x+w/2, y+h/2)
   // it returns {0, 0} if the area requested doesn't contain a single valid value

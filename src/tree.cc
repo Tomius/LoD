@@ -3,9 +3,6 @@
 #include "tree.h"
 #include "oglwrap/debug/insertion.h"
 
-namespace gl = oglwrap;
-using glEnum = oglwrap::SmartEnums;
-
 Tree::Tree(const engine::HeightMapInterface& height_map,
            Skybox *skybox, Shadow *shadow)
   : mesh_{{"models/trees/swamptree.dae",
@@ -80,7 +77,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
 void Tree::shadowRender(float time, const engine::Camera& cam) {
   shadow_prog_.use();
 
-  auto cullface = gl::TemporaryDisable(glEnum::CullFace);
+  auto cullface = gl::TemporaryDisable(gl::kCullFace);
 
   auto frustum = cam.frustum();
   auto campos = cam.pos();
@@ -106,9 +103,9 @@ void Tree::render(float time, const engine::Camera& cam) {
   uSunData_.set(skybox_->getSunData());
   uProjectionMatrix_ = cam.projectionMatrix();
 
-  auto blend = gl::TemporaryEnable(glEnum::Blend);
-  auto cullface = gl::TemporaryDisable(glEnum::CullFace);
-  gl::BlendFunc(glEnum::SrcAlpha, glEnum::OneMinusSrcAlpha);
+  auto blend = gl::TemporaryEnable(gl::kBlend);
+  auto cullface = gl::TemporaryDisable(gl::kCullFace);
+  gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
   auto campos = cam.pos();
   auto cam_mx = cam.matrix();

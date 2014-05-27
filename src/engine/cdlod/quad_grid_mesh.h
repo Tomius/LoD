@@ -20,12 +20,12 @@ class QuadGridMesh {
     assert(2 <= dimension && dimension <= 256);
   }
 
-  void setupPositions(oglwrap::VertexAttribArray attrib) {
+  void setupPositions(gl::VertexAttribArray attrib) {
     mesh_.setupPositions(attrib);
   }
 
   // Uses vertex attrib divisor!
-  void setupRenderData(oglwrap::VertexAttribArray attrib) {
+  void setupRenderData(gl::VertexAttribArray attrib) {
     mesh_.setupRenderData(attrib);
   }
 
@@ -56,7 +56,7 @@ class QuadGridMesh {
   }
 
   // render with uniforms
-  void render(oglwrap::UniformObject<glm::vec4> uRenderData) const {
+  void render(gl::UniformObject<glm::vec4> uRenderData) const {
     mesh_.render(uRenderData);
   }
 };

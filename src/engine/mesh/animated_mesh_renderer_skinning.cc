@@ -182,8 +182,8 @@ void AnimatedMeshRenderer::loadBones() {
   }
 
   // Unbind our things, so they won't be modified from outside
-  oglwrap::VertexArray::Unbind();
-  oglwrap::ArrayBuffer::Unbind();
+  gl::VertexArray::Unbind();
+  gl::ArrayBuffer::Unbind();
 }
 
 /// Creates the bone attributes data (the skinning.)
@@ -210,9 +210,9 @@ template <class Index_t>
   * @param boneIDs - Should be an array of attributes, that will be shader plumbed for the boneIDs data.
   * @param bone_weights - Should be an array of attributes, that will be shader plumbed for the bone_weights data.
   * @param integerIDs - If true, boneIDs are uploaded as integers (#version 130+) else they are uploaded as floats */
-void AnimatedMeshRenderer::shaderPlumbBones(oglwrap::IndexType idx_t,
-                                            oglwrap::LazyVertexAttribArray boneIDs,
-                                            oglwrap::LazyVertexAttribArray bone_weights,
+void AnimatedMeshRenderer::shaderPlumbBones(gl::IndexType idx_t,
+                                            gl::LazyVertexAttribArray boneIDs,
+                                            gl::LazyVertexAttribArray bone_weights,
                                             bool integerIDs) {
   const size_t per_attrib_size = sizeof(SkinningData::VertexBoneData_PerAttribute<Index_t>);
 
@@ -230,16 +230,16 @@ void AnimatedMeshRenderer::shaderPlumbBones(oglwrap::IndexType idx_t,
 
       if (integerIDs) {
         boneIDs[boneAttribSet].ipointer(
-          4, oglwrap::WholeDataType(idx_t), stride, (const void*)baseOffset
+          4, gl::WholeDataType(idx_t), stride, (const void*)baseOffset
         ).enable();
       } else {
         boneIDs[boneAttribSet].pointer(
-          4, oglwrap::DataType(idx_t), false, stride, (const void*)baseOffset
+          4, gl::DataType(idx_t), false, stride, (const void*)baseOffset
         ).enable();
       }
 
       bone_weights[boneAttribSet].setup(
-        4, oglwrap::DataType::Float, stride, (const void*)weightOffset
+        4, gl::DataType::kFloat, stride, (const void*)weightOffset
       ).enable();
     }
 
@@ -256,8 +256,8 @@ void AnimatedMeshRenderer::shaderPlumbBones(oglwrap::IndexType idx_t,
   }
 
   // Unbind our things, so they won't be modified from outside
-  oglwrap::VertexArray::Unbind();
-  oglwrap::ArrayBuffer::Unbind();
+  gl::VertexArray::Unbind();
+  gl::ArrayBuffer::Unbind();
 }
 
 /// Returns the first node called \a name, who is under \a currentRoot in the bone hierarchy.
@@ -363,8 +363,8 @@ size_t AnimatedMeshRenderer::getBoneAttribNum() {
   * @param boneIDs - The array of attributes array to use as destination for bone IDs.
   * @param bone_weights - The array of attributes array to use as destination for bone weights.
   * @param integerIDs - if true, boneIDs are uploaded as integers (#version 130+) else they are uploaded as floats */
-void AnimatedMeshRenderer::setupBones(oglwrap::LazyVertexAttribArray boneIDs,
-                                      oglwrap::LazyVertexAttribArray bone_weights,
+void AnimatedMeshRenderer::setupBones(gl::LazyVertexAttribArray boneIDs,
+                                      gl::LazyVertexAttribArray bone_weights,
                                       bool integerIDs) {
 
   if (skinning_data_.is_setup_bones) {
@@ -382,15 +382,15 @@ void AnimatedMeshRenderer::setupBones(oglwrap::LazyVertexAttribArray boneIDs,
 
   if (skinning_data_.num_bones < UCHAR_MAX) {
     shaderPlumbBones<unsigned char>(
-      oglwrap::IndexType::UnsignedByte, boneIDs, bone_weights, integerIDs
+      gl::IndexType::kUnsignedByte, boneIDs, bone_weights, integerIDs
     );
   } else if (skinning_data_.num_bones < USHRT_MAX) {
     shaderPlumbBones<unsigned short>(
-      oglwrap::IndexType::UnsignedShort, boneIDs, bone_weights, integerIDs
+      gl::IndexType::kUnsignedShort, boneIDs, bone_weights, integerIDs
     );
   } else { // more than 65535 bones? WTF???
     shaderPlumbBones<unsigned int>(
-      oglwrap::IndexType::UnsignedInt, boneIDs, bone_weights, integerIDs
+      gl::IndexType::kUnsignedInt, boneIDs, bone_weights, integerIDs
     );
   }
 }

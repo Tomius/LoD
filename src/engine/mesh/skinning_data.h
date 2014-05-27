@@ -68,7 +68,7 @@ struct SkinningData {
   };
 
   /// The OpenGL buffers for the vertex bone data.
-  std::vector<oglwrap::ArrayBuffer> vertex_bone_data_buffers;
+  std::vector<gl::ArrayBuffer> vertex_bone_data_buffers;
 
   /// The transformations of the bones.
   std::vector<BoneInfo> bone_info;

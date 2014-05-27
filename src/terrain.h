@@ -12,14 +12,14 @@
 #include "engine/cdlod/terrain.h"
 
 class Terrain : public engine::GameObject {
-  oglwrap::Program prog_;
-  oglwrap::VertexShader vs_;
-  oglwrap::FragmentShader fs_;
+  gl::Program prog_;
+  gl::VertexShader vs_;
+  gl::FragmentShader fs_;
 
-  oglwrap::Texture2D grassMaps_[2], grassNormalMap_;
-  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uShadowCP_;
-  oglwrap::LazyUniform<glm::vec4> uSunData_;
-  oglwrap::LazyUniform<int> uNumUsedShadowMaps_;
+  gl::Texture2D grassMaps_[2], grassNormalMap_;
+  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uShadowCP_;
+  gl::LazyUniform<glm::vec4> uSunData_;
+  gl::LazyUniform<int> uNumUsedShadowMaps_;
 
   engine::HeightMap<unsigned char> height_map_;
   engine::cdlod::Terrain mesh_;

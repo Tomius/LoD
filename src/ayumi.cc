@@ -4,11 +4,7 @@
 #include <string>
 #include <GLFW/glfw3.h>
 
-namespace gl = oglwrap;
-using glEnum = oglwrap::SmartEnums;
-
 using engine::AnimParams;
-
 extern bool was_left_click;
 
 Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
@@ -167,15 +163,15 @@ void Ayumi::shadowRender(float time, const engine::Camera& cam) {
                              transform.matrix(), mesh_.worldTransform());
   mesh_.uploadBoneInfo(shadow_uBones_);
 
-  gl::CullFace(glEnum::Front);
-  gl::FrontFace(glEnum::Ccw);
-  auto cullface = gl::TemporaryEnable(glEnum::CullFace);
+  gl::CullFace(gl::kFront);
+  gl::FrontFace(gl::kCcw);
+  auto cullface = gl::TemporaryEnable(gl::kCullFace);
   mesh_.disableTextures();
 
   mesh_.render();
 
   mesh_.enableTextures();
-  gl::CullFace(glEnum::Back);
+  gl::CullFace(gl::kBack);
 
   shadow_->push();
 }
@@ -189,8 +185,8 @@ void Ayumi::render(float time, const engine::Camera& cam) {
 
   mesh_.uploadBoneInfo(uBones_);
 
-  gl::FrontFace(glEnum::Ccw);
-  auto cullface = gl::TemporaryEnable(glEnum::CullFace);
+  gl::FrontFace(gl::kCcw);
+  auto cullface = gl::TemporaryEnable(gl::kCullFace);
 
   mesh_.render();
 }

@@ -26,7 +26,7 @@ void Animation::setDefaultAnimation(const std::string& anim_name,
 void Animation::changeAnimation(size_t anim_idx,
                                 float current_time,
                                 float transition_time,
-                                oglwrap::Bitfield<AnimFlag> flags,
+                                gl::Bitfield<AnimFlag> flags,
                                 float speed) {
   bool was_last_invalid = (last_anim_.handle == nullptr);
 

@@ -21,23 +21,23 @@ class Skybox : public engine::GameObject {
   glm::vec3 getSunPos() const;
   glm::vec4 getSunData() const;
 
-  const oglwrap::TextureCube& env_map() { return env_map_; };
-  const oglwrap::FragmentShader& sky_fs() { return sky_fs_; };
+  const gl::TextureCube& env_map() { return env_map_; };
+  const gl::FragmentShader& sky_fs() { return sky_fs_; };
 
  private:
   float time_;
-  oglwrap::Cube cube_;
+  gl::Cube cube_;
 
-  oglwrap::VertexShader vs_;
-  oglwrap::FragmentShader fs_;
-  oglwrap::Program prog_;
+  gl::VertexShader vs_;
+  gl::FragmentShader fs_;
+  gl::Program prog_;
 
-  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_;
-  oglwrap::LazyUniform<glm::mat3> uCameraMatrix_;
-  oglwrap::LazyUniform<glm::vec4> uSunData_;
+  gl::LazyUniform<glm::mat4> uProjectionMatrix_;
+  gl::LazyUniform<glm::mat3> uCameraMatrix_;
+  gl::LazyUniform<glm::vec4> uSunData_;
 
-  oglwrap::TextureCube env_map_;
-  oglwrap::FragmentShader sky_fs_;
+  gl::TextureCube env_map_;
+  gl::FragmentShader sky_fs_;
 };
 
 

@@ -3,8 +3,6 @@
 #include "charmove.h"
 #include <GLFW/glfw3.h>
 
-using namespace oglwrap;
-
 CharacterMovement::CharacterMovement(
                   GLFWwindow* window,
                   engine::Transform& transform,
@@ -85,7 +83,7 @@ void CharacterMovement::update(float time) {
     glm::vec3 fwd = cam.forward();
     double cameraRot = -atan2(fwd.z, fwd.x);
     double moveRot = atan2(moveDir.y, moveDir.x); // +y is forward
-    dest_rot_ = ToDegree(cameraRot + moveRot);
+    dest_rot_ = gl::ToDegree(cameraRot + moveRot);
     dest_rot_ = fmod(dest_rot_, 360);
 
     double diff = dest_rot_ - curr_rot_;

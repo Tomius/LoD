@@ -10,8 +10,8 @@
 #include "engine/gameobject.h"
 
 class Shadow {
-  oglwrap::Texture2D tex_;
-  oglwrap::Framebuffer fbo_;
+  gl::Texture2D tex_;
+  gl::Framebuffer fbo_;
 
   size_t w_, h_, size_;
   size_t xsize_, ysize_, curr_depth_, max_depth_;
@@ -31,7 +31,7 @@ public:
   }
 
   const std::vector<glm::mat4>& shadowCPs() const;
-  const oglwrap::Texture2D& shadowTex() const;
+  const gl::Texture2D& shadowTex() const;
   glm::ivec2 getAtlasDimensions() const {
     return glm::ivec2(xsize_, ysize_);
   }

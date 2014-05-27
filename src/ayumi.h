@@ -22,12 +22,12 @@ extern const int PERFORMANCE;
 class Ayumi : public engine::GameObject {
   engine::AnimatedMeshRenderer mesh_;
   engine::Animation anim_;
-  oglwrap::Program prog_, shadow_prog_;
+  gl::Program prog_, shadow_prog_;
 
-  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_,
+  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_,
                                   uModelMatrix_, uBones_,
                                   shadow_uMCP_, shadow_uBones_;
-  oglwrap::LazyUniform<glm::vec4> uSunData_;
+  gl::LazyUniform<glm::vec4> uSunData_;
 
   bool attack2_, attack3_;
 

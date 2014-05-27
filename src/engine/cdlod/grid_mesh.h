@@ -31,9 +31,9 @@ struct svec2 {
 // use unsigned shorts instead of ints or floats), but for CDLOD, you need
 // pow2 sizes, so there 128*128 is the max
 class GridMesh {
-  oglwrap::VertexArray vao_;
-  oglwrap::IndexBuffer aIndices_;
-  oglwrap::ArrayBuffer aPositions_, aRenderData_;
+  gl::VertexArray vao_;
+  gl::IndexBuffer aIndices_;
+  gl::ArrayBuffer aPositions_, aRenderData_;
   int index_count_, dimension_;
   std::vector<glm::vec4> render_data_; // xy: offset, z: scale, w: level
 
@@ -41,8 +41,8 @@ class GridMesh {
 
  public:
   GridMesh(GLubyte dimension);
-  void setupPositions(oglwrap::VertexAttribArray attrib);
-  void setupRenderData(oglwrap::VertexAttribArray attrib);
+  void setupPositions(gl::VertexAttribArray attrib);
+  void setupRenderData(gl::VertexAttribArray attrib);
 
   // xy: offset, z: scale, w: level
   void addToRenderList(const glm::vec4& render_data);
@@ -52,7 +52,7 @@ class GridMesh {
   void render() const;
 
   // render with uniforms
-  void render(oglwrap::UniformObject<glm::vec4> uRenderData) const;
+  void render(gl::UniformObject<glm::vec4> uRenderData) const;
 
   int dimension() const {return dimension_;}
 };

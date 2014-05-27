@@ -22,15 +22,15 @@ extern const int PERFORMANCE;
 class Tree : public engine::GameObject {
   static constexpr int kTreeTypeNum = 2;
   engine::MeshRenderer mesh_[kTreeTypeNum];
-  oglwrap::Program prog_, shadow_prog_;
+  gl::Program prog_, shadow_prog_;
 
-  oglwrap::VertexShader vs_, shadow_vs_;
-  oglwrap::FragmentShader fs_, shadow_fs_;
+  gl::VertexShader vs_, shadow_vs_;
+  gl::FragmentShader fs_, shadow_fs_;
 
-  oglwrap::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
-  oglwrap::LazyUniform<glm::mat3> uNormalMatrix_;
-  oglwrap::LazyUniform<glm::mat4> shadow_uMCP_;
-  oglwrap::LazyUniform<glm::vec4> uSunData_;
+  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
+  gl::LazyUniform<glm::mat3> uNormalMatrix_;
+  gl::LazyUniform<glm::mat4> shadow_uMCP_;
+  gl::LazyUniform<glm::vec4> uSunData_;
 
   Skybox *skybox_;
   Shadow *shadow_;

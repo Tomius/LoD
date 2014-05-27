@@ -4,9 +4,6 @@
 #include "oglwrap/context.h"
 #include "oglwrap/smart_enums.h"
 
-namespace gl = oglwrap;
-using glEnum = oglwrap::SmartEnums;
-
 Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
     : size_(shadow_map_size)
     , xsize_(atlas_x_size)
@@ -17,25 +14,21 @@ Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
 
   // Setup the texture array that will serve as storage.
   tex_.bind();
-  tex_.upload(
-    glEnum::DepthComponent,
-    size_*xsize_, size_*ysize_,
-    glEnum::DepthComponent,
-    glEnum::Float, nullptr
-  );
-  tex_.minFilter(glEnum::Linear);
-  tex_.magFilter(glEnum::Linear);
-  tex_.wrapS(glEnum::ClampToBorder);
-  tex_.wrapT(glEnum::ClampToBorder);
+  tex_.upload(gl::kDepthComponent, size_*xsize_, size_*ysize_,
+              gl::kDepthComponent, gl::kFloat, nullptr);
+  tex_.minFilter(gl::kLinear);
+  tex_.magFilter(gl::kLinear);
+  tex_.wrapS(gl::kClampToBorder);
+  tex_.wrapT(gl::kClampToBorder);
   tex_.borderColor(glm::vec4(1.0f));
-  tex_.compareFunc(glEnum::Lequal);
-  tex_.compareMode(glEnum::CompareRefToTexture);
+  tex_.compareFunc(gl::kLequal);
+  tex_.compareMode(gl::kCompareRefToTexture);
 
   // Setup the FBO
   fbo_.bind();
-  fbo_.attachTexture(glEnum::DepthAttachment, tex_, 0);
+  fbo_.attachTexture(gl::kDepthAttachment, tex_, 0);
   // No color output in the bound framebuffer, only depth.
-  gl::DrawBuffer(glEnum::None);
+  gl::DrawBuffer(gl::kNone);
   fbo_.validate();
   fbo_.unbind();
 }
@@ -87,7 +80,7 @@ const std::vector<glm::mat4>& Shadow::shadowCPs() const {
   return cp_matrices_;
 }
 
-const oglwrap::Texture2D& Shadow::shadowTex() const {
+const gl::Texture2D& Shadow::shadowTex() const {
   return tex_;
 }
 

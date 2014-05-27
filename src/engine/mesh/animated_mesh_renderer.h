@@ -36,7 +36,7 @@ public:
    * @param flags      The assimp post-process flags to use while loading the mesh.
    */
   AnimatedMeshRenderer(const std::string& filename,
-                       oglwrap::Bitfield<aiPostProcessSteps> flags);
+                       gl::Bitfield<aiPostProcessSteps> flags);
 
   /// Returns a reference to the animation resources
   const AnimData& getAnimData() const {
@@ -102,9 +102,9 @@ private:
    *                       plumbed for the bone_weights data.
    * @param integerIDs     If true, boneIDs are uploaded as integers
    *                       (#version 130+) else they are uploaded as floats */
-  void shaderPlumbBones(oglwrap::IndexType idx_t,
-                        oglwrap::LazyVertexAttribArray boneIDs,
-                        oglwrap::LazyVertexAttribArray bone_weights,
+  void shaderPlumbBones(gl::IndexType idx_t,
+                        gl::LazyVertexAttribArray boneIDs,
+                        gl::LazyVertexAttribArray bone_weights,
                         bool integerWeights = true);
 
 private:
@@ -173,8 +173,8 @@ public:
    *                       for bone weights.
    * @param integerIDs     If true, boneIDs are uploaded as integers
    *                       (#version 130+) else they are uploaded as floats */
-  void setupBones(oglwrap::LazyVertexAttribArray boneIDs,
-                  oglwrap::LazyVertexAttribArray bone_weights,
+  void setupBones(gl::LazyVertexAttribArray boneIDs,
+                  gl::LazyVertexAttribArray bone_weights,
                   bool integerIDs = true);
 
   /*         //=====:==-==-==:=====\\                           //=====:==-==-==:=====\\
@@ -319,7 +319,7 @@ public:
    *
    * @param bones - The uniform naming the bones array. It should be indexable.
    */
-  void uploadBoneInfo(oglwrap::LazyUniform<glm::mat4>& bones);
+  void uploadBoneInfo(gl::LazyUniform<glm::mat4>& bones);
 
   /**
    * @brief Updates the bones transformation and uploads them into the given
@@ -333,7 +333,7 @@ public:
    */
   void updateAndUploadBoneInfo(Animation& animation,
                                float time_in_seconds,
-                               oglwrap::LazyUniform<glm::mat4>& bones);
+                               gl::LazyUniform<glm::mat4>& bones);
 
   /*       //=====:==-==-==:=====\\                                   //=====:==-==-==:=====\\
     <---<}>==~=~=~==--==--==~=~=~==<{>----- Animation Control -----<}>==~=~=~==--==--==~=~=~==<{>--->
@@ -359,7 +359,7 @@ public:
    */
   void addAnimation(const std::string& filename,
                     const std::string& anim_name,
-                    oglwrap::Bitfield<AnimFlag> flags = AnimFlag::None,
+                    gl::Bitfield<AnimFlag> flags = AnimFlag::None,
                     float speed = 1.0f);
 
 }; // AnimatedMeshRenderer

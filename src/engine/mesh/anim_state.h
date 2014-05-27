@@ -49,7 +49,7 @@ struct AnimationState {
   glm::vec3 offset;
 
   /// The current animation modifier flags.
-  oglwrap::Bitfield<AnimFlag> flags;
+  gl::Bitfield<AnimFlag> flags;
 
   /// The speed modifier
   float speed;
@@ -75,7 +75,7 @@ struct AnimParams {
   bool use_default_flags;
 
   /// A bitfield of the Animation modifying flags
-  oglwrap::Bitfield<AnimFlag> flags;
+  gl::Bitfield<AnimFlag> flags;
 
   /// The speed multiplier
   float speed;
@@ -92,7 +92,7 @@ struct AnimParams {
    */
   AnimParams(std::string name,
              float transition_time,
-             oglwrap::Bitfield<AnimFlag> flags,
+             gl::Bitfield<AnimFlag> flags,
              float speed = 0.0f)
       : name(name)
       , transition_time(transition_time)

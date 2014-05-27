@@ -43,7 +43,7 @@ public:
   }
 
   /// Returns the currently running animation's AnimFlags.
-  oglwrap::Bitfield<AnimFlag> getCurrentAnimFlags() const {
+  gl::Bitfield<AnimFlag> getCurrentAnimFlags() const {
     return current_anim_.flags;
   }
 
@@ -134,7 +134,7 @@ private:
   void changeAnimation(size_t anim_idx,
                        float current_time,
                        float transition_time,
-                       oglwrap::Bitfield<AnimFlag> flags,
+                       gl::Bitfield<AnimFlag> flags,
                        float speed = 1.0f);
 
 public:

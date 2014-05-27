@@ -3,9 +3,6 @@
 #include "./skybox.h"
 #include "oglwrap/smart_enums.h"
 
-namespace gl = oglwrap;
-using glEnum = oglwrap::SmartEnums;
-
 constexpr float day_duration = 128.0f;
 constexpr float day_start = -day_duration/32;
 
@@ -29,11 +26,11 @@ Skybox::Skybox()
   env_map_.active(0);
   {
     env_map_.bind();
-    env_map_.minFilter(glEnum::Linear);
-    env_map_.magFilter(glEnum::Linear);
-    env_map_.wrapS(glEnum::ClampToEdge);
-    env_map_.wrapT(glEnum::ClampToEdge);
-    env_map_.wrapP(glEnum::ClampToEdge);
+    env_map_.minFilter(gl::kLinear);
+    env_map_.magFilter(gl::kLinear);
+    env_map_.wrapS(gl::kClampToEdge);
+    env_map_.wrapT(gl::kClampToEdge);
+    env_map_.wrapP(gl::kClampToEdge);
 
     for (int i = 0; i < 6; i++) {
       // The cloud map is not in srgb

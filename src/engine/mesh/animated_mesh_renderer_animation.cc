@@ -324,7 +324,7 @@ void AnimatedMeshRenderer::updateBoneInfo(Animation& anim,
 /// Updates the bones transformations.
 /** @param time_in_seconds - Expected to be a time value in seconds. */
 void AnimatedMeshRenderer::uploadBoneInfo(
-                                    oglwrap::LazyUniform<glm::mat4>& bones) {
+                                    gl::LazyUniform<glm::mat4>& bones) {
   for (unsigned i = 0; i < skinning_data_.num_bones; i++) {
       bones[i] = skinning_data_.bone_info[i].final_transform;
   }
@@ -333,7 +333,7 @@ void AnimatedMeshRenderer::uploadBoneInfo(
 void AnimatedMeshRenderer::updateAndUploadBoneInfo(
                                     Animation& anim,
                                     float time,
-                                    oglwrap::LazyUniform<glm::mat4>& bones) {
+                                    gl::LazyUniform<glm::mat4>& bones) {
   updateBoneInfo(anim, time);
   uploadBoneInfo(bones);
 }

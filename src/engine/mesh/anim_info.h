@@ -28,7 +28,7 @@ struct AnimInfo {
   std::string name;
 
   /// Default animation flags for this animation.
-  oglwrap::Bitfield<AnimFlag> flags;
+  gl::Bitfield<AnimFlag> flags;
 
   /// Default speed modifier.
   float speed;

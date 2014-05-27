@@ -6,14 +6,14 @@ namespace engine {
 
 AnimatedMeshRenderer::AnimatedMeshRenderer(
                                   const std::string& filename,
-                                  oglwrap::Bitfield<aiPostProcessSteps> flags)
+                                  gl::Bitfield<aiPostProcessSteps> flags)
   : MeshRenderer(filename, flags)
   , skinning_data_(scene_->mNumMeshes) {
 }
 
 void AnimatedMeshRenderer::addAnimation(const std::string& filename,
                                         const std::string& anim_name,
-                                        oglwrap::Bitfield<AnimFlag> flags,
+                                        gl::Bitfield<AnimFlag> flags,
                                         float speed) {
   if (anims_.canFind(anim_name)) {
     throw std::runtime_error(

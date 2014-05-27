@@ -41,13 +41,13 @@ public:
   const std::string& format_string() const {return format_string_;}
 
   // Returns the format of the height data
-  virtual oglwrap::PixelDataFormat format() const;
+  virtual gl::PixelDataFormat format() const;
 
   // Returns the default internal-format for this format.
-  virtual oglwrap::PixelDataInternalFormat internalFormat() const;
+  virtual gl::PixelDataInternalFormat internalFormat() const;
 
   // Returns the type of the height data
-  virtual oglwrap::PixelDataType type() const;
+  virtual gl::PixelDataType type() const;
 
   // Indexes the array, but doesn't care about over or under-indexing
   std::array<DATA_TYPE, NUM_COMPONENTS>& operator()(int x, int y) {
@@ -71,9 +71,9 @@ public:
   }
 
   // Uploads it to a texture object
-  virtual void upload(oglwrap::Texture2D& tex) const;
-  virtual void upload(oglwrap::Texture2D& tex,
-                      oglwrap::PixelDataInternalFormat internal_format) const;
+  virtual void upload(gl::Texture2D& tex) const;
+  virtual void upload(gl::Texture2D& tex,
+                      gl::PixelDataInternalFormat internal_format) const;
 };
 
 }

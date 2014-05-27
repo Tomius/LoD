@@ -12,7 +12,6 @@ namespace engine {
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 Texture<DATA_TYPE, NUM_COMPONENTS>::Texture(const std::string& file_name,
                                             std::string format_string) {
-
   // Preprocess format_string: 'S', 'C' and 'I' have special meaning
   size_t s_pos = format_string.find('S');
   if(s_pos != std::string::npos) {
@@ -68,46 +67,44 @@ Texture<DATA_TYPE, NUM_COMPONENTS>::Texture(const std::string& file_name,
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-oglwrap::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
-  using glEnum = oglwrap::SmartEnums;
-
+gl::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
   if (integer_) {
     if (format_string_ == "R") {
-      return glEnum::RedInteger;
+      return gl::kRedInteger;
     } else if (format_string_ == "G") {
-      return glEnum::GreenInteger;
+      return gl::kGreenInteger;
     } else if (format_string_ == "B") {
-      return glEnum::BlueInteger;
+      return gl::kBlueInteger;
     } else if (format_string_ == "RG") {
-      return glEnum::RgInteger;
+      return gl::kRgInteger;
     } else if (format_string_ == "RGB") {
-      return glEnum::RgbInteger;
+      return gl::kRgbInteger;
     } else if (format_string_ == "RGBA") {
-      return glEnum::RgbaInteger;
+      return gl::kRgbaInteger;
     } else if (format_string_ == "BGR") {
-      return glEnum::BgrInteger;
+      return gl::kBgrInteger;
     } else if (format_string_ == "BGRA") {
-      return glEnum::BgraInteger;
+      return gl::kBgraInteger;
     } else {
       abort();
     }
   } else {
     if (format_string_ == "R") {
-      return glEnum::Red;
+      return gl::kRed;
     } else if (format_string_ == "G") {
-      return glEnum::Green;
+      return gl::kGreen;
     } else if (format_string_ == "B") {
-      return glEnum::Blue;
+      return gl::kBlue;
     } else if (format_string_ == "RG") {
-      return glEnum::Rg;
+      return gl::kRg;
     } else if (format_string_ == "RGB") {
-      return glEnum::Rgb;
+      return gl::kRgb;
     } else if (format_string_ == "RGBA") {
-      return glEnum::Rgba;
+      return gl::kRgba;
     } else if (format_string_ == "BGR") {
-      return glEnum::Bgr;
+      return gl::kBgr;
     } else if (format_string_ == "BGRA") {
-      return glEnum::Bgra;
+      return gl::kBgra;
     } else {
       abort();
     }
@@ -115,31 +112,29 @@ oglwrap::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-oglwrap::PixelDataInternalFormat
+gl::PixelDataInternalFormat
 Texture<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
-  using glEnum = oglwrap::SmartEnums;
-
   if(compressed_) {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
-      return glEnum::CompressedRed;
+      return gl::kCompressedRed;
     } else if (format_string_ == "RG") {
-      return glEnum::CompressedRg;
+      return gl::kCompressedRg;
     } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-      return srgb_ ? glEnum::CompressedSrgb : glEnum::CompressedRgb;
+      return srgb_ ? gl::kCompressedSrgb : gl::kCompressedRgb;
     } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-      return srgb_ ? glEnum::CompressedSrgbAlpha : glEnum::CompressedRgba;
+      return srgb_ ? gl::kCompressedSrgbAlpha : gl::kCompressedRgba;
     } else {
       abort();
     }
   } else {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
-      return glEnum::Red;
+      return gl::kRed;
     } else if (format_string_ == "RG") {
-      return glEnum::Rg;
+      return gl::kRg;
     } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-      return srgb_ ? glEnum::Srgb : glEnum::Rgb;
+      return srgb_ ? gl::kSrgb : gl::kRgb;
     } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-      return srgb_ ? glEnum::SrgbAlpha : glEnum::Rgba;
+      return srgb_ ? gl::kSrgbAlpha : gl::kRgba;
     } else {
       abort();
     }
@@ -147,44 +142,40 @@ Texture<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-oglwrap::PixelDataType Texture<DATA_TYPE, NUM_COMPONENTS>::type() const {
-  using glEnum = oglwrap::SmartEnums;
-
+gl::PixelDataType Texture<DATA_TYPE, NUM_COMPONENTS>::type() const {
   if (std::is_same<DATA_TYPE, char>::value) {
-    return glEnum::Byte;
+    return gl::kByte;
   } else if (std::is_same<DATA_TYPE, unsigned char>::value) {
-    return glEnum::UnsignedByte;
+    return gl::kUnsignedByte;
   } else if (std::is_same<DATA_TYPE, short>::value) {
-    return glEnum::Short;
+    return gl::kShort;
   } else if (std::is_same<DATA_TYPE, unsigned short>::value) {
-    return glEnum::UnsignedShort;
+    return gl::kUnsignedShort;
   } else if (std::is_same<DATA_TYPE, int>::value) {
-    return glEnum::Int;
+    return gl::kInt;
   } else if (std::is_same<DATA_TYPE, unsigned int>::value) {
-    return glEnum::UnsignedInt;
+    return gl::kUnsignedInt;
   } else if (std::is_same<DATA_TYPE, float>::value) {
-    return glEnum::Float;
+    return gl::kFloat;
   } else {
     abort();
   }
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(oglwrap::Texture2D& tex) const {
+void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(gl::Texture2D& tex) const {
   upload(tex, internalFormat());
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(oglwrap::Texture2D& tex,
-                      oglwrap::PixelDataInternalFormat internal_format) const {
-  namespace gl = oglwrap;
-
+void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(gl::Texture2D& tex,
+                      gl::PixelDataInternalFormat internal_format) const {
   bool bad_alignment = (w_ * sizeof(DATA_TYPE) * NUM_COMPONENTS) % 4 != 0;
   GLint unpack_aligment;
 
   if(bad_alignment) {
     glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack_aligment);
-    gl::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, 1);
+    gl::PixelStore(gl::kUnpackAlignment, 1);
   }
 
   tex.upload(
@@ -196,7 +187,7 @@ void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(oglwrap::Texture2D& tex,
   );
 
   if(bad_alignment) {
-    gl::PixelStore(oglwrap::PixelStorageMode::UnpackAlignment, unpack_aligment);
+    gl::PixelStore(gl::kUnpackAlignment, unpack_aligment);
   }
 }
 

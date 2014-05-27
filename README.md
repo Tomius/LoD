@@ -55,4 +55,4 @@ Acknowledgements
 - *Kristóf Marussy (kris7t)* for a lot of useful advices and catching many implementation-dependent bugs.
 
 ----------------------
-If you have any problem, please post in the issues tab or mail me at tomius1994@gmail.com. Any feedback would be appreciated.
+If you have any problem, please post in the issues tab or mail me at icyplusplus@gmail.com. Any feedback would be appreciated.

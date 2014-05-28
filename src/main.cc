@@ -26,12 +26,7 @@
 #include "./shadow.h"
 #include "./loading_screen.h"
 
-extern const float GRAVITY = 18.0f;
-/* 0 -> max quality
-   2 -> max performance */
-extern const int PERFORMANCE = 1;
-double ogl_version;
-bool was_left_click = false;
+constexpr float kGravity = 18.0f;
 
 void glInit(GLFWwindow* window) {
   gl::ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -74,7 +69,7 @@ static void PrintDebugTime() {
   last_debug_time = curr_time;
 }
 
-engine::Scene *scene;
+static engine::Scene *scene;
 
 // Callbacks
 static void ErrorCallback(int error, const char* description) {
@@ -82,7 +77,7 @@ static void ErrorCallback(int error, const char* description) {
 }
 
 static void KeyCallback(GLFWwindow* window, int key, int scancode,
-                                            int action, int mods) {
+                        int action, int mods) {
   if(action == GLFW_PRESS) {
     switch(key) {
       case GLFW_KEY_ESCAPE:
@@ -118,9 +113,6 @@ static void MouseScrolledCallback(GLFWwindow* window, double xoffset,
 
 static void MouseButtonPressed(GLFWwindow* window, int button,
                                int action, int mods) {
-  if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    was_left_click = true;
-  }
   scene->mouseButtonPressed(window, button, action, mods);
 }
 
@@ -160,8 +152,9 @@ int main() {
     }
 
     // Check the created OpenGL context's version
-    ogl_version = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR) +
-                  glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
+    double ogl_version =
+        glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR) +
+        glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
     std::cout << " - OpenGL version: "  << ogl_version << std::endl;
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);

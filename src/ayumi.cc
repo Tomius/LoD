@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 
 using engine::AnimParams;
-extern bool was_left_click;
 
 Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     : mesh_("models/ayumi/ayumi.dae",
@@ -23,7 +22,8 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     , window_(window)
     , charmove_(nullptr)
     , skybox_(skybox)
-    , shadow_(shadow) {
+    , shadow_(shadow)
+    , was_left_click_(false) {
 
   gl::ShaderSource vs_src("ayumi.vert");
   vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
@@ -116,8 +116,8 @@ void Ayumi::update(float time) {
 
   using engine::AnimParams;
 
-  if (was_left_click) {
-    was_left_click = false;
+  if (was_left_click_) {
+    was_left_click_ = false;
     if (curr_anim == "Attack") {
       attack2_ = true;
     } else if (curr_anim == "Attack2") {
@@ -260,5 +260,13 @@ AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
     } else {
       return AnimParams("Stand", 0.2f);
     }
+  }
+}
+
+
+void Ayumi::mouseButtonPressed(const engine::Timer& timer, int button,
+                               int action, int mods) {
+  if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    was_left_click_ = true;
   }
 }

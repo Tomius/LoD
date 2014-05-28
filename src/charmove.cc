@@ -159,7 +159,7 @@ void CharacterMovement::updateHeight(float time) {
       } else {
         pos.y += vert_speed_ * dt;
       }
-      vert_speed_ -= dt * GRAVITY;
+      vert_speed_ -= dt * kGravity;
     }
   }
 }

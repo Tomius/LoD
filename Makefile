@@ -1,6 +1,6 @@
 BINARY = LoD
 SRC_DIR = src
-OBJ_DIR = obj
+OBJ_DIR = .obj
 
 CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
 OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))

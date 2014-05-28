@@ -35,7 +35,7 @@ MeshRenderer::MeshRenderer(const std::string& filename,
     glm::inverse(engine::convertMatrix(scene_->mRootNode->mTransformation));
 }
 
-template <class IdxType>
+template <typename IdxType>
 /// A template for setting different types (byte/short/int) of indices.
 /** This expect the correct vao to be already bound!
   * @param index - The index of the entry */

@@ -15,10 +15,6 @@
 #include "shadow.h"
 #include "engine/height_map_interface.h"
 
-/* 0 -> max quality
-   2 -> max performance */
-extern const int PERFORMANCE;
-
 class Tree : public engine::GameObject {
   static constexpr int kTreeTypeNum = 2;
   engine::MeshRenderer mesh_[kTreeTypeNum];

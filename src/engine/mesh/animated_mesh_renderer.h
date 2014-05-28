@@ -66,7 +66,7 @@ private:
    */
   const aiNodeAnim* getRootBone(const aiNode* node, const aiScene* anim);
 
-  template <class Index_t>
+  template <typename Index_t>
   /**
    * @brief Creates bone attributes data.
    *
@@ -85,7 +85,7 @@ private:
    */
   void createBonesData();
 
-  template <class Index_t>
+  template <typename Index_t>
   /**
    * Shader plumbs the bone data.
    *

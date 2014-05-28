@@ -9,7 +9,7 @@
 namespace engine {
 
 struct SkinningData {
-  template<class Index_t>
+  template<typename Index_t>
   /**
    * @brief A struct containing an "ivec4" for the boneIDs, and a vec4 for
    *        bone weights.

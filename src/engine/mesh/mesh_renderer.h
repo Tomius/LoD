@@ -85,7 +85,7 @@ public:
                gl::Bitfield<aiPostProcessSteps> flags);
 
 private:
-  template <class IdxType>
+  template <typename IdxType>
   /// A template for setting different types (byte/short/int) of indices.
   /** This expect the correct vao to be already bound!
     * @param index - The index of the entry */

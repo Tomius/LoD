@@ -12,7 +12,7 @@
 
 #include "terrain.h"
 
-extern const float GRAVITY;
+extern const float kGravity;
 
 class CharacterMovement {
   engine::Transform& transform_;

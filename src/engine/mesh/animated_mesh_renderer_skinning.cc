@@ -60,7 +60,7 @@ const aiNodeAnim* AnimatedMeshRenderer::getRootBone(const aiNode* node,
   return nullptr;
 }
 
-template <class Index_t>
+template <typename Index_t>
 /// Creates bone attributes data.
 /** It is a template, as the type of boneIDs shouldn't be fix. Most of the times,
   * a skeleton won't contain more than 256 bones, but that doesn't mean boneIDs
@@ -200,7 +200,7 @@ void AnimatedMeshRenderer::createBonesData() {
   }
 }
 
-template <class Index_t>
+template <typename Index_t>
 /// Shader plumbs the bone data.
 /** It is a template, as the type of boneIDs shouldn't be fix. Most of the times,
   * a skeleton won't contain more than 256 bones, but that doesn't mean boneIDs

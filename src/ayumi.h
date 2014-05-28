@@ -15,9 +15,6 @@
 #include "./shadow.h"
 
 extern const float GRAVITY;
-/* 0 -> max quality
-   2 -> max performance */
-extern const int PERFORMANCE;
 
 class Ayumi : public engine::GameObject {
   engine::AnimatedMeshRenderer mesh_;
@@ -36,6 +33,11 @@ class Ayumi : public engine::GameObject {
   CharacterMovement *charmove_;
   Skybox* skybox_;
   Shadow* shadow_;
+  bool was_left_click_;
+
+  CharacterMovement::CanDoCallback canJump;
+  CharacterMovement::CanDoCallback canFlip;
+  engine::Animation::AnimationEndedCallback animationEndedCallback;
 
  public:
   Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow);
@@ -52,11 +54,8 @@ class Ayumi : public engine::GameObject {
   }
   virtual void keyAction(const engine::Timer&, int key, int scancode,
                          int action, int mods) override;
-
- private:
-  CharacterMovement::CanDoCallback canJump;
-  CharacterMovement::CanDoCallback canFlip;
-  engine::Animation::AnimationEndedCallback animationEndedCallback;
+  virtual void mouseButtonPressed(const engine::Timer& timer, int button,
+                                  int action, int mods) override;
 };
 
 #endif  // LOD_INCLUDE_AYUMI_H_

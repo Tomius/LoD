@@ -17,7 +17,7 @@ public:
   // - 'C': a compressed image will be used.
   // - 'I': an integer image will be used.
   HeightMap(const std::string& file_name,
-            const std::string& format_string = "CR")
+            const std::string& format_string = "R")
   : tex_(file_name, format_string) {}
 
   // The width and height of the texture

@@ -18,21 +18,19 @@ namespace engine {
 
 class Scene {
   std::vector<std::unique_ptr<GameObject>> gameobjects_, after_effects_;
-
-public:
   Camera* camera_;
   std::unique_ptr<Skybox> skybox_;
   std::unique_ptr<Shadow> shadow_;
   Timer game_time_, environment_time_, camera_time_;
 
-  Scene() { }
+ public:
+  virtual ~Scene() {}
+
+  virtual float gravity() { return 9.81f; }
 
   template<typename T, typename... Args>
   T* addGameObject(Args&&... args) {
-    static_assert(
-      std::is_base_of<GameObject, T>::value,
-      "Unknown type"
-    );
+    static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
 
     T *go = new T{std::forward<Args>(args)...};
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
@@ -48,10 +46,7 @@ public:
 
   template<typename T, typename... Args>
   T* addAfterEffect(Args&&... args) {
-    static_assert(
-      std::is_base_of<GameObject, T>::value,
-      "Unknown type"
-    );
+    static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
 
     T *go = new T{std::forward<Args>(args)...};
     after_effects_.push_back(std::unique_ptr<GameObject>(go));
@@ -67,10 +62,7 @@ public:
 
   template<typename T, typename... Args>
   T* addShadow(Args&&... args) {
-    static_assert(
-      std::is_base_of<Shadow, T>::value,
-      "Unknown type"
-    );
+    static_assert(std::is_base_of<Shadow, T>::value, "Unknown type");
 
     auto shadow = new T{std::forward<Args>(args)...};
     shadow_ = std::unique_ptr<Shadow>(shadow);
@@ -86,10 +78,7 @@ public:
 
   template<typename T, typename... Args>
   T* addSkybox(Args&&... args) {
-    static_assert(
-      std::is_base_of<Skybox, T>::value,
-      "Unknown type"
-    );
+    static_assert(std::is_base_of<Skybox, T>::value, "Unknown type");
 
     auto skybox = new T{std::forward<Args>(args)...};
     skybox_ = std::unique_ptr<Skybox>(skybox);
@@ -107,7 +96,7 @@ public:
     camera_ = cam;
   }
 
-  void screenResized(size_t w, size_t h) {
+  virtual void screenResized(size_t w, size_t h) {
     if (shadow_) {
       shadow_->screenResized(w, h);
     }
@@ -129,7 +118,7 @@ public:
   }
 
 private:
-  void update() {
+  virtual void update() {
     game_time_.tick();
     environment_time_.tick();
     camera_time_.tick();
@@ -148,7 +137,7 @@ private:
     camera_->update(camera_time_);
   }
 
-  void shadowRender() {
+  virtual void shadowRender() {
     if (!camera_)
       return;
 
@@ -161,7 +150,7 @@ private:
     }
   }
 
-  void render() {
+  virtual void render() {
     if (!camera_)
       return;
 
@@ -178,14 +167,13 @@ private:
   }
 
 public:
-  void turn() {
+  virtual void turn() {
     update();
     shadowRender();
     render();
   }
 
-  void keyAction(GLFWwindow* window, int key, int scancode,
-                                     int action, int mods) {
+  virtual void keyAction(int key, int scancode, int action, int mods) {
     if (camera_) {
       camera_->keyAction(camera_time_, key, scancode, action, mods);
     }
@@ -211,7 +199,7 @@ public:
     }
   }
 
-  void mouseScrolled(GLFWwindow* window, double xoffset, double yoffset) {
+  virtual void mouseScrolled(double xoffset, double yoffset) {
     if (camera_) {
       camera_->mouseScrolled(camera_time_, xoffset, yoffset);
     }
@@ -224,7 +212,7 @@ public:
     }
   }
 
-  void mouseButtonPressed(GLFWwindow* window, int button, int action, int mods) {
+  virtual void mouseButtonPressed(int button, int action, int mods) {
     if (camera_) {
       camera_->mouseButtonPressed(camera_time_, button, action, mods);
     }
@@ -237,7 +225,7 @@ public:
     }
   }
 
-  void mouseMoved(GLFWwindow* window, double xpos, double ypos) {
+  virtual void mouseMoved(double xpos, double ypos) {
     if (camera_) {
       camera_->mouseMoved(camera_time_, xpos, ypos);
     }

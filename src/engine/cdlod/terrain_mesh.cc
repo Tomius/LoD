@@ -1,10 +1,10 @@
-#include "./terrain.h"
+#include "./terrain_mesh.h"
 #include "../../oglwrap/smart_enums.h"
 
 namespace engine {
 namespace cdlod {
 
-Terrain::Terrain(const HeightMapInterface& height_map)
+TerrainMesh::TerrainMesh(const HeightMapInterface& height_map)
     : mesh_(height_map), height_map_(height_map) {
   gl::ShaderSource vs_src{"cdlod_terrain.vert"};
 
@@ -18,7 +18,7 @@ Terrain::Terrain(const HeightMapInterface& height_map)
   vertex_shader_.source(vs_src);
 }
 
-void Terrain::setup(gl::Program& program, int tex_unit) {
+void TerrainMesh::setup(gl::Program& program, int tex_unit) {
   program.use();
 
   mesh_.setupPositions(program | "CDLODTerrain_aPosition");
@@ -49,7 +49,7 @@ void Terrain::setup(gl::Program& program, int tex_unit) {
   height_map_tex_.unbind();
 }
 
-void Terrain::render(const Camera& cam) {
+void TerrainMesh::render(const Camera& cam) {
   if(!uCamPos_) {
     throw std::logic_error("engine::cdlod::terrain requires a setup() call, "
                            "before the use of the render() function.");

@@ -12,8 +12,6 @@
 
 #include "terrain.h"
 
-extern const float kGravity;
-
 class CharacterMovement {
   engine::Transform& transform_;
   engine::RigidBody& rigid_body_;

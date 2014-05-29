@@ -2,6 +2,7 @@
 
 #include "charmove.h"
 #include <GLFW/glfw3.h>
+#include "engine/game_engine.h"
 
 CharacterMovement::CharacterMovement(
                   GLFWwindow* window,
@@ -159,7 +160,7 @@ void CharacterMovement::updateHeight(float time) {
       } else {
         pos.y += vert_speed_ * dt;
       }
-      vert_speed_ -= dt * kGravity;
+      vert_speed_ -= dt * engine::GameEngine::scene().gravity();
     }
   }
 }

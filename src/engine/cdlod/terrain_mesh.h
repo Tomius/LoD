@@ -1,7 +1,7 @@
 // Copyright (c) 2014, Tamas Csala
 
-#ifndef ENGINE_CDLOD_CDLOD_TERRAIN_H_
-#define ENGINE_CDLOD_CDLOD_TERRAIN_H_
+#ifndef ENGINE_CDLOD_TERRAIN_MESH_H_
+#define ENGINE_CDLOD_TERRAIN_MESH_H_
 
 #include "../../lod_oglwrap_config.h"
 
@@ -16,9 +16,9 @@ namespace engine {
 
 namespace cdlod {
 
-class Terrain {
+class TerrainMesh {
  public:
-  Terrain(const HeightMapInterface& height_map);
+  TerrainMesh(const HeightMapInterface& height_map);
 
   // It defines the following functions:
   // vec3 CDLODTerrain_worldPos();

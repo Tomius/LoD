@@ -9,7 +9,7 @@
 
 #include "engine/gameobject.h"
 #include "engine/height_map.h"
-#include "engine/cdlod/terrain.h"
+#include "engine/cdlod/terrain_mesh.h"
 
 class Terrain : public engine::GameObject {
   gl::Program prog_;
@@ -22,7 +22,7 @@ class Terrain : public engine::GameObject {
   gl::LazyUniform<int> uNumUsedShadowMaps_;
 
   engine::HeightMap<unsigned char> height_map_;
-  engine::cdlod::Terrain mesh_;
+  engine::cdlod::TerrainMesh mesh_;
 
   Skybox *skybox_;
   Shadow *shadow_;

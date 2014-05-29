@@ -4,20 +4,20 @@
 #define ENGINE_BASIC_HEIGHT_MAP_H_
 
 #include "height_map_interface.h"
-#include "texture.h"
+#include "texture_source.h"
 
 namespace engine {
 
 template<typename DATA_TYPE>
 class HeightMap : public HeightMapInterface {
-  Texture<DATA_TYPE, 1> tex_;
+  TextureSource<DATA_TYPE, 1> tex_;
 public:
   // Loads in a texture from a file
   // The format string may contain any of these two flags:
   // - 'C': a compressed image will be used.
   // - 'I': an integer image will be used.
   HeightMap(const std::string& file_name,
-            const std::string& format_string = "R")
+            const std::string& format_string = "CR")
   : tex_(file_name, format_string) {}
 
   // The width and height of the texture

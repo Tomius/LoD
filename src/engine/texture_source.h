@@ -1,7 +1,7 @@
 // Copyright (c) 2014, Tamas Csala
 
-#ifndef ENGINE_TEXTURE_H_
-#define ENGINE_TEXTURE_H_
+#ifndef ENGINE_TEXTURE_SOURCE_H_
+#define ENGINE_TEXTURE_SOURCE_H_
 
 #include <string>
 #include "../lod_oglwrap_config.h"
@@ -11,7 +11,7 @@
 namespace engine {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-class Texture {
+class TextureSource {
   bool integer_, srgb_, compressed_;
   std::string format_string_;
   std::vector<std::array<DATA_TYPE, NUM_COMPONENTS>> data_;
@@ -22,10 +22,10 @@ public:
   // - 'S': the image is converted from SRGB to linear colorspace at load.
   // - 'C': a compressed image will be used.
   // - 'I': an integer image will be used.
-  Texture(const std::string& file_name,
-          std::string format_string = "CSRGBA");
+  TextureSource(const std::string& file_name,
+                std::string format_string = "CSRGBA");
 
-  virtual ~Texture() {}
+  virtual ~TextureSource() {}
 
   // getters
   int w() const {return w_;}
@@ -78,6 +78,6 @@ public:
 
 }
 
-#include "texture-inl.h"
+#include "texture_source-inl.h"
 
 #endif

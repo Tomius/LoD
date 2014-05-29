@@ -1,16 +1,16 @@
 // Copyright (c) 2014, Tamas Csala
 
-#ifndef ENGINE_TEXTURE_INL_H_
-#define ENGINE_TEXTURE_INL_H_
+#ifndef ENGINE_TEXTURE_SOURCE_INL_H_
+#define ENGINE_TEXTURE_SOURCE_INL_H_
 
-#include "texture.h"
+#include "texture_source.h"
 #include "../oglwrap/smart_enums.h"
 #include "../oglwrap/context/pixel_ops.h"
 
 namespace engine {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-Texture<DATA_TYPE, NUM_COMPONENTS>::Texture(const std::string& file_name,
+TextureSource<DATA_TYPE, NUM_COMPONENTS>::TextureSource(const std::string& file_name,
                                             std::string format_string) {
   // Preprocess format_string: 'S', 'C' and 'I' have special meaning
   size_t s_pos = format_string.find('S');
@@ -18,18 +18,24 @@ Texture<DATA_TYPE, NUM_COMPONENTS>::Texture(const std::string& file_name,
     srgb_ = true;
     format_string.erase(format_string.begin() + s_pos);
     assert(NUM_COMPONENTS >= 3); // only rgb and rgba can be in srgb
+  } else {
+    srgb_ = false;
   }
 
   size_t c_pos = format_string.find('C');
   if(c_pos != std::string::npos) {
     compressed_ = true;
     format_string.erase(format_string.begin() + c_pos);
+  } else {
+    compressed_ = false;
   }
 
   size_t i_pos = format_string.find('I');
   if(i_pos != std::string::npos) {
     integer_ = true;
     format_string.erase(format_string.begin() + i_pos);
+  } else {
+    integer_ = false;
   }
 
   format_string_ = format_string;
@@ -67,7 +73,7 @@ Texture<DATA_TYPE, NUM_COMPONENTS>::Texture(const std::string& file_name,
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-gl::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
+gl::PixelDataFormat TextureSource<DATA_TYPE, NUM_COMPONENTS>::format() const {
   if (integer_) {
     if (format_string_ == "R") {
       return gl::kRedInteger;
@@ -113,7 +119,7 @@ gl::PixelDataFormat Texture<DATA_TYPE, NUM_COMPONENTS>::format() const {
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 gl::PixelDataInternalFormat
-Texture<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
+TextureSource<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
   if(compressed_) {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
       return gl::kCompressedRed;
@@ -142,7 +148,7 @@ Texture<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-gl::PixelDataType Texture<DATA_TYPE, NUM_COMPONENTS>::type() const {
+gl::PixelDataType TextureSource<DATA_TYPE, NUM_COMPONENTS>::type() const {
   if (std::is_same<DATA_TYPE, char>::value) {
     return gl::kByte;
   } else if (std::is_same<DATA_TYPE, unsigned char>::value) {
@@ -163,12 +169,12 @@ gl::PixelDataType Texture<DATA_TYPE, NUM_COMPONENTS>::type() const {
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(gl::Texture2D& tex) const {
+void TextureSource<DATA_TYPE, NUM_COMPONENTS>::upload(gl::Texture2D& tex) const {
   upload(tex, internalFormat());
 }
 
 template<typename DATA_TYPE, char NUM_COMPONENTS>
-void Texture<DATA_TYPE, NUM_COMPONENTS>::upload(gl::Texture2D& tex,
+void TextureSource<DATA_TYPE, NUM_COMPONENTS>::upload(gl::Texture2D& tex,
                       gl::PixelDataInternalFormat internal_format) const {
   bool bad_alignment = (w_ * sizeof(DATA_TYPE) * NUM_COMPONENTS) % 4 != 0;
   GLint unpack_aligment;

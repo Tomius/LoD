@@ -23,6 +23,7 @@ Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
   tex_.borderColor(glm::vec4(1.0f));
   tex_.compareFunc(gl::kLequal);
   tex_.compareMode(gl::kCompareRefToTexture);
+  tex_.unbind();
 
   // Setup the FBO
   fbo_.bind();

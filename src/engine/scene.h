@@ -134,7 +134,9 @@ private:
       i->update(game_time_.current);
     }
 
-    camera_->update(camera_time_);
+    if (camera_) {
+      camera_->update(camera_time_);
+    }
   }
 
   virtual void shadowRender() {

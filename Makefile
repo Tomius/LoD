@@ -4,8 +4,7 @@ OBJ_DIR = .obj
 
 CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
 OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
-DEPS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.dep))
-HEADERS := $(shell find -L $(SRC_DIR) -name '*.h')
+DEPS := $(OBJECTS:.o=.dep)
 
 CXX = clang++
 CXXFLAGS = -g -rdynamic -std=c++11 -Wall -Qunused-arguments \
@@ -32,7 +31,3 @@ $(OBJ_DIR)/%.o:
 
 $(BINARY): $(DEPS) $(OBJECTS)
 	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
-
-
-
-

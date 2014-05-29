@@ -13,6 +13,8 @@
 #include "./tree.h"
 #include "./shadow.h"
 
+#include "./loading_screen.h"
+
 static double last_debug_time = 0;
 
 static void PrintDebugText(const std::string& str) {
@@ -27,6 +29,11 @@ static void PrintDebugTime() {
 
 MideuScene::MideuScene() {
   GLFWwindow* window = engine::GameEngine::window();
+
+  // The scene builds quite slow, put some picture for the user.
+  LoadingScreen().render();
+  glfwSwapBuffers(window);
+
   PrintDebugText("Initializing the skybox");
     Skybox *skybox = addSkybox();
   PrintDebugTime();

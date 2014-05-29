@@ -6,7 +6,6 @@
 #include "../oglwrap/smart_enums.h"
 
 #include "game_engine.h"
-#include "../loading_screen.h" // fixme
 
 static double last_debug_time = 0;
 
@@ -27,9 +26,6 @@ static void GlInit(GLFWwindow* window) {
   gl::Enable(gl::kDepthClamp);
   gl::CullFace(gl::kBack);
   gl::Hint(gl::kTextureCompressionHint, gl::kFastest);
-
-  LoadingScreen().render();
-  glfwSwapBuffers(window);
 }
 
 void FpsDisplay(float interval = 0.25f) {

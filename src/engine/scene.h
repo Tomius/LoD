@@ -18,7 +18,7 @@ namespace engine {
 
 class Scene {
   std::vector<std::unique_ptr<GameObject>> gameobjects_, after_effects_;
-  Camera* camera_;
+  std::unique_ptr<Camera> camera_;
   std::unique_ptr<Skybox> skybox_;
   std::unique_ptr<Shadow> shadow_;
   Timer game_time_, environment_time_, camera_time_;
@@ -41,22 +41,6 @@ class Scene {
   GameObject* addGameObject(Args&&... args) {
     GameObject *go = new GameObject{std::forward<Args>(args)...};
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
-    return go;
-  }
-
-  template<typename T, typename... Args>
-  T* addAfterEffect(Args&&... args) {
-    static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
-
-    T *go = new T{std::forward<Args>(args)...};
-    after_effects_.push_back(std::unique_ptr<GameObject>(go));
-    return go;
-  }
-
-  template<typename... Args>
-  GameObject* addAfterEffect(Args&&... args) {
-    GameObject *go = new GameObject{std::forward<Args>(args)...};
-    after_effects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }
 
@@ -92,8 +76,13 @@ class Scene {
     return skybox;
   }
 
-  void addCamera(Camera* cam) {
-    camera_ = cam;
+  template<typename T, typename... Args>
+  T* addCamera(Args&&... args) {
+    static_assert(std::is_base_of<Camera, T>::value, "Unknown type");
+
+    auto camera = new T{std::forward<Args>(args)...};
+    camera_ = std::unique_ptr<Camera>(camera);
+    return camera;
   }
 
   virtual void screenResized(size_t w, size_t h) {
@@ -112,9 +101,6 @@ class Scene {
     for (auto& i : gameobjects_) {
       i->screenResized(w, h);
     }
-    for (auto& i : after_effects_) {
-      i->screenResized(w, h);
-    }
   }
 
 private:
@@ -128,9 +114,6 @@ private:
     }
 
     for (auto& i : gameobjects_) {
-      i->update(game_time_.current);
-    }
-    for (auto& i : after_effects_) {
       i->update(game_time_.current);
     }
 
@@ -163,8 +146,11 @@ private:
     for (auto& i : gameobjects_) {
       i->render(game_time_.current, *camera_);
     }
-    for (auto& i : after_effects_) {
-      i->render(game_time_.current, *camera_);
+  }
+
+  virtual void drawGui() {
+    for (auto& i : gameobjects_) {
+      i->drawGui();
     }
   }
 
@@ -173,6 +159,7 @@ public:
     update();
     shadowRender();
     render();
+    drawGui();
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) {
@@ -181,9 +168,6 @@ public:
     }
 
     for (auto& i : gameobjects_) {
-      i->keyAction(game_time_, key, scancode, action, mods);
-    }
-    for (auto& i : after_effects_) {
       i->keyAction(game_time_, key, scancode, action, mods);
     }
 
@@ -209,9 +193,6 @@ public:
     for (auto& i : gameobjects_) {
       i->mouseScrolled(game_time_, xoffset, yoffset);
     }
-    for (auto& i : after_effects_) {
-      i->mouseScrolled(game_time_, xoffset, yoffset);
-    }
   }
 
   virtual void mouseButtonPressed(int button, int action, int mods) {
@@ -222,9 +203,6 @@ public:
     for (auto& i : gameobjects_) {
       i->mouseButtonPressed(game_time_, button, action, mods);
     }
-    for (auto& i : after_effects_) {
-      i->mouseButtonPressed(game_time_, button, action, mods);
-    }
   }
 
   virtual void mouseMoved(double xpos, double ypos) {
@@ -233,9 +211,6 @@ public:
     }
 
     for (auto& i : gameobjects_) {
-      i->mouseMoved(game_time_, xpos, ypos);
-    }
-    for (auto& i : after_effects_) {
       i->mouseMoved(game_time_, xpos, ypos);
     }
   }

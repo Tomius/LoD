@@ -68,14 +68,14 @@ MideuScene::MideuScene() {
   ayumi->transform.addChild(cam_offset);
   cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 
-  cam_ = make_unique<engine::ThirdPersonalCamera>(window, 45.0f, 0.5f, 6000.0f,
-    cam_offset, cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
+  engine::ThirdPersonalCamera *cam = addCamera<engine::ThirdPersonalCamera>(
+    window, 45.0f, 0.5f, 6000.0f, cam_offset,
+    cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
     height_map, 1.5f);
 
-  charmove_->setCamera(cam_.get());
-  addCamera(cam_.get());
+  charmove_->setCamera(cam);
 
   PrintDebugText("Initializing the resources for the bloom effect");
-    addAfterEffect<BloomEffect>();
+    addGameObject<BloomEffect>();
   PrintDebugTime();
 }

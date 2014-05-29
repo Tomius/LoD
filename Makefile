@@ -11,7 +11,8 @@ CXXFLAGS = -g -rdynamic -std=c++11 -Wall -Qunused-arguments \
 					 `pkg-config --cflags glfw3` `Magick++-config --cxxflags --cppflags`
 LDFLAGS = -g -rdynamic -lGL -lGLU -lGLEW -lassimp `pkg-config --libs glfw3` \
 					-lXxf86vm -lX11 -lXrandr -lXi -lm -lXcursor -lpthread \
-					`Magick++-config --ldflags --libs`
+					`Magick++-config --ldflags --libs` -lfreetype \
+					-Lsrc/engine/gui/freetype-gl -lfreetype-gl
 
 .PHONY: all clean
 

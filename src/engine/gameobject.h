@@ -26,6 +26,7 @@ public:
   virtual void update(float t) {}
   virtual void shadowRender(float time, const Camera& cam) {}
   virtual void render(float time, const Camera& cam) {}
+  virtual void drawGui() {}
 
   virtual void screenResized(size_t width, size_t height) {}
   virtual void keyAction(const Timer& timer, int key, int scancode,

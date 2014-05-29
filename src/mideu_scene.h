@@ -8,7 +8,6 @@
 
 class MideuScene : public engine::Scene {
   std::unique_ptr<CharacterMovement> charmove_;
-  std::unique_ptr<engine::ThirdPersonalCamera> cam_;
  public:
   MideuScene();
   virtual float gravity() override { return 18.0f; }

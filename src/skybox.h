@@ -9,7 +9,7 @@
 #include "oglwrap/shapes/cube.h"
 #include "oglwrap/textures/texture_cube.h"
 
-#include "engine/gameobject.h"
+#include "engine/game_object.h"
 
 class Skybox : public engine::GameObject {
  public:

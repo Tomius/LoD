@@ -113,6 +113,7 @@ class Label : public engine::GameObject {
 
     size_.x = x1;
 
+    prog_.use();
     vao_.bind();
     attribs_.bind();
     attribs_.data(attribs_vec);
@@ -128,6 +129,7 @@ class Label : public engine::GameObject {
   const Font& font() const { return font_; }
   const glm::vec4& color() const { return font_.color(); }
   void set_color(const glm::vec4& color) {
+    prog_.use();
     gl::Uniform<glm::vec4>(prog_, "uColor") = color;
     default_font_.set_color(color);
     set_text(text_);
@@ -156,8 +158,8 @@ class Label : public engine::GameObject {
     set_position(pos_);
   }
 
- private:
   virtual void screenResized(size_t width, size_t height) override {
+    prog_.use();
     gl::Uniform<glm::mat4>(prog_, "uProjectionMatrix") =
       glm::ortho<float>(-int(width)/2, width/2, -int(height)/2, height/2, -1, 1);
     screen_size_.x = width;
@@ -169,8 +171,9 @@ class Label : public engine::GameObject {
     prog_.use();
     vao_.bind();
 
-    auto blend = gl::TemporaryEnable(gl::kBlend);
-    auto cullface = gl::TemporaryDisable(gl::kCullFace);
+    auto capabilities = gl::TemporarySet({{gl::kBlend, true},
+                                          {gl::kCullFace, false},
+                                          {gl::kDepthTest, false}});
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
     gl::Texture2D::Active(0);

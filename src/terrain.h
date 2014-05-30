@@ -7,7 +7,7 @@
 #include "shadow.h"
 #include "./lod_oglwrap_config.h"
 
-#include "engine/gameobject.h"
+#include "engine/game_object.h"
 #include "engine/height_map.h"
 #include "engine/cdlod/terrain_mesh.h"
 

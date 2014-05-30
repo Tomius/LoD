@@ -7,7 +7,7 @@
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 
-#include "engine/gameobject.h"
+#include "engine/game_object.h"
 #include "engine/mesh/mesh_renderer.h"
 
 #include "charmove.h"

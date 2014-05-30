@@ -9,7 +9,7 @@
 #include "oglwrap/shapes/full_screen_rect.h"
 #include "oglwrap/textures/texture_2D.h"
 
-#include "engine/gameobject.h"
+#include "engine/game_object.h"
 
 class BloomEffect : public engine::GameObject {
   gl::VertexShader vs_;

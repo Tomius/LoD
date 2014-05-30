@@ -10,7 +10,7 @@
 #include "oglwrap/textures/texture_2D.h"
 #include "oglwrap/smart_enums.h"
 
-#include "engine/gameobject.h"
+#include "engine/game_object.h"
 
 class LoadingScreen {
   gl::Texture2D tex_;

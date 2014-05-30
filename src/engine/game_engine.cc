@@ -28,23 +28,6 @@ static void GlInit(GLFWwindow* window) {
   gl::Hint(gl::kTextureCompressionHint, gl::kFastest);
 }
 
-void FpsDisplay(float interval = 0.25f) {
-  double time = glfwGetTime();
-
-  static double accum_time = 0.0f;
-  static double last_call = time;
-  double dt = time - last_call;
-  last_call = time;
-  static int calls = 0;
-
-  calls++;
-  accum_time += dt;
-  if (accum_time > interval) {
-    std::cout << "FPS: " << calls * (1 / interval) << std::endl;
-    accum_time = calls = 0;
-  }
-}
-
 namespace engine {
 
 Scene *GameEngine::scene_;
@@ -65,7 +48,7 @@ void GameEngine::InitContext() {
 
     // Window creation
     window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
-                               glfwGetPrimaryMonitor(), nullptr);
+                               nullptr, nullptr);
     if (!window_){
       // If it failed, try a 2.1 context
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -124,7 +107,6 @@ void GameEngine::InitContext() {
 void GameEngine::Run() {
   while (!glfwWindowShouldClose(window_)) {
     gl::Clear().Color().Depth();
-    FpsDisplay();
     scene_->turn();
 
     glfwSwapBuffers(window_);

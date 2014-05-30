@@ -90,13 +90,17 @@ class Font {
 
  public:
   Font(const std::string& filename = "src/engine/gui/freetype-gl/fonts/Vera.ttf",
-       float size = 12,  glm::vec4 color = glm::vec4{0,0,0,1},
+       float size = 12,  glm::vec4 color = glm::vec4{0, 1, 0, 1},
        HorizontalAlignment xalign = HorizontalAlignment::kLeft,
        VerticalAlignment yalign = VerticalAlignment::kBottom)
-    : data_(filename, size)
+    : data_(filename, size), color_(color)
     , horizontal_alignment_(xalign)
     , vertical_alignment_(yalign) { }
 
+  Font(const Font&) = default;
+  Font(Font&&) = default;
+  Font& operator=(const Font&) = default;
+  Font& operator=(Font&&) = default;
 
   const std::string& filename() const { return data_.filename(); }
   const glm::vec4& color() const { return color_; }

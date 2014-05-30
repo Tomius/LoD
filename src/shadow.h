@@ -7,7 +7,7 @@
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/framebuffer.h"
-#include "engine/gameobject.h"
+#include "engine/game_object.h"
 
 class Shadow {
   gl::Texture2D tex_;

@@ -1,7 +1,7 @@
 // Copyright (c) 2014, Tamas Csala
 
-#ifndef ENGINE_GAMEOBJECT_H_
-#define ENGINE_GAMEOBJECT_H_
+#ifndef ENGINE_GAME_OBJECT_H_
+#define ENGINE_GAME_OBJECT_H_
 
 #include <memory>
 #include "camera.h"

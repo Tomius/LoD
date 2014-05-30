@@ -12,6 +12,7 @@
 #include "./ayumi.h"
 #include "./tree.h"
 #include "./shadow.h"
+#include "./fps_display.h"
 
 #include "./loading_screen.h"
 
@@ -78,4 +79,6 @@ MideuScene::MideuScene() {
   PrintDebugText("Initializing the resources for the bloom effect");
     addGameObject<BloomEffect>();
   PrintDebugTime();
+
+  addGameObject<FpsDisplay>();
 }

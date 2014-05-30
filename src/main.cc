@@ -9,8 +9,8 @@ using engine::GameEngine;
 int main() {
   try {
     GameEngine::InitContext();
-    //GameEngine::LoadScene<MideuScene>();
-    GameEngine::LoadScene<SandboxScene>();
+    GameEngine::LoadScene<MideuScene>();
+    //GameEngine::LoadScene<SandboxScene>();
     GameEngine::Run();
   } catch(std::exception& err) {
     std::cerr << err.what();

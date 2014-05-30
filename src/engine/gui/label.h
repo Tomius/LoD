@@ -9,6 +9,7 @@
 #include "../../oglwrap/smart_enums.h"
 
 namespace engine {
+namespace gui {
 
 class Label : public engine::GameObject {
   Font font_, default_font_;
@@ -42,7 +43,6 @@ class Label : public engine::GameObject {
   void set_position(glm::vec2 pos) {
     pos_ = pos;
 
-
     glm::vec2 actual_pos = pos;
     if (default_font_.horizontal_alignment() ==
         Font::HorizontalAlignment::kCenter) {
@@ -74,13 +74,12 @@ class Label : public engine::GameObject {
 
   void set_text(const std::wstring& text) {
     text_ = text;
-    size_.x = 0;
     std::vector<glm::vec4> attribs_vec;
 
     font_ = default_font_;
     font_.load_glyphs(text.c_str());
 
-    float pen_x = 0;
+    float pen_x = 0, x0, x1, y0, y1, s0, t0, s1, t1;
     for (size_t i = 0; i < text.size(); ++i) {
       texture_glyph_t *glyph = font_.get_glyph(text[i]);
       if (glyph) {
@@ -88,15 +87,14 @@ class Label : public engine::GameObject {
         if (i > 0) { kerning = texture_glyph_get_kerning(glyph, text[i-1]); }
 
         pen_x += kerning;
-        size_.x += kerning + glyph->advance_x + glyph->offset_x + glyph->width;
-        float x0 = pen_x + glyph->offset_x;
-        float y0 = glyph->offset_y;
-        float x1 = x0 + glyph->width;
-        float y1 = y0 - glyph->height;
-        float s0 = glyph->s0;
-        float t0 = glyph->t0;
-        float s1 = glyph->s1;
-        float t1 = glyph->t1;
+        x0 = pen_x + glyph->offset_x;
+        y0 = glyph->offset_y;
+        x1 = x0 + glyph->width;
+        y1 = y0 - glyph->height;
+        s0 = glyph->s0;
+        t0 = glyph->t0;
+        s1 = glyph->s1;
+        t1 = glyph->t1;
 
         glm::vec4 a(x0, y0, s0, t0), b(x0, y1, s0, t1);
         glm::vec4 c(x1, y0, s1, t0), d(x1, y1, s1, t1);
@@ -112,6 +110,8 @@ class Label : public engine::GameObject {
         pen_x += glyph->advance_x;
       }
     }
+
+    size_.x = x1;
 
     vao_.bind();
     attribs_.bind();
@@ -178,22 +178,10 @@ class Label : public engine::GameObject {
     gl::DrawArrays(gl::kTriangles, 0, idx_cnt_);
 
     vao_.unbind();
-
-    update_text();
   }
-
-  void update_text() {
-    std::wstring text = L"Amalfi kisváros (közigazgatásilag comune) Olaszország Campania régiójában, Salerno megyében. A várost valószínűleg Nagy Konstantin császár katonái alapították 320-ban. A középkorban az Amalfi Köztársaság fővárosa volt és egyben az egyik legfontosabb földközi-tengeri kikötő, Salerno vetélytársa. A nagy hajózási tapasztalatnak köszönhetően az amalfiak megalkották a Tabula Amalphitanát, a világ első hajózási törvénykönyvét, amellyel a rivális tengeri hatalmak elismerését is kivívták. Amalfi kereskedői raktárakat tartottak fenn Alexandriában, Antiokheiában és Jeruzsálemben, az utóbbi helyen 1048-ban általuk alapított Szent János-kórházból eredeztetik a johanniták rendjét. A papírgyártó műhelyeiről és a limoncellójáról világszerte híres település ma az Olaszországba látogató turisták egyik kedvenc célpontja. Itt született Flavio Gioia, a mágnestű feltalálója is. Természeti szépségei és gazdag történelmi, kulturális öröksége miatt a környező településekkel együtt 1997 óta az UNESCO Világörökségének része.";
-    int len = 100;
-    static int first = 0, tick = 0;
-    if(++tick % 10 == 0) {
-      std::wstring current = text.substr(++first%(text.size()-len), len);
-      set_text(current);
-    }
-  }
-
 };
 
+} // namespace gui
 } // namespace engine
 
 #endif

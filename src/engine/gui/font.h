@@ -8,6 +8,7 @@
 #include "../../oglwrap/glm/glm/glm.hpp"
 
 namespace engine {
+namespace gui {
 
 class FontData {
   std::string filename_;
@@ -123,6 +124,7 @@ class Font {
 
 };
 
+} // namespace gui
 } // namespace engine
 
 #endif

@@ -10,14 +10,15 @@
 
 struct SandboxScene : public engine::Scene {
   SandboxScene() {
-    engine::Font font;
+    using engine::gui::Font;
+
+    Font font;
     font.set_size(30);
     font.set_color(glm::vec4{0.0, 0.7, 1.0, 0.9});
-    font.set_vertical_alignment(engine::Font::VerticalAlignment::kCenter);
-    font.set_horizontal_alignment(engine::Font::HorizontalAlignment::kCenter);
-    addGameObject<engine::Label>(
-      L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789",
-      glm::vec2{0.0f, 0.0f}, font);
+    font.set_vertical_alignment(Font::VerticalAlignment::kCenter);
+    font.set_horizontal_alignment(Font::HorizontalAlignment::kCenter);
+
+    addGameObject<engine::gui::Label>(L"Hello world!", glm::vec2{0.0f, 0.0f}, font);
   }
 };
 

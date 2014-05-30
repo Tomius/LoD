@@ -16,7 +16,7 @@ class Font {
   glm::vec4 color_;
   float size_;
  public:
-  Font(std::string filename = "src/engine/gui/freetype-gl/fonts/Vera.ttf",
+  Font(const std::string& filename = "src/engine/gui/freetype-gl/fonts/Vera.ttf",
        float size = 12,  glm::vec4 color = glm::vec4{0,0,0,1})
     : filename_(filename), atlas_(texture_atlas_new(1024, 1024, 1))
     , font_(texture_font_new_from_file(atlas_, size, filename.c_str()))
@@ -27,11 +27,7 @@ class Font {
 
   Font& operator=(const Font& f) {
     if (this != &f) {
-      if (font_ != nullptr) {
-        texture_font_delete(font_);
-        font_ = nullptr;
-      }
-
+      release();
       *this = Font{f.filename_, f.size_, f.color_};
     }
 
@@ -52,8 +48,17 @@ class Font {
   }
 
   ~Font() {
+    release();
+  }
+
+  void release() {
     if (font_ != nullptr) {
+      if(font_->atlas != nullptr) {
+        texture_atlas_delete(font_->atlas);
+        font_->atlas = nullptr;
+      }
       texture_font_delete(font_);
+      font_ = nullptr;
     }
   }
 

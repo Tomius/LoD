@@ -57,6 +57,7 @@ class Label : public engine::GameObject {
     size_.x = 0;
     std::vector<glm::vec4> attribs_vec;
 
+    font_.release();
     font_ = default_font_;
     font_.load_glyphs(text.c_str());
 

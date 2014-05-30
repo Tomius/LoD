@@ -34,7 +34,7 @@ Scene *GameEngine::scene_;
 GLFWwindow *GameEngine::window_;
 
 void GameEngine::InitContext() {
-    PrintDebugText("Creating the OpenGL context");
+  PrintDebugText("Creating the OpenGL context");
     glfwSetErrorCallback(ErrorCallback);
 
     // GLFW init
@@ -63,33 +63,33 @@ void GameEngine::InitContext() {
         std::terminate();
       }
     }
-
-    // Check the created OpenGL context's version
-    double ogl_version =
-        glfwGetWindowAttrib(window_, GLFW_CONTEXT_VERSION_MAJOR) +
-        glfwGetWindowAttrib(window_, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
-    std::cout << " - OpenGL version: "  << ogl_version << std::endl;
-    int width, height;
-    glfwGetFramebufferSize(window_, &width, &height);
-    std::cout << " - Resolution: "  << width << " x " << height << std::endl;
-
-    if (ogl_version < 2.1) {
-      std::cout << "At least OpenGL version 2.1 is required to run this program\n";
-      std::terminate();
-    }
-
-    // If it's ok, set it for the window
-    glfwMakeContextCurrent(window_);
-
-    // GLEW init
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-      std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
-      std::terminate();
-    }
-    gl::GetError();
   PrintDebugTime();
+
+  // Check the created OpenGL context's version
+  double ogl_version =
+      glfwGetWindowAttrib(window_, GLFW_CONTEXT_VERSION_MAJOR) +
+      glfwGetWindowAttrib(window_, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
+  std::cout << " - OpenGL version: "  << ogl_version << std::endl;
+  int width, height;
+  glfwGetFramebufferSize(window_, &width, &height);
+  std::cout << " - Resolution: "  << width << " x " << height << std::endl;
+
+  if (ogl_version < 2.1) {
+    std::cout << "At least OpenGL version 2.1 is required to run this program\n";
+    std::terminate();
+  }
+
+  // If it's ok, set it for the window
+  glfwMakeContextCurrent(window_);
+
+  // GLEW init
+  glewExperimental = GL_TRUE;
+  GLenum err = glewInit();
+  if (err != GLEW_OK) {
+    std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
+    std::terminate();
+  }
+  gl::GetError();
 
   // No V-sync needed.
   glfwSwapInterval(0);

@@ -28,7 +28,7 @@ class Label : public engine::GameObject {
 
     (prog_ << vs << fs).link().use();
 
-    gl::Uniform<glm::vec2>(prog_, "uOffset") = glm::vec2(pos);
+    gl::Uniform<glm::vec4>(prog_, "uColor") = font.color();
 
     set_text(text);
 
@@ -41,11 +41,31 @@ class Label : public engine::GameObject {
 
   void set_position(glm::vec2 pos) {
     pos_ = pos;
-    gl::Uniform<glm::vec2>(prog_, "uOffset") = pos;
+
+
+    glm::vec2 actual_pos = pos;
+    if (default_font_.horizontal_alignment() ==
+        Font::HorizontalAlignment::kCenter) {
+      actual_pos.x -= size().x/2;
+    } else if (default_font_.horizontal_alignment() ==
+               Font::HorizontalAlignment::kRight) {
+      actual_pos.x -= size().x;
+    }
+
+    if (default_font_.vertical_alignment() ==
+        Font::VerticalAlignment::kCenter) {
+      actual_pos.y += size().y/2;
+    } else if (default_font_.vertical_alignment() ==
+               Font::VerticalAlignment::kTop) {
+      actual_pos.y += size().y;
+    }
+
+    prog_.use();
+    gl::Uniform<glm::vec2>(prog_, "uOffset") = actual_pos;
   }
 
   glm::vec2 size() const {
-    return size_ / screen_size_;
+    return size_ / (screen_size_/2.0f);
   }
 
   const std::wstring& text() {
@@ -57,19 +77,19 @@ class Label : public engine::GameObject {
     size_.x = 0;
     std::vector<glm::vec4> attribs_vec;
 
-    font_.release();
     font_ = default_font_;
     font_.load_glyphs(text.c_str());
 
+    float pen_x = 0;
     for (size_t i = 0; i < text.size(); ++i) {
       texture_glyph_t *glyph = font_.get_glyph(text[i]);
-      if (glyph != nullptr) {
+      if (glyph) {
         int kerning = 0;
-        if (i > 0) {
-            kerning = texture_glyph_get_kerning(glyph, text[i-1]);
-        }
-        size_.x += kerning;
-        float x0 = size_.x + glyph->offset_x;
+        if (i > 0) { kerning = texture_glyph_get_kerning(glyph, text[i-1]); }
+
+        pen_x += kerning;
+        size_.x += kerning + glyph->advance_x + glyph->offset_x + glyph->width;
+        float x0 = pen_x + glyph->offset_x;
         float y0 = glyph->offset_y;
         float x1 = x0 + glyph->width;
         float y1 = y0 - glyph->height;
@@ -89,7 +109,7 @@ class Label : public engine::GameObject {
         attribs_vec.push_back(b);
         attribs_vec.push_back(c);
 
-        size_.x += glyph->advance_x;
+        pen_x += glyph->advance_x;
       }
     }
 
@@ -105,9 +125,36 @@ class Label : public engine::GameObject {
     idx_cnt_ = attribs_vec.size();
   }
 
-  Font& font() { return font_; }
   const Font& font() const { return font_; }
-  void set_font(const Font& font) { font_ = font; }
+  const glm::vec4& color() const { return font_.color(); }
+  void set_color(const glm::vec4& color) {
+    gl::Uniform<glm::vec4>(prog_, "uColor") = color;
+    default_font_.set_color(color);
+    set_text(text_);
+  }
+  float font_size() const { return default_font_.size(); }
+  void set_font_size(float size) {
+    default_font_.set_size(size);
+    set_text(text_);
+  }
+
+  Font::HorizontalAlignment horizontal_alignment() const {
+    return font_.horizontal_alignment();
+  }
+
+  void set_horizontal_alignment(const Font::HorizontalAlignment& align) {
+    font_.set_horizontal_alignment(align);
+    set_position(pos_);
+  }
+
+  Font::VerticalAlignment vertical_alignment() const {
+    return font_.vertical_alignment();
+  }
+
+  void set_vertical_alignment(const Font::VerticalAlignment& align) {
+    font_.set_vertical_alignment(align);
+    set_position(pos_);
+  }
 
  private:
   virtual void screenResized(size_t width, size_t height) override {
@@ -115,6 +162,7 @@ class Label : public engine::GameObject {
       glm::ortho<float>(-int(width)/2, width/2, -int(height)/2, height/2, -1, 1);
     screen_size_.x = width;
     screen_size_.y = height;
+    set_position(pos_);
   }
 
   virtual void drawGui() override {
@@ -136,10 +184,12 @@ class Label : public engine::GameObject {
 
   void update_text() {
     std::wstring text = L"Amalfi kisváros (közigazgatásilag comune) Olaszország Campania régiójában, Salerno megyében. A várost valószínűleg Nagy Konstantin császár katonái alapították 320-ban. A középkorban az Amalfi Köztársaság fővárosa volt és egyben az egyik legfontosabb földközi-tengeri kikötő, Salerno vetélytársa. A nagy hajózási tapasztalatnak köszönhetően az amalfiak megalkották a Tabula Amalphitanát, a világ első hajózási törvénykönyvét, amellyel a rivális tengeri hatalmak elismerését is kivívták. Amalfi kereskedői raktárakat tartottak fenn Alexandriában, Antiokheiában és Jeruzsálemben, az utóbbi helyen 1048-ban általuk alapított Szent János-kórházból eredeztetik a johanniták rendjét. A papírgyártó műhelyeiről és a limoncellójáról világszerte híres település ma az Olaszországba látogató turisták egyik kedvenc célpontja. Itt született Flavio Gioia, a mágnestű feltalálója is. Természeti szépségei és gazdag történelmi, kulturális öröksége miatt a környező településekkel együtt 1997 óta az UNESCO Világörökségének része.";
-    int len = 20;
-    static int first = 0;
-    std::wstring current = text.substr(++first%(text.size()-len), len);
-    set_text(current);
+    int len = 100;
+    static int first = 0, tick = 0;
+    if(++tick % 10 == 0) {
+      std::wstring current = text.substr(++first%(text.size()-len), len);
+      set_text(current);
+    }
   }
 
 };

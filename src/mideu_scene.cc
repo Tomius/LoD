@@ -36,7 +36,7 @@ MideuScene::MideuScene() {
   glfwSwapBuffers(window);
 
   PrintDebugText("Initializing the skybox");
-    Skybox *skybox = addSkybox();
+    Skybox *skybox = addGameObject<Skybox>();
   PrintDebugTime();
 
   PrintDebugText("Initializing the shadow maps");
@@ -44,7 +44,7 @@ MideuScene::MideuScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the terrain");
-    Terrain *terrain = addGameObject<Terrain>(skybox, shadow);
+    Terrain *terrain = addGameObject<Terrain>(skybox);
     const engine::HeightMapInterface& height_map = terrain->height_map();
   PrintDebugTime();
 

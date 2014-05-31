@@ -7,27 +7,36 @@
 #include <memory>
 
 #include "../shadow.h"
-#include "../skybox.h"
 #include "../oglwrap/oglwrap.h"
 
 #include "timer.h"
 #include "camera.h"
 
-class GameObject;
-
 namespace engine {
 
+class GameObject;
+
 class Scene {
-  std::vector<std::unique_ptr<GameObject>> gameobjects_, after_effects_;
+  std::vector<std::unique_ptr<GameObject>> gameobjects_;
   std::unique_ptr<Camera> camera_;
-  std::unique_ptr<Skybox> skybox_;
   std::unique_ptr<Shadow> shadow_;
   Timer game_time_, environment_time_, camera_time_;
 
  public:
   virtual ~Scene() {}
 
-  virtual float gravity() { return 9.81f; }
+  // setters and getters
+  virtual float gravity() const { return 9.81f; }
+  const Timer& game_time() const { return game_time_; }
+  Timer& game_time() { return game_time_; }
+  const Timer& environment_time() const { return environment_time_; }
+  Timer& environment_time() { return environment_time_; }
+  const Timer& camera_time() const { return camera_time_; }
+  Timer& camera_time() { return camera_time_; }
+  const Camera* camera() const { return camera_.get(); }
+  Camera* camera() { return camera_.get(); }
+  const Shadow* shadow() const { return shadow_.get(); }
+  Shadow* shadow() { return shadow_.get(); }
 
   template<typename T, typename... Args>
   T* addGameObject(Args&&... args) {
@@ -62,22 +71,6 @@ class Scene {
   }
 
   template<typename T, typename... Args>
-  T* addSkybox(Args&&... args) {
-    static_assert(std::is_base_of<Skybox, T>::value, "Unknown type");
-
-    auto skybox = new T{std::forward<Args>(args)...};
-    skybox_ = std::unique_ptr<Skybox>(skybox);
-    return skybox;
-  }
-
-  template<typename... Args>
-  Skybox* addSkybox(Args&&... args) {
-    auto skybox = new Skybox{std::forward<Args>(args)...};
-    skybox_ = std::unique_ptr<Skybox>(skybox);
-    return skybox;
-  }
-
-  template<typename T, typename... Args>
   T* addCamera(Args&&... args) {
     static_assert(std::is_base_of<Camera, T>::value, "Unknown type");
 
@@ -91,16 +84,12 @@ class Scene {
       shadow_->screenResized(w, h);
     }
 
-    if (skybox_) {
-      skybox_->screenResized(w, h);
-    }
-
     if (camera_) {
       camera_->screenResized(w, h);
     }
 
     for (auto& i : gameobjects_) {
-      i->screenResized(w, h);
+      i->screenResizedAll(*this, w, h);
     }
   }
 
@@ -110,12 +99,8 @@ private:
     environment_time_.tick();
     camera_time_.tick();
 
-    if (skybox_) {
-      skybox_->update(environment_time_.current);
-    }
-
     for (auto& i : gameobjects_) {
-      i->update(game_time_.current);
+      i->updateAll(*this);
     }
 
     if (camera_) {
@@ -130,7 +115,7 @@ private:
     if (shadow_) {
       shadow_->begin(); {
         for (auto& i : gameobjects_) {
-          i->shadowRender(game_time_.current, *camera_);
+          i->shadowRenderAll(*this);
         }
       } shadow_->end();
     }
@@ -140,23 +125,19 @@ private:
     if (!camera_)
       return;
 
-    if (skybox_) {
-      skybox_->render(environment_time_.current, *camera_);
-    }
-
     for (auto& i : gameobjects_) {
-      i->render(game_time_.current, *camera_);
+      i->renderAll(*this);
     }
   }
 
-  virtual void drawGui() {
+  virtual void render2D() {
     auto capabilities = gl::TemporarySet({{gl::kBlend, true},
                                           {gl::kCullFace, false},
                                           {gl::kDepthTest, false}});
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
     for (auto& i : gameobjects_) {
-      i->drawGui();
+      i->render2DAll(*this);
     }
   }
 
@@ -165,7 +146,7 @@ public:
     update();
     shadowRender();
     render();
-    drawGui();
+    render2D();
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) {
@@ -174,7 +155,7 @@ public:
     }
 
     for (auto& i : gameobjects_) {
-      i->keyAction(game_time_, key, scancode, action, mods);
+      i->keyActionAll(*this, key, scancode, action, mods);
     }
 
     if (action == GLFW_PRESS) {
@@ -197,7 +178,7 @@ public:
     }
 
     for (auto& i : gameobjects_) {
-      i->mouseScrolled(game_time_, xoffset, yoffset);
+      i->mouseScrolledAll(*this, xoffset, yoffset);
     }
   }
 
@@ -207,7 +188,7 @@ public:
     }
 
     for (auto& i : gameobjects_) {
-      i->mouseButtonPressed(game_time_, button, action, mods);
+      i->mouseButtonPressedAll(*this, button, action, mods);
     }
   }
 
@@ -217,7 +198,7 @@ public:
     }
 
     for (auto& i : gameobjects_) {
-      i->mouseMoved(game_time_, xpos, ypos);
+      i->mouseMovedAll(*this, xpos, ypos);
     }
   }
 };

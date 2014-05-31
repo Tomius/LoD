@@ -1,6 +1,7 @@
 // Copyright (c) 2014, Tamas Csala
 
 #include "./skybox.h"
+#include "engine/scene.h"
 #include "oglwrap/smart_enums.h"
 
 constexpr float day_duration = 128.0f, day_start = 0.0f;
@@ -37,10 +38,6 @@ Skybox::Skybox()
                            "CRGBA");
     }
   }
-}
-
-void Skybox::update(float time) {
-  time_ = time + day_start;
 }
 
 glm::vec3 Skybox::getSunPos() const {
@@ -84,7 +81,13 @@ glm::vec4 Skybox::getSunData() const {
   return glm::vec4(getSunPos(), day_lerp);
 }
 
-void Skybox::render(float time, const engine::Camera& cam) {
+void Skybox::update(const engine::Scene& scene) {
+  time_ = scene.environment_time().current + day_start;
+}
+
+void Skybox::render(const engine::Scene& scene) {
+  const engine::Camera& cam = *scene.camera();
+
   // We don't need the camera matrix's translation part for the skybox
   const float* f = glm::value_ptr(cam.matrix());
   glm::mat3 cam_rot = glm::mat3(f[0], f[1], f[2],

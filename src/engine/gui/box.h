@@ -6,24 +6,30 @@
 namespace engine {
 namespace gui {
 
-template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
-glm::vec2 sgn(glm::vec2 val) { return glm::vec2(sgn(val.x), sgn(val.y));}
+struct BoxParams {
+  glm::vec2 center, extent;
+  std::wstring label_text = L"";
+  Font label_font = Font{};
+  glm::vec2 label_pos;
+  enum class Style {kFlat, kShaded} style = Style::kFlat;
+  glm::vec4 bg_color = glm::vec4{0.5f};
+  glm::vec4 bg_top_color = glm::vec4{0.3f, 0.3f, 0.3f, 1};
+  glm::vec4 bg_top_mid_color = glm::vec4{0.6f, 0.6f, 0.6f, 1};
+  glm::vec4 bg_bottom_mid_color = glm::vec4{0.04f, 0.1f, 0.2f, 1};
+  glm::vec4 bg_bottom_color = glm::vec4{0.01f, 0.025f, 0.05f, 1};
+  float transition_height = 0.75f;
+  glm::vec4 border_color = glm::vec4{1.0f};
+  float border_width = 1;
+};
 
 class Box : public engine::GameObject {
-  glm::vec2 center_, extent_;
-  glm::vec4 bg_color_, border_color_;
+  BoxParams params_;
 
   gl::FullScreenRectangle rect_;
   gl::Program prog_;
-  float border_width_in_pixels_;
 
  public:
-  Box(glm::vec2 center, glm::vec2 extent, const std::wstring& text = L"",
-      glm::vec4 bg_color = glm::vec4{0.5f}, glm::vec4 border_color = glm::vec4{1.0f},
-      float border_width = 1)
-      : center_(center), extent_(extent)
-      , bg_color_(bg_color), border_color_(border_color)
-      , border_width_in_pixels_(border_width) {
+  Box(const BoxParams& params) : params_(params) {
     gl::VertexShader vs("box.vert");
     gl::FragmentShader fs("box.frag");
     prog_ << vs << fs;
@@ -31,16 +37,30 @@ class Box : public engine::GameObject {
 
     rect_.setupPositions(prog_ | "aPosition");
     rect_.setupTexCoords(prog_ | "aTexCoord");
-    gl::Uniform<glm::vec2>(prog_, "uOffset") = center;
-    gl::Uniform<glm::vec2>(prog_, "uScale") = extent;
-    gl::Uniform<glm::vec4>(prog_, "uBgColor") = bg_color;
-    gl::Uniform<glm::vec4>(prog_, "uBorderColor") = border_color;
-    gl::Uniform<float>(prog_, "uBorderPixels") = border_width;
+    gl::Uniform<glm::vec2>(prog_, "uOffset") = params_.center;
+    gl::Uniform<glm::vec2>(prog_, "uScale") = params_.extent;
+    gl::Uniform<glm::vec4>(prog_, "uBorderColor") = params_.border_color;
+    gl::Uniform<float>(prog_, "uBorderPixels") = params_.border_width;
+
+    if(params_.style == BoxParams::Style::kShaded) {
+      gl::Uniform<glm::vec4>(prog_, "uBgTopColor") = params_.bg_top_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgTopMidColor") = params_.bg_top_mid_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgBottomMidColor") = params_.bg_bottom_mid_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgBottomColor") = params_.bg_bottom_color;
+      gl::Uniform<float>(prog_, "uTransitionHeight") = params_.transition_height;
+    } else {
+      gl::Uniform<glm::vec4>(prog_, "uBgColor") = params_.bg_color;
+      gl::Uniform<float>(prog_, "uTransitionHeight") = -1.0f;
+    }
+
+    if(!params_.label_text.empty()) {
+      addComponent<Label>(params_.label_text, params_.label_pos, params_.label_font);
+    }
   }
 
-  virtual void screenResized(size_t width, size_t height) override {
+  virtual void screenResized(const Scene&, size_t width, size_t height) override {
     glm::vec2 border_width =
-      border_width_in_pixels_ / (extent_ * glm::vec2(width, height));
+      params_.border_width / (params_.extent * glm::vec2(width, height));
 
     prog_.use();
     gl::Uniform<glm::vec2>(prog_, "uBorderWidth") = border_width;
@@ -50,7 +70,7 @@ class Box : public engine::GameObject {
     };
 
     for (int i = 0; i < 4; ++i) {
-      glm::vec2 corner = extent_ * corners[i] + center_;
+      glm::vec2 corner = params_.extent * corners[i] + params_.center;
       corner = (1.0f + corner) * 0.5f; // [-1, 1] -> [0, 1]
       corner *= glm::vec2(width, height);
 
@@ -63,7 +83,7 @@ class Box : public engine::GameObject {
     }
   }
 
-  virtual void drawGui() override {
+  virtual void render2D(const Scene& scene) override {
     prog_.use();
     rect_.render();
   }

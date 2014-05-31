@@ -23,7 +23,7 @@ BloomEffect::BloomEffect()
   tex_.unbind();
 }
 
-void BloomEffect::screenResized(size_t w, size_t h) {
+void BloomEffect::screenResized(const engine::Scene&, size_t w, size_t h) {
   width_ = w;
   height_ = h;
   prog_.use();
@@ -35,7 +35,7 @@ void BloomEffect::screenResized(size_t w, size_t h) {
   tex_.unbind();
 }
 
-void BloomEffect::render(float, const engine::Camera&) {
+void BloomEffect::render(const engine::Scene&) {
   // Copy the backbuffer to the texture that our shader can fetch.
   tex_.active(0);
   tex_.bind();

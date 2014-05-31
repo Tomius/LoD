@@ -24,8 +24,9 @@ class BloomEffect : public engine::GameObject {
 public:
   BloomEffect();
   virtual ~BloomEffect() {}
-  virtual void screenResized(size_t width, size_t height) override;
-  virtual void render(float, const engine::Camera&) override;
+  virtual void screenResized(const engine::Scene&, size_t width,
+                             size_t height) override;
+  virtual void render(const engine::Scene& scene) override;
 };
 
 

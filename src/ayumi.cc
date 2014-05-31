@@ -4,6 +4,8 @@
 #include <string>
 #include <GLFW/glfw3.h>
 
+#include "engine/scene.h"
+
 using engine::AnimParams;
 
 Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
@@ -109,7 +111,8 @@ engine::Animation& Ayumi::getAnimation() {
   return anim_;
 }
 
-void Ayumi::update(float time) {
+void Ayumi::update(const engine::Scene& scene) {
+  float time = scene.game_time().current;
   charmove_->update(time);
 
   std::string curr_anim = anim_.getCurrentAnimation();
@@ -156,7 +159,7 @@ void Ayumi::update(float time) {
   mesh_.updateBoneInfo(anim_, time);
 }
 
-void Ayumi::shadowRender(float time, const engine::Camera& cam) {
+void Ayumi::shadowRender(const engine::Scene&) {
   shadow_prog_.use();
   shadow_uMCP_ =
     shadow_->modelCamProjMat(skybox_->getSunPos(), mesh_.bSphere(),
@@ -176,8 +179,9 @@ void Ayumi::shadowRender(float time, const engine::Camera& cam) {
   shadow_->push();
 }
 
-void Ayumi::render(float time, const engine::Camera& cam) {
+void Ayumi::render(const engine::Scene& scene) {
   prog_.use();
+  const auto& cam = *scene.camera();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uModelMatrix_ = transform.matrix() * mesh_.worldTransform();
@@ -191,8 +195,8 @@ void Ayumi::render(float time, const engine::Camera& cam) {
   mesh_.render();
 }
 
-void Ayumi::keyAction(const engine::Timer&, int key, int scancode,
-                                            int action, int mods) {
+void Ayumi::keyAction(const engine::Scene&, int key, int scancode,
+                                      int action, int mods) {
   if(key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
     charmove_->handleSpacePressed();
   }
@@ -264,7 +268,7 @@ AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
 }
 
 
-void Ayumi::mouseButtonPressed(const engine::Timer& timer, int button,
+void Ayumi::mouseButtonPressed(const engine::Scene& scene, int button,
                                int action, int mods) {
   if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     was_left_click_ = true;

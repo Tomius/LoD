@@ -1,7 +1,7 @@
 // Copyright (c) 2014, Tamas Csala
 
 #include "tree.h"
-#include "oglwrap/debug/insertion.h"
+#include "engine/scene.h"
 
 Tree::Tree(const engine::HeightMapInterface& height_map,
            Skybox *skybox, Shadow *shadow)
@@ -74,11 +74,12 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
   }
 }
 
-void Tree::shadowRender(float time, const engine::Camera& cam) {
+void Tree::shadowRender(const engine::Scene& scene) {
   shadow_prog_.use();
 
   auto cullface = gl::TemporaryDisable(gl::kCullFace);
 
+  const auto& cam = *scene.camera();
   auto frustum = cam.frustum();
   auto campos = cam.pos();
   for (size_t i = 0; i < trees_.size() &&
@@ -98,9 +99,11 @@ void Tree::shadowRender(float time, const engine::Camera& cam) {
   }
 }
 
-void Tree::render(float time, const engine::Camera& cam) {
+void Tree::render(const engine::Scene& scene) {
   prog_.use();
   uSunData_.set(skybox_->getSunData());
+
+  const auto& cam = *scene.camera();
   uProjectionMatrix_ = cam.projectionMatrix();
 
   auto blend = gl::TemporaryEnable(gl::kBlend);

@@ -15,11 +15,12 @@ class Skybox : public engine::GameObject {
  public:
   Skybox();
   virtual ~Skybox() {}
-  virtual void render(float time, const engine::Camera& cam) override;
-  virtual void update(float time) override;
 
   glm::vec3 getSunPos() const;
   glm::vec4 getSunData() const;
+
+  virtual void render(const engine::Scene& scene) override;
+  virtual void update(const engine::Scene& scene) override;
 
   const gl::TextureCube& env_map() { return env_map_; };
   const gl::FragmentShader& sky_fs() { return sky_fs_; };

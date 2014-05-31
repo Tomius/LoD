@@ -40,7 +40,7 @@ class GameEngine {
     ScreenResizeCallback(window_, width, height);
   }
 
-  static Scene& scene() {
+  static const Scene& scene() {
     return *scene_;
   }
 

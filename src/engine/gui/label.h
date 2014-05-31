@@ -157,7 +157,7 @@ class Label : public engine::GameObject {
     set_position(pos_);
   }
 
-  virtual void screenResized(size_t width, size_t height) override {
+  virtual void screenResized(const Scene& scene, size_t width, size_t height) override {
     prog_.use();
     gl::Uniform<glm::mat4>(prog_, "uProjectionMatrix") =
       glm::ortho<float>(-int(width)/2, width/2, -int(height)/2, height/2, -1, 1);
@@ -166,7 +166,7 @@ class Label : public engine::GameObject {
     set_position(pos_);
   }
 
-  virtual void drawGui() override {
+  virtual void render2D(const Scene& scene) override {
     prog_.use();
     vao_.bind();
 

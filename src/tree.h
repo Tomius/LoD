@@ -42,8 +42,8 @@ class Tree : public engine::GameObject {
 public:
   Tree(const engine::HeightMapInterface& height_map, Skybox *skybox, Shadow *shadow);
   virtual ~Tree() {}
-  virtual void shadowRender(float time, const engine::Camera& cam) override;
-  virtual void render(float time, const engine::Camera& cam) override;
+  virtual void shadowRender(const engine::Scene& scene) override;
+  virtual void render(const engine::Scene& scene) override;
 };
 
 #endif // LOD_TREE_H_

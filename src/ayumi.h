@@ -44,17 +44,17 @@ class Ayumi : public engine::GameObject {
   virtual ~Ayumi() {}
   engine::AnimatedMeshRenderer& getMesh();
   engine::Animation& getAnimation();
-  virtual void update(float time) override;
-  virtual void shadowRender(float time, const engine::Camera& cam) override;
-  virtual void render(float time, const engine::Camera& cam) override;
+  virtual void update(const engine::Scene& scene) override;
+  virtual void shadowRender(const engine::Scene& scene) override;
+  virtual void render(const engine::Scene& scene) override;
   void charmove(CharacterMovement* charmove) {
     charmove_ = (assert(charmove), charmove);
     charmove_->setCanJumpCallback(std::bind(&Ayumi::canJump, this));
     charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
   }
-  virtual void keyAction(const engine::Timer&, int key, int scancode,
+  virtual void keyAction(const engine::Scene& scene, int key, int scancode,
                          int action, int mods) override;
-  virtual void mouseButtonPressed(const engine::Timer& timer, int button,
+  virtual void mouseButtonPressed(const engine::Scene& scene, int button,
                                   int action, int mods) override;
 };
 

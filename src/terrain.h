@@ -20,19 +20,19 @@ class Terrain : public engine::GameObject {
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uShadowCP_;
   gl::LazyUniform<glm::vec4> uSunData_;
   gl::LazyUniform<int> uNumUsedShadowMaps_;
+  gl::LazyUniform<glm::ivec2> uShadowAtlasSize_;
 
   engine::HeightMap<unsigned char> height_map_;
   engine::cdlod::TerrainMesh mesh_;
 
   Skybox *skybox_;
-  Shadow *shadow_;
-public:
 
-  Terrain(Skybox *skybox, Shadow *shadow);
+public:
+  Terrain(Skybox *skybox);
   virtual ~Terrain() {}
 
   const engine::HeightMapInterface& height_map() { return height_map_; }
-  virtual void render(float time, const engine::Camera& cam) override;
+  virtual void render(const engine::Scene& scene) override;
 };
 
 #endif // LOD_TERRAIN_H_

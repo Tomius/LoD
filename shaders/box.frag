@@ -9,6 +9,9 @@ uniform vec2 uBorderWidth;
 uniform float uBorderPixels;
 uniform vec2 uCorners[4];
 
+uniform vec4 uBgTopColor, uBgTopMidColor, uBgBottomMidColor, uBgBottomColor;
+uniform float uTransitionHeight;
+
 #define CheckCornerMacro(corner_num)                                      \
   float len = length(gl_FragCoord.xy - uCorners[corner_num]);             \
   if(len > 10 - uBorderPixels) {                                          \
@@ -42,6 +45,19 @@ bool IsBorder() {
   return CheckCorner() || dist.x < uBorderWidth.x || dist.y < uBorderWidth.y;
 }
 
+vec4 bgColor() {
+  if (uTransitionHeight < 0) {
+    return uBgColor;
+  } else {
+    if (vTexCoord.y > uTransitionHeight) {
+      return mix(uBgTopColor, uBgTopMidColor,
+                (1 - vTexCoord.y) / (1 - uTransitionHeight));
+    } else {
+      return mix(uBgBottomColor, uBgBottomMidColor, vTexCoord.y / uTransitionHeight);
+    }
+  }
+}
+
 void main() {
-  gl_FragColor = IsBorder() ? uBorderColor : uBgColor;
+  gl_FragColor = IsBorder() ? uBorderColor : bgColor();
 }

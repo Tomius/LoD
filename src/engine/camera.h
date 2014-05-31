@@ -6,16 +6,17 @@
 #include <cmath>
 #include <iostream>
 
-#include "timer.h"
-#include "transform.h"
-#include "rigid_body.h"
-#include "collision/frustum.h"
 #include "../oglwrap/glm/glm/gtx/rotate_vector.hpp"
 #include "../oglwrap/debug/insertion.h"
 
+#include "./timer.h"
+#include "./transform.h"
+#include "./rigid_body.h"
+#include "collision/frustum.h"
+
 namespace engine {
 
-/// The base class for all cameras (basically a Transform)
+/// The base class for all cameras
 class Camera : public Transform {
   float fovy_, z_near_, z_far_, width_, height_;
 

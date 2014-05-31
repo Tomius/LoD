@@ -3,7 +3,9 @@
 #include "terrain.h"
 #include <string>
 
-Terrain::Terrain(Skybox *skybox, Shadow *shadow)
+#include "engine/scene.h"
+
+Terrain::Terrain(Skybox *skybox)
     : vs_("terrain.vert")
     , fs_("terrain.frag")
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
@@ -11,10 +13,10 @@ Terrain::Terrain(Skybox *skybox, Shadow *shadow)
     , uShadowCP_(prog_, "uShadowCP")
     , uSunData_(prog_, "uSunData")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
+    , uShadowAtlasSize_(prog_, "uShadowAtlasSize")
     , height_map_("terrain/mideu.png")
     , mesh_(height_map_)
-    , skybox_((assert(skybox), skybox))
-    , shadow_((assert(shadow), shadow)) {
+    , skybox_((assert(skybox), skybox)) {
   prog_ << vs_ << fs_ << skybox_->sky_fs();
   mesh_.setup_and_link(prog_, 1);
   prog_.use();
@@ -48,39 +50,37 @@ Terrain::Terrain(Skybox *skybox, Shadow *shadow)
   }
 
   gl::UniformSampler(prog_, "uShadowMap").set(5);
-  gl::Uniform<glm::ivec2>(prog_, "uShadowAtlasSize") = shadow->getAtlasDimensions();
 
   prog_.validate();
 }
 
-void Terrain::render(float time, const engine::Camera& cam) {
+void Terrain::render(const engine::Scene& scene) {
+  const engine::Camera& cam = *scene.camera();
+  const Shadow *shadow = scene.shadow();
+
   prog_.use();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uSunData_.set(skybox_->getSunData());
-  for (size_t i = 0; i < shadow_->getDepth(); ++i) {
-    uShadowCP_[i] = shadow_->shadowCPs()[i];
+  if(shadow) {
+    for (size_t i = 0; i < shadow->getDepth(); ++i) {
+      uShadowCP_[i] = shadow->shadowCPs()[i];
+    }
+    uNumUsedShadowMaps_ = shadow->getDepth();
+    uShadowAtlasSize_ = shadow->getAtlasDimensions();
   }
-  uNumUsedShadowMaps_ = shadow_->getDepth();
-  grassMaps_[0].active(2);
-  grassMaps_[0].bind();
-  grassMaps_[1].active(3);
-  grassMaps_[1].bind();
-  grassNormalMap_.active(4);
-  grassNormalMap_.bind();
-  shadow_->shadowTex().active(5);
-  shadow_->shadowTex().bind();
+
+  grassMaps_[0].bind(2);
+  grassMaps_[1].bind(3);
+  grassNormalMap_.bind(4);
+  if(shadow) { shadow->shadowTex().bind(5); }
 
   mesh_.render(cam);
 
-  shadow_->shadowTex().active(5);
-  shadow_->shadowTex().unbind();
-  grassMaps_[0].active(2);
-  grassMaps_[0].unbind();
-  grassMaps_[1].active(3);
-  grassMaps_[1].unbind();
-  grassNormalMap_.active(4);
-  grassNormalMap_.unbind();
+  if(shadow) { shadow->shadowTex().unbind(5); }
+  grassNormalMap_.unbind(4);
+  grassMaps_[1].unbind(3);
+  grassMaps_[0].unbind(2);
 }
 
 

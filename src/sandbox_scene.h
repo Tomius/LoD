@@ -15,20 +15,19 @@ struct SandboxScene : public engine::Scene {
     using engine::gui::Label;
     using engine::gui::Box;
 
-    Font font;
-    font.set_size(40);
-    font.set_color(glm::vec4{0, 1, 0, 0.5});
-    font.set_vertical_alignment(Font::VerticalAlignment::kBottom);
     engine::gui::BoxParams params;
     params.center = glm::vec2{0.0f, 0.0f};
     params.extent = glm::vec2{0.5f, 0.5f};
     params.label_pos = params.center + glm::vec2(0, 0.8f) * params.extent;
     params.label_text = L"I'm the title of this box";
-    params.label_font = font;
+    params.label_font.set_size(40);
+    params.label_font.set_color(glm::vec4{0, 1, 0, 0.5});
+    params.label_font.set_vertical_alignment(Font::VerticalAlignment::kBottom);
     params.style = engine::gui::BoxParams::Style::kShaded;
     params.transition_height = 0.85f;
     addGameObject<Box>(params);
 
+    Font font;
     font.set_size(30);
     font.set_color(glm::vec4{0.0, 0.7, 1.0, 0.9});
     addGameObject<Label>(L"This is a random blue label", glm::vec2{0.0f, 0.0f}, font);
@@ -45,13 +44,12 @@ struct SandboxScene : public engine::Scene {
       L"Please comment out a line in 'src/main.cc' if you want to see the real Land of Dreams scene.",
       glm::vec2{0.0f, 0.8f}, font);
 
-    font.set_size(15);
-    font.set_color(glm::vec4{0, 1, 1, 1});
-    font.set_vertical_alignment(Font::VerticalAlignment::kBottom);
     params.center = glm::vec2{0.3f, -0.2f};
     params.extent = glm::vec2{0.1f, 0.05f};
     params.label_text = L"This is a smaller box";
-    params.label_font = font;
+    params.label_font.set_size(15);
+    params.label_font.set_color(glm::vec4{0, 1, 1, 1});
+    params.label_font.set_vertical_alignment(Font::VerticalAlignment::kBottom);
     params.label_pos = params.center + glm::vec2(0, -0.2) * params.extent;
     params.style = engine::gui::BoxParams::Style::kShaded;
     params.bg_top_color = glm::vec4{0.3f, 0.4f, 0.3f, 1};

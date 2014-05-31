@@ -6,6 +6,9 @@
 namespace engine {
 namespace gui {
 
+template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
+glm::vec2 sgn(glm::vec2 val) { return glm::vec2(sgn(val.x), sgn(val.y));}
+
 class Box : public engine::GameObject {
   glm::vec2 center_, extent_;
   glm::vec4 bg_color_, border_color_;
@@ -32,6 +35,7 @@ class Box : public engine::GameObject {
     gl::Uniform<glm::vec2>(prog_, "uScale") = extent;
     gl::Uniform<glm::vec4>(prog_, "uBgColor") = bg_color;
     gl::Uniform<glm::vec4>(prog_, "uBorderColor") = border_color;
+    gl::Uniform<float>(prog_, "uBorderPixels") = border_width;
   }
 
   virtual void screenResized(size_t width, size_t height) override {
@@ -40,6 +44,23 @@ class Box : public engine::GameObject {
 
     prog_.use();
     gl::Uniform<glm::vec2>(prog_, "uBorderWidth") = border_width;
+
+    glm::vec2 corners[4] = {
+      glm::vec2{-1, -1}, glm::vec2{-1, +1}, glm::vec2{+1, -1}, glm::vec2{+1, +1}
+    };
+
+    for (int i = 0; i < 4; ++i) {
+      glm::vec2 corner = extent_ * corners[i] + center_;
+      corner = (1.0f + corner) * 0.5f; // [-1, 1] -> [0, 1]
+      corner *= glm::vec2(width, height);
+
+      // offset it with 10 px towards the center
+      corner -= corners[i] * glm::vec2(10);
+
+      // and upload the uniform
+      std::string name = "uCorners[" + std::to_string(i) + "]";
+      gl::Uniform<glm::vec2>(prog_, name) = corner;
+    }
   }
 
   virtual void drawGui() override {

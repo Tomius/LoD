@@ -7,7 +7,7 @@
 
 varying vec3  w_vNormal;
 varying vec3  c_vPos, w_vPos;
-varying vec2  vTexcoord;
+varying vec2  vTexCoord;
 varying float vInvalid;
 varying mat3  vNormalMatrix;
 
@@ -88,7 +88,7 @@ void main() {
 
   // Normals
   vec3 w_normal = normalize(w_vNormal);
-  vec3 normal_offset = texture2D(uGrassNormalMap, vTexcoord*256).rgb;
+  vec3 normal_offset = texture2D(uGrassNormalMap, vTexCoord*256).rgb;
   vec3 w_final_normal = normalize(vNormalMatrix * normal_offset);
   vec3 c_normal = (uCameraMatrix * vec4(w_final_normal, 0.0)).xyz;
 
@@ -108,11 +108,11 @@ void main() {
     specular_power = 5 * pow(max(dot(H, N), 0), kSpecularShininess);
   }
 
-  vec3 grass_color_0 = texture2D(uGrassMap0, vTexcoord*128).rgb;
-  vec3 grass_color_1 = texture2D(uGrassMap0, vTexcoord*8).rgb;
+  vec3 grass_color_0 = texture2D(uGrassMap0, vTexCoord*128).rgb;
+  vec3 grass_color_1 = texture2D(uGrassMap0, vTexCoord*8).rgb;
 
-  vec3 rock_color_0 = texture2D(uGrassMap1, vTexcoord*128).rgb;
-  vec3 rock_color_1 = texture2D(uGrassMap1, vTexcoord*8).rgb;
+  vec3 rock_color_0 = texture2D(uGrassMap1, vTexCoord*128).rgb;
+  vec3 rock_color_1 = texture2D(uGrassMap1, vTexCoord*8).rgb;
 
   float height_factor = clamp(sqrt(max(w_vPos.y - 16, 0) / 64), 0, 1);
 

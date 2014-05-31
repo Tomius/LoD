@@ -25,7 +25,7 @@ protected:
   /// A class to store per mesh data (the class loads in a scene, that might contain multiply meshes).
   struct MeshEntry {
     gl::VertexArray vao;
-    gl::ArrayBuffer verts, normals, texCoords;
+    gl::ArrayBuffer verts, normals, tex_coords;
     gl::IndexBuffer indices;
     unsigned idxCount, materialIndex;
     gl::IndexType idxType;
@@ -67,8 +67,8 @@ protected:
   bool is_setup_positions_;
   /// Stores if the setupNormals function is called (they shouldn't be called more than once).
   bool is_setup_normals_;
-  /// Stores if the setup_texcoords function is called (they shouldn't be called more than once).
-  bool is_setup_texcoords_;
+  /// Stores if the setup_texCoords function is called (they shouldn't be called more than once).
+  bool is_setup_tex_coords_;
   /// Textures can be disabled, and not used for rendering
   bool textures_enabled_;
 
@@ -105,7 +105,7 @@ public:
     * @param attrib - The attribute array to use as destination. */
   void setupNormals(gl::VertexAttribArray attrib);
 
-  /// Checks if every mesh in the scene has texcoords
+  /// Checks if every mesh in the scene has tex_coords
   /** Returns true if all of the meshes in the scene have texture
     * coordinates in the specified texture coordinate set.
     * @param texCoordSet - Specifies the index of the texture coordinate set that should be inspected */

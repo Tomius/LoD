@@ -11,11 +11,11 @@ uniform mat3 uNormalMatrix;
 
 varying vec3 c_vPos;
 varying vec3 w_vNormal;
-varying vec2 vTexcoord;
+varying vec2 vTexCoord;
 
 void main() {
   w_vNormal = aNormal * uNormalMatrix;
-  vTexcoord = aTexCoord;
+  vTexCoord = aTexCoord;
 
   vec4 c_pos = uModelCameraMatrix * aPosition;
   c_vPos = vec3(c_pos);

@@ -21,9 +21,9 @@ uniform sampler2D CDLODTerrain_uHeightMap;
 uniform vec2 CDLODTerrain_uTexSize;
 uniform vec3 CDLODTerrain_uCamPos;
 
-float CDLODTerrain_fetchHeight(vec2 texCoord) {
+float CDLODTerrain_fetchHeight(vec2 tex_coord) {
   return texture2D(CDLODTerrain_uHeightMap,
-                   texCoord / vec2(CDLODTerrain_uTexSize)).r * 255;
+                   tex_coord / vec2(CDLODTerrain_uTexSize)).r * 255;
 }
 
 vec2 CDLODTerrain_frac(vec2 x) { return x - floor(x); }

@@ -17,7 +17,7 @@ class FpsDisplay : public engine::GameObject {
     label_.screenResized(width, height);
   }
 
-  virtual void update(float time) {
+  virtual void update(float time) override {
     static double accum_time = 0.0f;
     static double last_call = time;
     double dt = time - last_call;
@@ -39,9 +39,7 @@ class FpsDisplay : public engine::GameObject {
 
  public:
   FpsDisplay() : font_("src/engine/gui/freetype-gl/fonts/Vera.ttf", 30,
-                       glm::vec4(1, 0, 0, 1),
-                       engine::gui::Font::HorizontalAlignment::kCenter,
-                       engine::gui::Font::VerticalAlignment::kCenter)
+                       glm::vec4(1, 0, 0, 1))
                , label_(L"FPS: ", glm::vec2{0.8f, 0.9f}, font_) {}
 
 };

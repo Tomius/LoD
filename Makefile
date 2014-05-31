@@ -1,3 +1,5 @@
+# Copyright (c) 2014, Tamas Csala
+
 BINARY = LoD
 SRC_DIR = src
 OBJ_DIR = .obj

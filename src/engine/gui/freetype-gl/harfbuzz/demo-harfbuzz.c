@@ -137,7 +137,7 @@ int main( int argc, char **argv )
 
 
     typedef struct { float x,y, u,v, gamma, r,g,b,a; } vertex_t;
-    vbuffer = vertex_buffer_new( "a_vertex:2f,a_texcoord:2f,"
+    vbuffer = vertex_buffer_new( "a_vertex:2f,a_texCoord:2f,"
                                 "a_gamma:1f,a_color:4f" );
 
     /* Create a buffer for harfbuzz to use */
@@ -149,7 +149,7 @@ int main( int argc, char **argv )
         hb_buffer_set_script( buffer, script );
         hb_buffer_set_language( buffer,
                                 hb_language_from_string(language, strlen(language)) );
-        hb_buffer_add_utf8( buffer, text, strlen(text), 0, strlen(text) ); 
+        hb_buffer_add_utf8( buffer, text, strlen(text), 0, strlen(text) );
         hb_shape( fonts[i]->hb_ft_font, buffer, NULL, 0 );
 
         unsigned int         glyph_count;
@@ -157,7 +157,7 @@ int main( int argc, char **argv )
             hb_buffer_get_glyph_infos(buffer, &glyph_count);
         hb_glyph_position_t *glyph_pos =
             hb_buffer_get_glyph_positions(buffer, &glyph_count);
- 
+
         texture_font_load_glyphs( fonts[i], text,
                                   direction, language, script );
 

@@ -24,12 +24,12 @@ uniform vec2 uTexSize;
 
 varying vec3  w_vNormal;
 varying vec3  c_vPos, w_vPos;
-varying vec2  vTexcoord;
+varying vec2  vTexCoord;
 varying float vInvalid;
 varying mat3  vNormalMatrix;
 
-float fetchHeight(vec2 texCoord) {
-  return texture2D(uHeightMap, texCoord).r * 255;
+float fetchHeight(vec2 tex_coord) {
+  return texture2D(uHeightMap, tex_coord).r * 255;
 }
 
 vec2 frac(vec2 x) { return x - floor(x); }
@@ -52,10 +52,10 @@ void main() {
     clamp((dist - morph_start*max_dist) / ((1-morph_start) * max_dist), 0, 1);
 
   vec2 morphed_pos = morphVertex(pos, morph);
-  vec2 texcoord = morphed_pos + uTexSize/2;
+  vec2 tex_coord = morphed_pos + uTexSize/2;
 
-  if (texcoord.x < 1 || uTexSize.x < texcoord.x + 1 ||
-      texcoord.y < 1 || uTexSize.y < texcoord.y + 1) {
+  if (tex_coord.x < 1 || uTexSize.x < tex_coord.x + 1 ||
+      tex_coord.y < 1 || uTexSize.y < tex_coord.y + 1) {
     vInvalid = 1e10;
     gl_Position = vec4(0.0);
     return;
@@ -63,11 +63,11 @@ void main() {
     vInvalid = 0.0;
   }
 
-  texcoord /= vec2(uTexSize);
+  tex_coord /= vec2(uTexSize);
 
-  vTexcoord = texcoord;
+  vTexCoord = tex_coord;
 
-  float height = fetchHeight(texcoord);
+  float height = fetchHeight(tex_coord);
   vec3 w_pos = vec3(morphed_pos.x, height, morphed_pos.y);
   w_vPos = w_pos;
 
@@ -75,10 +75,10 @@ void main() {
   c_vPos = c_pos.xyz;
 
   // Normal approximation from the heightmap
-  vec3 u = vec3(1.0f, 0.0f, fetchHeight(texcoord + vec2(1, 0)) -
-                            fetchHeight(texcoord - vec2(1, 0)));
-  vec3 v = vec3(0.0f, 1.0f, fetchHeight(texcoord + vec2(0, 1)) -
-                            fetchHeight(texcoord + vec2(0, 1)));
+  vec3 u = vec3(1.0f, 0.0f, fetchHeight(tex_coord + vec2(1, 0)) -
+                            fetchHeight(tex_coord - vec2(1, 0)));
+  vec3 v = vec3(0.0f, 1.0f, fetchHeight(tex_coord + vec2(0, 1)) -
+                            fetchHeight(tex_coord + vec2(0, 1)));
   vec3 w_normal = normalize(cross(u, v));
   w_vNormal = w_normal;
 

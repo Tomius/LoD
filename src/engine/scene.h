@@ -8,6 +8,7 @@
 
 #include "../shadow.h"
 #include "../skybox.h"
+#include "../oglwrap/oglwrap.h"
 
 #include "timer.h"
 #include "camera.h"
@@ -149,6 +150,11 @@ private:
   }
 
   virtual void drawGui() {
+    auto capabilities = gl::TemporarySet({{gl::kBlend, true},
+                                          {gl::kCullFace, false},
+                                          {gl::kDepthTest, false}});
+    gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
+
     for (auto& i : gameobjects_) {
       i->drawGui();
     }

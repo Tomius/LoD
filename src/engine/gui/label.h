@@ -28,11 +28,9 @@ class Label : public engine::GameObject {
     gl::FragmentShader fs("text.frag");
 
     (prog_ << vs << fs).link().use();
-
     gl::Uniform<glm::vec4>(prog_, "uColor") = font.color();
 
     set_text(text);
-
     size_.y = font.size();
   }
 
@@ -119,7 +117,7 @@ class Label : public engine::GameObject {
     attribs_.data(attribs_vec);
     (prog_ | "aPosition").pointer(2, gl::kFloat, false,
                                   4*sizeof(float), 0).enable();
-    (prog_ | "aTexcoord").pointer(2, gl::kFloat, false, 4*sizeof(float),
+    (prog_ | "aTexCoord").pointer(2, gl::kFloat, false, 4*sizeof(float),
                                   (const void*)(2*sizeof(float))).enable();
     vao_.unbind();
 
@@ -138,6 +136,7 @@ class Label : public engine::GameObject {
   void set_font_size(float size) {
     default_font_.set_size(size);
     set_text(text_);
+    size_.y = size;
   }
 
   Font::HorizontalAlignment horizontal_alignment() const {
@@ -170,11 +169,6 @@ class Label : public engine::GameObject {
   virtual void drawGui() override {
     prog_.use();
     vao_.bind();
-
-    auto capabilities = gl::TemporarySet({{gl::kBlend, true},
-                                          {gl::kCullFace, false},
-                                          {gl::kDepthTest, false}});
-    gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
     gl::Texture2D::Active(0);
     font_.bindTexture();

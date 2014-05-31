@@ -7,9 +7,9 @@ attribute vec2 aTexCoord;
 
 uniform mat4 uMCP;
 
-varying vec2 vTexcoord;
+varying vec2 vTexCoord;
 
 void main() {
-  vTexcoord = aTexCoord;
+  vTexCoord = aTexCoord;
   gl_Position = uMCP * aPosition;
 }

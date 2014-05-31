@@ -4,7 +4,7 @@
 
 varying vec3 c_vPos;
 varying vec3 w_vNormal;
-varying vec2 vTexcoord;
+varying vec2 vTexCoord;
 
 uniform sampler2D uDiffuseTexture;
 
@@ -28,7 +28,7 @@ void main() {
 
   float diffuse_power = max(abs(dot(normalize(w_vNormal), normalize(AmbientDirection()))), 0.3);
 
-  vec4 color = texture2D(uDiffuseTexture, vTexcoord);
+  vec4 color = texture2D(uDiffuseTexture, vTexCoord);
   vec3 final_color = color.rgb * (SunPower() * diffuse_power + AmbientPower()) / 2;
 
   float actual_alpha = min(color.a, alpha);

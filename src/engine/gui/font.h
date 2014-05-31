@@ -90,9 +90,9 @@ class Font {
 
  public:
   Font(const std::string& filename = "src/engine/gui/freetype-gl/fonts/Vera.ttf",
-       float size = 12,  glm::vec4 color = glm::vec4{0, 1, 0, 1},
-       HorizontalAlignment xalign = HorizontalAlignment::kLeft,
-       VerticalAlignment yalign = VerticalAlignment::kBottom)
+       float size = 12,  glm::vec4 color = glm::vec4{1},
+       HorizontalAlignment xalign = HorizontalAlignment::kCenter,
+       VerticalAlignment yalign = VerticalAlignment::kCenter)
     : data_(filename, size), color_(color)
     , horizontal_alignment_(xalign)
     , vertical_alignment_(yalign) { }

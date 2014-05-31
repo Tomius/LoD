@@ -37,7 +37,7 @@ public:
     prog_.validate();
 
     rect_.setupPositions(prog_ | "aPosition");
-    rect_.setupTexCoords(prog_ | "aTexcoord", true);
+    rect_.setupTexCoords(prog_ | "aTexCoord", true);
   }
 
   void render() {

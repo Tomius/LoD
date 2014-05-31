@@ -19,7 +19,7 @@ MeshRenderer::MeshRenderer(const std::string& filename,
   , entries_(scene_->mNumMeshes)
   , is_setup_positions_(false)
   , is_setup_normals_(false)
-  , is_setup_texcoords_(false)
+  , is_setup_tex_coords_(false)
   , textures_enabled_(true) {
 
   if (!scene_) {
@@ -147,7 +147,7 @@ void MeshRenderer::setupNormals(gl::VertexAttribArray attrib) {
   gl::ArrayBuffer::Unbind();
 }
 
-/// Checks if every mesh in the scene has texcoords
+/// Checks if every mesh in the scene has tex_coords
 /** Returns true if all of the meshes in the scene have texture
   * coordinates in the specified texture coordinate set.
   * @param texCoordSet  Specifies the index of the texture coordinate
@@ -173,12 +173,12 @@ bool MeshRenderer::hasTexCoords(unsigned char texCoordSet) {
 void MeshRenderer::setupTexCoords(gl::VertexAttribArray attrib,
                                   unsigned char texCoordSet) {
 
-  if (is_setup_texcoords_) {
+  if (is_setup_tex_coords_) {
     throw std::logic_error(
       "MeshRenderer::setupTexCoords is called multiply times on the same object"
     );
   } else {
-    is_setup_texcoords_ = true;
+    is_setup_tex_coords_ = true;
   }
 
   // Initialize TexCoords
@@ -201,8 +201,8 @@ void MeshRenderer::setupTexCoords(gl::VertexAttribArray attrib,
 
     entries_[i].vao.bind();
 
-    entries_[i].texCoords.bind();
-    entries_[i].texCoords.data(texCoordsVector);
+    entries_[i].tex_coords.bind();
+    entries_[i].tex_coords.data(texCoordsVector);
     attrib.setup<float>(2).enable();
   }
 

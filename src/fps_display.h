@@ -6,10 +6,8 @@
 #include "engine/scene.h"
 #include "engine/game_object.h"
 #include "engine/gui/label.h"
-#include "engine/gui/font.h"
 
 class FpsDisplay : public engine::GameObject {
-  engine::gui::Font font_;
   engine::gui::Label *label_;
 
   static constexpr float refresh_interval = 0.1f;
@@ -28,9 +26,10 @@ class FpsDisplay : public engine::GameObject {
   }
 
  public:
-  FpsDisplay() : font_("src/engine/gui/freetype-gl/fonts/Vera.ttf", 30,
-                       glm::vec4(1, 0, 0, 1)) {
-    label_ = addComponent<engine::gui::Label>(L"FPS: ", glm::vec2{0.8f, 0.9f}, font_);
+  FpsDisplay() {
+    label_ = addComponent<engine::gui::Label>(L"FPS: ", glm::vec2{0.8f, 0.9f},
+             engine::gui::Font{"src/engine/gui/freetype-gl/fonts/Vera.ttf", 30,
+             glm::vec4(1, 0, 0, 1)});
   }
 
 };

@@ -31,6 +31,9 @@ static void PrintDebugTime() {
 MideuScene::MideuScene() {
   GLFWwindow* window = engine::GameEngine::window();
 
+  // Disable cursor
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
   // The scene builds quite slow, put some picture for the user.
   LoadingScreen().render();
   glfwSwapBuffers(window);
@@ -56,8 +59,8 @@ MideuScene::MideuScene() {
     Ayumi *ayumi = addGameObject<Ayumi>(window, skybox, shadow);
     ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
 
-    charmove_ = make_unique<CharacterMovement>(window, ayumi->transform,
-                                               *ayumi->rigid_body);
+    charmove_ = engine::make_unique<CharacterMovement>(window, ayumi->transform,
+                                                       *ayumi->rigid_body);
     ayumi->charmove(charmove_.get());
   PrintDebugTime();
 

@@ -1,5 +1,8 @@
 // Copyright (c) 2014, Tamas Csala
 
+#ifndef ENGINE_GUI_BOX_H_
+#define ENGINE_GUI_BOX_H_
+
 #include "label.h"
 #include "../../oglwrap/shapes/full_screen_rect.h"
 
@@ -20,6 +23,7 @@ struct BoxParams {
   float transition_height = 0.75f;
   glm::vec4 border_color = glm::vec4{1.0f};
   float border_width = 1;
+  float roundness = 10;
 };
 
 class Box : public engine::GameObject {
@@ -41,6 +45,7 @@ class Box : public engine::GameObject {
     gl::Uniform<glm::vec2>(prog_, "uScale") = params_.extent;
     gl::Uniform<glm::vec4>(prog_, "uBorderColor") = params_.border_color;
     gl::Uniform<float>(prog_, "uBorderPixels") = params_.border_width;
+    gl::Uniform<float>(prog_, "uRoundness") = params_.roundness;
 
     if(params_.style == BoxParams::Style::kShaded) {
       gl::Uniform<glm::vec4>(prog_, "uBgTopColor") = params_.bg_top_color;
@@ -74,8 +79,8 @@ class Box : public engine::GameObject {
       corner = (1.0f + corner) * 0.5f; // [-1, 1] -> [0, 1]
       corner *= glm::vec2(width, height);
 
-      // offset it with 10 px towards the center
-      corner -= corners[i] * glm::vec2(10);
+      // offset it with 'roundness' px towards the center
+      corner -= corners[i] * glm::vec2(params_.roundness);
 
       // and upload the uniform
       std::string name = "uCorners[" + std::to_string(i) + "]";
@@ -89,5 +94,7 @@ class Box : public engine::GameObject {
   }
 };
 
-}
-}
+} // namespace gui
+} // namespace engine
+
+#endif

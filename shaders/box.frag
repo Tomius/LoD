@@ -6,16 +6,15 @@ varying vec2 vTexCoord;
 
 uniform vec4 uBgColor, uBorderColor;
 uniform vec2 uBorderWidth;
-uniform float uBorderPixels;
 uniform vec2 uCorners[4];
 
 uniform vec4 uBgTopColor, uBgTopMidColor, uBgBottomMidColor, uBgBottomColor;
-uniform float uTransitionHeight;
+uniform float uBorderPixels, uTransitionHeight, uRoundness;
 
 #define CheckCornerMacro(corner_num)                                      \
   float len = length(gl_FragCoord.xy - uCorners[corner_num]);             \
-  if(len > 10 - uBorderPixels) {                                          \
-    if(len > 10) {                                                        \
+  if(len > uRoundness - uBorderPixels) {                                  \
+    if(len > uRoundness) {                                                \
       discard;                                                            \
     } else {                                                              \
       return true;                                                        \

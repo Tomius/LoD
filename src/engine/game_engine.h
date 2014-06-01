@@ -48,6 +48,12 @@ class GameEngine {
     return window_;
   }
 
+  static glm::vec2 window_size() {
+    int width, height;
+    glfwGetWindowSize(GameEngine::window(), &width, &height);
+    return glm::vec2(width, height);
+  }
+
   static void Run();
 
  private:

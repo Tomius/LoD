@@ -26,25 +26,27 @@ class FontData {
       font_ = nullptr;
     }
   }
- public:
 
+  void load_glyphs() {
+    static const wchar_t * cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
+                                   L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+                                   L"`abcdefghijklmnopqrstuvwxyz{|}~"
+                                   L"áéíóöőúüűÁÉÍÓÖŐÚÜŰ";
+    texture_font_load_glyphs(font_, cache);
+  }
+
+ public:
   FontData(const std::string& filename
               = "src/engine/gui/freetype-gl/fonts/Vera.ttf", float size = 12)
-    : filename_(filename), atlas_(texture_atlas_new(1024, 1024, 1))
-    , font_(texture_font_new_from_file(atlas_, size, filename.c_str()))
-    , size_(size) { }
-
-  FontData(const FontData& f) { font_ = nullptr; *this = f; }
-  FontData(FontData&& f) { *this = std::move(f);}
-
-  FontData& operator=(const FontData& f) {
-    if (this != &f) {
-      release();
-      *this = FontData{f.filename_, f.size_};
-    }
-
-    return *this;
+      : filename_(filename), atlas_(texture_atlas_new(512, 512, 1))
+      , font_(texture_font_new_from_file(atlas_, size, filename.c_str()))
+      , size_(size) {
+    load_glyphs();
   }
+
+  FontData(const FontData& f) = delete;
+  FontData(FontData&& f) { *this = std::move(f);}
+  FontData& operator=(const FontData& f) = delete;
 
   FontData& operator=(FontData&& f) {
     if (this != &f) {
@@ -67,17 +69,16 @@ class FontData {
     return texture_font_get_glyph(font_, ch);
   }
 
-  void load_glyphs(const wchar_t* text) {
-    texture_font_load_glyphs(font_, text);
-  }
-
   void bindTexture() const {
     glBindTexture(GL_TEXTURE_2D, atlas_->id);
   }
+
+  texture_font_t* expose() { return font_; }
 };
 
 class Font {
-  FontData data_;
+  // Font should be copyable, but the fontdata shouldn't be loaded for each copy
+  std::shared_ptr<FontData> data_;
   glm::vec4 color_;
 
  public:
@@ -93,7 +94,7 @@ class Font {
        float size = 12,  glm::vec4 color = glm::vec4{1},
        HorizontalAlignment xalign = HorizontalAlignment::kCenter,
        VerticalAlignment yalign = VerticalAlignment::kCenter)
-    : data_(filename, size), color_(color)
+    : data_(engine::make_shared<FontData>(filename, size)), color_(color)
     , horizontal_alignment_(xalign)
     , vertical_alignment_(yalign) { }
 
@@ -102,11 +103,14 @@ class Font {
   Font& operator=(const Font&) = default;
   Font& operator=(Font&&) = default;
 
-  const std::string& filename() const { return data_.filename(); }
+  const std::string& filename() const { return data_->filename(); }
   const glm::vec4& color() const { return color_; }
   void set_color(const glm::vec4& color) { color_ = color; }
-  float size() const { return data_.size(); }
-  void set_size(float size) { data_ = FontData{data_.filename(), size}; }
+  float size() const { return data_->size(); }
+  void set_size(float size) {
+    data_ = engine::make_shared<FontData>(data_->filename(), size);
+  }
+  texture_font_t* expose() { return data_->expose(); }
 
   HorizontalAlignment horizontal_alignment() const {
     return horizontal_alignment_;
@@ -122,9 +126,8 @@ class Font {
     vertical_alignment_ = align;
   }
 
-  texture_glyph_t *get_glyph(wchar_t ch) {return data_.get_glyph(ch); }
-  void load_glyphs(const wchar_t* text) { data_.load_glyphs(text); }
-  void bindTexture() const { data_.bindTexture(); }
+  texture_glyph_t *get_glyph(wchar_t ch) {return data_->get_glyph(ch); }
+  void bindTexture() const { data_->bindTexture(); }
 
 };
 

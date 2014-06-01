@@ -27,10 +27,7 @@ $(OBJ_DIR)/%.dep: $(SRC_DIR)/%.cc
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.dep=.cc)) -MT $(@:.dep=.o) -MF $@
 
-# Don't build deps when running make clean
-ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
-endif
 
 $(OBJ_DIR)/%.o:
 	$(CXX) $(CXXFLAGS) -c $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.o=.cc)) -o $@

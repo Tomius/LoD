@@ -101,7 +101,6 @@ void GameEngine::InitContext() {
   glfwSetScrollCallback(window_, MouseScrolledCallback);
   glfwSetMouseButtonCallback(window_, MouseButtonPressed);
   glfwSetCursorPosCallback(window_, MouseMoved);
-  glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void GameEngine::Run() {

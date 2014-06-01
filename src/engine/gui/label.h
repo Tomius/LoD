@@ -12,18 +12,18 @@ namespace engine {
 namespace gui {
 
 class Label : public engine::GameObject {
-  Font font_, default_font_;
+  Font font_;
   gl::VertexArray vao_;
   gl::ArrayBuffer attribs_;
   gl::Program prog_;
 
   size_t idx_cnt_;
-  glm::vec2 pos_, size_, screen_size_;
+  glm::vec2 pos_, size_;
   std::wstring text_;
 
  public:
   Label(const std::wstring& text, glm::vec2 pos, const Font& font = Font{})
-      : default_font_(font), idx_cnt_(0), pos_(pos), text_(text) {
+      : font_(font), idx_cnt_(0), pos_(pos), text_(text) {
     gl::VertexShader vs("text.vert");
     gl::FragmentShader fs("text.frag");
 
@@ -42,18 +42,18 @@ class Label : public engine::GameObject {
     pos_ = pos;
 
     glm::vec2 actual_pos = pos;
-    if (default_font_.horizontal_alignment() ==
+    if (font_.horizontal_alignment() ==
         Font::HorizontalAlignment::kCenter) {
       actual_pos.x -= size().x/2;
-    } else if (default_font_.horizontal_alignment() ==
+    } else if (font_.horizontal_alignment() ==
                Font::HorizontalAlignment::kRight) {
       actual_pos.x -= size().x;
     }
 
-    if (default_font_.vertical_alignment() ==
+    if (font_.vertical_alignment() ==
         Font::VerticalAlignment::kCenter) {
       actual_pos.y += size().y/2;
-    } else if (default_font_.vertical_alignment() ==
+    } else if (font_.vertical_alignment() ==
                Font::VerticalAlignment::kTop) {
       actual_pos.y += size().y;
     }
@@ -63,7 +63,7 @@ class Label : public engine::GameObject {
   }
 
   glm::vec2 size() const {
-    return size_ / (screen_size_/2.0f);
+    return size_ / (GameEngine::window_size()/2.0f);
   }
 
   const std::wstring& text() {
@@ -73,9 +73,6 @@ class Label : public engine::GameObject {
   void set_text(const std::wstring& text) {
     text_ = text;
     std::vector<glm::vec4> attribs_vec;
-
-    font_ = default_font_;
-    font_.load_glyphs(text.c_str());
 
     float pen_x = 0, x0, x1, y0, y1, s0, t0, s1, t1;
     for (size_t i = 0; i < text.size(); ++i) {
@@ -129,12 +126,11 @@ class Label : public engine::GameObject {
   void set_color(const glm::vec4& color) {
     prog_.use();
     gl::Uniform<glm::vec4>(prog_, "uColor") = color;
-    default_font_.set_color(color);
-    set_text(text_);
+    font_.set_color(color);
   }
-  float font_size() const { return default_font_.size(); }
+  float font_size() const { return font_.size(); }
   void set_font_size(float size) {
-    default_font_.set_size(size);
+    font_.set_size(size);
     set_text(text_);
     size_.y = size;
   }
@@ -161,8 +157,6 @@ class Label : public engine::GameObject {
     prog_.use();
     gl::Uniform<glm::mat4>(prog_, "uProjectionMatrix") =
       glm::ortho<float>(-int(width)/2, width/2, -int(height)/2, height/2, -1, 1);
-    screen_size_.x = width;
-    screen_size_.y = height;
     set_position(pos_);
   }
 

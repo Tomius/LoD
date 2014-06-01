@@ -9,7 +9,7 @@ uniform vec2 uBorderWidth;
 uniform vec2 uCorners[4];
 
 uniform vec4 uBgTopColor, uBgTopMidColor, uBgBottomMidColor, uBgBottomColor;
-uniform float uBorderPixels, uTransitionHeight, uRoundness;
+uniform float uBorderPixels, uTransitionHeight, uRoundness, uInverted;
 
 #define CheckCornerMacro(corner_num)                                      \
   float len = length(gl_FragCoord.xy - uCorners[corner_num]);             \

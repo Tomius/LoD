@@ -63,6 +63,22 @@ class Box : public engine::GameObject {
     }
   }
 
+  void set_inverted(bool value) {
+    prog_.use();
+    if(value) {
+      gl::Uniform<glm::vec4>(prog_, "uBgTopColor") = params_.bg_top_mid_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgTopMidColor") = params_.bg_top_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgBottomMidColor") = params_.bg_bottom_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgBottomColor") = params_.bg_bottom_mid_color;
+    } else {
+      gl::Uniform<glm::vec4>(prog_, "uBgTopColor") = params_.bg_top_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgTopMidColor") = params_.bg_top_mid_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgBottomMidColor") = params_.bg_bottom_mid_color;
+      gl::Uniform<glm::vec4>(prog_, "uBgBottomColor") = params_.bg_bottom_color;
+    }
+  }
+
+ private:
   virtual void screenResized(const Scene&, size_t width, size_t height) override {
     glm::vec2 border_width =
       params_.border_width / (params_.extent * glm::vec2(width, height));

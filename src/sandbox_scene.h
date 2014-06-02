@@ -55,14 +55,14 @@ struct SandboxScene : public engine::Scene {
     Button *blue_pill = addGameObject<Button>(glm::vec2{-0.2f, -0.2f},
                                               glm::vec2{0.08f, 0.04f},
                                               L"dis one?",
-                                              glm::vec4{1, 0, 0, 0.85},
+                                              glm::vec4{1, 0.05f, 0.05f, 1},
                                               glm::vec4{1, 1, 1, 1}, 20);
       blue_pill->addPressCallback([](){engine::GameEngine::LoadScene<MideuScene>();});
 
     Button *orange_pill = addGameObject<Button>(glm::vec2{0.2f, -0.2f},
                                                 glm::vec2{0.08f, 0.04f},
                                                 L"*this one?",
-                                                glm::vec4{0, 0, 1, 0.85},
+                                                glm::vec4{0.05f, 0.05f, 1, 1},
                                                 glm::vec4{1, 1, 1, 1}, 20);
       orange_pill->addPressCallback([](){
         std::cout << "Wrong pill, sorry. Aborting now." << std::endl;

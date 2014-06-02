@@ -37,8 +37,8 @@ public:
      * fx, fy -- cx, fy
      */
 
-    double fx = floor(x), cx = ceil(x);
-    double fy = floor(y), cy = ceil(y);
+    double fx = floor(x), cx = fx + 1;
+    double fy = floor(y), cy = fy + 1;
 
     double fh = glm::mix(double(tex_(fx, fy)[0]), double(tex_(cx, fy)[0]), x-fx);
     double ch = glm::mix(double(tex_(fx, cy)[0]), double(tex_(cx, cy)[0]), x-fx);

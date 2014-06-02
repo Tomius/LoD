@@ -41,7 +41,7 @@ void main() {
   float spec_mask = texture2D(uSpecularTexture, vTexCoord).r;
 
   vec3 final_color = color *
-    (SunPower()*(diffuse_power + spec_mask*specular_power) + (AmbientPower() + 0.1));
+    (diffuse_power + spec_mask*specular_power + AmbientPower());
 
   gl_FragColor = vec4(final_color, 1.0);
 }

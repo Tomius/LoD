@@ -116,8 +116,7 @@ vec3 SkyColor(vec3 look_dir) {
       // Border grey area
       0.7 * min(cloud.g + cloud.b * 0.5, 1.0) * 0.1 * moon_power +
       // The main grey area
-      (cloud.g * (1.0 - cloud.b * 0.2) * 5.0) * pow(1.0 - moon_power, 2.0) * 0.1 * moon_power
-      ) +
+      (cloud.g * (1.0 - cloud.b * 0.2) * 5.0) * pow(1.0 - moon_power, 2.0) * 0.1 * moon_power) +
       // The Moon's effect
       kLightColor * 0.5 * min(moon_power + cloud.g * 0.4 + cloud.b * 0.1, 1.0) * 0.1 * moon_power;
 
@@ -138,13 +137,13 @@ float isDay() {
 }
 
 float SunPower() {
-  return clamp((uDay + 0.1) * normalize(uSunPos).y, 0, 1);
+  return clamp((uDay + 0.1) * (normalize(uSunPos).y + 0.12), 0, 1);
 }
 
 float AmbientPower() {
   return mix(
-    0.05, // night
-    0.1 * max(dot( // day
+    0.2, // night
+    0.3 * max(dot( // day
         normalize(uSunPos + vec3(0.0, 0.12, 0.0)),
         vec3(0.0, 1.0, 0.0)
     ), 0.4),

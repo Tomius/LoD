@@ -29,7 +29,8 @@ void main() {
   float diffuse_power = max(abs(dot(normalize(w_vNormal), normalize(AmbientDirection()))), 0.3);
 
   vec4 color = texture2D(uDiffuseTexture, vTexCoord);
-  vec3 final_color = color.rgb * (SunPower() * diffuse_power + AmbientPower()) / 2;
+  // FIXME
+  vec3 final_color = color.rgb * SunPower() * (diffuse_power + AmbientPower());
 
   float actual_alpha = min(color.a, alpha);
 
@@ -40,8 +41,7 @@ void main() {
   float length_from_camera = length(c_vPos);
 
   vec3 fog_color = mix(vec3(0.2), vec3(0.8, 0.8, 0.4), isDay()) * SunPower();
-  vec3 fog = fog_color * (0.005 + SunPower());
   float fog_alpha = clamp((length_from_camera - kFogMin) / (kFogMax - kFogMin), 0.0, 1.0) / 6;
 
-  gl_FragColor = vec4(mix(pow(final_color, vec3(1.3)), fog, fog_alpha), actual_alpha);
+  gl_FragColor = vec4(mix(pow(final_color, vec3(1.3)), fog_color, fog_alpha), actual_alpha);
 }

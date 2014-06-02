@@ -87,25 +87,32 @@ void main() {
   }
 
   // Normals
-  vec3 w_normal = normalize(w_vNormal);
+  mat3 normal_matrix;
+  normal_matrix[0] = normalize(vNormalMatrix[0]);
+  normal_matrix[1] = normalize(vNormalMatrix[1]);
+  normal_matrix[2] = normalize(vNormalMatrix[2]);
   vec3 normal_offset = texture2D(uGrassNormalMap, vTexCoord*256).rgb;
-  vec3 w_final_normal = normalize(vNormalMatrix * normal_offset);
-  vec3 c_normal = (uCameraMatrix * vec4(w_final_normal, 0.0)).xyz;
+  vec3 w_normal = normalize(normal_matrix[2] + normal_matrix * normal_offset);
+  vec3 c_normal = mat3(uCameraMatrix) * w_normal;
+
+  // vec3 w_normal = normalize(w_vNormal);
+  // vec3 c_normal = mat3(uCameraMatrix) * w_normal;
 
   // Lighting directions
-  vec3 c_light_dir = -normalize((uCameraMatrix * vec4(AmbientDirection(), 0)).xyz);
-  vec3 c_view_direction = normalize(-(uCameraMatrix * vec4(w_vPos, 1)).xyz);
+  vec3 w_light_dir = AmbientDirection();
+  vec3 c_light_dir = mat3(uCameraMatrix) * w_light_dir;
+  vec3 c_view_direction = -normalize((uCameraMatrix * vec4(w_vPos, 1)).xyz);
 
   // Lighting values
-  float diffuse_power = dot(c_normal, c_light_dir);
+  float diffuse_power = dot(w_normal, w_light_dir);
   float specular_power;
-  if (diffuse_power <= 0.0 || AmbientDirection().y < 0) {
+  if (diffuse_power < 0.0) {
     diffuse_power = 0;
     specular_power = 0;
   } else {
     vec3 L = c_light_dir, V = c_view_direction;
     vec3 H = normalize(L + V), N = c_normal;
-    specular_power = 5 * pow(max(dot(H, N), 0), kSpecularShininess);
+    specular_power = pow(max(dot(H, N), 0), kSpecularShininess);
   }
 
   vec3 grass_color_0 = texture2D(uGrassMap0, vTexCoord*128).rgb;
@@ -118,9 +125,9 @@ void main() {
 
   vec3 color_0 = mix(grass_color_0, rock_color_0, height_factor);
   vec3 color_1 = mix(grass_color_1, rock_color_1, height_factor/2);
-  vec3 diffuse_color = mix(color_0, color_1, 0.5);
+  vec3 diffuse_color = mix(color_0, color_1, 0.25);
 
-  vec3 final_color = diffuse_color * (Visibility()*SunPower()*
+  vec3 final_color = diffuse_color * (Visibility()*
       (specular_power + diffuse_power + 0.1) + AmbientPower());
 
   // Fog
@@ -129,5 +136,5 @@ void main() {
   float alpha = clamp((length_from_camera - kFogMin) /
                       (kFogMax - kFogMin), 0, 1) / 4;
 
-  gl_FragColor = vec4(mix(pow(final_color, vec3(0.7)), fog_color, alpha), 1);
+  gl_FragColor = vec4(mix(final_color, fog_color, alpha), 1);
 }

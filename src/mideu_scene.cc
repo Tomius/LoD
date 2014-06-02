@@ -51,10 +51,6 @@ MideuScene::MideuScene() {
     const engine::HeightMapInterface& height_map = terrain->height_map();
   PrintDebugTime();
 
-  PrintDebugText("Initializing the trees");
-    addGameObject<Tree>(height_map, skybox, shadow);
-  PrintDebugTime();
-
   PrintDebugText("Initializing Ayumi");
     Ayumi *ayumi = addGameObject<Ayumi>(window, skybox, shadow);
     ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
@@ -78,6 +74,10 @@ MideuScene::MideuScene() {
     height_map, 1.5f);
 
   charmove_->setCamera(cam);
+
+  PrintDebugText("Initializing the trees");
+    addGameObject<Tree>(height_map, skybox, shadow);
+  PrintDebugTime();
 
   PrintDebugText("Initializing the resources for the bloom effect");
     addGameObject<BloomEffect>();

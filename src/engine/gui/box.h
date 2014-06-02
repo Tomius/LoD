@@ -97,7 +97,7 @@ class Box : public engine::GameObject {
  private:
   virtual void screenResized(const Scene&, size_t width, size_t height) override {
     glm::vec2 border_width =
-      params_.border_width / (params_.extent * glm::vec2(width, height));
+      params_.border_width / (params_.extent * glm::vec2(0.99f * width, 0.99f * height));
 
     prog_.use();
     gl::Uniform<glm::vec2>(prog_, "uBorderWidth") = border_width;

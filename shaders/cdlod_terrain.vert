@@ -55,16 +55,17 @@ vec2 CDLODTerrain_texCoord(vec3 pos) {
 }
 
 vec3 CDLODTerrain_normal(vec3 pos) {
-  vec3 u = vec3(1.0f, 0.0f, CDLODTerrain_fetchHeight(pos.xz + vec2(1, 0)) -
-                            CDLODTerrain_fetchHeight(pos.xz - vec2(1, 0)));
-  vec3 v = vec3(0.0f, 1.0f, CDLODTerrain_fetchHeight(pos.xz + vec2(0, 1)) -
-                            CDLODTerrain_fetchHeight(pos.xz - vec2(0, 1)));
-  return normalize(cross(u, v));
+  vec3 u = vec3(1.0f, CDLODTerrain_fetchHeight(pos.xz + vec2(1, 0)) -
+                      CDLODTerrain_fetchHeight(pos.xz - vec2(1, 0)), 0.0f);
+  vec3 v = vec3(0.0f, CDLODTerrain_fetchHeight(pos.xz + vec2(0, 1)) -
+                      CDLODTerrain_fetchHeight(pos.xz - vec2(0, 1)), 1.0f);
+  return normalize(cross(u, -v));
 }
 
 mat3 CDLODTerrain_normalMatrix(vec3 normal) {
-  vec3 tangent = cross(vec3(0.0, 0.0, 1.0), normal);
-  vec3 bitangent = cross(normal, tangent);
+  vec3 tangent = normalize(cross(normal, vec3(0.0, 0.0, 1.0)));
+  vec3 bitangent = normalize(cross(normal, tangent));
+  tangent = normalize(cross(bitangent, normal));
 
   return mat3(tangent, bitangent, normal);
 }

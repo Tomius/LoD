@@ -12,6 +12,9 @@ namespace gui {
 class Button : public engine::GameObject {
   glm::vec2 pos_, extent_;
   Box *box_;
+  bool mouse_over_;
+
+  std::vector<std::function<void()>> on_press_callback_;
 
   virtual void mouseMoved(const Scene& scene, double xpos, double ypos) override {
     glm::vec2 window_size_2 = GameEngine::window_size() / 2.0f;
@@ -21,14 +24,26 @@ class Button : public engine::GameObject {
     if(pos_.x - extent_.x < ndc_pos.x && ndc_pos.x < pos_.x + extent_.x &&
        pos_.y - extent_.y < ndc_pos.y && ndc_pos.y < pos_.y + extent_.y) {
       box_->set_inverted(true);
+      mouse_over_ = true;
     } else {
       box_->set_inverted(false);
+      mouse_over_ = false;
+    }
+  }
+
+  virtual void mouseButtonPressed(const Scene& scene, int button,
+                                  int action, int mods) override {
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && mouse_over_) {
+      for(const auto& callback : on_press_callback_) {
+        callback();
+      }
     }
   }
 
  public:
   Button(glm::vec2 pos, glm::vec2 extent, const std::wstring& text,
-         glm::vec4 color, glm::vec4 font_color) : pos_(pos), extent_(extent) {
+         glm::vec4 color, glm::vec4 font_color, int roundness = 7)
+      : pos_(pos), extent_(extent), mouse_over_(false) {
 
     BoxParams params;
     params.center = pos;
@@ -39,17 +54,21 @@ class Button : public engine::GameObject {
     params.bg_top_color = glm::vec4{top/3.0f, color.a};
     params.bg_top_mid_color = glm::vec4{top, color.a};
     params.bg_bottom_mid_color = color;
+    params.label_text = text;
+    params.label_font = Font{"src/engine/gui/freetype-gl/fonts/VeraMoBd.ttf", 15};
+    params.label_font.set_vertical_alignment(Font::VerticalAlignment::kBottom);
+    params.label_font.set_color(font_color);
+    params.label_pos = pos + glm::vec2(0.0f, -0.4f) * params.extent;
     params.bg_bottom_color = glm::vec4{glm::vec3(color)/3.0f, color.a};
     params.transition_height = 0.85f;
     params.border_color = glm::vec4{0, 0, 0, 1};
     params.border_width = 2;
-    params.roundness = 7;
+    params.roundness = roundness;
     box_ = addComponent<Box>(params);
+  }
 
-    Font font("src/engine/gui/freetype-gl/fonts/VeraMoBd.ttf", 15);
-    font.set_vertical_alignment(Font::VerticalAlignment::kBottom);
-    font.set_color(font_color);
-    addComponent<Label>(text, pos + glm::vec2(0.0f, -0.4f) * params.extent, font);
+  void addPressCallback(const std::function<void()>& func) {
+    on_press_callback_.push_back(func);
   }
 };
 

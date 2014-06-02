@@ -38,7 +38,7 @@ class FontData {
  public:
   FontData(const std::string& filename
               = "src/engine/gui/freetype-gl/fonts/Vera.ttf", float size = 12)
-      : filename_(filename), atlas_(texture_atlas_new(512, 512, 1))
+      : filename_(filename), atlas_(texture_atlas_new(1024, 1024, 1))
       , font_(texture_font_new_from_file(atlas_, size, filename.c_str()))
       , size_(size) {
     load_glyphs();

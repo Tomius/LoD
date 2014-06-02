@@ -32,8 +32,10 @@ class Box : public engine::GameObject {
   gl::FullScreenRectangle rect_;
   gl::Program prog_;
 
+  Label *label_;
+
  public:
-  Box(const BoxParams& params) : params_(params) {
+  Box(const BoxParams& params) : params_(params), label_(nullptr) {
     gl::VertexShader vs("box.vert");
     gl::FragmentShader fs("box.frag");
     prog_ << vs << fs;
@@ -59,7 +61,8 @@ class Box : public engine::GameObject {
     }
 
     if(!params_.label_text.empty()) {
-      addComponent<Label>(params_.label_text, params_.label_pos, params_.label_font);
+      label_ = addComponent<Label>(params_.label_text, params_.label_pos,
+                                   params_.label_font);
     }
   }
 
@@ -75,6 +78,19 @@ class Box : public engine::GameObject {
       gl::Uniform<glm::vec4>(prog_, "uBgTopMidColor") = params_.bg_top_mid_color;
       gl::Uniform<glm::vec4>(prog_, "uBgBottomMidColor") = params_.bg_bottom_mid_color;
       gl::Uniform<glm::vec4>(prog_, "uBgBottomColor") = params_.bg_bottom_color;
+    }
+  }
+
+  std::wstring text() const {
+    return label_ ? label_->text() : L"";
+  }
+
+  void set_text(const std::wstring& text) {
+    if(label_) {
+      label_->set_text(text);
+    } else {
+      label_ = addComponent<Label>(text, params_.label_pos,
+                                   params_.label_font);
     }
   }
 

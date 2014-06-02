@@ -70,16 +70,45 @@ class Label : public engine::GameObject {
     return text_;
   }
 
-  void set_text(const std::wstring& text) {
+  void set_text(const std::wstring& text, size_t cursor_pos = -1) {
     text_ = text;
     std::vector<glm::vec4> attribs_vec;
 
     float pen_x = 0, x0, x1, y0, y1, s0, t0, s1, t1;
-    for (size_t i = 0; i < text.size(); ++i) {
-      texture_glyph_t *glyph = font_.get_glyph(text[i]);
+    for (size_t i = 0; i < text_.size(); ++i) {
+      // Cursor
+      if(i == cursor_pos) {
+        // we use the black character (-1) as texture
+        texture_glyph_t *glyph = font_.get_glyph(-1);
+
+        x0 = pen_x + 1;
+        y0 = font_.expose()->descender;
+        x1 = pen_x + 2;
+        y1 = y0 + font_.expose()->height - font_.expose()->linegap;
+
+        s0 = glyph->s0;
+        t0 = glyph->t0;
+        s1 = glyph->s1;
+        t1 = glyph->t1;
+
+        glm::vec4 a(x0, y0, s0, t0), b(x0, y1, s0, t1);
+        glm::vec4 c(x1, y0, s1, t0), d(x1, y1, s1, t1);
+
+        attribs_vec.push_back(a);
+        attribs_vec.push_back(b);
+        attribs_vec.push_back(c);
+
+        attribs_vec.push_back(d);
+        attribs_vec.push_back(b);
+        attribs_vec.push_back(c);
+
+      }
+
+      // The current character (glyph) in the text
+      texture_glyph_t *glyph = font_.get_glyph(text_[i]);
       if (glyph) {
         int kerning = 0;
-        if (i > 0) { kerning = texture_glyph_get_kerning(glyph, text[i-1]); }
+        if (i > 0) { kerning = texture_glyph_get_kerning(glyph, text_[i-1]); }
 
         pen_x += kerning;
         x0 = pen_x + glyph->offset_x;
@@ -106,6 +135,7 @@ class Label : public engine::GameObject {
       }
     }
 
+    // Update the length of the text
     size_.x = x1;
 
     prog_.use();

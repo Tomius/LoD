@@ -41,6 +41,8 @@ void BloomEffect::render(const engine::Scene&) {
   tex_.bind();
   tex_.copy(gl::kRgb, 0, 0, width_, height_);
 
+  auto srgb = gl::TemporaryEnable(gl::kFramebufferSrgb);
+
   gl::Clear().Color().Depth();
 
   prog_.use();

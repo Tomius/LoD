@@ -30,7 +30,7 @@ void main() {
 
   vec4 color = texture2D(uDiffuseTexture, vTexCoord);
   // FIXME
-  vec3 final_color = color.rgb * SunPower() * (diffuse_power + AmbientPower());
+  vec3 final_color = color.rgb * (diffuse_power + AmbientPower());
 
   float actual_alpha = min(color.a, alpha);
 

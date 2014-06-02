@@ -43,6 +43,7 @@ void GameEngine::InitContext() {
     }
 
     // First try to open a 3.3 context (for VertexAttribDivisor)
+    glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 

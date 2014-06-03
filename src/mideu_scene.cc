@@ -84,4 +84,6 @@ MideuScene::MideuScene() {
   PrintDebugTime();
 
   addGameObject<FpsDisplay>();
+
+  environment_time().stop();
 }

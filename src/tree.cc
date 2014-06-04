@@ -80,13 +80,11 @@ void Tree::shadowRender(const engine::Scene& scene) {
   auto cullface = gl::TemporaryDisable(gl::kCullFace);
 
   const auto& cam = *scene.camera();
-  auto frustum = cam.frustum();
   auto campos = cam.pos();
   for (size_t i = 0; i < trees_.size() &&
       shadow_->getDepth() < shadow_->getMaxDepth(); i++) {
 
-    if (trees_[i].bbox.collidesWithFrustum(frustum) &&
-      glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
+    if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 150) {
       shadow_uMCP_ = shadow_->modelCamProjMat(
         skybox_->getSunPos(),
         mesh_[trees_[i].type].bSphere(),

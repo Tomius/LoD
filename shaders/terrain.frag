@@ -79,7 +79,7 @@ float Visibility() {
 
 const float kFogMin = 128.0;
 const float kFogMax = 2048.0;
-const float kSpecularShininess = 32.0;
+const float kSpecularShininess = 64.0;
 
 void main() {
   if (vInvalid != 0.0) {
@@ -115,17 +115,17 @@ void main() {
     specular_power = pow(max(dot(H, N), 0), kSpecularShininess);
   }
 
-  vec3 grass_color_0 = texture2D(uGrassMap0, vTexCoord*128).rgb;
-  vec3 grass_color_1 = texture2D(uGrassMap0, vTexCoord*8).rgb;
+  vec3 grass_color_0 = texture2D(uGrassMap0, vTexCoord*256).rgb;
+  vec3 grass_color_1 = texture2D(uGrassMap0, vTexCoord*16).rgb;
 
-  vec3 rock_color_0 = texture2D(uGrassMap1, vTexCoord*128).rgb;
-  vec3 rock_color_1 = texture2D(uGrassMap1, vTexCoord*8).rgb;
+  vec3 rock_color_0 = texture2D(uGrassMap1, vTexCoord*256).rgb;
+  vec3 rock_color_1 = texture2D(uGrassMap1, vTexCoord*16).rgb;
 
   float height_factor = clamp(sqrt(max(w_vPos.y - 16, 0) / 64), 0, 1);
 
   vec3 color_0 = mix(grass_color_0, rock_color_0, height_factor);
   vec3 color_1 = mix(grass_color_1, rock_color_1, height_factor/2);
-  vec3 diffuse_color = mix(color_0, color_1, 0.25);
+  vec3 diffuse_color = mix(color_0, color_1, 0.3);
 
   vec3 final_color = diffuse_color * (Visibility()*
       (specular_power + diffuse_power + 0.1) + AmbientPower());

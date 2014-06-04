@@ -38,8 +38,8 @@ vec3 SkyColor(vec3 look_dir) {
   // Counting the day_color
   {
     // The Sun itself
-    vec3 sun = atm_color *
-        (look_dir_sun_dist > 0.995 + 0.004 * sun_power ? 1.0 : 0.0);
+    float sun = atm_color * (look_dir_sun_dist > 0.995 + 0.004 * sun_power ?
+          (1.0 - 0.8*cloud.a) : 0.2);
 
     vec3 air =
         // The sky's base color.
@@ -80,7 +80,7 @@ vec3 SkyColor(vec3 look_dir) {
         kLightColor * 0.5 * min(sun_power + cloud.g * 0.4 + cloud.b * 0.1, 1.0) * sun_power;
 
     day_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r)) +
-                vec3(1.0, 0.7, 0.5) * sun * (1.0 - 0.99 * cloud.a);
+                vec3(1.0, 0.7, 0.5) * sun;
 
   }
 
@@ -124,7 +124,7 @@ vec3 SkyColor(vec3 look_dir) {
   }
 
   vec3 final_color = clamp(mix(night_color, day_color, uDay), 0, 1);
-  return pow(final_color, vec3(2.2)); // srgb -> linear
+  return pow(final_color, vec3(4.0)); // srgb -> linear + hdr -> ldr
 }
 
 // Functions for other objects' lighting computations

@@ -40,7 +40,7 @@ void main() {
   vec3 color = texture2D(uDiffuseTexture, vTexCoord).rgb;
   float spec_mask = texture2D(uSpecularTexture, vTexCoord).r;
 
-  vec3 final_color = color *
+  vec3 final_color = color * (0.5 + 0.5 * SunPower()) *
     (diffuse_power + spec_mask*specular_power + AmbientPower());
 
   gl_FragColor = vec4(final_color, 1.0);

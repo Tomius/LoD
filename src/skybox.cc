@@ -4,7 +4,7 @@
 #include "engine/scene.h"
 #include "oglwrap/smart_enums.h"
 
-constexpr float day_duration = 128.0f, day_start = day_duration/18;
+constexpr float day_duration = 720.0f, day_start = 0.0f;
 
 Skybox::Skybox()
     : time_(day_start)

@@ -68,8 +68,9 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
       int type = rand() % kTreeTypeNum;
 
       engine::BoundingBox bbox = mesh_[type].boundingBox(matrix);
+      glm::vec4 bsphere = mesh_[type].bSphere();
 
-      trees_.push_back(TreeInfo{type, matrix, bbox});
+      trees_.push_back(TreeInfo{type, matrix, bsphere, bbox});
     }
   }
 }
@@ -84,12 +85,12 @@ void Tree::shadowRender(const engine::Scene& scene) {
   for (size_t i = 0; i < trees_.size() &&
       shadow_->getDepth() < shadow_->getMaxDepth(); i++) {
 
-    if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 150) {
+   if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 200) {
       shadow_uMCP_ = shadow_->modelCamProjMat(
         skybox_->getSunPos(),
-        mesh_[trees_[i].type].bSphere(),
+        trees_[i].bsphere,
         trees_[i].mat,
-        glm::mat4()//mesh_.worldTransform()
+        glm::mat4()
       );
       mesh_[trees_[i].type].render();
       shadow_->push();

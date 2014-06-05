@@ -25,7 +25,8 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     , charmove_(nullptr)
     , skybox_(skybox)
     , shadow_(shadow)
-    , was_left_click_(false) {
+    , was_left_click_(false)
+    , bsphere_(mesh_.bSphere()) {
 
   gl::ShaderSource vs_src("ayumi.vert");
   vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
@@ -162,7 +163,7 @@ void Ayumi::update(const engine::Scene& scene) {
 void Ayumi::shadowRender(const engine::Scene&) {
   shadow_prog_.use();
   shadow_uMCP_ =
-    shadow_->modelCamProjMat(skybox_->getSunPos(), mesh_.bSphere(),
+    shadow_->modelCamProjMat(skybox_->getSunPos(), bsphere_,
                              transform.matrix(), mesh_.worldTransform());
   mesh_.uploadBoneInfo(shadow_uBones_);
 

@@ -34,6 +34,7 @@ class Tree : public engine::GameObject {
   struct TreeInfo {
     int type;
     glm::mat4 mat;
+    glm::vec4 bsphere;
     engine::BoundingBox bbox;
   };
 

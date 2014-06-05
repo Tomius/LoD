@@ -379,19 +379,15 @@ BoundingBox MeshRenderer::boundingBox(const glm::mat4& matrix) const {
   return BoundingBox{mins, maxes};
 }
 
-/// Returns the center (as xyz) and radius (as w) of the bounding sphere.
-glm::vec4 MeshRenderer::bSphere() const {
-  BoundingBox bbox = boundingBox();
+glm::vec4 MeshRenderer::bSphere(const BoundingBox& bbox) const {
   glm::vec3 center = bbox.center(), extent = bbox.extent();
   return glm::vec4(center, sqrt(glm::dot(extent, extent)) / 2); // Pythagoras.
 }
 
 /// Returns the center offseted by the model matrix (as xyz) and radius (as w) of the bounding sphere.
-/** @param modelMatrix - The matrix to use to offset the center of the bounding sphere. */
-glm::vec4 MeshRenderer::bSphere(const glm::mat4& modelMatrix) const {
-  glm::vec4 m_bSphere = bSphere();
-  return glm::vec4(glm::vec3(modelMatrix *
-                   glm::vec4(glm::vec3(m_bSphere), 1)), m_bSphere.w);
+/** @param model_matrix - The matrix to use to offset the center of the bounding sphere. */
+glm::vec4 MeshRenderer::bSphere(const glm::mat4& model_matrix) const {
+  return bSphere(boundingBox(model_matrix));
 }
 
 /// Returns the center of the bounding sphere.

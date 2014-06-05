@@ -3,7 +3,7 @@
 #version 120
 
 // This might be overwritten by the c++ code.
-#define SHADOW_MAP_NUM 16
+#define SHADOW_MAP_NUM 4
 
 varying vec3  w_vNormal;
 varying vec3  c_vPos, w_vPos;

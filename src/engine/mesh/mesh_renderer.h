@@ -166,11 +166,11 @@ public:
     * model matrix with this matrix will solve that problem. */
   glm::mat4 worldTransform() const;
 
-  /// Returns the center (as xyz) and radius (as w) of the bounding sphere.
-  glm::vec4 bSphere() const;
+  /// Returns the bounding sphere from the bounding box
+  glm::vec4 bSphere(const BoundingBox& bbox) const;
 
   /// Returns the center offseted by the model matrix (as xyz) and radius (as w) of the bounding sphere.
-  glm::vec4 bSphere(const glm::mat4& modelMatrix) const;
+  glm::vec4 bSphere(const glm::mat4& modelMatrix = glm::mat4{}) const;
 
   /// Returns the center of the bounding sphere.
   glm::vec3 bSphereCenter() const;

@@ -35,6 +35,8 @@ class Ayumi : public engine::GameObject {
   Shadow* shadow_;
   bool was_left_click_;
 
+  glm::vec4 bsphere_;
+
   CharacterMovement::CanDoCallback canJump;
   CharacterMovement::CanDoCallback canFlip;
   engine::Animation::AnimationEndedCallback animationEndedCallback;

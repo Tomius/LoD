@@ -51,15 +51,15 @@ void main() {
     float diffuse_power, specular_power;
     vec3 c_sun_dir = mat3(uCameraMatrix) * w_sun_dir;
     CalculateLighting(c_sun_dir, diffuse_power, specular_power);
-    diffuse_power *= 0.1 + 0.9*SunPower();
-    specular_power *= 0.1 + 0.9*SunPower();
+    diffuse_power *= pow(SunPower(), 0.3);
+    specular_power *= pow(SunPower(), 0.3);
     lighting = SunColor() * (diffuse_power + spec_mask*specular_power);
   } else {
     float diffuse_power, specular_power;
     vec3 c_moon_dir = mat3(uCameraMatrix) * -w_sun_dir;
     CalculateLighting(c_moon_dir, diffuse_power, specular_power);
-    diffuse_power *= 0.1 + 0.9*MoonPower();
-    specular_power *= 0.1 + 0.9*MoonPower();
+    diffuse_power *= pow(MoonPower(), 0.3);
+    specular_power *= pow(MoonPower(), 0.3);
     lighting = MoonColor() * (diffuse_power + spec_mask*specular_power);
   }
 

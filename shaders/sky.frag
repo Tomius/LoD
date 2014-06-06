@@ -131,8 +131,8 @@ vec3 SkyColor(vec3 look_dir) {
 vec3 SunPos() { return sun_pos; }
 vec3 MoonPos() { return moon_pos; }
 
-float SunPower() { return clamp(sun_pos.y + 0.02, 0, 1); }
-float MoonPower() { return clamp(moon_pos.y + 0.02, 0, 1); }
+float SunPower() { return clamp(sun_pos.y, 0, 1); }
+float MoonPower() { return clamp(moon_pos.y, 0, 1); }
 
 vec3 SunColor() { return vec3(1.0, 0.9, 0.75); }
 vec3 MoonColor() { return vec3(0.4); }

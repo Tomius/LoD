@@ -5,8 +5,9 @@ Simple attempt of drawing big terrains in OpenGL with CDLOD. The project also in
 
 **This is just an educational project.** I don't own the rights for every media in the application.
 
-Here's a picture of the program's current capability:
+Some screenshots (might not be up to date):
 ![screenshot](screenshot.png)
+![screenshot2](screenshot2.png)
 
 Dependencies:
 -------------

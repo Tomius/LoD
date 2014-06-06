@@ -11,7 +11,7 @@ Terrain::Terrain(Skybox *skybox)
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uShadowCP_(prog_, "uShadowCP")
-    , uSunData_(prog_, "uSunData")
+    , uSunPos_(prog_, "uSunPos")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowAtlasSize_(prog_, "uShadowAtlasSize")
     , height_map_("terrain/mideu.png")
@@ -61,7 +61,7 @@ void Terrain::render(const engine::Scene& scene) {
   prog_.use();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
-  uSunData_.set(skybox_->getSunData());
+  uSunPos_.set(skybox_->getSunPos());
   if(shadow) {
     for (size_t i = 0; i < shadow->getDepth(); ++i) {
       uShadowCP_[i] = shadow->shadowCPs()[i];

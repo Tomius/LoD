@@ -20,7 +20,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
   , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
   , uNormalMatrix_(prog_, "uNormalMatrix")
   , shadow_uMCP_(shadow_prog_, "uMCP")
-  , uSunData_(prog_, "uSunData")
+  , uSunPos_(prog_, "uSunPos")
   , skybox_((assert(skybox), skybox))
   , shadow_((assert(shadow), shadow)) {
 
@@ -101,7 +101,7 @@ void Tree::shadowRender(const engine::Scene& scene) {
 
 void Tree::render(const engine::Scene& scene) {
   prog_.use();
-  uSunData_.set(skybox_->getSunData());
+  uSunPos_.set(skybox_->getSunPos());
 
   const auto& cam = *scene.camera();
   uProjectionMatrix_ = cam.projectionMatrix();

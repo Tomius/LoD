@@ -26,7 +26,7 @@ class Tree : public engine::GameObject {
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
   gl::LazyUniform<glm::mat3> uNormalMatrix_;
   gl::LazyUniform<glm::mat4> shadow_uMCP_;
-  gl::LazyUniform<glm::vec4> uSunData_;
+  gl::LazyUniform<glm::vec3> uSunPos_;
 
   Skybox *skybox_;
   Shadow *shadow_;

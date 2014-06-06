@@ -20,10 +20,14 @@ uniform int uNumUsedShadowMaps;
 uniform ivec2 uShadowAtlasSize;
 
 // External functions
-vec3 AmbientDirection();
+vec3 SunPos();
+vec3 MoonPos();
 float SunPower();
+float MoonPower();
+vec3 SunColor();
+vec3 MoonColor();
+vec3 AmbientColor();
 float AmbientPower();
-float isDay();
 
 // We love #version 120
 int min(int a, int b) {
@@ -50,10 +54,6 @@ bool isValid(vec2 tc) {
 }
 
 float Visibility() {
-  if(AmbientDirection().y < 0) {
-    return 0.0;
-  }
-
   float visibility = 1.0;
   int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
   float length_from_camera = length(c_vPos);
@@ -98,11 +98,8 @@ void main() {
   vec3 w_normal = normalize(normal_matrix[2] + normal_matrix * normal_offset);
   vec3 c_normal = mat3(uCameraMatrix) * w_normal;
 
-  // vec3 w_normal = normalize(w_vNormal);
-  // vec3 c_normal = mat3(uCameraMatrix) * w_normal;
-
   // Lighting directions
-  vec3 w_light_dir = AmbientDirection();
+  vec3 w_light_dir = SunPos();
   vec3 c_light_dir = mat3(uCameraMatrix) * w_light_dir;
   vec3 c_view_direction = -normalize((uCameraMatrix * vec4(w_vPos, 1)).xyz);
 
@@ -134,7 +131,7 @@ void main() {
       (specular_power + diffuse_power + 0.1) + AmbientPower());
 
   // Fog
-  vec3 fog_color = mix(vec3(0.2), vec3(0.8, 0.8, 0.4), isDay()) * SunPower();
+  vec3 fog_color = AmbientColor() / 3;
   float length_from_camera = length(c_vPos);
   float alpha = clamp((length_from_camera - kFogMin) /
                       (kFogMax - kFogMin), 0, 1) / 4;

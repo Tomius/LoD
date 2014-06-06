@@ -1,4 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
+// This shader is based on an oglplus example:
+// http://oglplus.org/oglplus/html/oglplus_2023_sky_8cpp-example.html
 
 #version 120
 
@@ -7,11 +9,15 @@ const float kAtmThickness = 50000;
 const vec3 kAirColor = vec3(0.32, 0.36, 0.45);
 const vec3 kLightColor = vec3(1.0, 1.0, 1.0);
 
-uniform vec4 uSunData;
-vec3 uSunPos = uSunData.xyz; // The position of the sun or the Moon
-float uDay = uSunData.w; // how day is it on a scale from 0 to 1 :)
+uniform vec3 uSunPos;
+vec3 sun_pos = normalize(uSunPos);
+vec3 moon_pos = -sun_pos;
 
 uniform samplerCube uEnvMap;
+
+float sqr(float x) {
+  return x*x;
+}
 
 // Returns the distance the light shot at look_dir travels
 // in the atmosphere relative to the atmosphere's thickness
@@ -21,14 +27,12 @@ float AtmIntersection(vec3 look_dir) {
   const float r = kWorldRadius + kAtmThickness;
   const float sun_len_sq = dot(sun_light, sun_light);
   float look_vert = dot(look_dir, -sun_light);
-  return (-look_vert + sqrt(look_vert * look_vert - sun_len_sq + r * r)) / kAtmThickness;
+  return (-look_vert + sqrt(look_vert * look_vert - sun_len_sq + r*r))
+         / kAtmThickness;
 }
 
 vec3 SkyColor(vec3 look_dir) {
-  vec3 sun_dir = normalize(uSunPos);
-  float sun_power = max(sun_dir.y + 0.12, 0.02);
   float atm_size = AtmIntersection(look_dir);
-  float look_dir_sun_dist = max(dot(look_dir, sun_dir), 0.0) + 0.003 * sqrt(atm_size);
   vec4 cloud = textureCube(uEnvMap, look_dir);
   float cloud_border = (1.0 - cloud.a) * cloud.b;
   vec3 atm_color = max(kLightColor - kAirColor * pow(atm_size, 0.33), vec3(0.0));
@@ -37,9 +41,13 @@ vec3 SkyColor(vec3 look_dir) {
 
   // Counting the day_color
   {
+    float sun_power = clamp(sun_pos.y + 0.12, 0, 1);
+    float look_dir_sun_dist =
+          max(dot(look_dir, sun_pos), 0.0) + 0.003 * sqrt(atm_size);
+
     // The Sun itself
-    float sun = atm_color * (look_dir_sun_dist > 0.995 + 0.004 * sun_power ?
-          (1.0 - 0.8*cloud.a) : 0.2);
+    vec3 sun = vec3(1.0, 0.7, 0.5) * atm_color *
+    (look_dir_sun_dist > 0.995 + 0.004 * sun_power ? (1.0 - 0.9*cloud.a) : 0.1);
 
     vec3 air =
         // The sky's base color.
@@ -49,13 +57,11 @@ vec3 SkyColor(vec3 look_dir) {
           // When it wins, it is a non-dominant dark grey color,
           // that lets the other effect paint the sky, but makes
           // them a bit brighter.
-          vec3(sun_power) * 1.5
-        ) +
+          vec3(sun_power) * 1.5) +
         // The scattering effect near the Sun
-        vec3(1.0, 0.9, 0.7) * atm_color * pow(
-          min(look_dir_sun_dist + 0.001 * atm_size, 1.0),
-          1024.0 / pow(atm_size, 2.0)
-        ) +
+        vec3(1.0, 0.9, 0.7) * atm_color *
+        pow(min(look_dir_sun_dist + 0.001 * atm_size, 1.0),
+            1024.0 / sqr(atm_size)) +
         // The yellow and red tone of the sky at sunset / sunrise
         atm_color * (look_dir_sun_dist / (1.0 + pow(3.0 * sun_power, 8.0))) * pow(atm_size, 0.6) * 0.5;
 
@@ -74,38 +80,31 @@ vec3 SkyColor(vec3 look_dir) {
           // and this makes the cloud look like it has depth.
           0.7 * min(cloud.g + cloud.b * 0.5, 1.0) * sun_power +
           // The clouds main area, which is the darkest
-          (cloud.g * (1.0 - cloud.b * 0.2) * 5.0) * pow(1.0 - sun_power, 2.0) * (sun_power)
+          (cloud.g * (1.0 - cloud.b * 0.2) * 5.0) * pow(1.0 - sun_power, 1.7) * (sun_power)
         ) * 1.2 +
         // The Sun makes the clouds brighter
-        kLightColor * 0.5 * min(sun_power + cloud.g * 0.4 + cloud.b * 0.1, 1.0) * sun_power;
+        kLightColor * 0.2 * min(sun_power + cloud.g * 0.4 + cloud.b * 0.1, 1.0) * sun_power;
 
-    day_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r)) +
-                vec3(1.0, 0.7, 0.5) * sun;
-
+    day_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r)) + sun;
   }
 
   // Counting the night_color
   {
     // Just some "references" to make the code easier to read.
     // They will be optimized out anyway, so not a performance issue.
-    vec3 moon_dir = sun_dir;
-    float moon_power = sun_power;
-    float look_dir_moon_dist = look_dir_sun_dist;
+    float moon_power = clamp(moon_pos.y + 0.12, 0, 1);
+    float look_dir_moon_dist = max(dot(look_dir, moon_pos), 0.0) + 0.003 * sqrt(atm_size);
 
     // The Moon itself
-    vec3 moon = (look_dir_moon_dist > 1.006 - 0.005 * moon_power ? vec3(0.4) : vec3(0.0));
+    float moon = (look_dir_moon_dist > 0.9999 ? 1.0 : 0.0);
 
     vec3 air =
       // The sky's base color.
-      0.256 * min(
-          kAirColor * sqrt(pow(moon_power, 0.25) * pow(atm_size, 0.75) + 0.15),
-          vec3(moon_power) * 1.5
-      ) +
+      0.256 * min(kAirColor * sqrt(pow(moon_power, 0.25) * pow(atm_size, 0.75) + 0.15),
+                  0.75 * vec3(moon_power) * 1.5) +
       // The scattering effect near the Moon
-      vec3(0.6) * pow(
-          min(0.997 * look_dir_sun_dist, 1.0),
-          1024.0 / pow(atm_size, 2.0)
-      );
+      vec3(0.5) * pow(min(0.999 * look_dir_moon_dist, 1.0),
+                          1024.0 / sqr(atm_size));
 
     vec3 clouds =
       // The cloud's white borders.
@@ -120,33 +119,26 @@ vec3 SkyColor(vec3 look_dir) {
       // The Moon's effect
       kLightColor * 0.5 * min(moon_power + cloud.g * 0.4 + cloud.b * 0.1, 1.0) * 0.1 * moon_power;
 
-    night_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r)) + moon * (1.0 - cloud.a);
+    night_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r))
+                  + vec3(0.4) * moon * (1.0 - cloud.a);
   }
 
-  vec3 final_color = clamp(mix(night_color, day_color, uDay), 0, 1);
+  vec3 final_color = clamp(night_color + day_color, 0, 1);
   return pow(final_color, vec3(2.2)); // srgb -> linear
 }
 
 // Functions for other objects' lighting computations
-vec3 AmbientDirection() {
-  return normalize(uSunPos);
-}
+vec3 SunPos() { return sun_pos; }
+vec3 MoonPos() { return moon_pos; }
 
-float isDay() {
-  return uDay;
-}
+float SunPower() { return clamp(sun_pos.y + 0.02, 0, 1); }
+float MoonPower() { return clamp(moon_pos.y + 0.02, 0, 1); }
 
-float SunPower() {
-  return clamp((uDay + 0.1) * (normalize(uSunPos).y + 0.12), 0, 1);
-}
+vec3 SunColor() { return vec3(1.0, 0.9, 0.75); }
+vec3 MoonColor() { return vec3(0.4); }
 
-float AmbientPower() {
-  return mix(
-    0.2, // night
-    0.3 * max(dot( // day
-        normalize(uSunPos + vec3(0.0, 0.12, 0.0)),
-        vec3(0.0, 1.0, 0.0)
-    ), 0.4),
-    uDay
-  );
+float AmbientPower() { return 0.15 * max(max(SunPower(), MoonPower()), 0.2); }
+vec3 AmbientColor() {
+  return max(SunPower() * SunColor() + MoonPower() * MoonColor(),
+             vec3(AmbientPower()));
 }

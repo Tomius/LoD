@@ -19,7 +19,7 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     , uBones_(prog_, "uBones")
     , shadow_uMCP_(shadow_prog_, "uMCP")
     , shadow_uBones_(shadow_prog_, "uBones")
-    , uSunData_(prog_, "uSunData")
+    , uSunPos_(prog_, "uSunPos")
     , attack2_(false)
     , window_(window)
     , charmove_(nullptr)
@@ -186,7 +186,7 @@ void Ayumi::render(const engine::Scene& scene) {
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uModelMatrix_ = transform.matrix() * mesh_.worldTransform();
-  uSunData_ = skybox_->getSunData();
+  uSunPos_ = skybox_->getSunPos();
 
   mesh_.uploadBoneInfo(uBones_);
 

@@ -35,7 +35,7 @@ class Skybox : public engine::GameObject {
 
   gl::LazyUniform<glm::mat4> uProjectionMatrix_;
   gl::LazyUniform<glm::mat3> uCameraMatrix_;
-  gl::LazyUniform<glm::vec4> uSunData_;
+  gl::LazyUniform<glm::vec3> uSunPos_;
 
   gl::TextureCube env_map_;
   gl::FragmentShader sky_fs_;

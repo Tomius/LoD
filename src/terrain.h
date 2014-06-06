@@ -18,7 +18,7 @@ class Terrain : public engine::GameObject {
 
   gl::Texture2D grassMaps_[2], grassNormalMap_;
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uShadowCP_;
-  gl::LazyUniform<glm::vec4> uSunData_;
+  gl::LazyUniform<glm::vec3> uSunPos_;
   gl::LazyUniform<int> uNumUsedShadowMaps_;
   gl::LazyUniform<glm::ivec2> uShadowAtlasSize_;
 

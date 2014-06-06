@@ -4,7 +4,7 @@
 #include "engine/scene.h"
 #include "oglwrap/smart_enums.h"
 
-constexpr float day_duration = 720.0f, day_start = 0.0f;
+constexpr float day_duration = 256.0f, day_start = 0.0f;
 
 Skybox::Skybox()
     : time_(day_start)
@@ -12,7 +12,7 @@ Skybox::Skybox()
     , fs_("skybox.frag")
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
-    , uSunData_(prog_, "uSunData")
+    , uSunPos_(prog_, "uSunPos")
     , sky_fs_("sky.frag") {
   prog_ << vs_ << fs_ << sky_fs_;
   prog_.link().use();
@@ -47,40 +47,6 @@ glm::vec3 Skybox::getSunPos() const {
           static_cast<float>(1e10 * cos(time_ * 2 * M_PI / day_duration));
 }
 
-glm::vec4 Skybox::getSunData() const {
-  float day_time = fmod(time_, day_duration) / day_duration;
-
-  static bool day = true;  // day/night
-  static float last_switch = 0.0f;
-  if (0.7f < day_time && day_time < 0.8f &&
-      0.5f < (time_ - last_switch) / day_duration) {
-    day = !day;
-    last_switch = time_;
-  }
-
-  static float day_lerp = 1.0f;
-  // The transition happens between the day_times of 0.7 and 0.8
-  const float day_night_transition_lenght = 0.1f * day_duration;
-
-  static float last_time = time_;
-  float time_diff = time_ - last_time;
-  last_time = time_;
-
-  if (day && day_lerp < 1.0f) {
-    day_lerp += time_diff / day_night_transition_lenght;
-    if (day_lerp > 1.0f) {
-      day_lerp = 1.0f;
-    }
-  } else if (!day && 0.0f < day_lerp) {
-    day_lerp -= time_diff / day_night_transition_lenght;
-    if (day_lerp < 0.0f) {
-      day_lerp = 0.0f;
-    }
-  }
-
-  return glm::vec4(getSunPos(), day_lerp);
-}
-
 void Skybox::update(const engine::Scene& scene) {
   time_ = scene.environment_time().current + day_start;
 }
@@ -97,7 +63,9 @@ void Skybox::render(const engine::Scene& scene) {
   prog_.use();
   uCameraMatrix_ = cam_rot;
   uProjectionMatrix_ = cam.projectionMatrix();
-  uSunData_ = getSunData();
+  uSunPos_ = getSunPos();
+
+  auto depth_test = gl::TemporaryDisable(gl::kDepthTest);
 
   env_map_.active(0);
   env_map_.bind();

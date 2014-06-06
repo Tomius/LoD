@@ -24,7 +24,7 @@ class Ayumi : public engine::GameObject {
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_,
                                   uModelMatrix_, uBones_,
                                   shadow_uMCP_, shadow_uBones_;
-  gl::LazyUniform<glm::vec4> uSunData_;
+  gl::LazyUniform<glm::vec3> uSunPos_;
 
   bool attack2_, attack3_;
 

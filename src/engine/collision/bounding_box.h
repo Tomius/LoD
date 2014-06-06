@@ -5,7 +5,7 @@
 
 #include "../../oglwrap/glm/glm/glm.hpp"
 #include "../misc.h"
-#include "../camera.h"
+#include "./frustum.h"
 
 namespace engine {
 

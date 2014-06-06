@@ -124,7 +124,7 @@ vec3 SkyColor(vec3 look_dir) {
   }
 
   vec3 final_color = clamp(mix(night_color, day_color, uDay), 0, 1);
-  return pow(final_color, vec3(4.0)); // srgb -> linear + hdr -> ldr
+  return pow(final_color, vec3(2.2)); // srgb -> linear
 }
 
 // Functions for other objects' lighting computations

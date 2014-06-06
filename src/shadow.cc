@@ -16,6 +16,7 @@ Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
   tex_.bind();
   tex_.upload(gl::kDepthComponent, size_*xsize_, size_*ysize_,
               gl::kDepthComponent, gl::kFloat, nullptr);
+  tex_.maxAnisotropy();
   tex_.minFilter(gl::kLinear);
   tex_.magFilter(gl::kLinear);
   tex_.wrapS(gl::kClampToBorder);

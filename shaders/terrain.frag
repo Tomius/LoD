@@ -3,7 +3,7 @@
 #version 120
 
 // This might be overwritten by the c++ code.
-#define SHADOW_MAP_NUM 4
+#define SHADOW_MAP_NUM 16
 
 varying vec3  w_vNormal;
 varying vec3  c_vPos, w_vPos;
@@ -56,6 +56,9 @@ float Visibility() {
 
   float visibility = 1.0;
   int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
+  float length_from_camera = length(c_vPos);
+  float modifier = max((300.0 - length_from_camera) / 300.0, 0.0);
+  modifier *= kMaxShadow;
 
   // For every shadow casters
   for (int i = 0; i < num_shadow_casters; ++i) {
@@ -65,11 +68,11 @@ float Visibility() {
       continue;
     }
 
-    visibility -= kMaxShadow * (1 - shadow2D(
+    visibility -= modifier * (1 - shadow2D(
       uShadowMap,
       vec3(
         AtlasLookup(shadowCoord.xy, i),
-        (shadowCoord.z - 0.001) / shadowCoord.w
+        (shadowCoord.z) / shadowCoord.w
       )
     ).r);
   }

@@ -69,6 +69,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
 
       engine::BoundingBox bbox = mesh_[type].boundingBox(matrix);
       glm::vec4 bsphere = mesh_[type].bSphere();
+      bsphere.w *= 1.5; // removes peter panning (but decreases quality)
 
       trees_.push_back(TreeInfo{type, matrix, bsphere, bbox});
     }
@@ -85,7 +86,7 @@ void Tree::shadowRender(const engine::Scene& scene) {
   for (size_t i = 0; i < trees_.size() &&
       shadow_->getDepth() < shadow_->getMaxDepth(); i++) {
 
-   if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 200) {
+   if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
       shadow_uMCP_ = shadow_->modelCamProjMat(
         skybox_->getSunPos(),
         trees_[i].bsphere,

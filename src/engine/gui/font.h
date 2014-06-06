@@ -6,6 +6,7 @@
 #include <string>
 #include "freetype-gl/freetype-gl.h"
 #include "../../oglwrap/glm/glm/glm.hpp"
+#include "../misc.h"
 
 namespace engine {
 namespace gui {

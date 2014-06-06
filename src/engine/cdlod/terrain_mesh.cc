@@ -29,11 +29,11 @@ void TerrainMesh::setup(gl::Program& program, int tex_unit) {
     } else
   #endif
     {
-      uRenderData_ = make_unique<gl::LazyUniform<glm::vec4>>(
+      uRenderData_ = engine::make_unique<gl::LazyUniform<glm::vec4>>(
           program, "CDLODTerrain_uRenderData");
     }
 
-  uCamPos_ = make_unique<gl::LazyUniform<glm::vec3>>(
+  uCamPos_ = engine::make_unique<gl::LazyUniform<glm::vec3>>(
       program, "CDLODTerrain_uCamPos");
 
   tex_unit_ = tex_unit;

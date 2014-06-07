@@ -86,7 +86,7 @@ public:
 
     for(int x = 0; x < w_; ++x) {
       for(int y = 0; y < h_; ++y) {
-        fetch(x, y) = (tex(x, y)[0] << 8) | (rand() % 128);
+        fetch(x, y) = (tex(x, y)[0] << 8) | (rand() % 256);
       }
     }
   }

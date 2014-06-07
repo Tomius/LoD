@@ -46,18 +46,16 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
   prog_.validate();
 
   // Get the trees' positions.
-  const int kTreeDist = 256;
-  for (int i = 2*kTreeDist; i + 2*kTreeDist < height_map.h(); i += kTreeDist) {
-    for (int j = 2*kTreeDist; j + 2*kTreeDist < height_map.w(); j += kTreeDist) {
+  const int kTreeDist = 128;
+  for (int i = kTreeDist; i + kTreeDist < height_map.h(); i += kTreeDist) {
+    for (int j = kTreeDist; j + kTreeDist < height_map.w(); j += kTreeDist) {
       glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
                                     j + rand()%(kTreeDist/2) - kTreeDist/4);
       glm::vec3 pos =
         glm::vec3(coord.x, height_map.heightAt(coord.x, coord.y)-1.0f, coord.y);
-      glm::vec3 scale = glm::vec3(
-                          1.0f + rand() / RAND_MAX,
-                          1.0f + rand() / RAND_MAX,
-                          1.0f + rand() / RAND_MAX
-                        ) * 2.0f;
+      glm::vec3 scale = glm::vec3(1.0f + rand() / RAND_MAX,
+                                  1.0f + rand() / RAND_MAX,
+                                  1.0f + rand() / RAND_MAX) * 2.0f;
 
       float rotation = 360.0f * rand() / RAND_MAX;
 

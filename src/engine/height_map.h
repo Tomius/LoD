@@ -27,7 +27,7 @@ public:
   // Returns if the coordinates are valid
   virtual bool valid(double x, double y) const override { return tex_.valid(x, y); }
 
-  virtual double heightAt(int x, int y) const override { return tex_(x, y)[0]; }
+  virtual double heightAt(int x, int y) const override { return tex_(x, y)[0] / 1024; }
 
   virtual double heightAt(double x, double y) const override {
     /*
@@ -43,7 +43,7 @@ public:
     double fh = glm::mix(double(tex_(fx, fy)[0]), double(tex_(cx, fy)[0]), x-fx);
     double ch = glm::mix(double(tex_(fx, cy)[0]), double(tex_(cx, cy)[0]), x-fx);
 
-    return glm::mix(fh, ch, y-fy);
+    return glm::mix(fh, ch, y-fy) / 1024;
   }
 
   virtual gl::PixelDataFormat format() const override {
@@ -139,7 +139,7 @@ public:
     }
 
     tex.upload(
-      gl::kR16,
+      gl::kR16F,
       w_, h_,
       gl::kRed,
       gl::kUnsignedShort,

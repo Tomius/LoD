@@ -14,7 +14,7 @@ Terrain::Terrain(Skybox *skybox)
     , uSunPos_(prog_, "uSunPos")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowAtlasSize_(prog_, "uShadowAtlasSize")
-    , height_map_("terrain/mideu.png")
+    , height_map_("terrain/output2.png")
     , mesh_(height_map_)
     , skybox_((assert(skybox), skybox)) {
   prog_ << vs_ << fs_ << skybox_->sky_fs();

@@ -120,27 +120,57 @@ gl::PixelDataFormat TextureSource<DATA_TYPE, NUM_COMPONENTS>::format() const {
 template<typename DATA_TYPE, char NUM_COMPONENTS>
 gl::PixelDataInternalFormat
 TextureSource<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
-  if(compressed_) {
+  // FIXME: The integer and unsigned integer textures have different internalFormats
+  // like kR8I and kR8Ui
+  if (std::is_same<DATA_TYPE, char>::value ||
+      std::is_same<DATA_TYPE, unsigned char>::value) {
+    if(compressed_) {
+      if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
+        return gl::kCompressedRed;
+      } else if (format_string_ == "RG") {
+        return gl::kCompressedRg;
+      } else if (format_string_ == "RGB" || format_string_ == "BGR") {
+        return srgb_ ? gl::kCompressedSrgb : gl::kCompressedRgb;
+      } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
+        return srgb_ ? gl::kCompressedSrgbAlpha : gl::kCompressedRgba;
+      } else {
+        abort();
+      }
+    } else {
+      if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
+        return gl::kR8;
+      } else if (format_string_ == "RG") {
+        return gl::kRg8;
+      } else if (format_string_ == "RGB" || format_string_ == "BGR") {
+        return srgb_ ? gl::kSrgb8 : gl::kRgb8;
+      } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
+        return srgb_ ? gl::kSrgb8Alpha8 : gl::kRgba8;
+      } else {
+        abort();
+      }
+    }
+  } else if (std::is_same<DATA_TYPE, short>::value ||
+             std::is_same<DATA_TYPE, unsigned short>::value) {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
-      return gl::kCompressedRed;
+      return gl::kR16;
     } else if (format_string_ == "RG") {
-      return gl::kCompressedRg;
+      return gl::kRg16;
     } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-      return srgb_ ? gl::kCompressedSrgb : gl::kCompressedRgb;
+      return gl::kRgb16;
     } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-      return srgb_ ? gl::kCompressedSrgbAlpha : gl::kCompressedRgba;
+      return gl::kRgba16;
     } else {
       abort();
     }
-  } else {
+  } else if (std::is_same<DATA_TYPE, float>::value) {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
-      return gl::kRed;
+      return gl::kR32F;
     } else if (format_string_ == "RG") {
-      return gl::kRg;
+      return gl::kRg32F;
     } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-      return srgb_ ? gl::kSrgb : gl::kRgb;
+      return gl::kRgb32F;
     } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-      return srgb_ ? gl::kSrgbAlpha : gl::kRgba;
+      return gl::kRgba32F;
     } else {
       abort();
     }

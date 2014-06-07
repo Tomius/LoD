@@ -22,8 +22,8 @@ class Terrain : public engine::GameObject {
   gl::LazyUniform<int> uNumUsedShadowMaps_;
   gl::LazyUniform<glm::ivec2> uShadowAtlasSize_;
 
-  engine::Pseudo16BitHeightMap height_map_;
-  //engine::HeightMap<unsigned char> height_map_;
+  //engine::Pseudo16BitHeightMap height_map_;
+  engine::HeightMap<unsigned short> height_map_;
   engine::cdlod::TerrainMesh mesh_;
 
   Skybox *skybox_;

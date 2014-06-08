@@ -13,18 +13,47 @@ class HeightMapInterface {
 public:
   virtual ~HeightMapInterface() {}
 
-  // The width and height of the texture
+  // The width and height of the texture (not the size of the heightmap)
   virtual int w() const = 0;
   virtual int h() const = 0;
 
-  // Returns if the coordinates are valid
-  virtual bool valid(double x, double y) const = 0;
+  virtual glm::vec2 extent() const = 0;
+  virtual glm::vec2 center() const = 0;
 
-  // Simple texture fetch
-  virtual double heightAt(int x, int y) const = 0;
+  // Returns if the texture coordinates are valid
+  virtual bool fetchValid(double x, double z) const = 0;
 
-  // Texture fetch with interpolation
-  virtual double heightAt(double x, double y) const = 0;
+  // Texture space fetch
+  virtual double fetchHeightAt(int s, int t) const = 0;
+
+  // Texture space fetch with interpolation
+  virtual double fetchHeightAt(double s, double t) const = 0;
+
+  virtual glm::dvec2 toWorldSpace(double s, double t) const {
+    return glm::dvec2(s, t);
+  }
+
+  virtual glm::dvec2 toTextureSpace(double s, double t) const {
+    return glm::dvec2(s, t);
+  }
+
+  // Returns if the world space coordinates represent a valid texel
+  bool valid(double x, double z) const {
+    glm::dvec2 tc = toTextureSpace(x, z);
+    return fetchValid(tc.x, tc.y);
+  }
+
+  // World space texture fetch (world space x and z coordinates)
+  double heightAt(int x, int z) const {
+    glm::dvec2 tc = toTextureSpace(x, z);
+    return fetchHeightAt(tc.x, tc.y);
+  }
+
+  // World space texture fetch with interpolation
+  double heightAt(double x, double z) const {
+    glm::dvec2 tc = toTextureSpace(x, z);
+    return fetchHeightAt(tc.x, tc.y);
+  }
 
   // Returns the format of the height data
   virtual gl::PixelDataFormat format() const = 0;

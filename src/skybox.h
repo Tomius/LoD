@@ -22,7 +22,6 @@ class Skybox : public engine::GameObject {
   virtual void render(const engine::Scene& scene) override;
   virtual void update(const engine::Scene& scene) override;
 
-  const gl::TextureCube& env_map() { return env_map_; };
   const gl::FragmentShader& sky_fs() { return sky_fs_; };
 
  private:
@@ -37,7 +36,6 @@ class Skybox : public engine::GameObject {
   gl::LazyUniform<glm::mat3> uCameraMatrix_;
   gl::LazyUniform<glm::vec3> uSunPos_;
 
-  gl::TextureCube env_map_;
   gl::FragmentShader sky_fs_;
 };
 

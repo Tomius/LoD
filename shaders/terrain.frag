@@ -121,7 +121,7 @@ void main() {
   vec3 rock_color_0 = texture2D(uGrassMap1, vTexCoord*64).rgb;
   vec3 rock_color_1 = texture2D(uGrassMap1, vTexCoord*4).rgb;
 
-  float height_factor = clamp(sqrt(max(w_vPos.y - 32, 0) / 64), 0, 1);
+  float height_factor = clamp(sqrt(max(w_vPos.y - 128, 0) / 256), 0, 1);
 
   vec3 color_0 = mix(grass_color_0, rock_color_0, height_factor);
   vec3 color_1 = mix(grass_color_1, rock_color_1, height_factor/2);

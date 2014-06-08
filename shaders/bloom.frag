@@ -14,7 +14,7 @@ vec3 fetch(in ivec2 tex_coord) {
   return texture2D(uTex, tex_coord/uScreenSize).rgb;
 }
 
-// This should be two nested for cycle if performance wasn't an issue...
+// This should be two nested for cycles if performance wasn't an issue...
 vec3 filter(in ivec2 tex_coord) {
   const float isq2 = 1.0/sqrt(2.0), isq3 = 1.0/sqrt(3.0);
 
@@ -37,8 +37,9 @@ void main() {
 
   vec3 texel = fetch(tex_coord);
 
-  float lumiosity = max(0.2126f*texel.r + 0.7152f*texel.g + 0.0722f*texel.b, 1);
-  vec3 color = glow*(1-lumiosity) + texel;
+  float lumiosity = 0.2126f*texel.r + 0.7152f*texel.g + 0.0722f*texel.b;
+  float glow_effect = clamp(2/lumiosity, 0, 1);
+  vec3 color = glow * glow_effect + texel;
 
   // Filmic tone mapping approximation, by Jim Hejl
   vec3 x = max(color - 0.004, 0.0);

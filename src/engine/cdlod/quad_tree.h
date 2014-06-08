@@ -19,23 +19,18 @@ class QuadTree {
 
   struct Node {
     GLshort x, z;
-    GLshort min_y, max_y;
+    BoundingBox bbox;
     GLushort size;
     GLubyte level;
     std::unique_ptr<Node> tl, tr, bl, br;
 
     Node(GLshort x, GLshort z, GLubyte level, GLubyte dimension);
 
-    BoundingBox boundingBox() const {
-      return BoundingBox(glm::vec3(x-size/2, min_y, z-size/2),
-                         glm::vec3(x+size/2, max_y, z+size/2));
-    }
-
     bool collidesWithSphere(const glm::vec3& center, float radius) {
-      return boundingBox().collidesWithSphere(center, radius);
+      return bbox.collidesWithSphere(center, radius);
     }
 
-    svec2 countMinMaxOfArea(const HeightMapInterface& hmap);
+    glm::dvec2 countMinMaxOfArea(const HeightMapInterface& hmap);
 
     void selectNodes(const glm::vec3& cam_pos, const Frustum& frustum,
                      QuadGridMesh& grid_mesh, int node_dimension);

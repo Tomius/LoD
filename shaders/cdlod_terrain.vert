@@ -23,7 +23,7 @@ uniform vec3 CDLODTerrain_uCamPos;
 
 float CDLODTerrain_fetchHeight(vec2 tex_coord) {
   return texture2D(CDLODTerrain_uHeightMap,
-                   tex_coord / vec2(CDLODTerrain_uTexSize)).r * 64;
+                   tex_coord / vec2(CDLODTerrain_uTexSize)).r * 255;
 }
 
 vec2 CDLODTerrain_frac(vec2 x) { return x - floor(x); }

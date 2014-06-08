@@ -9,8 +9,8 @@
 
 namespace engine {
 
-template<typename DATA_TYPE, char NUM_COMPONENTS>
-TextureSource<DATA_TYPE, NUM_COMPONENTS>::TextureSource(const std::string& file_name,
+template<typename T, char NUM_COMPONENTS>
+TextureSource<T, NUM_COMPONENTS>::TextureSource(const std::string& file_name,
                                             std::string format_string) {
   // Preprocess format_string: 'S', 'C' and 'I' have special meaning
   size_t s_pos = format_string.find('S');
@@ -49,21 +49,21 @@ TextureSource<DATA_TYPE, NUM_COMPONENTS>::TextureSource(const std::string& file_
   data_.resize(w_ * h_);
 
   MagickCore::StorageType type = MagickCore::UndefinedPixel;
-  if (std::is_same<DATA_TYPE, char>::value ||
-     std::is_same<DATA_TYPE, unsigned char>::value) {
+  if (std::is_same<T, char>::value ||
+     std::is_same<T, unsigned char>::value) {
     type = MagickCore::CharPixel;
-  } else if (std::is_same<DATA_TYPE, short>::value ||
-     std::is_same<DATA_TYPE, unsigned short>::value) {
+  } else if (std::is_same<T, short>::value ||
+     std::is_same<T, unsigned short>::value) {
     type = MagickCore::ShortPixel;
-  } else if (std::is_same<DATA_TYPE, int>::value ||
-     std::is_same<DATA_TYPE, unsigned int>::value) {
+  } else if (std::is_same<T, int>::value ||
+     std::is_same<T, unsigned int>::value) {
     type = MagickCore::IntegerPixel;
-  } else if (std::is_same<DATA_TYPE, long>::value ||
-     std::is_same<DATA_TYPE, unsigned long>::value) {
+  } else if (std::is_same<T, long>::value ||
+     std::is_same<T, unsigned long>::value) {
     type = MagickCore::LongPixel;
-  } else if (std::is_same<DATA_TYPE, float>::value) {
+  } else if (std::is_same<T, float>::value) {
     type = MagickCore::FloatPixel;
-  } else if (std::is_same<DATA_TYPE, double>::value) {
+  } else if (std::is_same<T, double>::value) {
     type = MagickCore::FloatPixel;
   } else {
     abort();
@@ -72,8 +72,8 @@ TextureSource<DATA_TYPE, NUM_COMPONENTS>::TextureSource(const std::string& file_
   image.write(0, 0, w_, h_, format_string_, type, data_.data());
 }
 
-template<typename DATA_TYPE, char NUM_COMPONENTS>
-gl::PixelDataFormat TextureSource<DATA_TYPE, NUM_COMPONENTS>::format() const {
+template<typename T, char NUM_COMPONENTS>
+gl::PixelDataFormat TextureSource<T, NUM_COMPONENTS>::format() const {
   if (integer_) {
     if (format_string_ == "R") {
       return gl::kRedInteger;
@@ -117,13 +117,13 @@ gl::PixelDataFormat TextureSource<DATA_TYPE, NUM_COMPONENTS>::format() const {
   }
 }
 
-template<typename DATA_TYPE, char NUM_COMPONENTS>
+template<typename T, char NUM_COMPONENTS>
 gl::PixelDataInternalFormat
-TextureSource<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
+TextureSource<T, NUM_COMPONENTS>::internalFormat() const {
   // FIXME: The integer and unsigned integer textures have different internalFormats
   // like kR8I and kR8Ui
-  if (std::is_same<DATA_TYPE, char>::value ||
-      std::is_same<DATA_TYPE, unsigned char>::value) {
+  if (std::is_same<T, char>::value ||
+      std::is_same<T, unsigned char>::value) {
     if(compressed_) {
       if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
         return gl::kCompressedRed;
@@ -149,8 +149,8 @@ TextureSource<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
         abort();
       }
     }
-  } else if (std::is_same<DATA_TYPE, short>::value ||
-             std::is_same<DATA_TYPE, unsigned short>::value) {
+  } else if (std::is_same<T, short>::value ||
+             std::is_same<T, unsigned short>::value) {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
       return gl::kR16;
     } else if (format_string_ == "RG") {
@@ -162,7 +162,7 @@ TextureSource<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
     } else {
       abort();
     }
-  } else if (std::is_same<DATA_TYPE, float>::value) {
+  } else if (std::is_same<T, float>::value) {
     if (format_string_ == "R" || format_string_ == "G" || format_string_ == "B") {
       return gl::kR32F;
     } else if (format_string_ == "RG") {
@@ -177,36 +177,36 @@ TextureSource<DATA_TYPE, NUM_COMPONENTS>::internalFormat() const {
   }
 }
 
-template<typename DATA_TYPE, char NUM_COMPONENTS>
-gl::PixelDataType TextureSource<DATA_TYPE, NUM_COMPONENTS>::type() const {
-  if (std::is_same<DATA_TYPE, char>::value) {
+template<typename T, char NUM_COMPONENTS>
+gl::PixelDataType TextureSource<T, NUM_COMPONENTS>::type() const {
+  if (std::is_same<T, char>::value) {
     return gl::kByte;
-  } else if (std::is_same<DATA_TYPE, unsigned char>::value) {
+  } else if (std::is_same<T, unsigned char>::value) {
     return gl::kUnsignedByte;
-  } else if (std::is_same<DATA_TYPE, short>::value) {
+  } else if (std::is_same<T, short>::value) {
     return gl::kShort;
-  } else if (std::is_same<DATA_TYPE, unsigned short>::value) {
+  } else if (std::is_same<T, unsigned short>::value) {
     return gl::kUnsignedShort;
-  } else if (std::is_same<DATA_TYPE, int>::value) {
+  } else if (std::is_same<T, int>::value) {
     return gl::kInt;
-  } else if (std::is_same<DATA_TYPE, unsigned int>::value) {
+  } else if (std::is_same<T, unsigned int>::value) {
     return gl::kUnsignedInt;
-  } else if (std::is_same<DATA_TYPE, float>::value) {
+  } else if (std::is_same<T, float>::value) {
     return gl::kFloat;
   } else {
     abort();
   }
 }
 
-template<typename DATA_TYPE, char NUM_COMPONENTS>
-void TextureSource<DATA_TYPE, NUM_COMPONENTS>::upload(gl::Texture2D& tex) const {
+template<typename T, char NUM_COMPONENTS>
+void TextureSource<T, NUM_COMPONENTS>::upload(gl::Texture2D& tex) const {
   upload(tex, internalFormat());
 }
 
-template<typename DATA_TYPE, char NUM_COMPONENTS>
-void TextureSource<DATA_TYPE, NUM_COMPONENTS>::upload(gl::Texture2D& tex,
+template<typename T, char NUM_COMPONENTS>
+void TextureSource<T, NUM_COMPONENTS>::upload(gl::Texture2D& tex,
                       gl::PixelDataInternalFormat internal_format) const {
-  bool bad_alignment = (w_ * sizeof(DATA_TYPE) * NUM_COMPONENTS) % 4 != 0;
+  bool bad_alignment = (w_ * sizeof(T) * NUM_COMPONENTS) % 4 != 0;
   GLint unpack_aligment;
 
   if(bad_alignment) {

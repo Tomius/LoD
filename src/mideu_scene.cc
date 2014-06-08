@@ -63,9 +63,10 @@ MideuScene::MideuScene() {
   charmove_->setAnimation(&ayumi->getAnimation());
 
   engine::Transform& cam_offset = addGameObject()->transform;
-  float x = height_map.w()/2.0f, y = height_map.h()/2.0f;
+
+  glm::vec2 center = height_map.center();
   ayumi->transform.localPos() =
-    glm::vec3{x, height_map.heightAt(x, y), y};
+    glm::vec3{center.x, height_map.heightAt(center.x, center.y), center.y};
   ayumi->transform.addChild(cam_offset);
   cam_offset.localPos(ayumi->getMesh().bSphereCenter());
 

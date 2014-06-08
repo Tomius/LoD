@@ -15,21 +15,26 @@ QuadTree::Node::Node(GLshort x, GLshort z, GLubyte level, GLubyte dimension)
   }
 }
 
-svec2 QuadTree::Node::countMinMaxOfArea(const HeightMapInterface& hmap) {
+glm::dvec2 QuadTree::Node::countMinMaxOfArea(const HeightMapInterface& hmap) {
+  glm::dvec2 min_max_y;
+  glm::dvec2 min_xz = hmap.toWorldSpace(x-size/2, z-size/2);
+  glm::dvec2 max_xz = hmap.toWorldSpace(x+size/2, z+size/2);
+
   if (level == 0) {
-    glm::dvec2 min_max = hmap.getMinMaxOfArea(x, z, size, size);
-    min_y = min_max.x;
-    max_y = min_max.y;
-    return svec2{min_y, max_y};
+    min_max_y = hmap.getMinMaxOfArea(x, z, size, size);
   } else {
-    svec2 tlb = tl->countMinMaxOfArea(hmap);
-    svec2 trb = tr->countMinMaxOfArea(hmap);
-    svec2 blb = bl->countMinMaxOfArea(hmap);
-    svec2 brb = br->countMinMaxOfArea(hmap);
-    min_y = std::min(tlb.x, std::min(trb.x, std::min(blb.x, brb.x)));
-    max_y = std::max(tlb.y, std::max(trb.y, std::max(blb.y, brb.y)));
-    return svec2{min_y, max_y};
+    glm::dvec2 tlb = tl->countMinMaxOfArea(hmap);
+    glm::dvec2 trb = tr->countMinMaxOfArea(hmap);
+    glm::dvec2 blb = bl->countMinMaxOfArea(hmap);
+    glm::dvec2 brb = br->countMinMaxOfArea(hmap);
+    min_max_y.x = std::min(tlb.x, std::min(trb.x, std::min(blb.x, brb.x)));
+    min_max_y.y = std::max(tlb.y, std::max(trb.y, std::max(blb.y, brb.y)));
   }
+
+  bbox = BoundingBox{glm::vec3(min_xz.x, min_max_y.x, min_xz.y),
+                     glm::vec3(max_xz.x, min_max_y.y, max_xz.y)};
+
+  return min_max_y;
 }
 
 void QuadTree::Node::selectNodes(const glm::vec3& cam_pos,
@@ -38,14 +43,13 @@ void QuadTree::Node::selectNodes(const glm::vec3& cam_pos,
                                  int node_dimension) {
   float scale = 1 << level;
   float lod_range = scale * 128;
-  BoundingBox bb = boundingBox();
 
-  if(!bb.collidesWithFrustum(frustum)) {
+  if(!bbox.collidesWithFrustum(frustum)) {
     return;
   }
 
   // if we can cover the whole area or if we are a leaf
-  if (!bb.collidesWithSphere(cam_pos, lod_range) || level == 0) {
+  if (!bbox.collidesWithSphere(cam_pos, lod_range) || level == 0) {
     grid_mesh.addToRenderList(x, z, scale, level);
   } else {
     bool btl = tl->collidesWithSphere(cam_pos, lod_range);

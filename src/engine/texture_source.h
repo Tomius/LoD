@@ -10,11 +10,11 @@
 
 namespace engine {
 
-template<typename DATA_TYPE, char NUM_COMPONENTS>
+template<typename T, char NUM_COMPONENTS>
 class TextureSource {
   bool integer_, srgb_, compressed_;
   std::string format_string_;
-  std::vector<std::array<DATA_TYPE, NUM_COMPONENTS>> data_;
+  std::vector<std::array<T, NUM_COMPONENTS>> data_;
   int w_, h_;
 public:
   // Loads in a texture from a file
@@ -32,10 +32,10 @@ public:
   int h() const {return h_;}
   bool integer() const {return integer_;}
   void set_integer(bool integer) {integer_ = integer;}
-  std::vector<std::array<DATA_TYPE, NUM_COMPONENTS>>& data() {
+  std::vector<std::array<T, NUM_COMPONENTS>>& data() {
     return data_;
   }
-  const std::vector<std::array<DATA_TYPE, NUM_COMPONENTS>>& data() const {
+  const std::vector<std::array<T, NUM_COMPONENTS>>& data() const {
     return data_;
   }
   const std::string& format_string() const {return format_string_;}
@@ -50,18 +50,18 @@ public:
   virtual gl::PixelDataType type() const;
 
   // Indexes the array, but doesn't care about over or under-indexing
-  std::array<DATA_TYPE, NUM_COMPONENTS>& operator()(int x, int y) {
+  std::array<T, NUM_COMPONENTS>& operator()(int x, int y) {
     return data_[y*h_ + x];
   }
-  const std::array<DATA_TYPE, NUM_COMPONENTS>& operator()(int x, int y) const {
+  const std::array<T, NUM_COMPONENTS>& operator()(int x, int y) const {
     return data_[y*h_ + x];
   }
 
   // Indexes the array, throws at over or under-indexing
-  std::array<DATA_TYPE, NUM_COMPONENTS>& at(int x, int y) {
+  std::array<T, NUM_COMPONENTS>& at(int x, int y) {
     return data_.at(y*h_ + x);
   }
-  const std::array<DATA_TYPE, NUM_COMPONENTS>& at(int x, int y) const {
+  const std::array<T, NUM_COMPONENTS>& at(int x, int y) const {
     return data_.at(y*h_ + x);
   }
 

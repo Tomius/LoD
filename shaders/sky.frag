@@ -13,8 +13,6 @@ uniform vec3 uSunPos;
 vec3 sun_pos = normalize(uSunPos);
 vec3 moon_pos = -sun_pos;
 
-uniform samplerCube uEnvMap;
-
 float sqr(float x) {
   return x*x;
 }
@@ -33,8 +31,6 @@ float AtmIntersection(vec3 look_dir) {
 
 vec3 SkyColor(vec3 look_dir) {
   float atm_size = AtmIntersection(look_dir);
-  vec4 cloud = textureCube(uEnvMap, look_dir);
-  float cloud_border = (1.0 - cloud.a) * cloud.b;
   vec3 atm_color = max(kLightColor - kAirColor * pow(atm_size, 0.33), vec3(0.0));
 
   vec3 day_color, night_color;
@@ -47,7 +43,7 @@ vec3 SkyColor(vec3 look_dir) {
 
     // The Sun itself
     vec3 sun = vec3(1.0, 0.7, 0.5) * atm_color *
-    (look_dir_sun_dist > 0.995 + 0.004 * sun_power ? (1.0 - 0.9*cloud.a) : 0.1);
+    (look_dir_sun_dist > 0.995 + 0.004 * sun_power ? 0.9 : 0.1);
 
     vec3 air =
         // The sky's base color.
@@ -65,27 +61,7 @@ vec3 SkyColor(vec3 look_dir) {
         // The yellow and red tone of the sky at sunset / sunrise
         atm_color * (look_dir_sun_dist / (1.0 + pow(3.0 * sun_power, 8.0))) * pow(atm_size, 0.6) * 0.5;
 
-    vec3 clouds =
-        atm_color * (
-          // The cloud's white borders. They are visible at the night too,
-          // because they aren't affected by sun_power. There are 3 "separate"
-          // layers of it, which are produced by 3 random functions, that have
-          // like 0 geometrical meaning. Even still this effect definitely looks
-          // better than having a mono-color border, and it also makes the border
-          // a random shape which is kinda cool :).
-          pow(min(look_dir_sun_dist * (cloud.g + cloud.b), 1.015), 64.0) * pow(cloud_border, 2.0) +
-          pow(min(look_dir_sun_dist * cloud.g + cloud.b, 1.020), 32.0) * cloud_border +
-          pow(min(look_dir_sun_dist * cloud.g * cloud.b, 1.010), 16.0) * pow(cloud_border, 0.5) +
-          // The cloud's light grey border. It's bigger than the white border,
-          // and this makes the cloud look like it has depth.
-          0.7 * min(cloud.g + cloud.b * 0.5, 1.0) * sun_power +
-          // The clouds main area, which is the darkest
-          (cloud.g * (1.0 - cloud.b * 0.2) * 5.0) * pow(1.0 - sun_power, 1.7) * (sun_power)
-        ) * 1.2 +
-        // The Sun makes the clouds brighter
-        kLightColor * 0.2 * min(sun_power + cloud.g * 0.4 + cloud.b * 0.1, 1.0) * sun_power;
-
-    day_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r)) + sun;
+    day_color = air + sun;
   }
 
   // Counting the night_color
@@ -106,21 +82,7 @@ vec3 SkyColor(vec3 look_dir) {
       vec3(0.5) * pow(min(0.999 * look_dir_moon_dist, 1.0),
                           1024.0 / sqr(atm_size));
 
-    vec3 clouds =
-      // The cloud's white borders.
-      atm_color * (
-      pow(min(look_dir_moon_dist * (cloud.g + cloud.b), 1.015), 64.0) * pow(cloud_border, 2.0) +
-      pow(min(look_dir_moon_dist * cloud.g + cloud.b, 1.020), 32.0) * cloud_border +
-      pow(min(look_dir_moon_dist * cloud.g * cloud.b, 1.010), 16.0) * pow(cloud_border, 0.5) +
-      // Border grey area
-      0.7 * min(cloud.g + cloud.b * 0.5, 1.0) * 0.1 * moon_power +
-      // The main grey area
-      (cloud.g * (1.0 - cloud.b * 0.2) * 5.0) * pow(1.0 - moon_power, 2.0) * 0.1 * moon_power) +
-      // The Moon's effect
-      kLightColor * 0.5 * min(moon_power + cloud.g * 0.4 + cloud.b * 0.1, 1.0) * 0.1 * moon_power;
-
-    night_color = mix(air, clouds, cloud.a * (1.0 - 0.8 * cloud.r))
-                  + vec3(0.4) * moon * (1.0 - cloud.a);
+    night_color = air + vec3(0.4) * moon;
   }
 
   vec3 final_color = clamp(night_color + day_color, 0, 1);

@@ -13,7 +13,9 @@ class BoundingBox {
   glm::vec3 mins_;
   glm::vec3 maxes_;
  public:
-  BoundingBox(const glm::vec3 mins, const glm::vec3 maxes)
+  BoundingBox() = default;
+
+  BoundingBox(const glm::vec3& mins, const glm::vec3& maxes)
       : mins_(mins), maxes_(maxes) {}
 
   glm::vec3 mins() const { return mins_; }

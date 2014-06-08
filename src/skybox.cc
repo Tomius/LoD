@@ -17,27 +17,9 @@ Skybox::Skybox()
   prog_ << vs_ << fs_ << sky_fs_;
   prog_.link().use();
 
-  gl::UniformSampler(prog_, "uEnvMap").set(0);
-
   prog_.validate();
 
   cube_.setupPositions(prog_ | "aPosition");
-
-  env_map_.active(0);
-  {
-    env_map_.bind();
-    env_map_.minFilter(gl::kLinear);
-    env_map_.magFilter(gl::kLinear);
-    env_map_.wrapS(gl::kClampToEdge);
-    env_map_.wrapT(gl::kClampToEdge);
-    env_map_.wrapP(gl::kClampToEdge);
-
-    for (int i = 0; i < 6; i++) {
-      // The cloud map is not in srgb
-      env_map_.loadTexture(i, "textures/skybox_" + std::to_string(i) + ".png",
-                           "CRGBA");
-    }
-  }
 }
 
 glm::vec3 Skybox::getSunPos() const {
@@ -67,13 +49,7 @@ void Skybox::render(const engine::Scene& scene) {
 
   auto depth_test = gl::TemporaryDisable(gl::kDepthTest);
 
-  env_map_.active(0);
-  env_map_.bind();
   gl::DepthMask(false);
-
   cube_.render();
-
   gl::DepthMask(true);
-  env_map_.active(0);
-  env_map_.unbind();
 }

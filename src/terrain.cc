@@ -5,16 +5,22 @@
 
 #include "engine/scene.h"
 
+const engine::Transform& Terrain::initTransform() {
+  transform.localScale() = glm::vec3(4, 0.8f, 4);
+  return transform;
+}
+
 Terrain::Terrain(Skybox *skybox)
     : vs_("terrain.vert")
     , fs_("terrain.frag")
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
+    , uModelMatrix_(prog_, "uModelMatrix")
     , uShadowCP_(prog_, "uShadowCP")
     , uSunPos_(prog_, "uSunPos")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowAtlasSize_(prog_, "uShadowAtlasSize")
-    , height_map_("terrain/output2.png")
+    , height_map_("terrain/output2.png", initTransform())
     , mesh_(height_map_)
     , skybox_((assert(skybox), skybox)) {
   prog_ << vs_ << fs_ << skybox_->sky_fs();
@@ -61,6 +67,7 @@ void Terrain::render(const engine::Scene& scene) {
   prog_.use();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
+  uModelMatrix_ = transform.matrix();
   uSunPos_.set(skybox_->getSunPos());
   if(shadow) {
     for (size_t i = 0; i < shadow->getDepth(); ++i) {

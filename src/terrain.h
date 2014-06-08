@@ -17,16 +17,18 @@ class Terrain : public engine::GameObject {
   gl::FragmentShader fs_;
 
   gl::Texture2D grassMaps_[2], grassNormalMap_;
-  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uShadowCP_;
+  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_,
+                             uModelMatrix_, uShadowCP_;
   gl::LazyUniform<glm::vec3> uSunPos_;
   gl::LazyUniform<int> uNumUsedShadowMaps_;
   gl::LazyUniform<glm::ivec2> uShadowAtlasSize_;
 
-  //engine::Pseudo16BitHeightMap height_map_;
   engine::HeightMap<unsigned short> height_map_;
   engine::cdlod::TerrainMesh mesh_;
 
   Skybox *skybox_;
+
+  const engine::Transform& initTransform();
 
 public:
   Terrain(Skybox *skybox);

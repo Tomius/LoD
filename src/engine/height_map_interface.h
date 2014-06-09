@@ -33,25 +33,33 @@ public:
     return glm::dvec2(s, t);
   }
 
-  virtual glm::dvec2 toTextureSpace(double s, double t) const {
+  virtual glm::dvec2 toModelSpace(double s, double t) const {
     return glm::dvec2(s, t);
+  }
+
+  virtual glm::vec3 toWorldSpace(const glm::vec3& p) const {
+    return p;
+  }
+
+  virtual glm::vec3 toModelSpace(const glm::vec3& p) const {
+    return p;
   }
 
   // Returns if the world space coordinates represent a valid texel
   bool valid(double x, double z) const {
-    glm::dvec2 tc = toTextureSpace(x, z);
+    glm::dvec2 tc = toModelSpace(x, z);
     return fetchValid(tc.x, tc.y);
   }
 
   // World space texture fetch (world space x and z coordinates)
   double heightAt(int x, int z) const {
-    glm::dvec2 tc = toTextureSpace(x, z);
+    glm::dvec2 tc = toModelSpace(x, z);
     return fetchHeightAt(tc.x, tc.y);
   }
 
   // World space texture fetch with interpolation
   double heightAt(double x, double z) const {
-    glm::dvec2 tc = toTextureSpace(x, z);
+    glm::dvec2 tc = toModelSpace(x, z);
     return fetchHeightAt(tc.x, tc.y);
   }
 

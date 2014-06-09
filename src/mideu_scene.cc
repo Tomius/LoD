@@ -65,10 +65,10 @@ MideuScene::MideuScene() {
   engine::Transform& cam_offset = addGameObject()->transform;
 
   glm::vec2 center = height_map.center();
-  ayumi->transform.localPos() =
+  ayumi->transform.local_pos() =
     glm::vec3{center.x, height_map.heightAt(center.x, center.y), center.y};
   ayumi->transform.addChild(cam_offset);
-  cam_offset.localPos(ayumi->getMesh().bSphereCenter());
+  cam_offset.set_local_pos(ayumi->getMesh().bSphereCenter());
 
   engine::ThirdPersonalCamera *cam = addCamera<engine::ThirdPersonalCamera>(
     window, 45.0f, 0.5f, 6000.0f, cam_offset,

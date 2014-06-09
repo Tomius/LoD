@@ -3,6 +3,7 @@
 #version 120
 
 uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
+uniform vec2 CDLODTerrain_uTexSize;
 
 varying vec3  w_vNormal;
 varying vec3  c_vPos, w_vPos;
@@ -20,8 +21,9 @@ void main() {
   vec2 tex_coord = CDLODTerrain_texCoord(w_pos);
   vec3 offseted_w_pos = (uModelMatrix * vec4(w_pos, 1)).xyz;
 
-  if (tex_coord.x <= 0 || 1 <= tex_coord.x ||
-      tex_coord.y <= 0 || 1 <= tex_coord.y) {
+  vec2 bias = vec2(1) / CDLODTerrain_uTexSize;
+  if (tex_coord.x < 0 + bias.x || 1 - bias.x < tex_coord.x ||
+      tex_coord.y < 0 + bias.y || 1 - bias.y < tex_coord.y) {
     vInvalid = 1e10;
     gl_Position = vec4(0.0);
     return;

@@ -6,7 +6,8 @@
 #include "engine/scene.h"
 
 const engine::Transform& Terrain::initTransform() {
-  transform.localScale() = glm::vec3(4, 0.8f, 4);
+  //transform.local_scale() = glm::vec3(4, 1, 4); TODO
+  transform.local_scale() = glm::vec3(1, 0.25f, 1);
   return transform;
 }
 

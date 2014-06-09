@@ -136,8 +136,8 @@ public:
     , cos_max_pitch_angle_(0.95)
     , mouse_sensitivity_(mouse_sensitivity) {
 
-    this->pos(pos);
-    forward(target - pos);
+    set_pos(pos);
+    set_forward(target - pos);
   }
 
   // The forward value is cached
@@ -145,7 +145,7 @@ public:
     return fwd_;
   }
 
-  virtual void forward(const glm::vec3& new_fwd) override {
+  virtual void set_forward(const glm::vec3& new_fwd) override {
     fwd_ = glm::normalize(new_fwd);
   }
 
@@ -154,15 +154,15 @@ public:
     return glm::vec3(0, 1, 0);
   }
 
-  virtual void up(const glm::vec3& new_up) override {}
+  virtual void set_up(const glm::vec3& new_up) override {}
 
   // The right vector is treated in a different way too.
   virtual glm::vec3 right() const override {
     return glm::cross(forward(), up());
   }
 
-  virtual void right(const glm::vec3& new_right) override {
-    forward(glm::cross(up(), new_right));
+  virtual void set_right(const glm::vec3& new_right) override {
+    set_forward(glm::cross(up(), new_right));
   }
 
   virtual glm::mat4 localToWorldMatrix() const override {
@@ -198,23 +198,22 @@ public:
         dy = 0;
       }
 
-      // Modify the forward vector
-      forward(forward() + right()*dx + up()*dy);
+      set_forward(forward() + right()*dx + up()*dy);
     }
 
     // Update the position
     float ds = timer.dt * speed_per_sec_;
     if(glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
-      localPos() += forward() * ds;
+      local_pos() += forward() * ds;
     }
     if(glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-      localPos() -= forward() * ds;
+      local_pos() -= forward() * ds;
     }
     if(glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
-      localPos() += right() * ds;
+      local_pos() += right() * ds;
     }
     if(glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
-      localPos() -= right() * ds;
+      local_pos() -= right() * ds;
     }
   }
 
@@ -276,8 +275,8 @@ public:
     , window_(window) {
 
     target.addChild(*this);
-    pos(position);
-    forward((target.pos()-position) / float(initial_distance_));
+    set_pos(position);
+    set_forward((target.pos()-position) / float(initial_distance_));
   }
 
   virtual ~ThirdPersonalCamera() {}
@@ -291,8 +290,8 @@ public:
     return target().pos() - forward() * float(curr_dist_mod_*initial_distance_);
   }
 
-  virtual void pos(const glm::vec3& new_pos) override {
-    localPos(new_pos - target().pos() + forward() *
+  virtual void set_pos(const glm::vec3& new_pos) override {
+    set_local_pos(new_pos - target().pos() + forward() *
       float(curr_dist_mod_*initial_distance_));
   }
 
@@ -301,7 +300,7 @@ public:
     return fwd_;
   }
 
-  virtual void forward(const glm::vec3& new_fwd) override {
+  virtual void set_forward(const glm::vec3& new_fwd) override {
     fwd_ = glm::normalize(new_fwd);
   }
 
@@ -310,15 +309,15 @@ public:
     return glm::vec3(0, 1, 0);
   }
 
-  virtual void up(const glm::vec3& new_up) override {}
+  virtual void set_up(const glm::vec3& new_up) override {}
 
   // The right vector is treated in a different way too.
   virtual glm::vec3 right() const override {
     return glm::cross(forward(), up());
   }
 
-  virtual void right(const glm::vec3& new_right) override {
-    forward(glm::cross(up(), new_right));
+  virtual void set_right(const glm::vec3& new_right) override {
+    set_forward(glm::cross(up(), new_right));
   }
 
   virtual glm::mat4 localToWorldMatrix() const override {
@@ -354,8 +353,7 @@ private:
         dy = 0;
       }
 
-      // Modify the forward vector
-      forward(forward() + right()*dx + up()*dy);
+      set_forward(forward() + right()*dx + up()*dy);
     }
 
     // Update the position

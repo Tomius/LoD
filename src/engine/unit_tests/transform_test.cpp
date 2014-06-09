@@ -61,9 +61,9 @@ void AssertEquals(const glm::dquat& a, const glm::dquat& b, const std::string& m
 
 void AssertEquals(const Transform& a, const Transform& b, const std::string& msg) {
   AssertEquals(a.getParent(), b.getParent(), msg);
-  AssertEquals(a.localPos(), b.localPos(), msg);
-  AssertEquals(a.localRot(), b.localRot(), msg);
-  AssertEquals(a.localScale(), b.localScale(), msg);
+  AssertEquals(a.local_pos(), b.local_pos(), msg);
+  AssertEquals(a.local_rot(), b.local_rot(), msg);
+  AssertEquals(a.local_scale(), b.local_scale(), msg);
 }
 
 glm::dvec3 RandomVec() {
@@ -95,7 +95,7 @@ void TestParentChild(Transform& parent,
 
 void CheckPos(Transform& parent, Transform& child, const std::string& msg) {
   AssertEquals(
-    child.pos(), parent.pos() + parent.rotateAndScale() * child.localPos(), msg
+    child.pos(), parent.pos() + parent.rotateAndScale() * child.local_pos(), msg
   );
 }
 
@@ -103,7 +103,7 @@ void TestLocRotScaleLevel1(Transform& parent, Transform& child) {
   Transform p = parent;
 
   // Location
-  child.localPos(RandomVec());
+  child.local_pos(RandomVec());
 
   CheckPos(parent, child, "Translation effect on child");
   AssertEquals(parent, p, "Child's translation has no effect parent");
@@ -112,17 +112,17 @@ void TestLocRotScaleLevel1(Transform& parent, Transform& child) {
   parent.rot(RandomQuat());
 
   CheckPos(parent, child, "Rotation effect on child");
-  AssertEquals(parent.pos(), p.pos(), "Rotation invariant on localPos");
+  AssertEquals(parent.pos(), p.pos(), "Rotation invariant on local_pos");
 
   p = parent;
   child.rot(parent.rot());
   AssertEquals(parent, p, "Child's rotation has no effect parent");
 
   // Scale
-  parent.localScale(RandomVec());
+  parent.local_scale(RandomVec());
 
   CheckPos(parent, child, "Scale effect on child's position");
-  AssertEquals(parent.pos(), p.pos(), "Scale invariant on localPos");
+  AssertEquals(parent.pos(), p.pos(), "Scale invariant on local_pos");
 
   p = parent;
   child.scale(parent.scale());
@@ -134,7 +134,7 @@ void TestLocRotScaleLevel2(Transform& gparent, Transform& parent, Transform& chi
   Transform gp = gparent;
 
   // Location
-  child.localPos(RandomVec());
+  child.local_pos(RandomVec());
 
   CheckPos(parent, child, "Translation effect on child");
   AssertEquals(parent, p, "Child's translation has no effect parent");
@@ -143,7 +143,7 @@ void TestLocRotScaleLevel2(Transform& gparent, Transform& parent, Transform& chi
   parent.rot(RandomQuat());
 
   CheckPos(parent, child, "Rotation effect on child");
-  AssertEquals(parent.pos(), p.pos(), "Rotation invariant on localPos");
+  AssertEquals(parent.pos(), p.pos(), "Rotation invariant on local_pos");
 
   p = parent;
   gp = gparent;
@@ -152,10 +152,10 @@ void TestLocRotScaleLevel2(Transform& gparent, Transform& parent, Transform& chi
   AssertEquals(gparent, gp, "Child's rotation has no effect on gparent");
 
   // Scale
-  parent.localScale(RandomVec());
+  parent.local_scale(RandomVec());
 
   CheckPos(parent, child, "Scale effect on child");
-  AssertEquals(parent.pos(), p.pos(), "Scale invariant on localPos");
+  AssertEquals(parent.pos(), p.pos(), "Scale invariant on local_pos");
 
   p = parent;
   gp = gparent;

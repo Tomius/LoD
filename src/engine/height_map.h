@@ -73,8 +73,16 @@ public:
     return glm::dvec2((s + offset.x) * scale.x, (t + offset.z) * scale.z);
   }
 
-  virtual glm::dvec2 toTextureSpace(double s, double t) const override {
+  virtual glm::dvec2 toModelSpace(double s, double t) const override {
     return glm::dvec2(s / scale.x - offset.x, t / scale.z - offset.z);
+  }
+
+  virtual glm::vec3 toWorldSpace(const glm::vec3& p) const {
+    return p / scale - offset;
+  }
+
+  virtual glm::vec3 toModelSpace(const glm::vec3& p) const {
+    return p / scale - offset;
   }
 
   virtual gl::PixelDataFormat format() const override {

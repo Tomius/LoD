@@ -28,19 +28,19 @@ float CDLODTerrain_fetchHeight(vec2 tex_coord) {
 
 vec2 CDLODTerrain_frac(vec2 x) { return x - floor(x); }
 
-vec2 CDLODTerrain_morphVertex(vec2 vertex, float morphK ) {
-  vec2 fracPart = CDLODTerrain_frac(vertex/ CDLODTerrain_uScale * 0.5 ) * 2.0;
-  return vertex - fracPart * CDLODTerrain_uScale * morphK;
+vec2 CDLODTerrain_morphVertex(vec2 vertex, float morph) {
+  vec2 frac_part = CDLODTerrain_frac(vertex / CDLODTerrain_uScale * 0.5 ) * 2.0;
+  return vertex - frac_part * CDLODTerrain_uScale * morph;
 }
 
-const float CDLODTerrain_morph_start = 0.90;
+const float CDLODTerrain_morph_start = 0.667;
 const float CDLODTerrain_morph_end_fudge = 0.99;
 
 vec3 CDLODTerrain_worldPos() {
   vec2 pos = CDLODTerrain_uOffset + CDLODTerrain_uScale * CDLODTerrain_aPosition;
 
   float max_dist = CDLODTerrain_morph_end_fudge * pow(2, CDLODTerrain_uLevel+1) * 128;
-  float dist = length(CDLODTerrain_uCamPos - vec3(pos.x, 0, pos.y));
+  float dist = length(CDLODTerrain_uCamPos - vec3(pos.x, CDLODTerrain_fetchHeight(pos), pos.y));
 
   float morph = clamp((dist - CDLODTerrain_morph_start*max_dist) /
       ((1-CDLODTerrain_morph_start) * max_dist), 0, 1);

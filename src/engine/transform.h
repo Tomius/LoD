@@ -61,7 +61,7 @@ public:
     WorldSpacePositionProxy(Transformation& tf)
       : vec3(tf.pos()), tf(tf) { }
 
-    ~WorldSpacePositionProxy() { tf.pos(*this); }
+    ~WorldSpacePositionProxy() { tf.set_pos(*this); }
   };
 
   WorldSpacePositionProxy pos_proxy() {
@@ -78,7 +78,7 @@ public:
     }
   }
 
-  virtual void pos(const vec3& new_pos) {
+  virtual void set_pos(const vec3& new_pos) {
     if (parent_) {
       pos_ = vec3(parent_->worldToLocalMatrix() * vec4(new_pos - parent_->pos(), 0));
     } else {
@@ -86,15 +86,15 @@ public:
     }
   }
 
-  vec3& localPos() {
+  vec3& local_pos() {
     return pos_;
   }
 
-  const vec3& localPos() const {
+  const vec3& local_pos() const {
     return pos_;
   }
 
-  void localPos(const vec3& new_pos) {
+  void set_local_pos(const vec3& new_pos) {
     pos_ = new_pos;
   }
 
@@ -104,7 +104,7 @@ public:
     WorldSpaceScaleProxy(Transformation& tf)
       : vec3(tf.scale()), tf(tf) { }
 
-    ~WorldSpaceScaleProxy() { tf.scale(*this); }
+    ~WorldSpaceScaleProxy() { tf.set_scale(*this); }
   };
 
   WorldSpaceScaleProxy scale_proxy() {
@@ -119,7 +119,7 @@ public:
     }
   }
 
-  virtual void scale(const vec3& new_scale) {
+  virtual void set_scale(const vec3& new_scale) {
     if (parent_) {
       scale_ = mat3(parent_->worldToLocalMatrix()) * new_scale;
     } else {
@@ -127,15 +127,15 @@ public:
     }
   }
 
-  vec3& localScale() {
+  vec3& local_scale() {
     return scale_;
   }
 
-  const vec3& localScale() const {
+  const vec3& local_scale() const {
     return scale_;
   }
 
-  void localScale(const vec3& new_scale) {
+  void set_local_scale(const vec3& new_scale) {
     scale_ = new_scale;
   }
 
@@ -145,8 +145,12 @@ public:
     WorldSpaceRotationProxy(Transformation& tf)
       : quat(tf.rot()), tf(tf) { }
 
-    ~WorldSpaceRotationProxy() { tf.rot(*this); }
+    ~WorldSpaceRotationProxy() { tf.set_rot(*this); }
   };
+
+  WorldSpaceRotationProxy rot_proxy() {
+    return WorldSpaceRotationProxy(*this);
+  }
 
   virtual const quat rot() const {
     if (parent_) {
@@ -156,7 +160,7 @@ public:
     }
   }
 
-  virtual void rot(const quat& new_rot) {
+  virtual void set_rot(const quat& new_rot) {
     if (parent_) {
       rot_ = glm::inverse(parent_->rot()) * new_rot;
     } else {
@@ -164,21 +168,21 @@ public:
     }
   }
 
-  quat& localRot() {
+  quat& local_rot() {
     return rot_;
   }
 
-  const quat& localRot() const {
+  const quat& local_rot() const {
     return rot_;
   }
 
-  void localRot(const quat& new_rot) {
+  void set_local_rot(const quat& new_rot) {
     return rot_ = new_rot;
   }
 
   // Sets the rotation, so that 'local_space_vec' in local space will be
   // equivalent to 'world_space_vec' in world space.
-  virtual void rot(const vec3& local_space_vec, const vec3& world_space_vec) {
+  virtual void set_rot(const vec3& local_space_vec, const vec3& world_space_vec) {
     vec3 local = glm::normalize(local_space_vec);
     vec3 world = glm::normalize(world_space_vec);
 
@@ -192,7 +196,7 @@ public:
       // We need the angle in degrees
       T angle_degree = std::acos(cosangle) * 180 / M_PI;
       // Rotate with the calced values
-      rot(glm::quat_cast(glm::rotate(mat4(), angle_degree, axis)));
+      set_rot(glm::quat_cast(glm::rotate(mat4(), angle_degree, axis)));
     } else {
       // If they are parallel, we only have to care about the case
       // when they go the opposite direction
@@ -201,14 +205,14 @@ public:
         if (fabs(glm::dot(local, vec3(1, 0, 0))) > 1e-3) {
           // If not, we can use it, to generate the axis to rotate around
           vec3 axis = glm::cross(vec3(1, 0, 0), local);
-          rot(glm::quat_cast(glm::rotate(mat4(), T{180}, axis)));
+          set_rot(glm::quat_cast(glm::rotate(mat4(), T{180}, axis)));
         } else {
           // Else we can use the Y axis for the same purpose
           vec3 axis = glm::cross(vec3(0, 1, 0), local);
-          rot(glm::quat_cast(glm::rotate(mat4(), T{180}, axis)));
+          set_rot(glm::quat_cast(glm::rotate(mat4(), T{180}, axis)));
         }
       } else {
-        rot(quat{});
+        set_rot(quat{});
       }
     }
   }
@@ -232,24 +236,24 @@ public:
     return glm::normalize(rot() * vec3(0, 0, -1));
   }
 
-  virtual void forward(const vec3& new_fwd) {
-    rot(vec3(0, 0, -1), new_fwd);
+  virtual void set_forward(const vec3& new_fwd) {
+    set_rot(vec3(0, 0, -1), new_fwd);
   }
 
   virtual vec3 up() const {
     return glm::normalize(rot() * vec3(0, 1, 0));
   }
 
-  virtual void up(const vec3& new_up) {
-     rot(vec3(0, 1, 0), new_up);
+  virtual void set_up(const vec3& new_up) {
+     set_rot(vec3(0, 1, 0), new_up);
   }
 
   virtual vec3 right() const {
     return glm::normalize(rot() * vec3(1, 0, 0));
   }
 
-  virtual void right(const vec3& new_right) {
-    rot(vec3(1, 0, 0), new_right);
+  virtual void set_right(const vec3& new_right) {
+    set_rot(vec3(1, 0, 0), new_right);
   }
 
   mat4 worldToLocalMatrix() const {

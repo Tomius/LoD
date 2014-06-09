@@ -43,8 +43,8 @@ public:
     float diff = new_height - last_height_;
     last_height_ = new_height;
 
-    transform_.localPos().y += diff;
-    local_transform_.localPos().y -= diff;
+    transform_.local_pos().y += diff;
+    local_transform_.local_pos().y -= diff;
   }
 
 };

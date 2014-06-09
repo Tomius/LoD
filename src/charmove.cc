@@ -112,7 +112,7 @@ void CharacterMovement::update(float time) {
 
   glm::mat4 rotation = glm::rotate(glm::mat4(), (float)fmod(curr_rot_, 360),
                                    glm::vec3(0,1,0));
-  transform_.rot(glm::quat_cast(rotation));
+  transform_.set_rot(glm::quat_cast(rotation));
 
   {
     auto pos = transform_.pos_proxy();
@@ -130,7 +130,7 @@ void CharacterMovement::update(float time) {
 }
 
 void CharacterMovement::updateHeight(float time) {
-  auto& pos = transform_.localPos();
+  auto& pos = transform_.local_pos();
 
   static float prevTime = 0;
   float diff_time = time - prevTime;

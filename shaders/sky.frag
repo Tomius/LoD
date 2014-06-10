@@ -53,7 +53,7 @@ vec3 SkyColor(vec3 look_dir) {
           // When it wins, it is a non-dominant dark grey color,
           // that lets the other effect paint the sky, but makes
           // them a bit brighter.
-          vec3(sun_power) * 1.5) +
+          (3+look_dir.y)/3 *  vec3(sun_power)) +
         // The scattering effect near the Sun
         vec3(1.0, 0.9, 0.7) * atm_color *
         pow(min(look_dir_sun_dist + 0.001 * atm_size, 1.0),
@@ -66,27 +66,26 @@ vec3 SkyColor(vec3 look_dir) {
 
   // Counting the night_color
   {
-    // Just some "references" to make the code easier to read.
-    // They will be optimized out anyway, so not a performance issue.
-    float moon_power = clamp(moon_pos.y + 0.12, 0, 1);
-    float look_dir_moon_dist = max(dot(look_dir, moon_pos), 0.0) + 0.003 * sqrt(atm_size);
+    float moon_power = 0.25 * clamp(moon_pos.y + 0.12, 0, 1);
+    float look_dir_moon_dist = max(dot(look_dir, moon_pos), 0.0)
+                              + 0.0005 * sqrt(atm_size);
 
     // The Moon itself
     float moon = (look_dir_moon_dist > 0.9999 ? 1.0 : 0.0);
 
     vec3 air =
       // The sky's base color.
-      0.256 * min(kAirColor * sqrt(pow(moon_power, 0.25) * pow(atm_size, 0.75) + 0.15),
-                  0.75 * vec3(moon_power) * 1.5) +
+      0.256 * min(0.5 * kAirColor * sqrt(pow(moon_power, 0.25) * pow(atm_size, 0.75) + 0.05),
+                  0.5 * vec3(moon_power)) +
       // The scattering effect near the Moon
-      vec3(0.5) * pow(min(0.999 * look_dir_moon_dist, 1.0),
+      vec3(0.2) * pow(min(0.98 * look_dir_moon_dist, 1.0),
                           1024.0 / sqr(atm_size));
 
-    night_color = air + vec3(0.4) * moon;
+    night_color = air + vec3(0.3) * moon;
   }
 
   vec3 final_color = clamp(night_color + day_color, 0, 1);
-  return pow(final_color, vec3(2.2)); // srgb -> linear
+  return final_color*final_color; // srgb -> linear
 }
 
 // Functions for other objects' lighting computations

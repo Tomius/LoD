@@ -6,12 +6,9 @@
 Tree::Tree(const engine::HeightMapInterface& height_map,
            Skybox *skybox, Shadow *shadow)
   : mesh_{{"models/trees/swamptree.dae",
-          aiProcessPreset_TargetRealtime_Quality |
-          aiProcess_FlipUVs},
+          aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs},
           {"models/trees/tree.obj",
-          aiProcessPreset_TargetRealtime_Quality |
-          aiProcess_FlipUVs}
-         }
+          aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs}}
   , vs_("tree.vert")
   , shadow_vs_("tree_shadow.vert")
   , fs_("tree.frag")
@@ -64,11 +61,14 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
       matrix[3] = glm::vec4(pos, 1);
       matrix = glm::scale(matrix, scale);
 
-      int type = rand() % kTreeTypeNum;
+      //int type = rand() % kTreeTypeNum;
+      // tree.obj textures are not srgb, but swamptree's textures are.
+      // Workaround until I fix that
+      int type = 0;
 
       engine::BoundingBox bbox = mesh_[type].boundingBox(matrix);
       glm::vec4 bsphere = mesh_[type].bSphere();
-      bsphere.w *= 1.5; // removes peter panning (but decreases quality)
+      bsphere.w *= 1.2; // removes peter panning (but decreases quality)
 
       trees_.push_back(TreeInfo{type, matrix, bsphere, bbox});
     }

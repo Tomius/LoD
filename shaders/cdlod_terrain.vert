@@ -33,7 +33,7 @@ vec2 CDLODTerrain_morphVertex(vec2 vertex, float morph) {
   return vertex - frac_part * CDLODTerrain_uScale * morph;
 }
 
-const float CDLODTerrain_morph_start = 0.667;
+const float CDLODTerrain_morph_start = 0.80;
 const float CDLODTerrain_morph_end_fudge = 0.99;
 
 vec3 CDLODTerrain_worldPos() {

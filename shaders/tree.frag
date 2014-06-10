@@ -30,12 +30,12 @@ void main() {
     alpha = 1 - (l - kMaxOpaqueDist) / (kMaxVisibleDist - kMaxOpaqueDist);
   }
 
-  float diffuse_power = max(abs(dot(normalize(w_vNormal), SunPos())), 0.3);
+  float diffuse_power = max(abs(dot(normalize(w_vNormal), SunPos())), 0.2);
 
   vec4 color = texture2D(uDiffuseTexture, vTexCoord);
   // FIXME
-  vec3 final_color = color.rgb * AmbientColor() *
-                     (diffuse_power + AmbientPower());
+  vec3 final_color = color.rgb * (vec3(0.1) + 0.9*AmbientColor()) *
+                     (diffuse_power + AmbientPower()/2);
 
   float actual_alpha = min(color.a, alpha);
 
@@ -49,6 +49,6 @@ void main() {
   float fog_alpha = clamp((length_from_camera - kFogMin) /
                           (kFogMax - kFogMin), 0.0, 1.0) / 6;
 
-  gl_FragColor = vec4(mix(pow(final_color, vec3(1.3)),
+  gl_FragColor = vec4(mix(final_color,
                           fog_color, fog_alpha), actual_alpha);
 }

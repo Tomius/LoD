@@ -10,8 +10,7 @@ using engine::AnimParams;
 
 Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     : mesh_("models/ayumi/ayumi.dae",
-            aiProcessPreset_TargetRealtime_Quality |
-            aiProcess_FlipUVs)
+            aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs)
     , anim_(mesh_.getAnimData())
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")

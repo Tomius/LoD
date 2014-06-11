@@ -30,22 +30,17 @@ void CalculateLighting(vec3 c_light_dir, out float diffuse_power,
     diffuse_power = 0.0;
     specular_power = 0.0;
   } else {
-    specular_power = pow(
-      max(
-        dot(
-          reflect(-c_light_dir, c_normal),
-          c_view_dir
-        ), 0.0
-      ), kSpecularShininess
-    );
+    vec3 L = c_light_dir, V = c_view_dir;
+    vec3 H = normalize(L + V), N = c_normal;
+    specular_power = pow(max(dot(H, N), 0), kSpecularShininess);
   }
 }
 
 void main() {
   float spec_mask = texture2D(uSpecularTexture, vTexCoord).r;
 
-  vec3 w_sun_dir = SunPos();
   vec3 lighting;
+  vec3 w_sun_dir = SunPos();
 
   if (w_sun_dir.y > 0) {
     float diffuse_power, specular_power;
@@ -53,18 +48,18 @@ void main() {
     CalculateLighting(c_sun_dir, diffuse_power, specular_power);
     diffuse_power *= pow(SunPower(), 0.3);
     specular_power *= pow(SunPower(), 0.3);
-    lighting = SunColor() * (diffuse_power + spec_mask*specular_power);
+    lighting = SunColor() * (diffuse_power + spec_mask*specular_power + AmbientPower());
   } else {
     float diffuse_power, specular_power;
     vec3 c_moon_dir = mat3(uCameraMatrix) * -w_sun_dir;
     CalculateLighting(c_moon_dir, diffuse_power, specular_power);
     diffuse_power *= pow(MoonPower(), 0.3);
     specular_power *= pow(MoonPower(), 0.3);
-    lighting = MoonColor() * (diffuse_power + spec_mask*specular_power);
+    lighting = MoonColor() * (diffuse_power + spec_mask*specular_power + AmbientPower());
   }
 
   vec3 diffuse_color = texture2D(uDiffuseTexture, vTexCoord).rgb;
-  vec3 final_color = diffuse_color * (lighting + AmbientPower());
+  vec3 final_color = diffuse_color * lighting;
 
   gl_FragColor = vec4(final_color, 1.0);
 }

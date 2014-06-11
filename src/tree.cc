@@ -87,7 +87,7 @@ void Tree::shadowRender(const engine::Scene& scene) {
 
    if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
       shadow_uMCP_ = shadow_->modelCamProjMat(
-        skybox_->getSunPos(),
+        skybox_->getLightSourcePos(),
         trees_[i].bsphere,
         trees_[i].mat,
         glm::mat4()

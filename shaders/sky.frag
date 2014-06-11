@@ -78,10 +78,10 @@ vec3 SkyColor(vec3 look_dir) {
       0.256 * min(0.5 * kAirColor * sqrt(pow(moon_power, 0.25) * pow(atm_size, 0.75) + 0.05),
                   0.5 * vec3(moon_power)) +
       // The scattering effect near the Moon
-      vec3(0.2) * pow(min(0.98 * look_dir_moon_dist, 1.0),
+      vec3(0.2) * pow(min(look_dir_moon_dist + 0.001 * atm_size, 1.0),
                           1024.0 / sqr(atm_size));
 
-    night_color = air + vec3(0.3) * moon;
+    night_color = air + vec3(0.4) * moon;
   }
 
   vec3 final_color = clamp(night_color + day_color, 0, 1);

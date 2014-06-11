@@ -29,6 +29,11 @@ glm::vec3 Skybox::getSunPos() const {
           static_cast<float>(1e10 * cos(time_ * 2 * M_PI / day_duration));
 }
 
+glm::vec3 Skybox::getLightSourcePos() const {
+  glm::vec3 sun_pos = getSunPos();
+  return sun_pos.y > 0 ? sun_pos : -sun_pos;
+}
+
 void Skybox::update(const engine::Scene& scene) {
   time_ = scene.environment_time().current + day_start;
 }

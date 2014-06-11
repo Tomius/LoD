@@ -31,11 +31,30 @@ void main() {
   }
 
   float diffuse_power = max(abs(dot(normalize(w_vNormal), SunPos())), 0.2);
+  vec3 lighting;
+  vec3 w_sun_dir = SunPos();
 
   vec4 color = texture2D(uDiffuseTexture, vTexCoord);
-  // FIXME
-  vec3 final_color = color.rgb * (vec3(0.1) + 0.9*AmbientColor()) *
-                     (diffuse_power + AmbientPower()/2);
+  bool is_leaf = color.g > (color.r + color.b) / 2;
+
+  if (w_sun_dir.y > 0) {
+    float diffuse_power = max(dot(w_vNormal, w_sun_dir), 0);
+    if(is_leaf) {
+      diffuse_power = SunPower()/8 + diffuse_power/3;
+    }
+    diffuse_power *= pow(SunPower(), 0.3);
+    lighting = SunColor() * (diffuse_power + AmbientPower());
+  } else {
+    float diffuse_power = max(dot(w_vNormal, w_sun_dir), 0);
+    if(is_leaf) {
+      diffuse_power = MoonPower()/8 + diffuse_power/3;
+    }
+    diffuse_power *= pow(MoonPower(), 0.3);
+    lighting = MoonColor() * (diffuse_power + AmbientPower());
+  }
+
+
+  vec3 final_color = color.rgb * lighting;
 
   float actual_alpha = min(color.a, alpha);
 

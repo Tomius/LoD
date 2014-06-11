@@ -17,7 +17,7 @@ class Skybox : public engine::GameObject {
   virtual ~Skybox() {}
 
   glm::vec3 getSunPos() const;
-  glm::vec4 getSunData() const;
+  glm::vec3 getLightSourcePos() const;
 
   virtual void render(const engine::Scene& scene) override;
   virtual void update(const engine::Scene& scene) override;

@@ -162,7 +162,7 @@ void Ayumi::update(const engine::Scene& scene) {
 void Ayumi::shadowRender(const engine::Scene&) {
   shadow_prog_.use();
   shadow_uMCP_ =
-    shadow_->modelCamProjMat(skybox_->getSunPos(), bsphere_,
+    shadow_->modelCamProjMat(skybox_->getLightSourcePos(), bsphere_,
                              transform.matrix(), mesh_.worldTransform());
   mesh_.uploadBoneInfo(shadow_uBones_);
 

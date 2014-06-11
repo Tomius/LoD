@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 
+#define GLM_FORCE_RADIANS
 #include "../oglwrap/glm/glm/glm.hpp"
 #include "../oglwrap/glm/glm/gtc/type_ptr.hpp"
 #include "../oglwrap/glm/glm/gtc/matrix_transform.hpp"
@@ -12,14 +13,14 @@
 
 namespace engine {
 
-template<typename T>
+template<typename T, glm::precision P = glm::precision::highp>
 class Transformation {
 
-  using vec3 = glm::detail::tvec3<T>;
-  using vec4 = glm::detail::tvec4<T>;
-  using mat3 = glm::detail::tmat3x3<T>;
-  using mat4 = glm::detail::tmat4x4<T>;
-  using quat = glm::detail::tquat<T>;
+  using vec3 = glm::detail::tvec3<T, P>;
+  using vec4 = glm::detail::tvec4<T, P>;
+  using mat3 = glm::detail::tmat3x3<T, P>;
+  using mat4 = glm::detail::tmat4x4<T, P>;
+  using quat = glm::detail::tquat<T, P>;
 
   Transformation* parent_;
   std::vector<Transformation*> children_;
@@ -194,9 +195,9 @@ public:
       // Dot gives us the cosine of their angle
       T cosangle = glm::dot(local, world);
       // We need the angle in degrees
-      T angle_degree = std::acos(cosangle) * 180 / M_PI;
+      T angle = std::acos(cosangle);
       // Rotate with the calced values
-      set_rot(glm::quat_cast(glm::rotate(mat4(), angle_degree, axis)));
+      set_rot(glm::quat_cast(glm::rotate(mat4(), angle, axis)));
     } else {
       // If they are parallel, we only have to care about the case
       // when they go the opposite direction
@@ -205,11 +206,11 @@ public:
         if (fabs(glm::dot(local, vec3(1, 0, 0))) > 1e-3) {
           // If not, we can use it, to generate the axis to rotate around
           vec3 axis = glm::cross(vec3(1, 0, 0), local);
-          set_rot(glm::quat_cast(glm::rotate(mat4(), T{180}, axis)));
+          set_rot(glm::quat_cast(glm::rotate(mat4(), T{M_PI}, axis)));
         } else {
           // Else we can use the Y axis for the same purpose
           vec3 axis = glm::cross(vec3(0, 1, 0), local);
-          set_rot(glm::quat_cast(glm::rotate(mat4(), T{180}, axis)));
+          set_rot(glm::quat_cast(glm::rotate(mat4(), T{M_PI}, axis)));
         }
       } else {
         set_rot(quat{});
@@ -281,7 +282,7 @@ public:
   }
 };
 
-using Transform = Transformation<float>;
+using Transform = Transformation<float, glm::precision::highp>;
 
 }
 

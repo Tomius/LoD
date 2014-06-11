@@ -171,7 +171,7 @@ void DirectionTest() {
   AssertEquals(t.up(), glm::dvec3(0, 1, 0), "Up");
   AssertEquals(t.right(), glm::dvec3(1, 0, 0), "Right");
 
-  t.rot(glm::quat_cast(glm::rotate(glm::dmat4(), 90.0, glm::dvec3(1, 0, 0))));
+  t.rot(glm::quat_cast(glm::rotate(glm::dmat4(), M_PI_2, glm::dvec3(1, 0, 0))));
 
   AssertEquals(t.forward(), glm::dvec3(0, 1, 0), "Forward");
   AssertEquals(t.up(), glm::dvec3(0, 0, 1), "Up");

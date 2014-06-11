@@ -35,8 +35,11 @@ MideuScene::MideuScene() {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // The scene builds quite slow, put some picture for the user.
-  LoadingScreen().render();
-  glfwSwapBuffers(window);
+  last_debug_time = 0;
+  PrintDebugText("Drawing the loading screen");
+    LoadingScreen().render();
+    glfwSwapBuffers(window);
+  PrintDebugTime();
 
   PrintDebugText("Initializing the skybox");
     Skybox *skybox = addGameObject<Skybox>();
@@ -71,7 +74,7 @@ MideuScene::MideuScene() {
   cam_offset.set_local_pos(ayumi->getMesh().bSphereCenter());
 
   engine::ThirdPersonalCamera *cam = addCamera<engine::ThirdPersonalCamera>(
-    window, 45.0f, 0.5f, 6000.0f, cam_offset,
+    window, float(M_PI/3.0f), 0.5f, 6000.0f, cam_offset,
     cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
     height_map, 1.5f);
 

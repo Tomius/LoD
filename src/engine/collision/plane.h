@@ -3,6 +3,7 @@
 #ifndef ENGINE_COLLISION_PLANE_H_
 #define ENGINE_COLLISION_PLANE_H_
 
+#define GLM_FORCE_RADIANS
 #include "../../oglwrap/glm/glm/glm.hpp"
 
 struct Plane {

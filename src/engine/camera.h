@@ -4,10 +4,9 @@
 #define ENGINE_CAMERA_H_
 
 #include <cmath>
-#include <iostream>
 
+#define GLM_FORCE_RADIANS
 #include "../oglwrap/glm/glm/gtx/rotate_vector.hpp"
-#include "../oglwrap/debug/insertion.h"
 
 #include "./timer.h"
 #include "./transform.h"

@@ -41,7 +41,7 @@ class CharacterMovement {
                     engine::Transform& transform,
                     engine::RigidBody& rigid_body,
                     float horizontal_speed = 10.0f,
-                    float rotationSpeed_PerSec = 180.0f);
+                    float rotationSpeed_PerSec = M_PI);
 
   void setCanJumpCallback(std::function<CanDoCallback> can_jump_functor) {
     can_jump_functor_ = can_jump_functor;

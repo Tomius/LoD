@@ -84,15 +84,15 @@ void CharacterMovement::update(float time) {
     glm::vec3 fwd = cam.forward();
     double cameraRot = -atan2(fwd.z, fwd.x);
     double moveRot = atan2(moveDir.y, moveDir.x); // +y is forward
-    dest_rot_ = gl::ToDegree(cameraRot + moveRot);
-    dest_rot_ = fmod(dest_rot_, 360);
+    dest_rot_ = cameraRot + moveRot;
+    dest_rot_ = fmod(dest_rot_, 2*M_PI);
 
     double diff = dest_rot_ - curr_rot_;
     double sign = diff / fabs(diff);
 
     // Take the shorter path.
-    while (fabs(diff) > 180) {
-      dest_rot_ -= sign * 360;
+    while (fabs(diff) > M_PI) {
+      dest_rot_ -= sign * 2*M_PI;
 
       diff = dest_rot_ - curr_rot_;
       sign = diff / fabs(diff);
@@ -101,16 +101,16 @@ void CharacterMovement::update(float time) {
     if (transition_) {
       if (fabs(diff) > rot_speed_ / 20.0f) {
         curr_rot_ += sign * dt * rot_speed_;
-        curr_rot_ = fmod(curr_rot_, 360);
+        curr_rot_ = fmod(curr_rot_, 2*M_PI);
       } else {
         transition_ = false;
       }
     } else {
-      curr_rot_ = fmod(dest_rot_, 360);
+      curr_rot_ = fmod(dest_rot_, 2*M_PI);
     }
   }
 
-  glm::mat4 rotation = glm::rotate(glm::mat4(), (float)fmod(curr_rot_, 360),
+  glm::mat4 rotation = glm::rotate(glm::mat4(), (float)fmod(curr_rot_, 2*M_PI),
                                    glm::vec3(0,1,0));
   transform_.set_rot(glm::quat_cast(rotation));
 

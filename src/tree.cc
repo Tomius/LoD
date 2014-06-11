@@ -55,7 +55,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
                                   1.0f + rand() / RAND_MAX,
                                   1.0f + rand() / RAND_MAX) * 2.0f;
 
-      float rotation = 360.0f * rand() / RAND_MAX;
+      float rotation = 2*M_PI * rand() / RAND_MAX;
 
       glm::mat4 matrix = glm::rotate(glm::mat4(), rotation, glm::vec3(0, 1, 0));
       matrix[3] = glm::vec4(pos, 1);

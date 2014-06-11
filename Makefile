@@ -6,7 +6,7 @@ OBJ_DIR = .obj
 
 CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
 OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
-DEPS := $(OBJECTS:.o=.dep)
+DEPS := $(OBJECTS:.o=.d)
 
 CXX = clang++
 CXXFLAGS = -g -rdynamic -std=c++11 -Wall -Qunused-arguments \
@@ -23,9 +23,9 @@ BOLD = \e[1m
 YELLOW = \e[93m
 
 ifneq ($(MAKECMDGOALS),nocolor)
-	printf = @/bin/echo -e "$(2)$(1)$(NORMAL)"
+	printf = @/bin/echo -e "$(2)$(subst $(OBJ_DIR)/,,$(1))$(NORMAL)"
 else
-	printf = $(info $(1))
+	printf = $(info $(subst $(OBJ_DIR)/,,$(1)))
 endif
 
 .PHONY: all nocolor clean
@@ -36,10 +36,10 @@ nocolor: $(BINARY)
 clean:
 	@rm -f $(BINARY) -rf $(OBJ_DIR)
 
-$(OBJ_DIR)/%.dep: $(SRC_DIR)/%.cc
-	$(call printf,Creating CXX dependency $@,$(YELLOW))
+$(OBJ_DIR)/%.d: $(SRC_DIR)/%.cc
+	$(call printf,Creating CXX dependency list $@,$(YELLOW))
 	@mkdir -p $(dir $@)
-	@$(CXX) $(CXXFLAGS) -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.dep=.cc)) -MT $(@:.dep=.o) -MF $@
+	@$(CXX) $(CXXFLAGS) -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.d=.cc)) -MT $(@:.d=.o) -MF $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)

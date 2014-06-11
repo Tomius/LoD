@@ -16,24 +16,42 @@ LDFLAGS = -g -rdynamic -lGL -lGLU -lGLEW -lassimp `pkg-config --libs glfw3` \
 					`Magick++-config --ldflags --libs` -lfreetype \
 					-Lsrc/engine/gui/freetype-gl -lfreetype-gl
 
-.PHONY: all clean
+NORMAL = \e[0m
+GREEN = \e[32m
+RED = \e[91m
+BOLD = \e[1m
+YELLOW = \e[93m
+
+ifneq ($(MAKECMDGOALS),nocolor)
+	printf = @/bin/echo -e "$(2)$(1)$(NORMAL)"
+else
+	printf = $(info $(1))
+endif
+
+.PHONY: all nocolor clean
 
 all: $(BINARY)
+nocolor: $(BINARY)
 
 clean:
-	rm -f $(BINARY) -rf $(OBJ_DIR)
+	@rm -f $(BINARY) -rf $(OBJ_DIR)
 
 $(OBJ_DIR)/%.dep: $(SRC_DIR)/%.cc
-	mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.dep=.cc)) -MT $(@:.dep=.o) -MF $@
+	$(call printf,Creating CXX dependency $@,$(YELLOW))
+	@mkdir -p $(dir $@)
+	@$(CXX) $(CXXFLAGS) -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.dep=.cc)) -MT $(@:.dep=.o) -MF $@
 
+ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
+endif
 
 $(OBJ_DIR)/%.o:
-	$(CXX) $(CXXFLAGS) -c $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.o=.cc)) -o $@
+	$(call printf,Building CXX object $@,$(GREEN))
+	@$(CXX) $(CXXFLAGS) -c $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.o=.cc)) -o $@
 
 $(BINARY): $(DEPS) $(OBJECTS)
-	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
+	$(call printf,Linking CXX executable $@,$(BOLD)$(RED))
+	@$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
 # Workaround for dependency change
 %.cc %.h:

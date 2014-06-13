@@ -47,4 +47,4 @@ public:
   virtual void render(const engine::Scene& scene) override;
 };
 
-#endif // LOD_TREE_H_
+#endif  // LOD_TREE_H_

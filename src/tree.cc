@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "tree.h"
+#include "./tree.h"
 #include "engine/scene.h"
 
 Tree::Tree(const engine::HeightMapInterface& height_map,

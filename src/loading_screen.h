@@ -53,4 +53,4 @@ public:
   }
 };
 
-#endif // LOD_LOADING_SCREEN_H_
+#endif  // LOD_LOADING_SCREEN_H_

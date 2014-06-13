@@ -4,10 +4,10 @@
 #define LOD_FPS_DISPLAY_H_
 
 #include "engine/scene.h"
-#include "engine/game_object.h"
+#include "engine/behaviour.h"
 #include "engine/gui/label.h"
 
-class FpsDisplay : public engine::GameObject {
+class FpsDisplay : public engine::Behaviour {
   engine::gui::Label *label_;
 
   static constexpr float refresh_interval = 0.1f;

@@ -41,4 +41,4 @@ static inline aiMatrix4x4 convertMatrix(const glm::mat4& m) {
 
 }
 
-#endif // ENGINE_ASSIMP_H_
+#endif  // ENGINE_ASSIMP_H_

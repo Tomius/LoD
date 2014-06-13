@@ -150,4 +150,4 @@ struct ExternalBoneTree : public BasicExternalBone {
 
 } // namespace engine
 
-#endif // ENGINE_MESH_SKINNING_DATA_H_
+#endif  // ENGINE_MESH_SKINNING_DATA_H_

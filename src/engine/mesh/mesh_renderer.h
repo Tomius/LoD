@@ -188,4 +188,4 @@ public:
 
 } // namespace engine
 
-#endif // ENGINE_MESH_MESH_RENDERER_H_
+#endif  // ENGINE_MESH_MESH_RENDERER_H_

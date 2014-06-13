@@ -3,13 +3,13 @@
 #ifndef ENGINE_GUI_BUTTON_H_
 #define ENGINE_GUI_BUTTON_H_
 
-#include "../game_object.h"
+#include "../behaviour.h"
 #include "./box.h"
 
 namespace engine {
 namespace gui {
 
-class Button : public engine::GameObject {
+class Button : public engine::Behaviour {
   glm::vec2 pos_, extent_;
   Box *box_;
   bool mouse_over_;

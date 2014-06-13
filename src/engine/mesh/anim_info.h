@@ -110,4 +110,4 @@ struct AnimData {
 
 } // namespace engine
 
-#endif // ENGINE_MESH_ANIM_INFO_H_
+#endif  // ENGINE_MESH_ANIM_INFO_H_

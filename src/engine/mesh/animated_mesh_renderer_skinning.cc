@@ -177,7 +177,7 @@ void AnimatedMeshRenderer::loadBones() {
       }
     }
 
-#endif // OGLWRAP_PORTABILITY_MODE
+#endif  // OGLWRAP_PORTABILITY_MODE
 
   }
 

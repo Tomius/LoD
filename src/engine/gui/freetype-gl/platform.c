@@ -43,7 +43,7 @@ double round (double v)
 {
 	return (v > 0.0) ? floor(v + 0.5) : ceil(v - 0.5);
 }
-#endif // _MSC_VER < 1800
+#endif  // _MSC_VER < 1800
 
 // strndup() is not available on Windows
 char *strndup( const char *s1, size_t n)
@@ -53,7 +53,7 @@ char *strndup( const char *s1, size_t n)
 	copy[n] = 0;
 	return copy;
 };
-#endif 
+#endif
 
 
 // strndup() was only added in OSX lion

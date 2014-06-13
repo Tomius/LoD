@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "bloom.h"
+#include "./bloom.h"
 #include "oglwrap/smart_enums.h"
 
 BloomEffect::BloomEffect()
@@ -40,8 +40,6 @@ void BloomEffect::render(const engine::Scene&) {
   tex_.active(0);
   tex_.bind();
   tex_.copy(gl::kRgb, 0, 0, width_, height_);
-
-  //auto srgb = gl::TemporaryEnable(gl::kFramebufferSrgb);
 
   gl::Clear().Color().Depth();
 

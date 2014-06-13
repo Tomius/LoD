@@ -7,7 +7,7 @@
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 
-#include "engine/game_object.h"
+#include "engine/behaviour.h"
 #include "engine/mesh/animated_mesh_renderer.h"
 
 #include "./charmove.h"
@@ -16,7 +16,7 @@
 
 extern const float GRAVITY;
 
-class Ayumi : public engine::GameObject {
+class Ayumi : public engine::Behaviour {
   engine::AnimatedMeshRenderer mesh_;
   engine::Animation anim_;
   gl::Program prog_, shadow_prog_;

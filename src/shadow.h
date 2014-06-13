@@ -44,4 +44,4 @@ public:
   void end();
 };
 
-#endif // LOD_SHADOW_H_
+#endif  // LOD_SHADOW_H_

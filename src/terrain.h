@@ -38,4 +38,4 @@ public:
   virtual void render(const engine::Scene& scene) override;
 };
 
-#endif // LOD_TERRAIN_H_
+#endif  // LOD_TERRAIN_H_

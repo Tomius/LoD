@@ -1,7 +1,9 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "mideu_scene.h"
+#include "./mideu_scene.h"
+
 #include <iostream>
+#include <string>
 
 #include "engine/game_engine.h"
 
@@ -69,14 +71,14 @@ MideuScene::MideuScene() {
 
   glm::vec2 center = height_map.center();
   ayumi->transform.local_pos() =
-    glm::vec3{center.x, height_map.heightAt(center.x, center.y), center.y};
+      glm::vec3 {center.x, height_map.heightAt(center.x, center.y), center.y};
   ayumi->transform.addChild(cam_offset);
   cam_offset.set_local_pos(ayumi->getMesh().bSphereCenter());
 
   engine::ThirdPersonalCamera *cam = addCamera<engine::ThirdPersonalCamera>(
-    window, float(M_PI/3.0f), 0.5f, 6000.0f, cam_offset,
-    cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
-    height_map, 1.5f);
+      window, static_cast<float>(M_PI/3.0f), 0.5f, 6000.0f, cam_offset,
+      cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
+      height_map, 1.5f);
 
   charmove_->setCamera(cam);
 

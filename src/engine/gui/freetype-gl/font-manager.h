@@ -199,7 +199,7 @@ typedef struct font_manager_t {
 
 #ifdef __cplusplus
 }
-#endif // ifdef __cplusplus
+#endif  // ifdef __cplusplus
 
 #endif /* __FONT_MANAGER_H__ */
 

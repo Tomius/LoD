@@ -3,9 +3,10 @@
 #define OGLWRAP_INSTANTIATE 1
 #include "../lod_oglwrap_config.h"
 #include <GLFW/glfw3.h>
-#include "../oglwrap/smart_enums.h"
+#include <string>
 
-#include "game_engine.h"
+#include "../oglwrap/smart_enums.h"
+#include "./game_engine.h"
 
 static double last_debug_time = 0;
 
@@ -119,8 +120,8 @@ void GameEngine::Run() {
 
 void GameEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
                              int action, int mods) {
-  if(action == GLFW_PRESS) {
-    switch(key) {
+  if (action == GLFW_PRESS) {
+    switch (key) {
       case GLFW_KEY_ESCAPE:
         glfwSetWindowShouldClose(window, GL_TRUE);
         break;
@@ -142,4 +143,4 @@ void GameEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
   scene_->keyAction(key, scancode, action, mods);
 }
 
-} // namespace engine
+}  // namespace engine

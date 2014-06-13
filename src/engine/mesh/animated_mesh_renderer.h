@@ -3,22 +3,22 @@
 #ifndef ENGINE_MESH_ANIMATED_MESH_RENDERER_H_
 #define ENGINE_MESH_ANIMATED_MESH_RENDERER_H_
 
+#include <string>
 #include <functional>
 
 #include "../../lod_oglwrap_config.h"
 #include "../../oglwrap/uniform.h"
 
-#include "mesh_renderer.h"
-#include "anim_state.h"
-#include "skinning_data.h"
-#include "anim_info.h"
-#include "animation.h"
+#include "./mesh_renderer.h"
+#include "./anim_state.h"
+#include "./skinning_data.h"
+#include "./anim_info.h"
+#include "./animation.h"
 
 namespace engine {
 
 /// A class for loading and displaying animations.
 class AnimatedMeshRenderer : public MeshRenderer {
-
   /// Stores data related to skin definition.
   SkinningData skinning_data_;
 
@@ -27,7 +27,7 @@ class AnimatedMeshRenderer : public MeshRenderer {
 
   friend class Animation;
 
-public:
+ public:
   /**
    * @brief Loads in the mesh and the skeleton for an asset, and prepares it
    *        for animation.
@@ -43,7 +43,7 @@ public:
     return anims_;
   }
 
-private:
+ private:
   /// It shouldn't be copyable.
   AnimatedMeshRenderer(const AnimatedMeshRenderer& src) = delete;
 
@@ -107,8 +107,7 @@ private:
                         gl::LazyVertexAttribArray bone_weights,
                         bool integerWeights = true);
 
-private:
-
+ private:
   /**
    * @brief Returns the first node called \a name, who is under \a currentRoot
    * in the bone hierarchy.
@@ -132,8 +131,7 @@ private:
   ExternalBone markChildExternal(ExternalBone* parent, aiNode* node,
                                  bool should_be_external = false);
 
-public:
-
+ public:
   /**
    * @brief Marks a bone to be modified from outside.
    *
@@ -181,8 +179,7 @@ public:
       <---<}>==~=~=~==--==--==~=~=~==<{>----- Animation -----<}>==~=~=~==--==--==~=~=~==<{>--->
              \\=====:==-==-==:=====//                           \\=====:==-==-==:=====//          */
 
-private:
-
+ private:
   /**
    * @brief Returns the index of the currently active translation keyframe for
    *        the given animation and time.
@@ -308,8 +305,7 @@ private:
                                   const aiNode* node,
                                   const glm::mat4& parent_transform = glm::mat4());
 
-public:
-
+ public:
   /// Updates the bones' transformations.
   void updateBoneInfo(Animation& animation,
                       float time_in_seconds);
@@ -361,9 +357,7 @@ public:
                     const std::string& anim_name,
                     gl::Bitfield<AnimFlag> flags = AnimFlag::None,
                     float speed = 1.0f);
+};  // AnimatedMeshRenderer
+}  // namespace engine
 
-}; // AnimatedMeshRenderer
-
-} // namespace engine
-
-#endif // ENGINE_MESH_ANIMATED_MESH_RENDERER_H_
+#endif  // ENGINE_MESH_ANIMATED_MESH_RENDERER_H_

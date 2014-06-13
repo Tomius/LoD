@@ -21,7 +21,7 @@ class BloomEffect : public engine::GameObject {
   gl::FullScreenRectangle rect_;
 
   GLuint width_, height_;
-public:
+ public:
   BloomEffect();
   virtual ~BloomEffect() {}
   virtual void screenResized(const engine::Scene&, size_t width,
@@ -30,4 +30,4 @@ public:
 };
 
 
-#endif // LOD_BLOOM_H_
+#endif  // LOD_BLOOM_H_

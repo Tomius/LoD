@@ -427,4 +427,4 @@ public:
 
 } // namespace engine
 
-#endif // ENGINE_CAMERA_H_
+#endif  // ENGINE_CAMERA_H_

@@ -9,12 +9,26 @@ OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
 DEPS := $(OBJECTS:.o=.d)
 
 CXX = clang++
-CXXFLAGS = -g -rdynamic -std=c++11 -Wall -Qunused-arguments \
-					 `pkg-config --cflags glfw3` `Magick++-config --cxxflags --cppflags`
-LDFLAGS = -g -rdynamic -lGL -lGLU -lGLEW -lassimp `pkg-config --libs glfw3` \
-					-lXxf86vm -lX11 -lXrandr -lXi -lm -lXcursor -lpthread \
-					`Magick++-config --ldflags --libs` -lfreetype \
-					-Lsrc/engine/gui/freetype-gl -lfreetype-gl
+
+BASE_CXXFLAGS = -std=c++11 -Wall -Qunused-arguments \
+					 			`pkg-config --cflags glfw3` `Magick++-config --cxxflags --cppflags`
+
+ifneq ($(MAKECMDGOALS),release)
+	CXXFLAGS = -g -rdynamic $(BASE_CXXFLAGS)
+else
+	CXXFLAGS = -O3 -DOGLWRAP_DEBUG=0 $(BASE_CXXFLAGS)
+endif
+
+BASE_LDFLAGS =  -lGL -lGLU -lGLEW -lassimp `pkg-config --libs glfw3` \
+								-lXxf86vm -lX11 -lXrandr -lXi -lm -lXcursor -lpthread \
+								`Magick++-config --ldflags --libs` -lfreetype \
+								-Lsrc/engine/gui/freetype-gl -lfreetype-gl
+
+ifneq ($(MAKECMDGOALS),release)
+	LDFLAGS = -g -rdynamic $(BASE_LDFLAGS)
+else
+	LDFLAGS = $(BASE_LDFLAGS)
+endif
 
 NORMAL = \e[0m
 GREEN = \e[32m
@@ -28,10 +42,11 @@ else
 	printf = $(info $(subst $(OBJ_DIR)/,,$(1)))
 endif
 
-.PHONY: all nocolor clean
+.PHONY: all clean nocolor release
 
 all: $(BINARY)
 nocolor: $(BINARY)
+release: $(BINARY)
 
 clean:
 	@rm -f $(BINARY) -rf $(OBJ_DIR)
@@ -45,11 +60,11 @@ ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
 endif
 
-$(OBJ_DIR)/%.o:
+$(OBJ_DIR)/%.o: $(OBJ_DIR)/%.d
 	$(call printf,Building CXX object $@,$(GREEN))
 	@$(CXX) $(CXXFLAGS) -c $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.o=.cc)) -o $@
 
-$(BINARY): $(DEPS) $(OBJECTS)
+$(BINARY): $(OBJECTS)
 	$(call printf,Linking CXX executable $@,$(BOLD)$(RED))
 	@$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 

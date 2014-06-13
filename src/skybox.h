@@ -9,9 +9,9 @@
 #include "oglwrap/shapes/cube.h"
 #include "oglwrap/textures/texture_cube.h"
 
-#include "engine/game_object.h"
+#include "engine/behaviour.h"
 
-class Skybox : public engine::GameObject {
+class Skybox : public engine::Behaviour {
  public:
   Skybox();
   virtual ~Skybox() {}

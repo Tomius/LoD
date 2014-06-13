@@ -124,4 +124,4 @@ struct AnimParams {
 
 } // namespace engine
 
-#endif // ENGINE_MESH_ANIM_STATE_H_
+#endif  // ENGINE_MESH_ANIM_STATE_H_

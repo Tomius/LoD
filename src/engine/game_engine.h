@@ -4,7 +4,7 @@
 #define ENGINE_GAME_ENGINE_H_
 
 #include <typeinfo>
-#include "scene.h"
+#include "./scene.h"
 
 namespace engine {
 
@@ -88,6 +88,6 @@ class GameEngine {
   }
 };
 
-} // namespace engine
+}  // namespace engine
 
 #endif

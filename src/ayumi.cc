@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "ayumi.h"
+#include "./ayumi.h"
 #include <string>
 #include <GLFW/glfw3.h>
 
@@ -26,7 +26,6 @@ Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
     , shadow_(shadow)
     , was_left_click_(false)
     , bsphere_(mesh_.bSphere()) {
-
   gl::ShaderSource vs_src("ayumi.vert");
   vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
   vs_src.insertMacroValue("BONE_NUM", mesh_.getNumBones());
@@ -197,7 +196,7 @@ void Ayumi::render(const engine::Scene& scene) {
 
 void Ayumi::keyAction(const engine::Scene&, int key, int scancode,
                                       int action, int mods) {
-  if(key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+  if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
     charmove_->handleSpacePressed();
   }
 }
@@ -270,7 +269,7 @@ AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
 
 void Ayumi::mouseButtonPressed(const engine::Scene& scene, int button,
                                int action, int mods) {
-  if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     was_left_click_ = true;
   }
 }

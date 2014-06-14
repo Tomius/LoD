@@ -18,19 +18,22 @@
 
 namespace engine {
 
-/// A class that can load in and draw meshes from over 30 file formats using assimp.
+/// A class that can load in and draw meshes using assimp.
 class MeshRenderer {
-protected:
-
-  /// A class to store per mesh data (the class loads in a scene, that might contain multiply meshes).
+ protected:
+  /**
+   * @brief A class to store per mesh data (the class loads in a scene, that
+   *        might contain multiply meshes).
+   */
   struct MeshEntry {
     gl::VertexArray vao;
     gl::ArrayBuffer verts, normals, tex_coords;
     gl::IndexBuffer indices;
-    unsigned idxCount, materialIndex;
-    gl::IndexType idxType;
+    unsigned idx_count, material_index;
+    static constexpr unsigned kInvalidMaterial = unsigned(-1);
+    gl::IndexType idx_type;
 
-    MeshEntry() : materialIndex(0xFFFFFFFF) {} // Invalid material
+    MeshEntry() : material_index(kInvalidMaterial) {}
   };
 
   /// The assimp importer. The scene actually belongs to this.
@@ -146,7 +149,7 @@ public:
   /// Sets the diffuse textures up to a specified texture unit.
   /** Changes the currently active texture unit and Texture2D binding.
     * @param texture_unit - Specifies the texture unit to use for the diffuse textures. */
-  void setupDiffuseTextures(unsigned short texture_unit);
+  void setupDiffuseTextures(unsigned short texture_unit, bool srbg = true);
 
   /// Sets the specular textures up to a specified texture unit.
   /** Changes the currently active texture unit and Texture2D binding.

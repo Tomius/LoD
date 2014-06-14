@@ -3,8 +3,11 @@
 #ifndef ENGINE_MESH_SKINNING_DATA_H_
 #define ENGINE_MESH_SKINNING_DATA_H_
 
+#include <map>
+#include <string>
+#include <vector>
 #include <memory>
-#include "mesh_renderer.h"
+#include "./mesh_renderer.h"
 
 namespace engine {
 
@@ -17,7 +20,7 @@ struct SkinningData {
    * The boneIDs part is not fixed to be int (unsigned), it becomes the
    * smallest type that can store all the ids of the bones.
    */
-  struct VertexBoneData_PerAttribute{
+  struct VertexBoneData_PerAttribute {
     Index_t ids[4];
     float weights[4];
 
@@ -37,7 +40,7 @@ struct SkinningData {
       do {
         for (size_t i = 0; i < data.size(); i++) {
           for (int j = 0; j < 4; j++) {
-            if (data[i].weights[j] < 1e-10) { // if equals 0
+            if (data[i].weights[j] < 1e-10) {  // if equals 0
               data[i].ids[j] = boneID;
               data[i].weights[j] = weight;
               return;
@@ -96,7 +99,7 @@ struct SkinningData {
   /// It is need to get the offsets.
   std::string root_bone;
 
-  SkinningData(size_t num_meshes = 0)
+  explicit SkinningData(size_t num_meshes = 0)
     : vertex_bone_data_buffers(num_meshes)
     , num_bones(0)
     , max_bone_attrib_num(0)
@@ -107,7 +110,7 @@ struct SkinningData {
 struct ExternalBone;
 
 struct BasicExternalBone {
-  const std::string name; // FIXME - only for debug
+  const std::string name;  // FIXME - only for debug
   const glm::mat4 offset;
   const glm::mat4 default_transform;
 
@@ -141,13 +144,12 @@ struct ExternalBoneTree : public BasicExternalBone {
   // This will be modified by the AnimatedClass's updateBoneInfo() call.
   std::shared_ptr<glm::mat4> global_transform_ptr;
 
-  ExternalBoneTree(const BasicExternalBone& super)
+  explicit ExternalBoneTree(const BasicExternalBone& super)
       : BasicExternalBone(super)
       , global_transform_ptr(new glm::mat4{})
   { }
-
 };
 
-} // namespace engine
+}  // namespace engine
 
 #endif  // ENGINE_MESH_SKINNING_DATA_H_

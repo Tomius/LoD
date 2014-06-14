@@ -4,10 +4,12 @@
 #define ENGINE_GUI_LABEL_H_
 
 #include <string>
-#include "font.h"
+#include <vector>
+
 #include "../game_engine.h"
-#include "../game_object.h"
 #include "../../oglwrap/smart_enums.h"
+
+#include "./font.h"
 
 namespace engine {
 namespace gui {
@@ -77,8 +79,7 @@ class Label : public engine::GameObject {
 
     float pen_x = 0, x0, x1, y0, y1, s0, t0, s1, t1;
     for (size_t i = 0; i < text_.size(); ++i) {
-      // Cursor
-      if(i == cursor_pos) {
+      if (i == cursor_pos) {  // Cursor
         // we use the black character (-1) as texture
         texture_glyph_t *glyph = font_.get_glyph(-1);
 
@@ -102,7 +103,6 @@ class Label : public engine::GameObject {
         attribs_vec.push_back(d);
         attribs_vec.push_back(b);
         attribs_vec.push_back(c);
-
       }
 
       // The current character (glyph) in the text
@@ -184,7 +184,8 @@ class Label : public engine::GameObject {
     set_position(pos_);
   }
 
-  virtual void screenResized(const Scene& scene, size_t width, size_t height) override {
+  virtual void screenResized(const Scene& scene, size_t width,
+                             size_t height) override {
     prog_.use();
     gl::Uniform<glm::mat4>(prog_, "uProjectionMatrix") =
       glm::ortho<float>(-int(width)/2, width/2, -int(height)/2, height/2, -1, 1);
@@ -203,7 +204,7 @@ class Label : public engine::GameObject {
   }
 };
 
-} // namespace gui
-} // namespace engine
+}  // namespace gui
+}  // namespace engine
 
 #endif

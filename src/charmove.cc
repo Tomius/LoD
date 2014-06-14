@@ -1,7 +1,8 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "charmove.h"
+#include "./charmove.h"
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include "engine/game_engine.h"
 
 CharacterMovement::CharacterMovement(
@@ -110,8 +111,9 @@ void CharacterMovement::update(float time) {
     }
   }
 
-  glm::mat4 rotation = glm::rotate(glm::mat4(), (float)fmod(curr_rot_, 2*M_PI),
-                                   glm::vec3(0,1,0));
+  glm::mat4 rotation = glm::rotate(glm::mat4(),
+                                   static_cast<float>(fmod(curr_rot_, 2*M_PI)),
+                                   glm::vec3(0, 1, 0));
   transform_.set_rot(glm::quat_cast(rotation));
 
   {

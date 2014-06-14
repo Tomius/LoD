@@ -96,19 +96,18 @@ class Box : public engine::GameObject {
 
  private:
   virtual void screenResized(const Scene&, size_t width, size_t height) override {
-    glm::vec2 border_width =
-      params_.border_width / (params_.extent * glm::vec2(0.99f * width, 0.99f * height));
+    glm::vec2 border_width = params_.border_width /
+        (params_.extent * glm::vec2(0.99f * width, 0.99f * height));
 
     prog_.use();
     gl::Uniform<glm::vec2>(prog_, "uBorderWidth") = border_width;
 
-    glm::vec2 corners[4] = {
-      glm::vec2{-1, -1}, glm::vec2{-1, +1}, glm::vec2{+1, -1}, glm::vec2{+1, +1}
-    };
+    glm::vec2 corners[4] = {glm::vec2{-1, -1}, glm::vec2{-1, +1},
+                            glm::vec2{+1, -1}, glm::vec2{+1, +1}};
 
     for (int i = 0; i < 4; ++i) {
       glm::vec2 corner = params_.extent * corners[i] + params_.center;
-      corner = (1.0f + corner) * 0.5f; // [-1, 1] -> [0, 1]
+      corner = (1.0f + corner) * 0.5f;  // [-1, 1] -> [0, 1]
       corner *= glm::vec2(width, height);
 
       // offset it with 'roundness' px towards the center
@@ -126,7 +125,7 @@ class Box : public engine::GameObject {
   }
 };
 
-} // namespace gui
-} // namespace engine
+}  // namespace gui
+}  // namespace engine
 
 #endif

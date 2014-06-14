@@ -39,9 +39,104 @@ class AnimatedMeshRenderer : public MeshRenderer {
                        gl::Bitfield<aiPostProcessSteps> flags);
 
   /// Returns a reference to the animation resources
-  const AnimData& getAnimData() const {
-    return anims_;
-  }
+  const AnimData& getAnimData() const { return anims_; }
+
+  // ---------------------------- Skin definition ------------------------------
+
+  /**
+   * @brief Marks a bone to be modified from outside.
+   *
+   * @param bone_name   The name of the bone.
+   * @return A structure, which through the bone, and all of its child can
+   *         be moved.
+   */
+  ExternalBoneTree markBoneExternal(const std::string& bone_name);
+
+  /**
+   * @brief Returns the number of bones this scene has.
+   *
+   * May change the currently active VAO and ArrayBuffer at the first call.
+   */
+  size_t getNumBones();
+
+  /**
+   * @brief Returns the size that boneIds and BoneWeights attribute arrays
+   *        should be.
+   *
+   * May change the currently active VAO and ArrayBuffer at the first call.
+   */
+  size_t getBoneAttribNum();
+
+  /**
+   * @brief Loads in bone weight and id information to the given array of
+   *        attribute arrays.
+   *
+   * Uploads the bone weight and id to an array of attribute arrays, and sets
+   * it up for use. For example if you specified "in vec4 boneIds[3]" you have
+   * to give "prog | boneIds".
+   *
+   * Calling this function changes the currently active VAO and ArrayBuffer.
+   *
+   * @param boneIDs        The array of attributes array to use as destination
+   *                       for bone IDs.
+   * @param bone_weights   The array of attributes array to use as destination
+   *                       for bone weights.
+   * @param integerIDs     If true, boneIDs are uploaded as integers
+   *                       (#version 130+) else they are uploaded as floats */
+  void setupBones(gl::LazyVertexAttribArray boneIDs,
+                  gl::LazyVertexAttribArray bone_weights,
+                  bool integerIDs = true);
+
+  // -------------------------------- Animation --------------------------------
+
+  /// Updates the bones' transformations.
+  void updateBoneInfo(Animation& animation,
+                      float time_in_seconds);
+
+  /**
+   * @brief Uploads the bones' transformations into the given uniform array.
+   *
+   * @param bones - The uniform naming the bones array. It should be indexable.
+   */
+  void uploadBoneInfo(gl::LazyUniform<glm::mat4>& bones);
+
+  /**
+   * @brief Updates the bones transformation and uploads them into the given
+   *        uniforms.
+   *
+   * @param animation        The animation to update.
+   * @param time_in_seconds  Expect a time value as a float, optimally since
+   *                         the start of the program.
+   * @param bones            The uniform naming the bones array. It should be
+   *                         indexable.
+   */
+  void updateAndUploadBoneInfo(Animation& animation,
+                               float time_in_seconds,
+                               gl::LazyUniform<glm::mat4>& bones);
+
+  // --------------------------- Animation Control -----------------------------
+
+  /**
+   * @brief Adds an external animation from a file.
+   *
+   * You should give this animation a name, you will be able to
+   * reference it with this name in the future. You can also set
+   * the default animation modifier flags for this animation.
+   * These flags will be used everytime you change to this animation
+   * without explicitly specifying new flags.
+   *
+   * @param filename    The name of the file, from where to load the animation.
+   * @param anim_name   The name with you wanna reference this animation.
+   * @param flags       You can specify animation modifiers, like repeat the
+   *                    animation after it ends, play it backwards, etc...
+   * @param speed       Sets the default speed of the animation. If it's 1, it
+   *                    will be played with the its default speed. If it's
+   *                    negative, it will be played backwards.
+   */
+  void addAnimation(const std::string& filename,
+                    const std::string& anim_name,
+                    gl::Bitfield<AnimFlag> flags = AnimFlag::None,
+                    float speed = 1.0f);
 
  private:
   /// It shouldn't be copyable.
@@ -50,9 +145,7 @@ class AnimatedMeshRenderer : public MeshRenderer {
   /// It shouldn't be copyable.
   void operator=(const AnimatedMeshRenderer& rhs) = delete;
 
-  /*         //=====:==-==-==:=====\\                                 //=====:==-==-==:=====\\
-      <---<}>==~=~=~==--==--==~=~=~==<{>----- Skin definition -----<}>==~=~=~==--==--==~=~=~==<{>--->
-             \\=====:==-==-==:=====//                                 \\=====:==-==-==:=====//          */
+  // ---------------------------- Skin definition ------------------------------
 
   /// Fills the bone_mapping with data.
   void mapBones();
@@ -107,7 +200,6 @@ class AnimatedMeshRenderer : public MeshRenderer {
                         gl::LazyVertexAttribArray bone_weights,
                         bool integerWeights = true);
 
- private:
   /**
    * @brief Returns the first node called \a name, who is under \a currentRoot
    * in the bone hierarchy.
@@ -131,55 +223,9 @@ class AnimatedMeshRenderer : public MeshRenderer {
   ExternalBone markChildExternal(ExternalBone* parent, aiNode* node,
                                  bool should_be_external = false);
 
- public:
-  /**
-   * @brief Marks a bone to be modified from outside.
-   *
-   * @param bone_name - The name of the bone.
-   * @return A structure, which through the bone, and all of its child can be moved.
-   */
-  ExternalBoneTree markBoneExternal(const std::string& bone_name);
 
-  /**
-   * @brief Returns the number of bones this scene has.
-   *
-   * May change the currently active VAO and ArrayBuffer at the first call.
-   */
-  size_t getNumBones();
+  // -------------------------------- Animation --------------------------------
 
-  /**
-   * @brief Returns the size that boneIds and BoneWeights attribute arrays
-   *        should be.
-   *
-   * May change the currently active VAO and ArrayBuffer at the first call.
-   */
-  size_t getBoneAttribNum();
-
-  /**
-   * @brief Loads in bone weight and id information to the given array of
-   *        attribute arrays.
-   *
-   * Uploads the bone weight and id to an array of attribute arrays, and sets
-   * it up for use. For example if you specified "in vec4 boneIds[3]" you have
-   * to give "prog | boneIds".
-   *
-   * Calling this function changes the currently active VAO and ArrayBuffer.
-   *
-   * @param boneIDs        The array of attributes array to use as destination
-   *                       for bone IDs.
-   * @param bone_weights   The array of attributes array to use as destination
-   *                       for bone weights.
-   * @param integerIDs     If true, boneIDs are uploaded as integers
-   *                       (#version 130+) else they are uploaded as floats */
-  void setupBones(gl::LazyVertexAttribArray boneIDs,
-                  gl::LazyVertexAttribArray bone_weights,
-                  bool integerIDs = true);
-
-  /*         //=====:==-==-==:=====\\                           //=====:==-==-==:=====\\
-      <---<}>==~=~=~==--==--==~=~=~==<{>----- Animation -----<}>==~=~=~==--==--==~=~=~==<{>--->
-             \\=====:==-==-==:=====//                           \\=====:==-==-==:=====//          */
-
- private:
   /**
    * @brief Returns the index of the currently active translation keyframe for
    *        the given animation and time.
@@ -305,58 +351,6 @@ class AnimatedMeshRenderer : public MeshRenderer {
                                   const aiNode* node,
                                   const glm::mat4& parent_transform = glm::mat4());
 
- public:
-  /// Updates the bones' transformations.
-  void updateBoneInfo(Animation& animation,
-                      float time_in_seconds);
-
-  /**
-   * @brief Uploads the bones' transformations into the given uniform array.
-   *
-   * @param bones - The uniform naming the bones array. It should be indexable.
-   */
-  void uploadBoneInfo(gl::LazyUniform<glm::mat4>& bones);
-
-  /**
-   * @brief Updates the bones transformation and uploads them into the given
-   *        uniforms.
-   *
-   * @param animation        The animation to update.
-   * @param time_in_seconds  Expect a time value as a float, optimally since
-   *                         the start of the program.
-   * @param bones            The uniform naming the bones array. It should be
-   *                         indexable.
-   */
-  void updateAndUploadBoneInfo(Animation& animation,
-                               float time_in_seconds,
-                               gl::LazyUniform<glm::mat4>& bones);
-
-  /*       //=====:==-==-==:=====\\                                   //=====:==-==-==:=====\\
-    <---<}>==~=~=~==--==--==~=~=~==<{>----- Animation Control -----<}>==~=~=~==--==--==~=~=~==<{>--->
-           \\=====:==-==-==:=====//                                   \\=====:==-==-==:=====//       */
-
-
-  /**
-   * @brief Adds an external animation from a file.
-   *
-   * You should give this animation a name, you will be able to
-   * reference it with this name in the future. You can also set
-   * the default animation modifier flags for this animation.
-   * These flags will be used everytime you change to this animation
-   * without explicitly specifying new flags.
-   *
-   * @param filename    The name of the file, from where to load the animation.
-   * @param anim_name   The name with you wanna reference this animation.
-   * @param flags       You can specify animation modifiers, like repeat the
-   *                    animation after it ends, play it backwards, etc...
-   * @param speed       Sets the default speed of the animation. If it's 1, it
-   *                    will be played with the its default speed. If it's
-   *                    negative, it will be played backwards.
-   */
-  void addAnimation(const std::string& filename,
-                    const std::string& anim_name,
-                    gl::Bitfield<AnimFlag> flags = AnimFlag::None,
-                    float speed = 1.0f);
 };  // AnimatedMeshRenderer
 }  // namespace engine
 

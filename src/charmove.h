@@ -10,7 +10,7 @@
 #include "engine/transform.h"
 #include "engine/mesh/animated_mesh_renderer.h"
 
-#include "terrain.h"
+#include "./terrain.h"
 
 class CharacterMovement {
   engine::Transform& transform_;
@@ -63,4 +63,4 @@ class CharacterMovement {
   void setCamera(engine::Camera* cam) { camera_ = cam; }
 };
 
-#endif // LOD_CHARMOVE_H_
+#endif  // LOD_CHARMOVE_H_

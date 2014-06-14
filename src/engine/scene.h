@@ -141,7 +141,7 @@ private:
     }
   }
 
-public:
+ public:
   virtual void turn() {
     update();
     shadowRender();

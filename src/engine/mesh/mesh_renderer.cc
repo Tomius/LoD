@@ -1,6 +1,9 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "mesh_renderer.h"
+#include "./mesh_renderer.h"
+
+#include <vector>
+
 #include "../../oglwrap/context.h"
 #include "../../oglwrap/smart_enums.h"
 
@@ -11,21 +14,16 @@ namespace engine {
   * @param flags - The assimp post-process flags. */
 MeshRenderer::MeshRenderer(const std::string& filename,
                            gl::Bitfield<aiPostProcessSteps> flags)
-  : scene_(importer_.ReadFile(
-             filename.c_str(),
-             flags | aiProcess_Triangulate
-           ))
-  , filename_(filename)
-  , entries_(scene_->mNumMeshes)
-  , is_setup_positions_(false)
-  , is_setup_normals_(false)
-  , is_setup_tex_coords_(false)
-  , textures_enabled_(true) {
-
+    : scene_(importer_.ReadFile(filename.c_str(), flags | aiProcess_Triangulate))
+    , filename_(filename)
+    , entries_(scene_->mNumMeshes)
+    , is_setup_positions_(false)
+    , is_setup_normals_(false)
+    , is_setup_tex_coords_(false)
+    , textures_enabled_(true) {
   if (!scene_) {
-    throw std::runtime_error(
-      "Error parsing " + filename_ + " : " + importer_.GetErrorString()
-    );
+    throw std::runtime_error("Error parsing " + filename_ + " : " +
+                             importer_.GetErrorString());
   }
 
   // The world transform is the transform that takes the root node to it's
@@ -40,23 +38,31 @@ template <typename IdxType>
 /** This expect the correct vao to be already bound!
   * @param index - The index of the entry */
 void MeshRenderer::setIndices(size_t index) {
-  const aiMesh* paiMesh = scene_->mMeshes[index];
+  const aiMesh* mesh = scene_->mMeshes[index];
 
-  std::vector<IdxType> indicesVector;
-  indicesVector.reserve(paiMesh->mNumFaces * 3);
+  std::vector<IdxType> indices_vector;
+  indices_vector.reserve(mesh->mNumFaces * 3);
+  bool invalid_triangles = false;
 
-  for (size_t i = 0; i < paiMesh->mNumFaces; i++) {
-    const aiFace& face = paiMesh->mFaces[i];
+  for (size_t i = 0; i < mesh->mNumFaces; i++) {
+    const aiFace& face = mesh->mFaces[i];
     if (face.mNumIndices == 3) { // The invalid vertices are just ignored.
-      indicesVector.push_back(face.mIndices[0]);
-      indicesVector.push_back(face.mIndices[1]);
-      indicesVector.push_back(face.mIndices[2]);
+      indices_vector.push_back(face.mIndices[0]);
+      indices_vector.push_back(face.mIndices[1]);
+      indices_vector.push_back(face.mIndices[2]);
+    } else {
+      invalid_triangles = true;
     }
   }
 
+  if(invalid_triangles) {
+    std::cerr << "Mesh '" << filename_ << "' contains non-triangle faces. "
+                 "This might result in rendering artifacts." << std::endl;
+  }
+
   entries_[index].indices.bind();
-  entries_[index].indices.data(indicesVector);
-  entries_[index].idxCount = indicesVector.size();
+  entries_[index].indices.data(indices_vector);
+  entries_[index].idx_count = indices_vector.size();
 }
 
 /// Loads in vertex positions and indices, and uploads the former into an attribute array.
@@ -65,43 +71,49 @@ void MeshRenderer::setIndices(size_t index) {
   * The mesh cannot be drawn without calling this function.
   * @param attrib - The attribute array to use as destination. */
 void MeshRenderer::setupPositions(gl::VertexAttribArray attrib) {
-  if (is_setup_positions_) {
-    throw std::logic_error(
-      "MeshRenderer::setup_position is called multiply times on the same object"
-    );
-  } else {
+  if (!is_setup_positions_) {
     is_setup_positions_ = true;
+  } else {
+    std::cerr << "MeshRenderer::setupPositions is called multiple times on the "
+                 "same object. If the two calls want to set positions up into "
+                 "the same attribute position, then the second call is "
+                 "unneccesary. If they want to set the positions to different "
+                 "attribute positions then the second call would make the "
+                 "first call not work anymore. Either way, calling "
+                 "setupPositions multiply times is a design error, that should "
+                 "be avoided.";
+    std::terminate();
   }
 
   for (size_t i = 0; i < entries_.size(); i++) {
-    const aiMesh* paiMesh = scene_->mMeshes[i];
+    const aiMesh* mesh = scene_->mMeshes[i];
 
     // ~~~~~~<{ Load the vertices }>~~~~~~
 
-    std::vector<aiVector3D> vertsVector;
-    size_t vertNum = paiMesh->mNumVertices;
-    vertsVector.reserve(vertNum);
+    std::vector<aiVector3D> verts_vector;
+    size_t vertNum = mesh->mNumVertices;
+    verts_vector.reserve(vertNum);
 
     for (size_t i = 0; i < vertNum; i++) {
-      vertsVector.push_back(paiMesh->mVertices[i]);
+      verts_vector.push_back(mesh->mVertices[i]);
     }
 
     entries_[i].vao.bind();
 
     entries_[i].verts.bind();
-    entries_[i].verts.data(vertsVector);
-    attrib.setup<float>(3).enable();
+    entries_[i].verts.data(verts_vector);
+    attrib.setup<glm::vec3>().enable();
 
     // ~~~~~~<{ Load the indices }>~~~~~~
 
-    if (paiMesh->mNumFaces * 3 < UCHAR_MAX) {
-      entries_[i].idxType = gl::kUnsignedByte;
+    if (mesh->mNumFaces * 3 < UCHAR_MAX) {
+      entries_[i].idx_type = gl::kUnsignedByte;
       setIndices<unsigned char>(i);
-    } else if (paiMesh->mNumFaces * 3 < USHRT_MAX) {
-      entries_[i].idxType = gl::kUnsignedShort;
+    } else if (mesh->mNumFaces * 3 < USHRT_MAX) {
+      entries_[i].idx_type = gl::kUnsignedShort;
       setIndices<unsigned short>(i);
     } else {
-      entries_[i].idxType = gl::kUnsignedInt;
+      entries_[i].idx_type = gl::kUnsignedInt;
       setIndices<unsigned int>(i);
     }
   }
@@ -115,25 +127,30 @@ void MeshRenderer::setupPositions(gl::VertexAttribArray attrib) {
   * Calling this function changes the currently active VAO and ArrayBuffer.
   * @param attrib - The attribute array to use as destination. */
 void MeshRenderer::setupNormals(gl::VertexAttribArray attrib) {
-
-  if (is_setup_normals_) {
-    throw std::logic_error(
-      "MeshRenderer::setupNormals is called multiply times on the same object"
-    );
-  } else {
+  if (!is_setup_normals_) {
     is_setup_normals_ = true;
+  } else {
+    std::cerr << "MeshRenderer::setupNormals is called multiple times on the "
+                 "same object. If the two calls want to set normals up into "
+                 "the same attribute position, then the second call is "
+                 "unneccesary. If they want to set the normals to different "
+                 "attribute positions then the second call would make the "
+                 "first call not work anymore. Either way, calling "
+                 "setupNormals multiply times is a design error, that should "
+                 "be avoided.";
+    std::terminate();
   }
 
   for (size_t i = 0; i < entries_.size(); i++) {
-    const aiMesh* paiMesh = scene_->mMeshes[i];
+    const aiMesh* mesh = scene_->mMeshes[i];
 
     std::vector<aiVector3D> normalsVector;
 
-    size_t vertNum = paiMesh->mNumVertices;
+    size_t vertNum = mesh->mNumVertices;
     normalsVector.reserve(vertNum);
 
     for (size_t i = 0; i < vertNum; i++) {
-      normalsVector.push_back(paiMesh->mNormals[i]);
+      normalsVector.push_back(mesh->mNormals[i]);
     }
 
     entries_[i].vao.bind();
@@ -172,37 +189,42 @@ bool MeshRenderer::hasTexCoords(unsigned char texCoordSet) {
   *                     that should be used */
 void MeshRenderer::setupTexCoords(gl::VertexAttribArray attrib,
                                   unsigned char texCoordSet) {
-
-  if (is_setup_tex_coords_) {
-    throw std::logic_error(
-      "MeshRenderer::setupTexCoords is called multiply times on the same object"
-    );
-  } else {
+  if (!is_setup_tex_coords_) {
     is_setup_tex_coords_ = true;
+  } else {
+    std::cerr << "MeshRenderer::setupTexCoords is called multiple times on the "
+                 "same object. If the two calls want to set tex_coords up into "
+                 "the same attribute position, then the second call is "
+                 "unneccesary. If they want to set the tex_coords to different "
+                 "attribute positions then the second call would make the "
+                 "first call not work anymore. Either way, calling "
+                 "setupTexCoords multiply times is a design error, that should "
+                 "be avoided.";
+    std::terminate();
   }
 
   // Initialize TexCoords
   for (size_t i = 0; i < entries_.size(); i++) {
-    const aiMesh* paiMesh = scene_->mMeshes[i];
-    entries_[i].materialIndex = paiMesh->mMaterialIndex;
+    const aiMesh* mesh = scene_->mMeshes[i];
+    entries_[i].material_index = mesh->mMaterialIndex;
 
-    std::vector<aiVector2D> texCoordsVector;
+    std::vector<aiVector2D> tex_coords_vector;
 
-    size_t vertNum = paiMesh->mNumVertices;
-    if (paiMesh->HasTextureCoords(texCoordSet)) {
-      texCoordsVector.reserve(vertNum);
+    size_t vertNum = mesh->mNumVertices;
+    if (mesh->HasTextureCoords(texCoordSet)) {
+      tex_coords_vector.reserve(vertNum);
       for (size_t i = 0; i < vertNum; i++) {
-        const aiVector3D& texC = paiMesh->mTextureCoords[texCoordSet][i];
-        texCoordsVector.push_back(aiVector2D(texC.x, texC.y));
+        const aiVector3D& texC = mesh->mTextureCoords[texCoordSet][i];
+        tex_coords_vector.push_back(aiVector2D(texC.x, texC.y));
       }
     } else {
-      texCoordsVector.resize(vertNum);
+      tex_coords_vector.resize(vertNum);
     }
 
     entries_[i].vao.bind();
 
     entries_[i].tex_coords.bind();
-    entries_[i].tex_coords.data(texCoordsVector);
+    entries_[i].tex_coords.data(tex_coords_vector);
     attrib.setup<float>(2).enable();
   }
 
@@ -283,47 +305,49 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
 /// Sets the diffuse textures up to a specified texture unit.
 /** Changes the currently active texture unit and Texture2D binding.
   * @param texture_unit Specifies the texture unit to use for the diffuse textures. */
-void MeshRenderer::setupDiffuseTextures(unsigned short texture_unit) {
-  setupTextures(texture_unit, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
+void MeshRenderer::setupDiffuseTextures(unsigned short texture_unit, bool srbg) {
+  setupTextures(texture_unit, aiTextureType_DIFFUSE,
+                AI_MATKEY_COLOR_DIFFUSE, srbg);
 }
 
 /// Sets the specular textures up to a specified texture unit.
 /** Changes the currently active texture unit and Texture2D binding.
   * @param texture_unit Specifies the texture unit to use for the specular textures. */
 void MeshRenderer::setupSpecularTextures(unsigned short texture_unit) {
-  setupTextures(texture_unit, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR, false);
+  setupTextures(texture_unit, aiTextureType_SPECULAR,
+                AI_MATKEY_COLOR_SPECULAR, false);
 }
 
 /// Renders the mesh.
 /** Changes the currently active VAO and may change the Texture2D binding */
 void MeshRenderer::render() {
   if (!is_setup_positions_) {
-    return;
+    return;  // we can't render the mesh, if we don't have any vertex.
   }
   for (size_t i = 0 ; i < entries_.size(); i++) {
     entries_[i].vao.bind();
 
-    const size_t materialIndex = entries_[i].materialIndex;
+    const size_t material_index = entries_[i].material_index;
 
     if (textures_enabled_) {
       for (auto iter = materials_.begin(); iter != materials_.end(); iter++) {
         auto& material = iter->second;
-        if (material.active == true && materialIndex < scene_->mNumMaterials) {
-          material.textures[materialIndex].active(material.texUnit);
+        if (material.active == true && material_index < scene_->mNumMaterials) {
+          material.textures[material_index].active(material.texUnit);
         }
-        material.textures[materialIndex].bind();
+        material.textures[material_index].bind();
       }
     }
 
-    gl::DrawElements(gl::kTriangles, entries_[i].idxCount, entries_[i].idxType);
+    gl::DrawElements(gl::kTriangles, entries_[i].idx_count, entries_[i].idx_type);
 
     if (textures_enabled_) {
       for (auto iter = materials_.begin(); iter != materials_.end(); iter++) {
         auto& material = iter->second;
-        if (material.active == true && materialIndex < scene_->mNumMaterials) {
-          material.textures[materialIndex].active(material.texUnit);
+        if (material.active == true && material_index < scene_->mNumMaterials) {
+          material.textures[material_index].active(material.texUnit);
         }
-        material.textures[materialIndex].unbind();
+        material.textures[material_index].unbind();
       }
     }
   }
@@ -381,7 +405,7 @@ BoundingBox MeshRenderer::boundingBox(const glm::mat4& matrix) const {
 
 glm::vec4 MeshRenderer::bSphere(const BoundingBox& bbox) const {
   glm::vec3 center = bbox.center(), extent = bbox.extent();
-  return glm::vec4(center, sqrt(glm::dot(extent, extent)) / 2); // Pythagoras.
+  return glm::vec4(center, sqrt(glm::dot(extent, extent)) / 2);  // Pythagoras.
 }
 
 /// Returns the center offseted by the model matrix (as xyz) and radius (as w) of the bounding sphere.
@@ -398,7 +422,7 @@ glm::vec3 MeshRenderer::bSphereCenter() const {
 /// Returns the radius of the bounding sphere.
 float MeshRenderer::bSphereRadius() const {
   glm::vec3 extent = boundingBox().extent();
-  return sqrt(glm::dot(extent, extent)) / 2; // Pythagoras.
+  return sqrt(glm::dot(extent, extent)) / 2;  // Pythagoras.
 }
 
-} // namespace engine
+}  // namespace engine

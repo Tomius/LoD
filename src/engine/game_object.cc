@@ -26,18 +26,18 @@ void GameObject::render2DAll(const Scene& scene) {
   }
 }
 
+void GameObject::screenResizedAll(const Scene& scene, size_t width,
+                                  size_t height) {
+  for (auto& behaviour : components_) {
+    behaviour->screenResizedAll(scene, width, height);
+  }
+  screenResized(scene, width, height);
+}
+
 void GameObject::updateAll(const Scene& scene) {
   for (auto& behaviour : behaviours_) {
     behaviour->updateAll(scene);
   }
-}
-
-void GameObject::screenResizedAll(const Scene& scene, size_t width,
-                                  size_t height) {
-  for (auto& behaviour : behaviours_) {
-    behaviour->screenResizedAll(scene, width, height);
-  }
-  screenResized(scene, width, height);
 }
 
 void GameObject::keyActionAll(const Scene& scene, int key, int scancode,

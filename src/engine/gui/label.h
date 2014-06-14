@@ -5,7 +5,8 @@
 
 #include <string>
 #include "font.h"
-#include "../scene.h"
+#include "../game_engine.h"
+#include "../game_object.h"
 #include "../../oglwrap/smart_enums.h"
 
 namespace engine {

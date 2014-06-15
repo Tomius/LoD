@@ -8,11 +8,12 @@
 #include "./lod_oglwrap_config.h"
 #include "engine/camera.h"
 #include "engine/transform.h"
+#include "engine/behaviour.h"
 #include "engine/mesh/animated_mesh_renderer.h"
 
 #include "./terrain.h"
 
-class CharacterMovement {
+class CharacterMovement : public engine::Behaviour {
   engine::Transform& transform_;
   engine::RigidBody& rigid_body_;
 
@@ -36,6 +37,10 @@ class CharacterMovement {
   std::function<CanDoCallback> can_jump_functor_;
   std::function<CanDoCallback> can_flip_functor_;
 
+  virtual void update(const engine::Scene& scene) override;
+  virtual void keyAction(const engine::Scene& scene, int key, int scancode,
+                         int action, int mods) override;
+
  public:
   CharacterMovement(GLFWwindow* window,
                     engine::Transform& transform,
@@ -50,7 +55,6 @@ class CharacterMovement {
     can_flip_functor_ = can_flip_functor;
   }
 
-  void update(float time);
   void handleSpacePressed();
   void updateHeight(float time);
   bool isJumping() const;

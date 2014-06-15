@@ -60,12 +60,12 @@ MideuScene::MideuScene() {
     Ayumi *ayumi = addGameObject<Ayumi>(window, skybox, shadow);
     ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
 
-    charmove_ = engine::make_unique<CharacterMovement>(window, ayumi->transform,
-                                                       *ayumi->rigid_body);
-    ayumi->charmove(charmove_.get());
+    CharacterMovement *charmove = ayumi->addComponent<CharacterMovement>(
+        window, ayumi->transform, *ayumi->rigid_body);
+    ayumi->charmove(charmove);
   PrintDebugTime();
 
-  charmove_->setAnimation(&ayumi->getAnimation());
+  charmove->setAnimation(&ayumi->getAnimation());
 
   engine::Transform& cam_offset = addGameObject()->transform;
 
@@ -80,7 +80,7 @@ MideuScene::MideuScene() {
       cam_offset.pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
       height_map, 1.5f);
 
-  charmove_->setCamera(cam);
+  charmove->setCamera(cam);
 
   PrintDebugText("Initializing the trees");
     addGameObject<Tree>(height_map, skybox, shadow);

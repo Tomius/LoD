@@ -7,7 +7,6 @@
 #include "./charmove.h"
 
 class MideuScene : public engine::Scene {
-  std::unique_ptr<CharacterMovement> charmove_;
  public:
   MideuScene();
   virtual float gravity() const override { return 18.0f; }

@@ -49,7 +49,8 @@ void CharacterMovement::handleSpacePressed() {
   }
 }
 
-void CharacterMovement::update(float time) {
+void CharacterMovement::update(const engine::Scene& scene) {
+  float time = scene.game_time().current;
   const engine::Camera& cam = *camera_;
   glm::vec2 character_offset = anim_->offsetSinceLastFrame();
 
@@ -129,6 +130,13 @@ void CharacterMovement::update(float time) {
 
   rigid_body_.update();
   updateHeight(time);
+}
+
+void CharacterMovement::keyAction(const engine::Scene&, int key, int scancode,
+                                  int action, int mods) {
+  if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+    handleSpacePressed();
+  }
 }
 
 void CharacterMovement::updateHeight(float time) {

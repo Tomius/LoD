@@ -14,8 +14,6 @@
 #include "./skybox.h"
 #include "./shadow.h"
 
-extern const float GRAVITY;
-
 class Ayumi : public engine::Behaviour {
   engine::AnimatedMeshRenderer mesh_;
   engine::Animation anim_;
@@ -54,8 +52,6 @@ class Ayumi : public engine::Behaviour {
     charmove_->setCanJumpCallback(std::bind(&Ayumi::canJump, this));
     charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
   }
-  virtual void keyAction(const engine::Scene& scene, int key, int scancode,
-                         int action, int mods) override;
   virtual void mouseButtonPressed(const engine::Scene& scene, int button,
                                   int action, int mods) override;
 };

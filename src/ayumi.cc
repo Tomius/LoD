@@ -112,7 +112,6 @@ engine::Animation& Ayumi::getAnimation() {
 
 void Ayumi::update(const engine::Scene& scene) {
   float time = scene.game_time().current;
-  charmove_->update(time);
 
   std::string curr_anim = anim_.getCurrentAnimation();
 
@@ -192,13 +191,6 @@ void Ayumi::render(const engine::Scene& scene) {
   auto cullface = gl::TemporaryEnable(gl::kCullFace);
 
   mesh_.render();
-}
-
-void Ayumi::keyAction(const engine::Scene&, int key, int scancode,
-                                      int action, int mods) {
-  if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-    charmove_->handleSpacePressed();
-  }
 }
 
 bool Ayumi::canJump() {

@@ -91,7 +91,7 @@ class TextField : public engine::Behaviour {
     params.border_color = glm::vec4{1, 1, 1, 1};
     params.border_width = 1;
     params.roundness = 7;
-    params.label_pos = center - glm::vec2(0, 0.5) * extent;
+    params.label_pos = center - glm::vec2(0, 0.6) * extent;
     params.label_text = text;
     params.label_cursor_pos = cursor_pos_;
     box_ = addComponent<Box>(params);

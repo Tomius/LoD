@@ -3,7 +3,8 @@
 #ifndef ENGINE_GUI_BOX_H_
 #define ENGINE_GUI_BOX_H_
 
-#include "label.h"
+#include <string>
+#include "./label.h"
 #include "../../oglwrap/shapes/full_screen_rect.h"
 
 namespace engine {
@@ -14,7 +15,7 @@ struct BoxParams {
   std::wstring label_text = L"";
   Font label_font = Font{};
   glm::vec2 label_pos;
-  size_t label_cursor_pos;
+  size_t label_cursor_pos = -1;
   enum class Style {kFlat, kShaded} style = Style::kFlat;
   glm::vec4 bg_color = glm::vec4{0.5f};
   glm::vec4 bg_top_color = glm::vec4{0.3f, 0.3f, 0.3f, 1};
@@ -29,14 +30,13 @@ struct BoxParams {
 
 class Box : public engine::GameObject {
   BoxParams params_;
+  Label *label_;
 
   gl::FullScreenRectangle rect_;
   gl::Program prog_;
 
-  Label *label_;
-
  public:
-  Box(const BoxParams& params) : params_(params), label_(nullptr) {
+  explicit Box(const BoxParams& params) : params_(params), label_(nullptr) {
     gl::VertexShader vs("box.vert");
     gl::FragmentShader fs("box.frag");
     prog_ << vs << fs;

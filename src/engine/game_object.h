@@ -45,7 +45,6 @@ class GameObject {
     Behaviour* behaviour = dynamic_cast<Behaviour*>(obj);
     if (behaviour) {
       behaviours_.push_back(behaviour);
-      std::cout << "Foo" << std::endl;
     }
 
     return obj;

@@ -99,6 +99,7 @@ void GameEngine::InitContext() {
   GlInit(window_);
 
   glfwSetKeyCallback(window_, KeyCallback);
+  glfwSetCharCallback(window_, CharCallback);
   glfwSetFramebufferSizeCallback(window_, ScreenResizeCallback);
   glfwSetScrollCallback(window_, MouseScrolledCallback);
   glfwSetMouseButtonCallback(window_, MouseButtonPressed);

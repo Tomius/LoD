@@ -25,7 +25,8 @@ class Label : public engine::GameObject {
   std::wstring text_;
 
  public:
-  Label(const std::wstring& text, glm::vec2 pos, const Font& font = Font{})
+  Label(const std::wstring& text, glm::vec2 pos,
+        const Font& font = Font{}, size_t cursor_pos = -1)
       : font_(font), idx_cnt_(0), pos_(pos), text_(text) {
     gl::VertexShader vs("text.vert");
     gl::FragmentShader fs("text.frag");
@@ -33,7 +34,7 @@ class Label : public engine::GameObject {
     (prog_ << vs << fs).link().use();
     gl::Uniform<glm::vec4>(prog_, "uColor") = font.color();
 
-    set_text(text);
+    set_text(text, cursor_pos);
     size_.y = font.size();
   }
 
@@ -78,7 +79,9 @@ class Label : public engine::GameObject {
     std::vector<glm::vec4> attribs_vec;
 
     float pen_x = 0, x0, x1, y0, y1, s0, t0, s1, t1;
-    for (size_t i = 0; i < text_.size(); ++i) {
+    // We have to run to loop for one more than the text size
+    // so we can draw the cursor at end of the text too
+    for (size_t i = 0; i <= text_.size(); ++i) {
       if (i == cursor_pos) {  // Cursor
         // we use the black character (-1) as texture
         texture_glyph_t *glyph = font_.get_glyph(-1);
@@ -106,33 +109,35 @@ class Label : public engine::GameObject {
       }
 
       // The current character (glyph) in the text
-      texture_glyph_t *glyph = font_.get_glyph(text_[i]);
-      if (glyph) {
-        int kerning = 0;
-        if (i > 0) { kerning = texture_glyph_get_kerning(glyph, text_[i-1]); }
+      if (i < text_.size()) {
+        texture_glyph_t *glyph = font_.get_glyph(text_[i]);
+        if (glyph) {
+          int kerning = 0;
+          if (i > 0) { kerning = texture_glyph_get_kerning(glyph, text_[i-1]); }
 
-        pen_x += kerning;
-        x0 = pen_x + glyph->offset_x;
-        y0 = glyph->offset_y;
-        x1 = x0 + glyph->width;
-        y1 = y0 - glyph->height;
-        s0 = glyph->s0;
-        t0 = glyph->t0;
-        s1 = glyph->s1;
-        t1 = glyph->t1;
+          pen_x += kerning;
+          x0 = pen_x + glyph->offset_x;
+          y0 = glyph->offset_y;
+          x1 = x0 + glyph->width;
+          y1 = y0 - glyph->height;
+          s0 = glyph->s0;
+          t0 = glyph->t0;
+          s1 = glyph->s1;
+          t1 = glyph->t1;
 
-        glm::vec4 a(x0, y0, s0, t0), b(x0, y1, s0, t1);
-        glm::vec4 c(x1, y0, s1, t0), d(x1, y1, s1, t1);
+          glm::vec4 a(x0, y0, s0, t0), b(x0, y1, s0, t1);
+          glm::vec4 c(x1, y0, s1, t0), d(x1, y1, s1, t1);
 
-        attribs_vec.push_back(a);
-        attribs_vec.push_back(b);
-        attribs_vec.push_back(c);
+          attribs_vec.push_back(a);
+          attribs_vec.push_back(b);
+          attribs_vec.push_back(c);
 
-        attribs_vec.push_back(d);
-        attribs_vec.push_back(b);
-        attribs_vec.push_back(c);
+          attribs_vec.push_back(d);
+          attribs_vec.push_back(b);
+          attribs_vec.push_back(c);
 
-        pen_x += glyph->advance_x;
+          pen_x += glyph->advance_x;
+        }
       }
     }
 

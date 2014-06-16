@@ -191,10 +191,10 @@ bool CharacterMovement::isDoingFlip() const {
   return flip_;
 }
 
-bool CharacterMovement::isWalking() const {
-  return walking_;
-}
-
 void CharacterMovement::setFlip(bool flip) {
   flip_ = flip;
+}
+
+bool CharacterMovement::isWalking() const {
+  return walking_;
 }

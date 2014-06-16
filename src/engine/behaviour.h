@@ -12,6 +12,7 @@ class Behaviour : public GameObject {
   virtual void update(const Scene& scene) {}
   virtual void keyAction(const Scene& scene, int key, int scancode,
                          int action, int mods) {}
+  virtual void charTyped(const Scene& scene, unsigned codepoint) {}
   virtual void mouseScrolled(const Scene& scene, double xoffset,
                              double yoffset) {}
   virtual void mouseButtonPressed(const Scene& scene, int button,
@@ -31,6 +32,13 @@ class Behaviour : public GameObject {
       component->keyActionAll(scene, key, scancode, action, mods);
     }
     keyAction(scene, key, scancode, action, mods);
+  }
+
+  void charTypedAll(const Scene& scene, unsigned codepoint) {
+    for (auto& behaviour : behaviours_) {
+      behaviour->charTypedAll(scene, codepoint);
+    }
+    charTyped(scene, codepoint);
   }
 
   virtual void mouseScrolledAll(const Scene& scene, double xoffset,

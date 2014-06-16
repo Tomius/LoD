@@ -47,6 +47,12 @@ void GameObject::keyActionAll(const Scene& scene, int key, int scancode,
   }
 }
 
+void GameObject::charTypedAll(const Scene& scene, unsigned codepoint) {
+  for (auto& behaviour : behaviours_) {
+    behaviour->charTypedAll(scene, codepoint);
+  }
+}
+
 void GameObject::mouseScrolledAll(const Scene& scene, double xoffset,
                                   double yoffset) {
   for (auto& behaviour : behaviours_) {

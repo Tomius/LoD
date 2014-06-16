@@ -7,6 +7,7 @@
 #include "engine/gui/label.h"
 #include "engine/gui/box.h"
 #include "engine/gui/button.h"
+#include "engine/gui/text_field.h"
 #include "oglwrap/smart_enums.h"
 
 #include "./mideu_scene.h"
@@ -17,6 +18,7 @@ struct SandboxScene : public engine::Scene {
     using engine::gui::Label;
     using engine::gui::Box;
     using engine::gui::Button;
+    using engine::gui::TextField;
 
     engine::gui::BoxParams params;
     params.center = glm::vec2{0.0f, 0.0f};
@@ -68,6 +70,8 @@ struct SandboxScene : public engine::Scene {
         std::cout << "Wrong pill, sorry. Aborting now." << std::endl;
         std::terminate();
       });
+
+    addGameObject<TextField>(glm::vec2{0.0, -0.8}, glm::vec2{0.05, 0.03}, L"Your name");
   }
 };
 

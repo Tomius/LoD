@@ -9,8 +9,8 @@
 #include "../shadow.h"
 #include "../oglwrap/oglwrap.h"
 
-#include "timer.h"
-#include "camera.h"
+#include "./timer.h"
+#include "./camera.h"
 
 namespace engine {
 
@@ -93,7 +93,7 @@ class Scene {
     }
   }
 
-private:
+ private:
   virtual void update() {
     game_time_.tick();
     environment_time_.tick();
@@ -172,6 +172,12 @@ private:
     }
   }
 
+  virtual void charTyped(unsigned codepoint) {
+    for (auto& i : gameobjects_) {
+      i->charTypedAll(*this, codepoint);
+    }
+  }
+
   virtual void mouseScrolled(double xoffset, double yoffset) {
     if (camera_) {
       camera_->mouseScrolled(camera_time_, xoffset, yoffset);
@@ -203,7 +209,7 @@ private:
   }
 };
 
-} // namespace engine
+}  // namespace engine
 
 
 #endif

@@ -67,6 +67,7 @@ class GameObject {
   virtual void updateAll(const Scene& scene);
   virtual void keyActionAll(const Scene& scene, int key, int scancode,
                             int action, int mods);
+  virtual void charTypedAll(const Scene& scene, unsigned codepoint);
   virtual void mouseScrolledAll(const Scene& scene, double xoffset,
                                 double yoffset);
   virtual void mouseButtonPressedAll(const Scene& scene, int button,

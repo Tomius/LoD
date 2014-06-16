@@ -209,24 +209,22 @@ void TextureSource<T, NUM_COMPONENTS>::upload(gl::Texture2D& tex,
   bool bad_alignment = (w_ * sizeof(T) * NUM_COMPONENTS) % 4 != 0;
   GLint unpack_aligment;
 
-  if(bad_alignment) {
+  if (bad_alignment) {
     glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack_aligment);
     gl::PixelStore(gl::kUnpackAlignment, 1);
   }
 
-  tex.upload(
-    internal_format,
-    w_, h_,
-    format(),
-    type(),
-    data().data()
-  );
+  tex.upload(internal_format,
+             w_, h_,
+             format(),
+             type(),
+             data().data());
 
-  if(bad_alignment) {
+  if (bad_alignment) {
     gl::PixelStore(gl::kUnpackAlignment, unpack_aligment);
   }
 }
 
-} // namespace engine
+}  // namespace engine
 
 #endif

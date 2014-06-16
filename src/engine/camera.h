@@ -19,7 +19,7 @@ namespace engine {
 class Camera : public Transform {
   float fovy_, z_near_, z_far_, width_, height_;
 
-public:
+ public:
   Camera(float fovy, float z_near, float z_far)
       : fovy_(fovy), z_near_(z_near), z_far_(z_far), width_(0), height_(0) {
   }

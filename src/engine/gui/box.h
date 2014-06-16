@@ -14,6 +14,7 @@ struct BoxParams {
   std::wstring label_text = L"";
   Font label_font = Font{};
   glm::vec2 label_pos;
+  size_t label_cursor_pos;
   enum class Style {kFlat, kShaded} style = Style::kFlat;
   glm::vec4 bg_color = glm::vec4{0.5f};
   glm::vec4 bg_top_color = glm::vec4{0.3f, 0.3f, 0.3f, 1};
@@ -49,7 +50,7 @@ class Box : public engine::GameObject {
     gl::Uniform<float>(prog_, "uBorderPixels") = params_.border_width;
     gl::Uniform<float>(prog_, "uRoundness") = params_.roundness;
 
-    if(params_.style == BoxParams::Style::kShaded) {
+    if (params_.style == BoxParams::Style::kShaded) {
       gl::Uniform<glm::vec4>(prog_, "uBgTopColor") = params_.bg_top_color;
       gl::Uniform<glm::vec4>(prog_, "uBgTopMidColor") = params_.bg_top_mid_color;
       gl::Uniform<glm::vec4>(prog_, "uBgBottomMidColor") = params_.bg_bottom_mid_color;
@@ -62,13 +63,13 @@ class Box : public engine::GameObject {
 
     if(!params_.label_text.empty()) {
       label_ = addComponent<Label>(params_.label_text, params_.label_pos,
-                                   params_.label_font);
+                                   params_.label_font, params_.label_cursor_pos);
     }
   }
 
   void set_inverted(bool value) {
     prog_.use();
-    if(value) {
+    if (value) {
       gl::Uniform<glm::vec4>(prog_, "uBgTopColor") = params_.bg_top_mid_color;
       gl::Uniform<glm::vec4>(prog_, "uBgTopMidColor") = params_.bg_top_color;
       gl::Uniform<glm::vec4>(prog_, "uBgBottomMidColor") = params_.bg_bottom_color;
@@ -85,12 +86,12 @@ class Box : public engine::GameObject {
     return label_ ? label_->text() : L"";
   }
 
-  void set_text(const std::wstring& text) {
-    if(label_) {
-      label_->set_text(text);
+  void set_text(const std::wstring& text, size_t cursor_pos = -1) {
+    if (label_) {
+      label_->set_text(text, cursor_pos);
     } else {
       label_ = addComponent<Label>(text, params_.label_pos,
-                                   params_.label_font);
+                                   params_.label_font, cursor_pos);
     }
   }
 

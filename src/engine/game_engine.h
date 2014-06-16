@@ -68,13 +68,17 @@ class GameEngine {
   static void KeyCallback(GLFWwindow* window, int key, int scancode,
                           int action, int mods);
 
+  static void CharCallback(GLFWwindow* window, unsigned codepoint) {
+    scene_->charTyped(codepoint);
+  }
+
   static void ScreenResizeCallback(GLFWwindow* window, int width, int height) {
     gl::Viewport(width, height);
     scene_->screenResized(width, height);
   }
 
   static void MouseScrolledCallback(GLFWwindow* window, double xoffset,
-                                                        double yoffset) {
+                                    double yoffset) {
     scene_->mouseScrolled(xoffset, yoffset);
   }
 

@@ -71,17 +71,11 @@ endif
 ifneq ($(MAKECMDGOALS),clean)
 $(shell $(MAKE) -f .MakefileObjsTotal)
 $(shell echo 0 > $(OBJ_DIR)/objs_current)
+$(shell rm -rf .lockdir)
 endif
 
-#read_obj_current = while ! mkdir .lockdir; do echo a >/dev/null; done; cat .obj/objs_current; rm -r .lockdir
-inc_objs_pcnt = @echo $$((`cat $(OBJ_DIR)/objs_current` + 1)) > $(OBJ_DIR)/objs_current
-get_objs_pcnt_helper = \( `cat $(OBJ_DIR)/objs_current` + 1 \) \* 100 / \( `cat $(OBJ_DIR)/objs_total` + 1 \)
-get_objs_pcnt_helper2 = $(shell expr $(call get_objs_pcnt_helper))
-get_objs_pcnt = $(shell printf [%3d%%] $(call get_objs_pcnt_helper2))
-
 %.o:
-	$(call inc_objs_pcnt)
-	$(call printf,$(call get_objs_pcnt) ,Building CXX object $@,$(GREEN))
+	$(call printf,$(shell ./.make_get_progress.sh) ,Building CXX object $@,$(GREEN))
 
 	@ # One of the depencies changed, which probably introduced new dependencies,
 	@ # that we don't depend on now. So if a new header is included from a header,

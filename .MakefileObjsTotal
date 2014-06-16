@@ -1,0 +1,20 @@
+SRC_DIR = src
+OBJ_DIR = .obj
+
+CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
+OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
+DEPS := $(OBJECTS:.o=.d)
+
+.PHONY: all
+
+all: $(OBJECTS)
+
+$(shell mkdir -p $(OBJ_DIR))
+$(shell echo 0 > $(OBJ_DIR)/objs_total)
+
+-include $(DEPS)
+
+%.d:
+
+%.o:
+	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total

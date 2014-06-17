@@ -1,5 +1,9 @@
 SRC_DIR = src
 OBJ_DIR = .obj
+PRECOMPILED_HEADER_SRC = $(SRC_DIR)/engine/oglwrap_all.h
+CXX_PRECOMPILED_HEADER_EXTENSION = pch
+PRECOMPILED_HEADER = $(PRECOMPILED_HEADER_SRC).$(CXX_PRECOMPILED_HEADER_EXTENSION)
+PRECOMPILED_HEADER_DEP = $(subst $(SRC_DIR),$(OBJ_DIR),$(PRECOMPILED_HEADER).d)
 
 CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
 OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
@@ -7,14 +11,25 @@ DEPS := $(OBJECTS:.o=.d)
 
 .PHONY: all
 
-all: $(OBJECTS)
+all: $(PRECOMPILED_HEADER) $(OBJECTS)
+
+-include $(DEPS)
+-include $(PRECOMPILED_HEADER_DEP)
 
 $(shell mkdir -p $(OBJ_DIR))
 $(shell echo 0 > $(OBJ_DIR)/objs_total)
 
--include $(DEPS)
-
 %.d:
+%.h:
+%.hpp:
+%.inl:
+Makefile:
+	touch $@
 
 %.o:
 	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total
+
+$(PRECOMPILED_HEADER):
+	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total
+
+

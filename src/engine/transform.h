@@ -29,8 +29,7 @@ class Transformation {
  public:
   Transformation()
       : parent_(nullptr)
-      , scale_(1, 1, 1)
-  { }
+      , scale_(1, 1, 1) { }
 
   virtual ~Transformation() {}
 

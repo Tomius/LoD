@@ -17,37 +17,42 @@ namespace engine {
 namespace gui {
 
 class TextField : public engine::Behaviour {
+  glm::vec2 pos_, extent_;
   Box *box_;
   size_t cursor_pos_;
   std::wstring text_;
-  bool cursor_visible_, modified_;
+  bool cursor_visible_, modified_, mouse_over_, focused_;
   float visiblity_time_;
 
   virtual void update(const Scene& scene) override {
-    if (modified_) {
-      visiblity_time_ = 0;
+    if (!focused_) {
+      box_->set_text(text_, -1);
     } else {
-      visiblity_time_ += scene.game_time().dt;
-    }
-
-    if (fmod(visiblity_time_, 1.0) < 0.5) {
-      if (!cursor_visible_ || modified_) {
-        box_->set_text(text_, cursor_pos_);
-        cursor_visible_ = true;
-        modified_ = false;
+       if (modified_) {
+        visiblity_time_ = 0;
+      } else {
+        visiblity_time_ += scene.game_time().dt;
       }
-    } else {
-      if (cursor_visible_ || modified_) {
-        box_->set_text(text_, -1);
-        cursor_visible_ = false;
-        modified_ = false;
+
+      if (fmod(visiblity_time_, 1.0) < 0.5) {
+        if (!cursor_visible_ || modified_) {
+          box_->set_text(text_, cursor_pos_);
+          cursor_visible_ = true;
+          modified_ = false;
+        }
+      } else {
+        if (cursor_visible_ || modified_) {
+          box_->set_text(text_, -1);
+          cursor_visible_ = false;
+          modified_ = false;
+        }
       }
     }
   }
 
   virtual void keyAction(const Scene& scene, int key, int scancode,
                          int action, int mods) override {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+    if (focused_ && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
       switch (key) {
         case GLFW_KEY_BACKSPACE: {
           if (cursor_pos_ > 0) {
@@ -74,15 +79,39 @@ class TextField : public engine::Behaviour {
   }
 
   virtual void charTyped(const Scene& scene, unsigned codepoint) override {
-    text_.insert(cursor_pos_, 1, codepoint);
-    cursor_pos_++;
-    modified_ = true;
+    if (focused_) {
+      text_.insert(cursor_pos_, 1, codepoint);
+      cursor_pos_++;
+      modified_ = true;
+    }
+  }
+
+  virtual void mouseMoved(const Scene& scene, double xpos, double ypos) override {
+    glm::vec2 window_size_2 = GameEngine::window_size() / 2.0f;
+    glm::vec2 ndc_pos = (glm::vec2(xpos, ypos) - window_size_2) / window_size_2;
+    ndc_pos.y *= -1;
+
+    if (pos_.x - extent_.x < ndc_pos.x && ndc_pos.x < pos_.x + extent_.x &&
+       pos_.y - extent_.y < ndc_pos.y && ndc_pos.y < pos_.y + extent_.y) {
+      box_->set_inverted(true);
+      mouse_over_ = true;
+    } else {
+      box_->set_inverted(false);
+      mouse_over_ = false;
+    }
+  }
+
+  virtual void mouseButtonPressed(const Scene& scene, int button,
+                                  int action, int mods) override {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+      focused_ = mouse_over_;
+    }
   }
 
  public:
   TextField(glm::vec2 center, glm::vec2 extent, const std::wstring& text)
-      : cursor_pos_(text.size()), text_(text)
-      , cursor_visible_(false), modified_(false) {
+      : pos_(center), extent_(extent), cursor_pos_(text.size()), text_(text)
+      , cursor_visible_(false), modified_(false), focused_(false) {
     BoxParams params;
     params.center = center;
     params.extent = extent;

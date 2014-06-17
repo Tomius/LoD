@@ -2,8 +2,8 @@
 
 #define OGLWRAP_INSTANTIATE 1
 #include "../lod_oglwrap_config.h"
-#include <GLFW/glfw3.h>
 #include <string>
+#include <GLFW/glfw3.h>
 
 #include "../oglwrap/smart_enums.h"
 #include "./game_engine.h"

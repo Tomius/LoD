@@ -3,6 +3,7 @@
 #ifndef ENGINE_GUI_BUTTON_H_
 #define ENGINE_GUI_BUTTON_H_
 
+#include <vector>
 #include "../behaviour.h"
 #include "./box.h"
 
@@ -21,7 +22,7 @@ class Button : public engine::Behaviour {
     glm::vec2 ndc_pos = (glm::vec2(xpos, ypos) - window_size_2) / window_size_2;
     ndc_pos.y *= -1;
 
-    if(pos_.x - extent_.x < ndc_pos.x && ndc_pos.x < pos_.x + extent_.x &&
+    if (pos_.x - extent_.x < ndc_pos.x && ndc_pos.x < pos_.x + extent_.x &&
        pos_.y - extent_.y < ndc_pos.y && ndc_pos.y < pos_.y + extent_.y) {
       box_->set_inverted(true);
       mouse_over_ = true;
@@ -33,8 +34,8 @@ class Button : public engine::Behaviour {
 
   virtual void mouseButtonPressed(const Scene& scene, int button,
                                   int action, int mods) override {
-    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && mouse_over_) {
-      for(const auto& callback : on_press_callback_) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && mouse_over_) {
+      for (const auto& callback : on_press_callback_) {
         callback();
       }
     }
@@ -44,7 +45,6 @@ class Button : public engine::Behaviour {
   Button(glm::vec2 pos, glm::vec2 extent, const std::wstring& text,
          glm::vec4 color, glm::vec4 font_color, int roundness = 7)
       : pos_(pos), extent_(extent), mouse_over_(false) {
-
     BoxParams params;
     params.center = pos;
     params.extent = extent;
@@ -72,7 +72,7 @@ class Button : public engine::Behaviour {
   }
 };
 
-} // namespace gui
-} // namespace engine
+}  // namespace gui
+}  // namespace engine
 
 #endif

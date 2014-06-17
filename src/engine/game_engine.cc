@@ -1,6 +1,8 @@
 // Copyright (c) 2014, Tamas Csala
 
-#define OGLWRAP_INSTANTIATE 1
+#ifndef OGLWRAP_INSTANTIATE
+  #define OGLWRAP_INSTANTIATE 1
+#endif
 #include "../lod_oglwrap_config.h"
 #include <string>
 #include <GLFW/glfw3.h>

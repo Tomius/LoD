@@ -10,7 +10,7 @@ namespace engine {
 
 // An interface to get data from a heightmap
 class HeightMapInterface {
-public:
+ public:
   virtual ~HeightMapInterface() {}
 
   // The width and height of the texture (not the size of the heightmap)
@@ -77,8 +77,6 @@ public:
   virtual glm::dvec2 getMinMaxOfArea(int x, int y, int w, int h) const;
 };
 
-
-}
-
+}  // namespace engine
 
 #endif

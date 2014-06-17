@@ -7,7 +7,7 @@
 #include "engine/camera.h"
 #include "engine/transform.h"
 #include "engine/behaviour.h"
-#include "engine/mesh/animated_mesh_renderer.h"
+#include "engine/mesh/animation.h"
 
 #include "./terrain.h"
 

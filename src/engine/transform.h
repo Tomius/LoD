@@ -15,7 +15,6 @@ namespace engine {
 
 template<typename T, glm::precision P = glm::precision::highp>
 class Transformation {
-
   using vec3 = glm::detail::tvec3<T, P>;
   using vec4 = glm::detail::tvec4<T, P>;
   using mat3 = glm::detail::tmat3x3<T, P>;
@@ -27,8 +26,7 @@ class Transformation {
   vec3 pos_, scale_;
   quat rot_;
 
-public:
-
+ public:
   Transformation()
       : parent_(nullptr)
       , scale_(1, 1, 1)
@@ -58,7 +56,7 @@ public:
 
   class WorldSpacePositionProxy : public vec3 {
     Transformation& tf;
-  public:
+   public:
     WorldSpacePositionProxy(Transformation& tf)
       : vec3(tf.pos()), tf(tf) { }
 
@@ -101,7 +99,7 @@ public:
 
   class WorldSpaceScaleProxy : public vec3 {
     Transformation& tf;
-  public:
+   public:
     WorldSpaceScaleProxy(Transformation& tf)
       : vec3(tf.scale()), tf(tf) { }
 
@@ -142,7 +140,7 @@ public:
 
   class WorldSpaceRotationProxy : public quat {
     Transformation& tf;
-  public:
+   public:
     WorldSpaceRotationProxy(Transformation& tf)
       : quat(tf.rot()), tf(tf) { }
 
@@ -284,6 +282,6 @@ public:
 
 using Transform = Transformation<float, glm::precision::highp>;
 
-}
+}  // namespace engine
 
 #endif

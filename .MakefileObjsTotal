@@ -11,25 +11,27 @@ DEPS := $(OBJECTS:.o=.d)
 
 .PHONY: all
 
-all: $(PRECOMPILED_HEADER) $(OBJECTS)
-
--include $(DEPS)
--include $(PRECOMPILED_HEADER_DEP)
+all: $(OBJECTS) $(PRECOMPILED_HEADER)
 
 $(shell mkdir -p $(OBJ_DIR))
 $(shell echo 0 > $(OBJ_DIR)/objs_total)
+-include $(DEPS)
+-include $(PRECOMPILED_HEADER_DEP)
 
 %.d:
 %.h:
 %.hpp:
 %.inl:
-Makefile:
-	touch $@
+
+.MakefileObjsTotal:
+	@touch $@
 
 %.o:
 	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total
 
 $(PRECOMPILED_HEADER):
-	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total
+	@echo $$(($(words $(OBJECTS)) + 1)) > $(OBJ_DIR)/objs_total
+
+
 
 

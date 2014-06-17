@@ -59,12 +59,18 @@ nocolor: $(BINARY)
 release: $(BINARY)
 
 clean:
-	@rm -f $(BINARY) -rf $(OBJ_DIR) -f $(PRECOMPILED_HEADER) -f $(PRECOMPILED_HEADER_INSTANTIATE)
+	@rm -f $(BINARY) -rf $(OBJ_DIR) -f $(PRECOMPILED_HEADER)
 
-ifneq ($(MAKECMDGOALS),clean)
-$(shell mkdir -p $(OBJ_DIR))
-$(shell echo 0 > $(OBJ_DIR)/objs_current)
-$(shell rm -f $(OBJ_DIR)/deps)
+ifneq ($(MAKECMDGOALS),clean) # don't create .d files just to remove them...
+$(shell rm -f $(OBJ_DIR)/deps)						# Remove the file used to sign the first .d file
+$(shell rm -rf .lockdir)									# Reset the lock for .make_get_progress.sh
+$(shell mkdir -p $(OBJ_DIR))							# Make OBJ_DIR for a helper file
+$(shell echo 0 > $(OBJ_DIR)/objs_current) # Reset the built object counter
+$(shell $(MAKE) -f .MakefileObjsTotal) 		# Count the number of objects to be built
+
+# include the dependency files
+-include $(DEPS)
+-include $(PRECOMPILED_HEADER_DEP)
 endif
 
 # The dependency list files
@@ -79,43 +85,16 @@ endif
 	@ # create the dependency list using clang -MM
 	@ $(CXX) $(CXXFLAGS) -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.d=.cc)) -MT $(@:.d=.o) -MF $@
 
-ifneq ($(MAKECMDGOALS),clean) # don't create .d files just to remove them...
--include $(DEPS)
-endif
-
 # We need a dep list for the precompiled header too
 $(PRECOMPILED_HEADER_DEP):
 	@ if [ ! -f $(OBJ_DIR)/deps ]; then touch $(OBJ_DIR)/deps; $(call printf,[  0%] ,Calculating CXX dependencies,$(YELLOW)); fi;
 	@ if [ ! -f $@ ]; then mkdir -p $(dir $@); touch $(@:.d=.d2); fi;
 	@ $(CXX) $(CXXFLAGS) -x c++-header -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION).d=)) -MT $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.d=)) -MF $@
 
-ifneq ($(MAKECMDGOALS),clean)
--include $(PRECOMPILED_HEADER_DEP)
-endif
-
-# Count the number of objects to be built
-ifneq ($(MAKECMDGOALS),clean)
-$(shell $(MAKE) -f .MakefileObjsTotal)
-$(shell rm -f $(OBJ_DIR)/deps)
-$(shell rm -rf .lockdir)
-endif
-
 $(PRECOMPILED_HEADER):
 	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building CXX precompiled header $@,$(CYAN))
 	@ if [ -f $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2 ]; then rm $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2;	else rm -f $(subst $(SRC_DIR),$(OBJ_DIR),$@).d; fi;
 	@ $(CXX) $(CXXFLAGS) -x c++-header $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -o $@
-
-# The precompiled headers depend on other headers and we need rules for them too
-# or else the makefile will go full retard, try to build the headers as they
-# object files, and will explode on circular dependencies
-%.h:
-%.hpp:
-%.inl:
-
-# I'm not quite sure about why does the makefile want to build itself
-# (it seems that PRECOMPILED_HEADER has Makefile as dependency)
-Makefile:
-	@ touch $@
 
 %.o: $(PRECOMPILED_HEADER)
 	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building CXX object $@,$(GREEN))
@@ -139,3 +118,15 @@ Makefile:
 $(BINARY): $(OBJECTS)
 	@ $(call printf,[100%] ,Linking CXX executable $@,$(BOLD)$(RED))
 	@ $(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
+
+# The precompiled headers depend on other headers and we need rules for them too
+# or else the makefile will go full retard, try to build the headers as they
+# object files, and will explode on circular dependencies
+%.h:
+%.hpp:
+%.inl:
+
+# I'm not quite sure about why does the makefile want to build itself
+# (it seems that PRECOMPILED_HEADER has Makefile as dependency)
+Makefile:
+	@ touch $@

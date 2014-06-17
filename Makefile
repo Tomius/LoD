@@ -61,12 +61,12 @@ release: $(BINARY)
 clean:
 	@rm -f $(BINARY) -rf $(OBJ_DIR) -f $(PRECOMPILED_HEADER)
 
-ifneq ($(MAKECMDGOALS),clean) # don't create .d files just to remove them...
-$(shell rm -f $(OBJ_DIR)/deps)						# Remove the file used to sign the first .d file
-$(shell rm -rf .lockdir)									# Reset the lock for .make_get_progress.sh
-$(shell mkdir -p $(OBJ_DIR))							# Make OBJ_DIR for a helper file
-$(shell echo 0 > $(OBJ_DIR)/objs_current) # Reset the built object counter
-$(shell $(MAKE) -f .MakefileObjsTotal) 		# Count the number of objects to be built
+ifneq ($(MAKECMDGOALS),clean) 						# don't create .d files just to remove them...
+$(shell mkdir -p $(OBJ_DIR))							# make OBJ_DIR for a helper file
+$(shell echo 0 > $(OBJ_DIR)/objs_current) # reset the built object counter
+$(shell $(MAKE) -f .MakefileObjsTotal) 		# count the number of objects to be built
+$(shell rm -rf $(OBJ_DIR)/deps)						# remove the dir used to sign the first .d file
+$(shell rm -rf .lockdir)									# reset the lock for .make_get_progress.sh
 
 # include the dependency files
 -include $(DEPS)
@@ -76,7 +76,7 @@ endif
 # The dependency list files
 %.d:
 	@ # print some text for the user if its the first .d file
-	@ if [ ! -f $(OBJ_DIR)/deps ]; then touch $(OBJ_DIR)/deps; $(call printf,[  0%] ,Calculating CXX dependencies,$(YELLOW)); fi;
+	@ if mkdir $(OBJ_DIR)/deps 2> /dev/null; then $(call printf,[  0%] ,Calculating CXX dependencies,$(YELLOW)); fi;
 
 	@ # if the file doesn't exist, create its directory,
 	@ # else create a .d2 file to sign, that we have just created it (see %.o)
@@ -127,6 +127,6 @@ $(BINARY): $(OBJECTS)
 %.inl:
 
 # I'm not quite sure about why does the makefile want to build itself
-# (it seems that PRECOMPILED_HEADER has Makefile as dependency)
+# (it seems like PRECOMPILED_HEADER has Makefile as dependency)
 Makefile:
 	@ touch $@

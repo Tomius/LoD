@@ -48,7 +48,7 @@ MideuScene::MideuScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the shadow maps");
-    Shadow *shadow = addShadow(512, 4, 4);
+    Shadow *shadow = addShadow(512, 1, 1);
   PrintDebugTime();
 
   PrintDebugText("Initializing the terrain");

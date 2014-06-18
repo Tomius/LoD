@@ -61,12 +61,13 @@ release: $(BINARY)
 clean:
 	@rm -f $(BINARY) -rf $(OBJ_DIR) -f $(PRECOMPILED_HEADER)
 
-ifneq ($(MAKECMDGOALS),clean) 						# don't create .d files just to remove them...
-$(shell mkdir -p $(OBJ_DIR))							# make OBJ_DIR for a helper file
-$(shell echo 0 > $(OBJ_DIR)/objs_current) # reset the built object counter
-$(shell $(MAKE) -f .MakefileObjsTotal) 		# count the number of objects to be built
-$(shell rm -rf $(OBJ_DIR)/deps)						# remove the dir used to sign the first .d file
-$(shell rm -rf .lockdir)									# reset the lock for .make_get_progress.sh
+ifneq ($(MAKECMDGOALS),clean) 						 # don't create .d files just to remove them...
+$(shell mkdir -p $(OBJ_DIR))							 # make OBJ_DIR for a helper file
+$(shell echo 0 > $(OBJ_DIR)/objs_current)  # reset the built object counter
+$(shell touch .MakefileObjsTotal) 				 # force the helper makefile to always run
+$(shell $(MAKE) -f .MakefileObjsTotal all) # count the number of objects to be built
+$(shell rm -rf $(OBJ_DIR)/deps)						 # remove the dir used to sign the first .d file
+$(shell rm -rf .lockdir)									 # reset the lock for .make_get_progress.sh
 
 # include the dependency files
 -include $(DEPS)

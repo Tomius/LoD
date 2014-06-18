@@ -15,10 +15,7 @@ $(shell echo 0 > $(OBJ_DIR)/objs_total)
 
 .PHONY: all
 
-all: $(PRECOMPILED_HEADER) $(OBJECTS) $(OBJ_DIR) .MakefileObjsTotal
-
-$(OBJ_DIR):
-	@mkdir -p $(OBJ_DIR)
+all: $(PRECOMPILED_HEADER) $(OBJECTS) .MakefileObjsTotal
 
 $(PRECOMPILED_HEADER) $(OBJECTS):
 	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total

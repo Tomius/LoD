@@ -9,28 +9,23 @@ CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
 OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
 DEPS := $(OBJECTS:.o=.d)
 
-.PHONY: all
-
-all: $(OBJECTS) $(PRECOMPILED_HEADER)
-
 $(shell mkdir -p $(OBJ_DIR))
-$(shell echo 0 > $(OBJ_DIR)/objs_total)
 -include $(DEPS)
 -include $(PRECOMPILED_HEADER_DEP)
 
-%.d:
-%.h:
-%.hpp:
-%.inl:
+.PHONY: all
 
-.MakefileObjsTotal:
-	@touch $@
-
-%.o:
-	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total
+all: $(PRECOMPILED_HEADER) $(OBJECTS)
+	@echo $(words $?) > $(OBJ_DIR)/objs_total
 
 $(PRECOMPILED_HEADER):
-	@echo $$(($(words $(OBJECTS)) + 1)) > $(OBJ_DIR)/objs_total
+$(OBJECTS):
+%:
+
+
+
+
+
 
 
 

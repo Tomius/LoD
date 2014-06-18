@@ -90,7 +90,7 @@ endif
 
 # We need a dep list for the precompiled header too
 $(PRECOMPILED_HEADER_DEP):
-	@ #if [ ! -f $(OBJ_DIR)/deps ]; then touch $(OBJ_DIR)/deps; $(call printf,[  0%] ,Calculating CXX dependencies,$(YELLOW)); fi;
+	@ if mkdir $(OBJ_DIR)/deps 2> /dev/null; then $(call printf,[  0%] ,Calculating CXX dependencies,$(YELLOW)); fi;
 	@ if [ ! -f $@ ]; then mkdir -p $(dir $@); touch $(@:.d=.d2); fi;
 	@ $(CXX) $(CXXFLAGS) -x c++-header -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION).d=)) -MT $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.d=)) -MF $@
 

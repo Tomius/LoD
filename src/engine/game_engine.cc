@@ -114,8 +114,7 @@ void GameEngine::Run() {
     glfwPollEvents();
   }
 
-  glfwDestroyWindow(window_);
-  glfwTerminate();
+  Destroy();
 }
 
 void GameEngine::KeyCallback(GLFWwindow* window, int key, int scancode,

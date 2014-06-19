@@ -17,6 +17,11 @@ $(shell echo 0 > $(OBJ_DIR)/objs_total)
 
 all: $(PRECOMPILED_HEADER) $(OBJECTS) .MakefileObjsTotal
 
-$(PRECOMPILED_HEADER) $(OBJECTS):
+$(OBJECTS):
 	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total
+
+$(PRECOMPILED_HEADER):
+	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total
+	@rm -f $(OBJECTS) # have to rebuild every object
+
 %:

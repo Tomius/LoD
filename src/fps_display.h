@@ -17,7 +17,7 @@ class FpsDisplay : public engine::Behaviour {
     static int calls = 0;
 
     calls++;
-    accum_time += scene.game_time().dt;
+    accum_time += scene.camera_time().dt;
     if (accum_time > refresh_interval) {
       label_->set_text(L"FPS: " +
         std::to_wstring(int(calls * (1.0f/accum_time))));

@@ -37,7 +37,7 @@ vec3 SkyColor(vec3 look_dir) {
 
   // Counting the day_color
   {
-    float sun_power = clamp(sun_pos.y + 0.12, 0, 1);
+    float sun_power = clamp(sun_pos.y + 0.12, 0.1, 1);
     float look_dir_sun_dist =
           max(dot(look_dir, sun_pos), 0.0) + 0.003 * sqrt(atm_size);
 
@@ -59,14 +59,14 @@ vec3 SkyColor(vec3 look_dir) {
         pow(min(look_dir_sun_dist + 0.001 * atm_size, 1.0),
             1024.0 / sqr(atm_size)) +
         // The yellow and red tone of the sky at sunset / sunrise
-        atm_color * (look_dir_sun_dist / (1.0 + pow(3.0 * sun_power, 8.0))) * pow(atm_size, 0.6) * 0.5;
+        atm_color * (look_dir_sun_dist / (0.7 + pow(2.9 * sun_power, 4.0))) * pow(atm_size, 0.6) * 0.5;
 
     day_color = air + sun;
   }
 
   // Counting the night_color
   {
-    float moon_power = 0.25 * clamp(moon_pos.y + 0.12, 0, 1);
+    float moon_power = 0.25 * clamp(moon_pos.y + 0.12, 0.1, 1);
     float look_dir_moon_dist = max(dot(look_dir, moon_pos), 0.0)
                               + 0.0005 * sqrt(atm_size);
 
@@ -75,8 +75,8 @@ vec3 SkyColor(vec3 look_dir) {
 
     vec3 air =
       // The sky's base color.
-      0.256 * min(0.5 * kAirColor * sqrt(pow(moon_power, 0.25) * pow(atm_size, 0.75) + 0.05),
-                  0.5 * vec3(moon_power)) +
+      0.256 * min(kAirColor * sqrt(pow(moon_power, 0.25) * pow(atm_size, 0.75) + 0.05),
+                  vec3(moon_power)) +
       // The scattering effect near the Moon
       vec3(0.2) * pow(min(look_dir_moon_dist + 0.001 * atm_size, 1.0),
                           1024.0 / sqr(atm_size));

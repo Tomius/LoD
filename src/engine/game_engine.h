@@ -14,9 +14,9 @@ class GameEngine {
   static void InitContext();
 
   static void Destroy() {
+    delete scene_;
     glfwDestroyWindow(window_);
     glfwTerminate();
-    delete scene_;
   }
 
   // Replaces the current scene with a new one, of the specified type.

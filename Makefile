@@ -120,6 +120,7 @@ $(PRECOMPILED_HEADER_DEP):
 
 $(PRECOMPILED_HEADER):
 	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building CXX precompiled header $@,$(CYAN))
+	@ rm -f $(PRECOMPILED_HEADER)-*
 	@ if [ -f $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2 ]; then rm $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2;	else $(CXX) $(CXXFLAGS) -x c++-header -MM $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -MT $@ -MF $(subst $(SRC_DIR),$(OBJ_DIR),$@).d; touch $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2; fi;
 	@ $(CXX) $(CXXFLAGS) -x c++-header $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -o $@
 

@@ -37,22 +37,10 @@ void main() {
   vec4 color = texture2D(uDiffuseTexture, vTexCoord);
   bool is_leaf = color.g > (color.r + color.b) / 2;
 
-  if (w_sun_dir.y > 0) {
-    float diffuse_power = max(dot(w_vNormal, w_sun_dir), 0);
-    if(is_leaf) {
-      diffuse_power = SunPower()/8 + diffuse_power/3;
-    }
-    diffuse_power *= pow(SunPower(), 0.3);
-    lighting = SunColor() * (diffuse_power + AmbientPower());
-  } else {
-    float diffuse_power = max(dot(w_vNormal, w_sun_dir), 0);
-    if(is_leaf) {
-      diffuse_power = MoonPower()/8 + diffuse_power/3;
-    }
-    diffuse_power *= pow(MoonPower(), 0.3);
-    lighting = MoonColor() * (diffuse_power + AmbientPower());
-  }
+  vec3 ground_color = vec3(0.1) + SunPower()*SunColor()/4 + MoonPower()*MoonColor()/8;
+  vec3 sky_color = 3*ground_color + vec3(0.1, 0.1, 0.3);
 
+  lighting = mix(ground_color, sky_color, clamp(w_vNormal.y, 0, 1));
 
   vec3 final_color = color.rgb * lighting;
 

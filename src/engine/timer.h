@@ -3,6 +3,7 @@
 #ifndef ENGINE_TIMER_H_
 #define ENGINE_TIMER_H_
 
+#include "./oglwrap_config.h"
 #include <GLFW/glfw3.h>
 
 namespace engine {
@@ -10,6 +11,7 @@ namespace engine {
 class Timer {
   double last_time_;
   bool stopped_;
+
  public:
   double current, dt;
 
@@ -18,10 +20,10 @@ class Timer {
   double tick() {
     if (!stopped_) {
       double time = glfwGetTime();
-      if(last_time_ != 0) {
+      if (last_time_ != 0) {
         dt = time - last_time_;
         // we don't want to take really big bursts into account.
-        if(dt > 0.5) {
+        if (dt > 0.5) {
           dt = 0;
         }
       }
@@ -50,7 +52,6 @@ class Timer {
   }
 };
 
-}
-
+}  // namespace engine
 
 #endif

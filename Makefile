@@ -52,16 +52,21 @@ else
 	printf = /bin/echo -e "$(1)$(3)$(subst $(OBJ_DIR)/,,$(2))$(NORMAL)"
 endif
 
-.PHONY: all clean nocolor release
+.PHONY: all debug release nocolor clean clean_deps
 
 all: $(BINARY)
+debug: $(BINARY)
 nocolor: $(BINARY)
 release: $(BINARY)
 
 clean:
 	@rm -f $(BINARY) -rf $(OBJ_DIR) -f $(PRECOMPILED_HEADER)
 
+clean_deps:
+	@find $(OBJ_DIR) -name '*.d*' | xargs rm -f
+
 ifneq ($(MAKECMDGOALS),clean) 						 # don't create .d files just to remove them...
+ifneq ($(MAKECMDGOALS),clean_deps)
 $(shell mkdir -p $(OBJ_DIR))							 # make OBJ_DIR for a helper file
 $(shell echo 0 > $(OBJ_DIR)/objs_current)  # reset the built object counter
 $(shell touch .MakefileObjsTotal) 				 # force the helper makefile to always run
@@ -72,6 +77,7 @@ $(shell rm -rf .lockdir)									 # reset the lock for .make_get_progress.sh
 # include the dependency files
 -include $(DEPS)
 -include $(PRECOMPILED_HEADER_DEP)
+endif
 endif
 
 # The dependency list files
@@ -129,3 +135,4 @@ $(BINARY): $(OBJECTS)
 	@ $(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
 %:
+	@

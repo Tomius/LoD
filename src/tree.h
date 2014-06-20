@@ -3,16 +3,15 @@
 #ifndef LOD_TREE_H_
 #define LOD_TREE_H_
 
-#include "./lod_oglwrap_config.h"
-#include "oglwrap/shader.h"
-#include "oglwrap/uniform.h"
+#include <vector>
 
+#include "engine/oglwrap_config.h"
 #include "engine/game_object.h"
 #include "engine/mesh/mesh_renderer.h"
 
-#include "charmove.h"
-#include "skybox.h"
-#include "shadow.h"
+#include "./charmove.h"
+#include "./skybox.h"
+#include "./shadow.h"
 #include "engine/height_map_interface.h"
 
 class Tree : public engine::GameObject {
@@ -40,7 +39,7 @@ class Tree : public engine::GameObject {
 
   std::vector<TreeInfo> trees_;
 
-public:
+ public:
   Tree(const engine::HeightMapInterface& height_map, Skybox *skybox, Shadow *shadow);
   virtual ~Tree() {}
   virtual void shadowRender(const engine::Scene& scene) override;

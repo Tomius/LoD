@@ -5,7 +5,7 @@
 
 #include "skybox.h"
 #include "shadow.h"
-#include "./lod_oglwrap_config.h"
+#include "engine/oglwrap_config.h"
 
 #include "engine/game_object.h"
 #include "engine/height_map.h"

@@ -6,7 +6,7 @@
 #include <string>
 #include <functional>
 
-#include "../../lod_oglwrap_config.h"
+#include "../oglwrap_config.h"
 #include "../../oglwrap/uniform.h"
 
 #include "./mesh_renderer.h"

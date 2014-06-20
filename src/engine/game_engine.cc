@@ -1,7 +1,8 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "../lod_oglwrap_config.h"
 #include <string>
+
+#include "./oglwrap_config.h"
 #include <GLFW/glfw3.h>
 
 #include "../oglwrap/smart_enums.h"

@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "../../lod_oglwrap_config.h"
+#include "../oglwrap_config.h"
 #include "../../oglwrap/smart_enums.h"
 
 #include "./box.h"

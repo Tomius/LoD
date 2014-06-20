@@ -4,7 +4,9 @@
 #define ENGINE_TEXTURE_SOURCE_H_
 
 #include <string>
-#include "../lod_oglwrap_config.h"
+#include <vector>
+
+#include "./oglwrap_config.h"
 #include "../oglwrap/textures/texture_2D.h"
 #include "../oglwrap/context.h"
 
@@ -16,7 +18,8 @@ class TextureSource {
   std::string format_string_;
   std::vector<std::array<T, NUM_COMPONENTS>> data_;
   int w_, h_;
-public:
+
+ public:
   // Loads in a texture from a file
   // The format string can contain any of these flags:
   // - 'S': the image is converted from SRGB to linear colorspace at load.
@@ -76,8 +79,8 @@ public:
                       gl::PixelDataInternalFormat internal_format) const;
 };
 
-}
+}  // namespace engine
 
-#include "texture_source-inl.h"
+#include "./texture_source-inl.h"
 
 #endif

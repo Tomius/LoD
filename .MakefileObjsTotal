@@ -25,3 +25,4 @@ $(PRECOMPILED_HEADER):
 	@rm -f $(OBJECTS) # have to rebuild every object
 
 %:
+	@

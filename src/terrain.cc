@@ -1,13 +1,13 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "terrain.h"
+#include "./terrain.h"
 #include <string>
 
 #include "engine/scene.h"
 
 const engine::Transform& Terrain::initTransform() {
   //transform.local_scale() = glm::vec3(4, 1, 4); TODO
-  transform.local_scale() = glm::vec3(1, 0.25f, 1);
+  transform.local_scale() = glm::vec3(1, 1.0f, 1);
   return transform;
 }
 
@@ -21,7 +21,7 @@ Terrain::Terrain(Skybox *skybox)
     , uSunPos_(prog_, "uSunPos")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowAtlasSize_(prog_, "uShadowAtlasSize")
-    , height_map_("terrain/output2.png", initTransform())
+    , height_map_("terrain/output.png", initTransform())
     , mesh_(height_map_)
     , skybox_((assert(skybox), skybox)) {
   prog_ << vs_ << fs_ << skybox_->sky_fs();

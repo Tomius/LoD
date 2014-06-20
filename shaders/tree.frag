@@ -21,6 +21,7 @@ const float kFogMin = 128.0;
 const float kFogMax = 2048.0;
 const float kMaxVisibleDist = 1450.0;
 const float kMaxOpaqueDist = 1350.0;
+vec3 kLightColor;
 
 void main() {
   float alpha = 1.0, l = length(c_vPos);

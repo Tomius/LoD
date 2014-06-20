@@ -6,7 +6,7 @@
 #include <map>
 #include <memory>
 
-#include "../../lod_oglwrap_config.h"
+#include "../oglwrap_config.h"
 #include "../../oglwrap/general.h"
 
 #include "anim_state.h"

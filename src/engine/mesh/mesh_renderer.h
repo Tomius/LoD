@@ -7,7 +7,7 @@
 #include <memory>
 #include <climits>
 
-#include "../../lod_oglwrap_config.h"
+#include "../oglwrap_config.h"
 #include "../../oglwrap/buffer.h"
 #include "../../oglwrap/enums/index_type.h"
 #include "../../oglwrap/vertex_attrib.h"

@@ -3,7 +3,7 @@
 #ifndef ENGINE_HEIGHT_MAP_INTERFACE_H_
 #define ENGINE_HEIGHT_MAP_INTERFACE_H_
 
-#include "../lod_oglwrap_config.h"
+#include "./oglwrap_config.h"
 #include "../oglwrap/textures/texture_2D.h"
 
 namespace engine {

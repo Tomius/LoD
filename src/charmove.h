@@ -3,7 +3,7 @@
 #ifndef LOD_CHARMOVE_H_
 #define LOD_CHARMOVE_H_
 
-#include "./lod_oglwrap_config.h"
+#include "engine/oglwrap_config.h"
 #include "engine/camera.h"
 #include "engine/transform.h"
 #include "engine/behaviour.h"

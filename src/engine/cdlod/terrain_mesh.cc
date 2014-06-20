@@ -15,7 +15,7 @@ TerrainMesh::TerrainMesh(const HeightMapInterface& height_map)
   #endif
       vs_src.insertMacroValue("VERTEX_ATTRIB_DIVISOR", false);
 
-  vertex_shader_.source(vs_src);
+  vertex_shader_.set_source(vs_src);
 }
 
 void TerrainMesh::setup(gl::Program& program, int tex_unit) {

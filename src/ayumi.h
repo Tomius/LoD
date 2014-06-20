@@ -3,10 +3,7 @@
 #ifndef LOD_INCLUDE_AYUMI_H_
 #define LOD_INCLUDE_AYUMI_H_
 
-#include "./lod_oglwrap_config.h"
-#include "oglwrap/shader.h"
-#include "oglwrap/uniform.h"
-
+#include "engine/oglwrap_config.h"
 #include "engine/behaviour.h"
 #include "engine/mesh/animated_mesh_renderer.h"
 

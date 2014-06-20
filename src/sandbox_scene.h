@@ -4,6 +4,7 @@
 #define LOD_SANDBOX_SCENE_H_
 
 #include "engine/scene.h"
+#include "engine/shader_catalog.h"
 #include "engine/gui/label.h"
 #include "engine/gui/box.h"
 #include "engine/gui/button.h"
@@ -72,6 +73,20 @@ struct SandboxScene : public engine::Scene {
       });
 
     addGameObject<TextField>(glm::vec2{0.0, -0.8}, glm::vec2{0.05, 0.03}, L"Your name");
+    //ShadingTechniqueTest();
+  }
+
+  void ShadingTechniqueTest() const {
+    engine::ShadingTechnique tech("test.frag");
+    std::cout << tech.src() << "\n" << tech.exports() << std::endl;
+
+    engine::ShaderCatalog catalog;
+    catalog.publish(&tech);
+
+    gl::Program prog;
+
+    gl::ShaderSource src {catalog.resolveIncludes("test2.frag", &prog)};
+    std::cout << src.source() << std::endl;
   }
 };
 

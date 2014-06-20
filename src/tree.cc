@@ -43,7 +43,7 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
   prog_.validate();
 
   // Get the trees' positions.
-  const int kTreeDist = 128;
+  const int kTreeDist = 256;
   glm::vec2 extent = height_map.extent();
   for (int i = kTreeDist; i + kTreeDist < extent.x; i += kTreeDist) {
     for (int j = kTreeDist; j + kTreeDist < extent.y; j += kTreeDist) {

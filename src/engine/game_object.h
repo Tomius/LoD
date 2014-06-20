@@ -5,7 +5,7 @@
 
 #include <memory>
 #include <vector>
-#include "../lod_oglwrap_config.h"
+
 #include "./camera.h"
 #include "./rigid_body.h"
 

@@ -3,7 +3,7 @@
 #ifndef LOD_LOADING_SCREEN_H_
 #define LOD_LOADING_SCREEN_H_
 
-#include "./lod_oglwrap_config.h"
+#include "engine/oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/shapes/full_screen_rect.h"

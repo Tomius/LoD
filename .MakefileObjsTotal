@@ -24,5 +24,11 @@ $(PRECOMPILED_HEADER):
 	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total
 	@rm -f $(OBJECTS) # have to rebuild every object
 
+%.h:
+  @
+%.hpp:
+  @
+%.inl:
+  @
 %:
-	@
+  @

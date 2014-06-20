@@ -134,5 +134,11 @@ $(BINARY): $(OBJECTS)
 	@ $(call printf,[100%] ,Linking CXX executable $@,$(BOLD)$(RED))
 	@ $(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
+%.h:
+	@
+%.hpp:
+	@
+%.inl:
+	@
 %:
 	@

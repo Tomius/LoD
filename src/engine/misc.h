@@ -1,3 +1,5 @@
+// Copyright (c) 2014, Tamas Csala
+
 #ifndef ENGINE_MISC_H
 #define ENGINE_MISC_H
 
@@ -20,6 +22,6 @@ T sqr(const T& x) {
   return x*x;
 }
 
-} // namespace engine
+}  // namespace engine
 
 #endif

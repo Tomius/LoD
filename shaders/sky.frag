@@ -4,6 +4,16 @@
 
 #version 120
 
+#export vec3 SkyColor(vec3 look_dir);
+#export vec3 SunPos();
+#export vec3 MoonPos();
+#export float SunPower();
+#export float MoonPower();
+#export float AmbientPower();
+#export vec3 SunColor();
+#export vec3 MoonColor();
+#export vec3 AmbientColor();
+
 const float kWorldRadius = 6371000;
 const float kAtmThickness = 50000;
 const vec3 kAirColor = vec3(0.32, 0.36, 0.45);

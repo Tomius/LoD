@@ -6,19 +6,17 @@
 
 constexpr float day_duration = 256.0f, day_start = 8.0f;
 
-Skybox::Skybox()
+Skybox::Skybox(engine::ShaderManager* manager)
     : time_(day_start)
-    , vs_("skybox.vert")
-    , fs_("skybox.frag")
+    , prog_(manager->get("skybox.vert"), manager->get("skybox.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
-    , uCameraMatrix_(prog_, "uCameraMatrix")
-    , uSunPos_(prog_, "uSunPos")
-    , sky_fs_("sky.frag") {
-  prog_ << vs_ << fs_ << sky_fs_;
-  prog_.link().use();
+    , uCameraMatrix_(prog_, "uCameraMatrix") {
+  engine::ShaderFile *sky_fs = manager->get("sky.frag");
+  sky_fs->set_update_func([this](const gl::Program& prog) {
+    gl::Uniform<glm::vec3>(prog, "uSunPos") = getSunPos();
+  });
 
-  prog_.validate();
-
+  prog_.use().validate();
   cube_.setupPositions(prog_ | "aPosition");
 }
 
@@ -48,9 +46,9 @@ void Skybox::render(const engine::Scene& scene) {
                                 f[8], f[9], f[10]);
 
   prog_.use();
+  prog_.update();
   uCameraMatrix_ = cam_rot;
   uProjectionMatrix_ = cam.projectionMatrix();
-  uSunPos_ = getSunPos();
 
   auto depth_test = gl::TemporaryDisable(gl::kDepthTest);
 

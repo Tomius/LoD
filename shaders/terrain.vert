@@ -2,6 +2,8 @@
 
 #version 120
 
+#include "cdlod_terrain.vert"
+
 uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
 uniform vec2 CDLODTerrain_uTexSize;
 
@@ -10,11 +12,6 @@ varying vec3  c_vPos, w_vPos;
 varying vec2  vTexCoord;
 varying float vInvalid;
 varying mat3  vNormalMatrix;
-
-vec3 CDLODTerrain_worldPos();
-vec2 CDLODTerrain_texCoord(vec3 pos);
-vec3 CDLODTerrain_normal(vec3 pos);
-mat3 CDLODTerrain_normalMatrix(vec3 normal);
 
 void main() {
   vec3 w_pos = CDLODTerrain_worldPos();

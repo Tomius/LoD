@@ -1,18 +1,20 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "shadow.h"
+#include <vector>
+#include "./shadow.h"
+#include "./skybox.h"
 #include "oglwrap/context.h"
 #include "oglwrap/smart_enums.h"
 
-Shadow::Shadow(int shadow_map_size, int atlas_x_size, int atlas_y_size)
+Shadow::Shadow(Skybox* skybox, int shadow_map_size,
+               int atlas_x_size, int atlas_y_size)
     : size_(shadow_map_size)
     , xsize_(atlas_x_size)
     , ysize_(atlas_y_size)
     , curr_depth_(0)
     , max_depth_(xsize_*ysize_)
-    , cp_matrices_(max_depth_)  {
-
-  // Setup the texture array that will serve as storage.
+    , cp_matrices_(max_depth_)
+    , skybox_(skybox)  {
   tex_.bind();
   tex_.upload(gl::kDepthComponent, size_*xsize_, size_*ysize_,
               gl::kDepthComponent, gl::kFloat, nullptr);
@@ -44,16 +46,15 @@ glm::dmat4 Shadow::projMat(double size) const {
   return glm::ortho<double>(-size, size, -size, size, 0, 2*size);
 }
 
-glm::dmat4 Shadow::camMat(glm::dvec3 lightSrcPos, glm::dvec4 targetBSphere) const {
+glm::dmat4 Shadow::camMat(glm::dvec3 lightSrcPos,
+                          glm::dvec4 targetBSphere) const {
   return glm::lookAt(
     glm::dvec3(targetBSphere) + glm::normalize(lightSrcPos) * targetBSphere.w,
     glm::dvec3(targetBSphere),
-    glm::dvec3(0, 1, 0)
-  );
+    glm::dvec3(0, 1, 0));
 }
 
-glm::mat4 Shadow::modelCamProjMat(glm::dvec3 lightSrcPos,
-                                  glm::dvec4 targetBSphere,
+glm::mat4 Shadow::modelCamProjMat(glm::dvec4 targetBSphere,
                                   glm::dmat4 modelMatrix,
                                   glm::dmat4 worldTransform) {
   // [-1, 1] -> [0, 1] convert
@@ -61,17 +62,16 @@ glm::mat4 Shadow::modelCamProjMat(glm::dvec3 lightSrcPos,
     0.5, 0.0, 0.0, 0.0,
     0.0, 0.5, 0.0, 0.0,
     0.0, 0.0, 0.5, 0.0,
-    0.5, 0.5, 0.5, 1.0
-  );
+    0.5, 0.5, 0.5, 1.0);
 
   glm::dmat4 projMatrix = projMat(targetBSphere.w);
   glm::dvec4 offseted_targetBSphere =
     glm::dvec4(
       glm::dvec3(modelMatrix * glm::dvec4(glm::dvec3(targetBSphere), 1)),
-      targetBSphere.w
-    );
+      targetBSphere.w);
 
-  glm::dmat4 pc = projMatrix * camMat(lightSrcPos, offseted_targetBSphere);
+  glm::dmat4 pc = projMatrix * camMat(glm::dvec3(skybox_->getLightSourcePos()),
+                                      offseted_targetBSphere);
 
   cp_matrices_[curr_depth_] = biasMatrix * pc;
 

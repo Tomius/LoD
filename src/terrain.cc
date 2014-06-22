@@ -6,36 +6,30 @@
 #include "engine/scene.h"
 
 const engine::Transform& Terrain::initTransform() {
-  //transform.local_scale() = glm::vec3(4, 1, 4); TODO
+  //  transform.local_scale() = glm::vec3(4, 1, 4); TODO
   transform.local_scale() = glm::vec3(1, 1.0f, 1);
   return transform;
 }
 
-Terrain::Terrain(Skybox *skybox)
-    : vs_("terrain.vert")
-    , fs_("terrain.frag")
-    , uProjectionMatrix_(prog_, "uProjectionMatrix")
+Terrain::Terrain(engine::ShaderManager* manager)
+    : uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")
     , uShadowCP_(prog_, "uShadowCP")
-    , uSunPos_(prog_, "uSunPos")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowAtlasSize_(prog_, "uShadowAtlasSize")
     , height_map_("terrain/output.png", initTransform())
-    , mesh_(height_map_)
-    , skybox_((assert(skybox), skybox)) {
-  prog_ << vs_ << fs_ << skybox_->sky_fs();
-  mesh_.setup_and_link(prog_, 1);
+    , mesh_(manager, height_map_)
+    , prog_(manager->get("terrain.vert"), manager->get("terrain.frag")) {
   prog_.use();
-
+  mesh_.setup(prog_, 1);
   gl::UniformSampler(prog_, "uGrassMap0").set(2);
   gl::UniformSampler(prog_, "uGrassMap1").set(3);
   for (int i = 0; i < 2; ++i) {
     grassMaps_[i].bind();
     // no alpha channel here
     grassMaps_[i].loadTexture(
-      i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg", "CSRGBA"
-    );
+      i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg", "CSRGBA");
     grassMaps_[i].generateMipmap();
     grassMaps_[i].maxAnisotropy();
     grassMaps_[i].minFilter(gl::kLinearMipmapLinear);
@@ -66,11 +60,11 @@ void Terrain::render(const engine::Scene& scene) {
   const Shadow *shadow = scene.shadow();
 
   prog_.use();
+  prog_.update();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uModelMatrix_ = transform.matrix();
-  uSunPos_.set(skybox_->getSunPos());
-  if(shadow) {
+  if (shadow) {
     for (size_t i = 0; i < shadow->getDepth(); ++i) {
       uShadowCP_[i] = shadow->shadowCPs()[i];
     }
@@ -81,11 +75,11 @@ void Terrain::render(const engine::Scene& scene) {
   grassMaps_[0].bind(2);
   grassMaps_[1].bind(3);
   grassNormalMap_.bind(4);
-  if(shadow) { shadow->shadowTex().bind(5); }
+  if (shadow) { shadow->shadowTex().bind(5); }
 
   mesh_.render(cam);
 
-  if(shadow) { shadow->shadowTex().unbind(5); }
+  if (shadow) { shadow->shadowTex().unbind(5); }
   grassNormalMap_.unbind(4);
   grassMaps_[1].unbind(3);
   grassMaps_[0].unbind(2);

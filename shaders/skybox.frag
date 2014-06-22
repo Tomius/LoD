@@ -2,9 +2,9 @@
 
 #version 120
 
-varying vec3 vTexCoord;
+#include "sky.frag"
 
-vec3 SkyColor(vec3 lookDir);
+varying vec3 vTexCoord;
 
 void main() {
   gl_FragColor = vec4(SkyColor(normalize(vTexCoord)), 1.0);

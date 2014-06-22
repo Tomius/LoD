@@ -3,35 +3,27 @@
 #include "./tree.h"
 #include "engine/scene.h"
 
-Tree::Tree(const engine::HeightMapInterface& height_map,
-           Skybox *skybox, Shadow *shadow)
-  : mesh_{{"models/trees/swamptree.dae",
-          aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs},
-          {"models/trees/tree.obj",
-          aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs}}
-  , vs_("tree.vert")
-  , shadow_vs_("tree_shadow.vert")
-  , fs_("tree.frag")
-  , shadow_fs_("tree_shadow.frag")
-  , uProjectionMatrix_(prog_, "uProjectionMatrix")
-  , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
-  , uNormalMatrix_(prog_, "uNormalMatrix")
-  , shadow_uMCP_(shadow_prog_, "uMCP")
-  , uSunPos_(prog_, "uSunPos")
-  , skybox_((assert(skybox), skybox))
-  , shadow_((assert(shadow), shadow)) {
-
-  shadow_prog_ << shadow_vs_ << shadow_fs_;
-  shadow_prog_.link().use();
-
+Tree::Tree(engine::ShaderManager *manager, Shadow *shadow,
+           const engine::HeightMapInterface& height_map)
+    : mesh_{{"models/trees/swamptree.dae",
+            aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs},
+            {"models/trees/tree.obj",
+            aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs}}
+    , prog_(manager->get("tree.vert"), manager->get("tree.frag"))
+    , shadow_prog_(manager->get("tree_shadow.vert"),
+                   manager->get("tree_shadow.frag"))
+    , uProjectionMatrix_(prog_, "uProjectionMatrix")
+    , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
+    , uNormalMatrix_(prog_, "uNormalMatrix")
+    , shadow_uMCP_(shadow_prog_, "uMCP")
+    , shadow_((assert(shadow), shadow)) {
+  shadow_prog_.use();
   gl::UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
-
   shadow_prog_.validate();
 
-  prog_ << vs_ << fs_ << skybox_->sky_fs();
-  prog_.link().use();
+  prog_.use();
 
-  for(int i = 0; i < kTreeTypeNum; ++i) {
+  for (int i = 0; i < kTreeTypeNum; ++i) {
     mesh_[i].setupPositions(prog_ | "aPosition");
     mesh_[i].setupTexCoords(prog_ | "aTexCoord");
     mesh_[i].setupNormals(prog_ | "aNormal");
@@ -61,14 +53,14 @@ Tree::Tree(const engine::HeightMapInterface& height_map,
       matrix[3] = glm::vec4(pos, 1);
       matrix = glm::scale(matrix, scale);
 
-      //int type = rand() % kTreeTypeNum;
+      // int type = rand() % kTreeTypeNum;
       // tree.obj textures are not srgb, but swamptree's textures are.
       // Workaround until I fix that
       int type = 0;
 
       engine::BoundingBox bbox = mesh_[type].boundingBox(matrix);
       glm::vec4 bsphere = mesh_[type].bSphere();
-      bsphere.w *= 1.2; // removes peter panning (but decreases quality)
+      bsphere.w *= 1.2;  // removes peter panning (but decreases quality)
 
       trees_.push_back(TreeInfo{type, matrix, bsphere, bbox});
     }
@@ -84,14 +76,10 @@ void Tree::shadowRender(const engine::Scene& scene) {
   auto campos = cam.pos();
   for (size_t i = 0; i < trees_.size() &&
       shadow_->getDepth() < shadow_->getMaxDepth(); i++) {
-
-   if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
-      shadow_uMCP_ = shadow_->modelCamProjMat(
-        skybox_->getLightSourcePos(),
-        trees_[i].bsphere,
-        trees_[i].mat,
-        glm::mat4()
-      );
+    if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
+      shadow_uMCP_ = shadow_->modelCamProjMat(trees_[i].bsphere,
+                                              trees_[i].mat,
+                                              glm::mat4());
       mesh_[trees_[i].type].render();
       shadow_->push();
     }
@@ -100,7 +88,7 @@ void Tree::shadowRender(const engine::Scene& scene) {
 
 void Tree::render(const engine::Scene& scene) {
   prog_.use();
-  uSunPos_.set(skybox_->getSunPos());
+  prog_.update();
 
   const auto& cam = *scene.camera();
   uProjectionMatrix_ = cam.projectionMatrix();
@@ -113,8 +101,8 @@ void Tree::render(const engine::Scene& scene) {
   auto cam_mx = cam.matrix();
   auto frustum = cam.frustum();
   for (size_t i = 0; i < trees_.size(); i++) {
-    // Check for visibility (is it behind to camera?)
-    if(!trees_[i].bbox.collidesWithFrustum(frustum) ||
+    // Check for visibility
+    if (!trees_[i].bbox.collidesWithFrustum(frustum) ||
       glm::length(glm::vec3(trees_[i].mat[3]) - campos) > 1500) {
       continue;
     }

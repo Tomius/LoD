@@ -3,8 +3,8 @@
 #ifndef LOD_INCLUDE_AYUMI_H_
 #define LOD_INCLUDE_AYUMI_H_
 
-#include "engine/oglwrap_config.h"
 #include "engine/behaviour.h"
+#include "engine/shader_manager.h"
 #include "engine/mesh/animated_mesh_renderer.h"
 
 #include "./charmove.h"
@@ -14,19 +14,17 @@
 class Ayumi : public engine::Behaviour {
   engine::AnimatedMeshRenderer mesh_;
   engine::Animation anim_;
-  gl::Program prog_, shadow_prog_;
+  engine::ShaderProgram prog_, shadow_prog_;
 
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_,
-                                  uModelMatrix_, uBones_,
-                                  shadow_uMCP_, shadow_uBones_;
-  gl::LazyUniform<glm::vec3> uSunPos_;
+                             uModelMatrix_, uBones_,
+                             shadow_uMCP_, shadow_uBones_;
 
   bool attack2_, attack3_;
 
   GLFWwindow* window_;
 
   CharacterMovement *charmove_;
-  Skybox* skybox_;
   Shadow* shadow_;
   bool was_left_click_;
 
@@ -36,8 +34,11 @@ class Ayumi : public engine::Behaviour {
   CharacterMovement::CanDoCallback canFlip;
   engine::Animation::AnimationEndedCallback animationEndedCallback;
 
+  engine::ShaderFile* loadVertexShader(engine::ShaderManager* manager);
+  engine::ShaderFile* loadShadowVertexShader(engine::ShaderManager* manager);
+
  public:
-  Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow);
+  Ayumi(engine::ShaderManager* manager, GLFWwindow* window, Shadow* shadow);
   virtual ~Ayumi() {}
   engine::AnimatedMeshRenderer& getMesh();
   engine::Animation& getAnimation();

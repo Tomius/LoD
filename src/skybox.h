@@ -9,11 +9,12 @@
 #include "oglwrap/shapes/cube.h"
 #include "oglwrap/textures/texture_cube.h"
 
+#include "engine/shader_manager.h"
 #include "engine/behaviour.h"
 
 class Skybox : public engine::Behaviour {
  public:
-  Skybox();
+  explicit Skybox(engine::ShaderManager* shader_manager);
   virtual ~Skybox() {}
 
   glm::vec3 getSunPos() const;
@@ -22,21 +23,16 @@ class Skybox : public engine::Behaviour {
   virtual void render(const engine::Scene& scene) override;
   virtual void update(const engine::Scene& scene) override;
 
-  const gl::FragmentShader& sky_fs() { return sky_fs_; };
-
  private:
   float time_;
   gl::Cube cube_;
 
   gl::VertexShader vs_;
   gl::FragmentShader fs_;
-  gl::Program prog_;
+  engine::ShaderProgram prog_;
 
   gl::LazyUniform<glm::mat4> uProjectionMatrix_;
   gl::LazyUniform<glm::mat3> uCameraMatrix_;
-  gl::LazyUniform<glm::vec3> uSunPos_;
-
-  gl::FragmentShader sky_fs_;
 };
 
 

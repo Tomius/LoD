@@ -1,49 +1,51 @@
 // Copyright (c) 2014, Tamas Csala
 
 #include "./ayumi.h"
+
 #include <string>
+#include "engine/oglwrap_config.h"
 #include <GLFW/glfw3.h>
 
 #include "engine/scene.h"
 
 using engine::AnimParams;
 
-Ayumi::Ayumi(GLFWwindow* window, Skybox* skybox, Shadow* shadow)
+engine::ShaderFile* Ayumi::loadVertexShader(engine::ShaderManager* manager) {
+  gl::ShaderSource vs_src("ayumi.vert");
+  vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
+  vs_src.insertMacroValue("BONE_NUM", mesh_.getNumBones());
+  return manager->publish("ayumi.vert", vs_src);
+}
+
+engine::ShaderFile* Ayumi::loadShadowVertexShader(
+    engine::ShaderManager* manager) {
+  gl::ShaderSource shadow_vs_src("ayumi_shadow.vert");
+  shadow_vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
+  shadow_vs_src.insertMacroValue("BONE_NUM", mesh_.getNumBones());
+  return manager->publish("ayumi_shadow.vert", shadow_vs_src);
+}
+
+
+Ayumi::Ayumi(engine::ShaderManager* manager, GLFWwindow* window, Shadow* shadow)
     : mesh_("models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs)
     , anim_(mesh_.getAnimData())
+    , prog_(loadVertexShader(manager), manager->get("ayumi.frag"))
+    , shadow_prog_(loadShadowVertexShader(manager), manager->get("shadow.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")
     , uBones_(prog_, "uBones")
     , shadow_uMCP_(shadow_prog_, "uMCP")
     , shadow_uBones_(shadow_prog_, "uBones")
-    , uSunPos_(prog_, "uSunPos")
     , attack2_(false)
     , window_(window)
     , charmove_(nullptr)
-    , skybox_(skybox)
     , shadow_(shadow)
     , was_left_click_(false)
     , bsphere_(mesh_.bSphere()) {
-  gl::ShaderSource vs_src("ayumi.vert");
-  vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
-  vs_src.insertMacroValue("BONE_NUM", mesh_.getNumBones());
-
-  gl::ShaderSource shadow_vs_src("ayumi_shadow.vert");
-  shadow_vs_src.insertMacroValue("BONE_ATTRIB_NUM", mesh_.getBoneAttribNum());
-  shadow_vs_src.insertMacroValue("BONE_NUM", mesh_.getNumBones());
-
-  gl::VertexShader vs(vs_src), shadow_vs(shadow_vs_src);
-  gl::FragmentShader fs("ayumi.frag"), shadow_fs("shadow.frag");
-
-  shadow_prog_ << shadow_vs << shadow_fs;
-  shadow_prog_.link();
-
   shadow_prog_.validate();
-
-  prog_ << vs << fs << skybox_->sky_fs();
-  prog_.link().use();
+  prog_.use();
 
   mesh_.setupPositions(prog_ | "aPosition");
   mesh_.setupTexCoords(prog_ | "aTexCoord");
@@ -160,8 +162,8 @@ void Ayumi::update(const engine::Scene& scene) {
 void Ayumi::shadowRender(const engine::Scene&) {
   shadow_prog_.use();
   shadow_uMCP_ =
-    shadow_->modelCamProjMat(skybox_->getLightSourcePos(), bsphere_,
-                             transform.matrix(), mesh_.worldTransform());
+    shadow_->modelCamProjMat(bsphere_, transform.matrix(),
+                             mesh_.worldTransform());
   mesh_.uploadBoneInfo(shadow_uBones_);
 
   gl::CullFace(gl::kFront);
@@ -179,11 +181,11 @@ void Ayumi::shadowRender(const engine::Scene&) {
 
 void Ayumi::render(const engine::Scene& scene) {
   prog_.use();
+  prog_.update();
   const auto& cam = *scene.camera();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uModelMatrix_ = transform.matrix() * mesh_.worldTransform();
-  uSunPos_ = skybox_->getSunPos();
 
   mesh_.uploadBoneInfo(uBones_);
 

@@ -2,6 +2,11 @@
 
 #version 120
 
+#export vec3 CDLODTerrain_worldPos();
+#export vec2 CDLODTerrain_texCoord(vec3 pos);
+#export vec3 CDLODTerrain_normal(vec3 pos);
+#export mat3 CDLODTerrain_normalMatrix(vec3 normal);
+
 attribute vec2 CDLODTerrain_aPosition; // I hate the lack of namespaces
 
 #define VERTEX_ATTRIB_DIVISOR true

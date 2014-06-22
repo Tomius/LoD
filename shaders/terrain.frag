@@ -2,6 +2,8 @@
 
 #version 120
 
+#include "sky.frag"
+
 // This might be overwritten by the c++ code.
 #define SHADOW_MAP_NUM 16
 
@@ -18,16 +20,6 @@ uniform sampler2DShadow uShadowMap;
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;
 uniform ivec2 uShadowAtlasSize;
-
-// External functions
-vec3 SunPos();
-vec3 MoonPos();
-float SunPower();
-float MoonPower();
-vec3 SunColor();
-vec3 MoonColor();
-vec3 AmbientColor();
-float AmbientPower();
 
 // We love #version 120
 int min(int a, int b) {

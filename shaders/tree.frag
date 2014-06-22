@@ -2,20 +2,13 @@
 
 #version 120
 
+#include "sky.frag"
+
 varying vec3 c_vPos;
 varying vec3 w_vNormal;
 varying vec2 vTexCoord;
 
 uniform sampler2D uDiffuseTexture;
-
-vec3 SunPos();
-vec3 MoonPos();
-float SunPower();
-float MoonPower();
-vec3 SunColor();
-vec3 MoonColor();
-vec3 AmbientColor();
-float AmbientPower();
 
 const float kFogMin = 128.0;
 const float kFogMax = 2048.0;

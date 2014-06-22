@@ -2,21 +2,14 @@
 
 #version 120
 
+#include "sky.frag"
+
 varying vec3 c_vNormal;
 varying vec3 w_vPos, c_vPos;
 varying vec2 vTexCoord;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
-
-vec3 SunPos();
-vec3 MoonPos();
-float SunPower();
-float MoonPower();
-vec3 SunColor();
-vec3 MoonColor();
-vec3 AmbientColor();
-float AmbientPower();
 
 const float kSpecularShininess = 20.0f;
 

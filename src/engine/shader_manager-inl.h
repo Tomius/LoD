@@ -30,7 +30,6 @@ inline ShaderFile* ShaderManager::publish(const std::string& filename,
   return load(filename, src);
 }
 
-
 }  // namespace engine
 
 #endif

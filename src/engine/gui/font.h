@@ -6,6 +6,8 @@
 #include <string>
 #include "freetype-gl/freetype-gl.h"
 #include "../../oglwrap/glm/glm/glm.hpp"
+
+#include "./font_manager.h"
 #include "../misc.h"
 
 namespace engine {
@@ -19,7 +21,7 @@ class FontData {
 
   void release() {
     if (font_ != nullptr) {
-      if(font_->atlas != nullptr) {
+      if (font_->atlas != nullptr) {
         texture_atlas_delete(font_->atlas);
         font_->atlas = nullptr;
       }
@@ -79,7 +81,7 @@ class FontData {
 
 class Font {
   // Font should be copyable, but the fontdata shouldn't be loaded for each copy
-  std::shared_ptr<FontData> data_;
+  FontData* data_;
   glm::vec4 color_;
 
  public:
@@ -95,7 +97,7 @@ class Font {
        float size = 12,  glm::vec4 color = glm::vec4{1},
        HorizontalAlignment xalign = HorizontalAlignment::kCenter,
        VerticalAlignment yalign = VerticalAlignment::kCenter)
-    : data_(engine::make_shared<FontData>(filename, size)), color_(color)
+    : data_(FontManager::get(filename, size)), color_(color)
     , horizontal_alignment_(xalign)
     , vertical_alignment_(yalign) { }
 
@@ -109,7 +111,7 @@ class Font {
   void set_color(const glm::vec4& color) { color_ = color; }
   float size() const { return data_->size(); }
   void set_size(float size) {
-    data_ = engine::make_shared<FontData>(data_->filename(), size);
+    data_ = FontManager::get(data_->filename(), size);
   }
   texture_font_t* expose() { return data_->expose(); }
 

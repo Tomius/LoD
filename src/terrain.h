@@ -19,7 +19,7 @@ class Terrain : public engine::GameObject {
   gl::LazyUniform<int> uNumUsedShadowMaps_;
   gl::LazyUniform<glm::ivec2> uShadowAtlasSize_;
 
-  engine::HeightMap<unsigned short> height_map_;
+  engine::HeightMap<GLushort> height_map_;
   engine::cdlod::TerrainMesh mesh_;
   engine::ShaderProgram prog_;  // has to be inited after mesh_
 

@@ -34,11 +34,11 @@ glm::vec3 Skybox::getLightSourcePos() const {
   return sun_pos.y > 0 ? sun_pos : -sun_pos;
 }
 
-void Skybox::update(const engine::Scene&) {
+void Skybox::update() {
   time_ = scene_->environment_time().current + day_start;
 }
 
-void Skybox::render(const engine::Scene&) {
+void Skybox::render() {
   const engine::Camera& cam = *scene_->camera();
 
   // We don't need the camera matrix's translation part for the skybox

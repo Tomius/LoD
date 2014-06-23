@@ -67,7 +67,7 @@ Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
   }
 }
 
-void Tree::shadowRender(const engine::Scene&) {
+void Tree::shadowRender() {
   shadow_prog_.use();
 
   auto shadow = scene_->shadow();
@@ -87,7 +87,7 @@ void Tree::shadowRender(const engine::Scene&) {
   }
 }
 
-void Tree::render(const engine::Scene&) {
+void Tree::render() {
   prog_.use();
   prog_.update();
 

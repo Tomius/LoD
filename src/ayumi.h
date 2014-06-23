@@ -13,22 +13,18 @@
 
 class Ayumi : public engine::Behaviour {
  public:
-  Ayumi(engine::Scene* scene);
+  explicit Ayumi(engine::Scene* scene);
   virtual ~Ayumi() {}
 
   engine::AnimatedMeshRenderer& getMesh();
   engine::Animation& getAnimation();
-  virtual void update(const engine::Scene& scene) override;
-  virtual void shadowRender(const engine::Scene& scene) override;
-  virtual void render(const engine::Scene& scene) override;
+
   void charmove(CharacterMovement* charmove) {
     if (!charmove) return;
     charmove_ = charmove;
     charmove_->setCanJumpCallback(std::bind(&Ayumi::canJump, this));
     charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
   }
-  virtual void mouseButtonPressed(const engine::Scene& scene, int button,
-                                  int action, int mods) override;
 
  private:
   engine::AnimatedMeshRenderer mesh_;
@@ -51,7 +47,10 @@ class Ayumi : public engine::Behaviour {
   engine::ShaderFile* loadVertexShader(engine::ShaderManager* manager);
   engine::ShaderFile* loadShadowVertexShader(engine::ShaderManager* manager);
 
-
+  virtual void update() override;
+  virtual void shadowRender() override;
+  virtual void render() override;
+  virtual void mouseButtonPressed(int button, int action, int mods) override;
 };
 
 #endif  // LOD_INCLUDE_AYUMI_H_

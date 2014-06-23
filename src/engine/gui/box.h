@@ -97,7 +97,7 @@ class Box : public engine::GameObject {
   gl::FullScreenRectangle rect_;
   gl::Program prog_;
 
-  virtual void screenResized(const Scene&, size_t width, size_t height) override {
+  virtual void screenResized(size_t width, size_t height) override {
     glm::vec2 border_width = params_.border_width /
         (params_.extent * glm::vec2(0.99f * width, 0.99f * height));
 
@@ -121,7 +121,7 @@ class Box : public engine::GameObject {
     }
   }
 
-  virtual void render2D(const Scene& scene) override {
+  virtual void render2D() override {
     prog_.use();
     rect_.render();
   }

@@ -104,7 +104,7 @@ class Scene {
     }
 
     for (auto& i : gameobjects_) {
-      i->screenResizedAll(*this, w, h);
+      i->screenResizedAll(w, h);
     }
   }
 
@@ -115,7 +115,7 @@ class Scene {
     camera_time_.tick();
 
     for (auto& i : gameobjects_) {
-      i->updateAll(*this);
+      i->updateAll();
     }
 
     if (camera_) {
@@ -130,7 +130,7 @@ class Scene {
     if (shadow_) {
       shadow_->begin(); {
         for (auto& i : gameobjects_) {
-          i->shadowRenderAll(*this);
+          i->shadowRenderAll();
         }
       } shadow_->end();
     }
@@ -141,7 +141,7 @@ class Scene {
       return;
 
     for (auto& i : gameobjects_) {
-      i->renderAll(*this);
+      i->renderAll();
     }
   }
 
@@ -152,7 +152,7 @@ class Scene {
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
     for (auto& i : gameobjects_) {
-      i->render2DAll(*this);
+      i->render2DAll();
     }
   }
 
@@ -170,7 +170,7 @@ class Scene {
     }
 
     for (auto& i : gameobjects_) {
-      i->keyActionAll(*this, key, scancode, action, mods);
+      i->keyActionAll(key, scancode, action, mods);
     }
 
     if (action == GLFW_PRESS) {
@@ -189,7 +189,7 @@ class Scene {
 
   virtual void charTyped(unsigned codepoint) {
     for (auto& i : gameobjects_) {
-      i->charTypedAll(*this, codepoint);
+      i->charTypedAll(codepoint);
     }
   }
 
@@ -199,7 +199,7 @@ class Scene {
     }
 
     for (auto& i : gameobjects_) {
-      i->mouseScrolledAll(*this, xoffset, yoffset);
+      i->mouseScrolledAll(xoffset, yoffset);
     }
   }
 
@@ -209,7 +209,7 @@ class Scene {
     }
 
     for (auto& i : gameobjects_) {
-      i->mouseButtonPressedAll(*this, button, action, mods);
+      i->mouseButtonPressedAll(button, action, mods);
     }
   }
 
@@ -219,7 +219,7 @@ class Scene {
     }
 
     for (auto& i : gameobjects_) {
-      i->mouseMovedAll(*this, xpos, ypos);
+      i->mouseMovedAll(xpos, ypos);
     }
   }
 };

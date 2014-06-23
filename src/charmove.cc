@@ -48,8 +48,8 @@ void CharacterMovement::handleSpacePressed() {
   }
 }
 
-void CharacterMovement::update(const engine::Scene& scene) {
-  float time = scene.game_time().current;
+void CharacterMovement::update() {
+  float time = scene_->game_time().current;
   const engine::Camera& cam = *camera_;
   glm::vec2 character_offset = anim_->offsetSinceLastFrame();
 
@@ -131,8 +131,7 @@ void CharacterMovement::update(const engine::Scene& scene) {
   updateHeight(time);
 }
 
-void CharacterMovement::keyAction(const engine::Scene&, int key, int scancode,
-                                  int action, int mods) {
+void CharacterMovement::keyAction(int key, int scancode, int action, int mods) {
   if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
     handleSpacePressed();
   }

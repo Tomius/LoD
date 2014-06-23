@@ -16,9 +16,8 @@ class BloomEffect : public engine::GameObject {
  public:
   explicit BloomEffect(engine::Scene *scene);
   virtual ~BloomEffect() {}
-  virtual void screenResized(const engine::Scene&, size_t width,
-                             size_t height) override;
-  virtual void render(const engine::Scene& scene) override;
+  virtual void screenResized(size_t width, size_t height) override;
+  virtual void render() override;
 
  private:
   engine::ShaderProgram prog_;

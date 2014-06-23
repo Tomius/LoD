@@ -64,26 +64,22 @@ class GameObject {
   const Scene* scene() const { return scene_; }
   void set_scene(Scene* scene) { scene_ = scene; }
 
-  virtual void shadowRender(const Scene& scene) {}
-  virtual void render(const Scene& scene) {}
-  virtual void render2D(const Scene& scene) {}
-  virtual void screenResized(const Scene& scene, size_t width, size_t height) {}
+  virtual void shadowRender() {}
+  virtual void render() {}
+  virtual void render2D() {}
+  virtual void screenResized(size_t width, size_t height) {}
 
-  virtual void shadowRenderAll(const Scene& scene);
-  virtual void renderAll(const Scene& scene);
-  virtual void render2DAll(const Scene& scene);
-  virtual void screenResizedAll(const Scene& scene, size_t width,
-                                size_t height);
+  virtual void shadowRenderAll();
+  virtual void renderAll();
+  virtual void render2DAll();
+  virtual void screenResizedAll(size_t width, size_t height);
 
-  virtual void updateAll(const Scene& scene);
-  virtual void keyActionAll(const Scene& scene, int key, int scancode,
-                            int action, int mods);
-  virtual void charTypedAll(const Scene& scene, unsigned codepoint);
-  virtual void mouseScrolledAll(const Scene& scene, double xoffset,
-                                double yoffset);
-  virtual void mouseButtonPressedAll(const Scene& scene, int button,
-                                     int action, int mods);
-  virtual void mouseMovedAll(const Scene& scene, double xpos, double ypos);
+  virtual void updateAll();
+  virtual void keyActionAll(int key, int scancode, int action, int mods);
+  virtual void charTypedAll(unsigned codepoint);
+  virtual void mouseScrolledAll(double xoffset, double yoffset);
+  virtual void mouseButtonPressedAll(int button, int action, int mods);
+  virtual void mouseMovedAll(double xpos, double ypos);
 };
 }  // namespace engine
 

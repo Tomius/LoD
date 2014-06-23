@@ -114,7 +114,7 @@ engine::Animation& Ayumi::getAnimation() {
   return anim_;
 }
 
-void Ayumi::update(const engine::Scene&) {
+void Ayumi::update() {
   float time = scene_->game_time().current;
 
   std::string curr_anim = anim_.getCurrentAnimation();
@@ -161,7 +161,7 @@ void Ayumi::update(const engine::Scene&) {
   mesh_.updateBoneInfo(anim_, time);
 }
 
-void Ayumi::shadowRender(const engine::Scene&) {
+void Ayumi::shadowRender() {
   shadow_prog_.use();
   shadow_uMCP_ =
     scene_->shadow()->modelCamProjMat(bsphere_, transform.matrix(),
@@ -181,7 +181,7 @@ void Ayumi::shadowRender(const engine::Scene&) {
   scene_->shadow()->push();
 }
 
-void Ayumi::render(const engine::Scene&) {
+void Ayumi::render() {
   prog_.use();
   prog_.update();
   const auto& cam = *scene_->camera();
@@ -263,8 +263,7 @@ AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
 }
 
 
-void Ayumi::mouseButtonPressed(const engine::Scene&, int button,
-                               int action, int mods) {
+void Ayumi::mouseButtonPressed(int button, int action, int mods) {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     was_left_click_ = true;
   }

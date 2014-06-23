@@ -57,9 +57,8 @@ class CharacterMovement : public engine::Behaviour {
   std::function<bool()> can_jump_functor_;
   std::function<bool()> can_flip_functor_;
 
-  virtual void update(const engine::Scene& scene) override;
-  virtual void keyAction(const engine::Scene& scene, int key, int scancode,
-                         int action, int mods) override;
+  virtual void update() override;
+  virtual void keyAction(int key, int scancode, int action, int mods) override;
 };
 
 #endif  // LOD_CHARMOVE_H_

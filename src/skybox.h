@@ -20,8 +20,8 @@ class Skybox : public engine::Behaviour {
   glm::vec3 getSunPos() const;
   glm::vec3 getLightSourcePos() const;
 
-  virtual void render(const engine::Scene& scene) override;
-  virtual void update(const engine::Scene& scene) override;
+  virtual void render() override;
+  virtual void update() override;
 
  private:
   float time_;

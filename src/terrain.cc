@@ -57,7 +57,7 @@ Terrain::Terrain(engine::Scene* scene)
   prog_.validate();
 }
 
-void Terrain::render(const engine::Scene&) {
+void Terrain::render() {
   const engine::Camera& cam = *scene_->camera();
   const Shadow *shadow = scene_->shadow();
 

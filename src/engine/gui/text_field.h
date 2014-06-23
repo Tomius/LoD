@@ -45,14 +45,14 @@ class TextField : public engine::Behaviour {
   bool cursor_visible_, modified_, mouse_over_, focused_;
   float visiblity_time_;
 
-  virtual void update(const Scene& scene) override {
+  virtual void update() override {
     if (!focused_) {
       box_->set_text(text_, -1);
     } else {
        if (modified_) {
         visiblity_time_ = 0;
       } else {
-        visiblity_time_ += scene.game_time().dt;
+        visiblity_time_ += scene_->game_time().dt;
       }
 
       if (fmod(visiblity_time_, 1.0) < 0.5) {
@@ -71,8 +71,7 @@ class TextField : public engine::Behaviour {
     }
   }
 
-  virtual void keyAction(const Scene& scene, int key, int scancode,
-                         int action, int mods) override {
+  virtual void keyAction(int key, int scancode, int action, int mods) override {
     if (focused_ && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
       switch (key) {
         case GLFW_KEY_BACKSPACE: {
@@ -99,7 +98,7 @@ class TextField : public engine::Behaviour {
     }
   }
 
-  virtual void charTyped(const Scene& scene, unsigned codepoint) override {
+  virtual void charTyped(unsigned codepoint) override {
     if (focused_) {
       text_.insert(cursor_pos_, 1, codepoint);
       cursor_pos_++;
@@ -107,7 +106,7 @@ class TextField : public engine::Behaviour {
     }
   }
 
-  virtual void mouseMoved(const Scene& scene, double xpos, double ypos) override {
+  virtual void mouseMoved(double xpos, double ypos) override {
     glm::vec2 window_size_2 = GameEngine::window_size() / 2.0f;
     glm::vec2 ndc_pos = (glm::vec2(xpos, ypos) - window_size_2) / window_size_2;
     ndc_pos.y *= -1;
@@ -122,8 +121,7 @@ class TextField : public engine::Behaviour {
     }
   }
 
-  virtual void mouseButtonPressed(const Scene& scene, int button,
-                                  int action, int mods) override {
+  virtual void mouseButtonPressed(int button, int action, int mods) override {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
       focused_ = mouse_over_;
     }

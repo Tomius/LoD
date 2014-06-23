@@ -12,26 +12,20 @@ class Behaviour : public GameObject {
   explicit Behaviour(Scene* scene) : GameObject(scene) {}
   virtual ~Behaviour() {}
 
-  virtual void update(const Scene& scene) {}
-  virtual void keyAction(const Scene& scene, int key, int scancode,
-                         int action, int mods) {}
-  virtual void charTyped(const Scene& scene, unsigned codepoint) {}
-  virtual void mouseScrolled(const Scene& scene, double xoffset,
-                             double yoffset) {}
-  virtual void mouseButtonPressed(const Scene& scene, int button,
-                                  int action, int mods) {}
-  virtual void mouseMoved(const Scene& scene, double xpos, double ypos) {}
+  virtual void update() {}
+  virtual void keyAction(int key, int scancode, int action, int mods) {}
+  virtual void charTyped(unsigned codepoint) {}
+  virtual void mouseScrolled(double xoffset, double yoffset) {}
+  virtual void mouseButtonPressed(int button, int action, int mods) {}
+  virtual void mouseMoved(double xpos, double ypos) {}
 
-  virtual void updateAll(const Scene& scene) override;
-  virtual void keyActionAll(const Scene& scene, int key, int scancode,
+  virtual void updateAll() override;
+  virtual void keyActionAll(int key, int scancode,
                             int action, int mods) override;
-  virtual void charTypedAll(const Scene& scene, unsigned codepoint) override;
-  virtual void mouseScrolledAll(const Scene& scene, double xoffset,
-                                double yoffset) override;
-  virtual void mouseButtonPressedAll(const Scene& scene, int button,
-                                     int action, int mods) override;
-  virtual void mouseMovedAll(const Scene& scene, double xpos,
-                             double ypos) override;
+  virtual void charTypedAll(unsigned codepoint) override;
+  virtual void mouseScrolledAll(double xoffset, double yoffset) override;
+  virtual void mouseButtonPressedAll(int button, int action, int mods) override;
+  virtual void mouseMovedAll(double xpos, double ypos) override;
 };
 
 }  // namespace engine

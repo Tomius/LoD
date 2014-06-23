@@ -49,7 +49,7 @@ class Button : public engine::Behaviour {
 
   std::vector<std::function<void()>> on_press_callback_;
 
-  virtual void mouseMoved(const Scene& scene, double xpos, double ypos) override {
+  virtual void mouseMoved(double xpos, double ypos) override {
     glm::vec2 window_size_2 = GameEngine::window_size() / 2.0f;
     glm::vec2 ndc_pos = (glm::vec2(xpos, ypos) - window_size_2) / window_size_2;
     ndc_pos.y *= -1;
@@ -64,8 +64,7 @@ class Button : public engine::Behaviour {
     }
   }
 
-  virtual void mouseButtonPressed(const Scene& scene, int button,
-                                  int action, int mods) override {
+  virtual void mouseButtonPressed(int button, int action, int mods) override {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && mouse_over_) {
       for (const auto& callback : on_press_callback_) {
         callback();

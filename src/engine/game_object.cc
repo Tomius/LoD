@@ -11,71 +11,67 @@
 
 namespace engine {
 
-void GameObject::shadowRenderAll(const Scene& scene) {
-  _TRY(shadowRender(scene));
+void GameObject::shadowRenderAll() {
+  _TRY(shadowRender());
   for (auto& component : components_) {
-    component->shadowRenderAll(scene);
+    component->shadowRenderAll();
   }
 }
 
-void GameObject::renderAll(const Scene& scene) {
-  _TRY(render(scene));
+void GameObject::renderAll() {
+  _TRY(render());
   for (auto& component : components_) {
-    component->renderAll(scene);
+    component->renderAll();
   }
 }
 
-void GameObject::render2DAll(const Scene& scene) {
-  _TRY(render2D(scene));
+void GameObject::render2DAll() {
+  _TRY(render2D());
   for (auto& component : components_) {
-    component->render2DAll(scene);
+    component->render2DAll();
   }
 }
 
-void GameObject::screenResizedAll(const Scene& scene, size_t width,
-                                  size_t height) {
+void GameObject::screenResizedAll(size_t width, size_t height) {
   for (auto& behaviour : components_) {
-    behaviour->screenResizedAll(scene, width, height);
+    behaviour->screenResizedAll(width, height);
   }
-  _TRY(screenResized(scene, width, height));
+  _TRY(screenResized(width, height));
 }
 
-void GameObject::updateAll(const Scene& scene) {
+void GameObject::updateAll() {
   for (auto& behaviour : behaviours_) {
-    behaviour->updateAll(scene);
-  }
-}
-
-void GameObject::keyActionAll(const Scene& scene, int key, int scancode,
-                              int action, int mods) {
-  for (auto& behaviour : behaviours_) {
-    behaviour->keyActionAll(scene, key, scancode, action, mods);
+    behaviour->updateAll();
   }
 }
 
-void GameObject::charTypedAll(const Scene& scene, unsigned codepoint) {
+void GameObject::keyActionAll(int key, int scancode, int action, int mods) {
   for (auto& behaviour : behaviours_) {
-    behaviour->charTypedAll(scene, codepoint);
+    behaviour->keyActionAll(key, scancode, action, mods);
   }
 }
 
-void GameObject::mouseScrolledAll(const Scene& scene, double xoffset,
-                                  double yoffset) {
+void GameObject::charTypedAll(unsigned codepoint) {
   for (auto& behaviour : behaviours_) {
-    behaviour->mouseScrolledAll(scene, xoffset, yoffset);
+    behaviour->charTypedAll(codepoint);
   }
 }
 
-void GameObject::mouseButtonPressedAll(const Scene& scene, int button,
-                                       int action, int mods) {
+void GameObject::mouseScrolledAll(double xoffset, double yoffset) {
   for (auto& behaviour : behaviours_) {
-    behaviour->mouseButtonPressedAll(scene, button, action, mods);
+    behaviour->mouseScrolledAll(xoffset, yoffset);
   }
 }
 
-void GameObject::mouseMovedAll(const Scene& scene, double xpos, double ypos) {
+void GameObject::mouseButtonPressedAll(int button, int action, int mods) {
   for (auto& behaviour : behaviours_) {
-    behaviour->mouseMovedAll(scene, xpos, ypos);
+    behaviour->mouseButtonPressedAll(button, action, mods);
+  }
+}
+
+void GameObject::mouseMovedAll(double xpos, double ypos) {
+  for (auto& behaviour : behaviours_) {
+    behaviour->mouseMovedAll(xpos, ypos);
   }
 }
 

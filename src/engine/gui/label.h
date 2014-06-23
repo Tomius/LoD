@@ -190,15 +190,14 @@ class Label : public engine::GameObject {
     set_position(pos_);
   }
 
-  virtual void screenResized(const Scene&, size_t width,
-                             size_t height) override {
+  virtual void screenResized(size_t width, size_t height) override {
     prog_.use();
     gl::Uniform<glm::mat4>(prog_, "uProjectionMatrix") =
       glm::ortho<float>(-int(width)/2, width/2, -int(height)/2, height/2, -1, 1);
     set_position(pos_);
   }
 
-  virtual void render2D(const Scene&) override {
+  virtual void render2D() override {
     prog_.use();
     vao_.bind();
 

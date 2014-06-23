@@ -19,12 +19,12 @@ class FpsDisplay : public engine::Behaviour {
   engine::gui::Label *label_;
   static constexpr float refresh_interval = 0.1f;
 
-  virtual void update(const engine::Scene& scene) override {
+  virtual void update() override {
     static double accum_time = 0;
     static int calls = 0;
 
     calls++;
-    accum_time += scene.camera_time().dt;
+    accum_time += scene_->camera_time().dt;
     if (accum_time > refresh_interval) {
       label_->set_text(L"FPS: " +
         std::to_wstring(static_cast<int>(calls * (1.0f/accum_time))));

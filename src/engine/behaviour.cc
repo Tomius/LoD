@@ -11,50 +11,46 @@
 
 namespace engine {
 
-void Behaviour::updateAll(const Scene& scene) {
+void Behaviour::updateAll() {
   for (auto& component : behaviours_) {
-    component->updateAll(scene);
+    component->updateAll();
   }
-  _TRY(update(scene));
+  _TRY(update());
 }
 
-void Behaviour::keyActionAll(const Scene& scene, int key, int scancode,
-                          int action, int mods) {
+void Behaviour::keyActionAll(int key, int scancode, int action, int mods) {
   for (auto& component : behaviours_) {
-    component->keyActionAll(scene, key, scancode, action, mods);
+    component->keyActionAll(key, scancode, action, mods);
   }
-  _TRY(keyAction(scene, key, scancode, action, mods));
+  _TRY(keyAction(key, scancode, action, mods));
 }
 
-void Behaviour::charTypedAll(const Scene& scene, unsigned codepoint) {
+void Behaviour::charTypedAll(unsigned codepoint) {
   for (auto& behaviour : behaviours_) {
-    behaviour->charTypedAll(scene, codepoint);
+    behaviour->charTypedAll(codepoint);
   }
-  _TRY(charTyped(scene, codepoint));
+  _TRY(charTyped(codepoint));
 }
 
-void Behaviour::mouseScrolledAll(const Scene& scene, double xoffset,
-                              double yoffset) {
+void Behaviour::mouseScrolledAll(double xoffset, double yoffset) {
   for (auto& component : behaviours_) {
-    component->mouseScrolledAll(scene, xoffset, yoffset);
+    component->mouseScrolledAll(xoffset, yoffset);
   }
-  _TRY(mouseScrolled(scene, xoffset, yoffset));
+  _TRY(mouseScrolled(xoffset, yoffset));
 }
 
-void Behaviour::mouseButtonPressedAll(const Scene& scene, int button,
-                                   int action, int mods) {
+void Behaviour::mouseButtonPressedAll(int button, int action, int mods) {
   for (auto& component : behaviours_) {
-    component->mouseButtonPressedAll(scene, button, action, mods);
+    component->mouseButtonPressedAll(button, action, mods);
   }
-  _TRY(mouseButtonPressed(scene, button, action, mods));
+  _TRY(mouseButtonPressed(button, action, mods));
 }
 
-void Behaviour::mouseMovedAll(const Scene& scene, double xpos,
-                           double ypos) {
+void Behaviour::mouseMovedAll(double xpos, double ypos) {
   for (auto& component : behaviours_) {
-    component->mouseMovedAll(scene, xpos, ypos);
+    component->mouseMovedAll(xpos, ypos);
   }
-  _TRY(mouseMoved(scene, xpos, ypos));
+  _TRY(mouseMoved(xpos, ypos));
 }
 
 }  // namespace engine

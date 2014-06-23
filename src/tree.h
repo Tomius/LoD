@@ -16,8 +16,8 @@ class Tree : public engine::GameObject {
  public:
   Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map);
   virtual ~Tree() {}
-  virtual void shadowRender(const engine::Scene& scene) override;
-  virtual void render(const engine::Scene& scene) override;
+  virtual void shadowRender() override;
+  virtual void render() override;
 
  private:
   static constexpr int kTreeTypeNum = 2;

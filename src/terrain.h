@@ -18,7 +18,7 @@ class Terrain : public engine::GameObject {
   virtual ~Terrain() {}
 
   const engine::HeightMapInterface& height_map() { return height_map_; }
-  virtual void render(const engine::Scene& scene) override;
+  virtual void render() override;
 
  private:
   engine::HeightMap<GLushort> height_map_;

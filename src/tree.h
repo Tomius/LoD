@@ -6,16 +6,20 @@
 #include <vector>
 
 #include "engine/oglwrap_config.h"
+#include "engine/scene.h"
 #include "engine/game_object.h"
 #include "engine/shader_manager.h"
 #include "engine/mesh/mesh_renderer.h"
 #include "engine/height_map_interface.h"
 
-#include "./charmove.h"
-#include "./skybox.h"
-#include "./shadow.h"
-
 class Tree : public engine::GameObject {
+ public:
+  Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map);
+  virtual ~Tree() {}
+  virtual void shadowRender(const engine::Scene& scene) override;
+  virtual void render(const engine::Scene& scene) override;
+
+ private:
   static constexpr int kTreeTypeNum = 2;
   engine::MeshRenderer mesh_[kTreeTypeNum];
   engine::ShaderProgram prog_, shadow_prog_;
@@ -23,8 +27,6 @@ class Tree : public engine::GameObject {
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
   gl::LazyUniform<glm::mat3> uNormalMatrix_;
   gl::LazyUniform<glm::mat4> shadow_uMCP_;
-
-  Shadow *shadow_;
 
   struct TreeInfo {
     int type;
@@ -34,13 +36,6 @@ class Tree : public engine::GameObject {
   };
 
   std::vector<TreeInfo> trees_;
-
- public:
-  Tree(engine::ShaderManager *manager, Shadow *shadow,
-       const engine::HeightMapInterface& height_map);
-  virtual ~Tree() {}
-  virtual void shadowRender(const engine::Scene& scene) override;
-  virtual void render(const engine::Scene& scene) override;
 };
 
 #endif  // LOD_TREE_H_

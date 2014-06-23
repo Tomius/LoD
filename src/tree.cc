@@ -3,20 +3,20 @@
 #include "./tree.h"
 #include "engine/scene.h"
 
-Tree::Tree(engine::ShaderManager *manager, Shadow *shadow,
-           const engine::HeightMapInterface& height_map)
-    : mesh_{{"models/trees/swamptree.dae",
+Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
+    : engine::GameObject(scene)
+    , mesh_{{"models/trees/swamptree.dae",
             aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs},
             {"models/trees/tree.obj",
             aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs}}
-    , prog_(manager->get("tree.vert"), manager->get("tree.frag"))
-    , shadow_prog_(manager->get("tree_shadow.vert"),
-                   manager->get("tree_shadow.frag"))
+    , prog_(scene->shader_manager()->get("tree.vert"),
+            scene->shader_manager()->get("tree.frag"))
+    , shadow_prog_(scene->shader_manager()->get("tree_shadow.vert"),
+                   scene->shader_manager()->get("tree_shadow.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
     , uNormalMatrix_(prog_, "uNormalMatrix")
-    , shadow_uMCP_(shadow_prog_, "uMCP")
-    , shadow_((assert(shadow), shadow)) {
+    , shadow_uMCP_(shadow_prog_, "uMCP") {
   shadow_prog_.use();
   gl::UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
   shadow_prog_.validate();
@@ -67,30 +67,31 @@ Tree::Tree(engine::ShaderManager *manager, Shadow *shadow,
   }
 }
 
-void Tree::shadowRender(const engine::Scene& scene) {
+void Tree::shadowRender(const engine::Scene&) {
   shadow_prog_.use();
 
+  auto shadow = scene_->shadow();
   auto cullface = gl::TemporaryDisable(gl::kCullFace);
 
-  const auto& cam = *scene.camera();
+  const auto& cam = *scene_->camera();
   auto campos = cam.pos();
   for (size_t i = 0; i < trees_.size() &&
-      shadow_->getDepth() < shadow_->getMaxDepth(); i++) {
+      shadow->getDepth() < shadow->getMaxDepth(); i++) {
     if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
-      shadow_uMCP_ = shadow_->modelCamProjMat(trees_[i].bsphere,
-                                              trees_[i].mat,
-                                              glm::mat4());
+      shadow_uMCP_ = shadow->modelCamProjMat(trees_[i].bsphere,
+                                             trees_[i].mat,
+                                             glm::mat4());
       mesh_[trees_[i].type].render();
-      shadow_->push();
+      shadow->push();
     }
   }
 }
 
-void Tree::render(const engine::Scene& scene) {
+void Tree::render(const engine::Scene&) {
   prog_.use();
   prog_.update();
 
-  const auto& cam = *scene.camera();
+  const auto& cam = *scene_->camera();
   uProjectionMatrix_ = cam.projectionMatrix();
 
   auto blend = gl::TemporaryEnable(gl::kBlend);

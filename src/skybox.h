@@ -9,12 +9,12 @@
 #include "oglwrap/shapes/cube.h"
 #include "oglwrap/textures/texture_cube.h"
 
-#include "engine/shader_manager.h"
+#include "engine/scene.h"
 #include "engine/behaviour.h"
 
 class Skybox : public engine::Behaviour {
  public:
-  explicit Skybox(engine::ShaderManager* shader_manager);
+  explicit Skybox(engine::Scene* scene);
   virtual ~Skybox() {}
 
   glm::vec3 getSunPos() const;

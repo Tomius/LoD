@@ -1,14 +1,14 @@
 // Copyright (c) 2014, Tamas Csala
 
-#ifndef LOD_MIDEU_SCENE_H_
-#define LOD_MIDEU_SCENE_H_
+#ifndef LOD_MAIN_SCENE_H_
+#define LOD_MAIN_SCENE_H_
 
 #include "engine/scene.h"
 #include "./charmove.h"
 
-class MideuScene : public engine::Scene {
+class MainScene : public engine::Scene {
  public:
-  MideuScene();
+  MainScene();
   virtual float gravity() const override { return 18.0f; }
 };
 

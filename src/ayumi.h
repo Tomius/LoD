@@ -12,6 +12,25 @@
 #include "./shadow.h"
 
 class Ayumi : public engine::Behaviour {
+ public:
+  Ayumi(engine::Scene* scene);
+  virtual ~Ayumi() {}
+
+  engine::AnimatedMeshRenderer& getMesh();
+  engine::Animation& getAnimation();
+  virtual void update(const engine::Scene& scene) override;
+  virtual void shadowRender(const engine::Scene& scene) override;
+  virtual void render(const engine::Scene& scene) override;
+  void charmove(CharacterMovement* charmove) {
+    if (!charmove) return;
+    charmove_ = charmove;
+    charmove_->setCanJumpCallback(std::bind(&Ayumi::canJump, this));
+    charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
+  }
+  virtual void mouseButtonPressed(const engine::Scene& scene, int button,
+                                  int action, int mods) override;
+
+ private:
   engine::AnimatedMeshRenderer mesh_;
   engine::Animation anim_;
   engine::ShaderProgram prog_, shadow_prog_;
@@ -20,13 +39,8 @@ class Ayumi : public engine::Behaviour {
                              uModelMatrix_, uBones_,
                              shadow_uMCP_, shadow_uBones_;
 
-  bool attack2_, attack3_;
-
-  GLFWwindow* window_;
-
+  bool attack2_, attack3_, was_left_click_;
   CharacterMovement *charmove_;
-  Shadow* shadow_;
-  bool was_left_click_;
 
   glm::vec4 bsphere_;
 
@@ -37,21 +51,7 @@ class Ayumi : public engine::Behaviour {
   engine::ShaderFile* loadVertexShader(engine::ShaderManager* manager);
   engine::ShaderFile* loadShadowVertexShader(engine::ShaderManager* manager);
 
- public:
-  Ayumi(engine::ShaderManager* manager, GLFWwindow* window, Shadow* shadow);
-  virtual ~Ayumi() {}
-  engine::AnimatedMeshRenderer& getMesh();
-  engine::Animation& getAnimation();
-  virtual void update(const engine::Scene& scene) override;
-  virtual void shadowRender(const engine::Scene& scene) override;
-  virtual void render(const engine::Scene& scene) override;
-  void charmove(CharacterMovement* charmove) {
-    charmove_ = (assert(charmove), charmove);
-    charmove_->setCanJumpCallback(std::bind(&Ayumi::canJump, this));
-    charmove_->setCanFlipCallback(std::bind(&Ayumi::canFlip, this));
-  }
-  virtual void mouseButtonPressed(const engine::Scene& scene, int button,
-                                  int action, int mods) override;
+
 };
 
 #endif  // LOD_INCLUDE_AYUMI_H_

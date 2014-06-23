@@ -26,12 +26,15 @@ engine::ShaderFile* Ayumi::loadShadowVertexShader(
 }
 
 
-Ayumi::Ayumi(engine::ShaderManager* manager, GLFWwindow* window, Shadow* shadow)
-    : mesh_("models/ayumi/ayumi.dae",
+Ayumi::Ayumi(engine::Scene* scene)
+    : engine::Behaviour(scene)
+    , mesh_("models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs)
     , anim_(mesh_.getAnimData())
-    , prog_(loadVertexShader(manager), manager->get("ayumi.frag"))
-    , shadow_prog_(loadShadowVertexShader(manager), manager->get("shadow.frag"))
+    , prog_(loadVertexShader(scene->shader_manager()),
+            scene->shader_manager()->get("ayumi.frag"))
+    , shadow_prog_(loadShadowVertexShader(scene->shader_manager()),
+                   scene->shader_manager()->get("shadow.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")
@@ -39,10 +42,9 @@ Ayumi::Ayumi(engine::ShaderManager* manager, GLFWwindow* window, Shadow* shadow)
     , shadow_uMCP_(shadow_prog_, "uMCP")
     , shadow_uBones_(shadow_prog_, "uBones")
     , attack2_(false)
-    , window_(window)
-    , charmove_(nullptr)
-    , shadow_(shadow)
+    , attack3_(false)
     , was_left_click_(false)
+    , charmove_(nullptr)
     , bsphere_(mesh_.bSphere()) {
   shadow_prog_.validate();
   prog_.use();
@@ -112,8 +114,8 @@ engine::Animation& Ayumi::getAnimation() {
   return anim_;
 }
 
-void Ayumi::update(const engine::Scene& scene) {
-  float time = scene.game_time().current;
+void Ayumi::update(const engine::Scene&) {
+  float time = scene_->game_time().current;
 
   std::string curr_anim = anim_.getCurrentAnimation();
 
@@ -146,7 +148,7 @@ void Ayumi::update(const engine::Scene& scene) {
     }
   } else {
     if (charmove_->isWalking()) {
-      if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
+      if (glfwGetKey(scene_->window(), GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
         anim_.setCurrentAnimation(AnimParams("Run", 0.3f), time);
       } else {
         anim_.setCurrentAnimation(AnimParams("Walk", 0.3f), time);
@@ -162,8 +164,8 @@ void Ayumi::update(const engine::Scene& scene) {
 void Ayumi::shadowRender(const engine::Scene&) {
   shadow_prog_.use();
   shadow_uMCP_ =
-    shadow_->modelCamProjMat(bsphere_, transform.matrix(),
-                             mesh_.worldTransform());
+    scene_->shadow()->modelCamProjMat(bsphere_, transform.matrix(),
+                                     mesh_.worldTransform());
   mesh_.uploadBoneInfo(shadow_uBones_);
 
   gl::CullFace(gl::kFront);
@@ -176,13 +178,13 @@ void Ayumi::shadowRender(const engine::Scene&) {
   mesh_.enableTextures();
   gl::CullFace(gl::kBack);
 
-  shadow_->push();
+  scene_->shadow()->push();
 }
 
-void Ayumi::render(const engine::Scene& scene) {
+void Ayumi::render(const engine::Scene&) {
   prog_.use();
   prog_.update();
-  const auto& cam = *scene.camera();
+  const auto& cam = *scene_->camera();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uModelMatrix_ = transform.matrix() * mesh_.worldTransform();
@@ -205,14 +207,14 @@ bool Ayumi::canFlip() {
 
 AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
   if (current_anim == "Attack") {
-    if (attack2_ ||
-        glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    if (attack2_ || glfwGetMouseButton(scene_->window(), GLFW_MOUSE_BUTTON_LEFT)
+          == GLFW_PRESS) {
       return AnimParams("Attack2", 0.1f);
     }
   } else if (current_anim == "Attack2") {
     attack2_ = false;
-    if (attack3_ ||
-        glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    if (attack3_ || glfwGetMouseButton(scene_->window(), GLFW_MOUSE_BUTTON_LEFT)
+          == GLFW_PRESS) {
       return AnimParams("Attack3", 0.05f);
     }
   } else if (current_anim == "Attack3") {
@@ -240,7 +242,7 @@ AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
     } else {
       params.transition_time = 0.3f;
     }
-    if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
+    if (glfwGetKey(scene_->window(), GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
       params.name = "Run";
       return params;
     } else {
@@ -261,7 +263,7 @@ AnimParams Ayumi::animationEndedCallback(const std::string& current_anim) {
 }
 
 
-void Ayumi::mouseButtonPressed(const engine::Scene& scene, int button,
+void Ayumi::mouseButtonPressed(const engine::Scene&, int button,
                                int action, int mods) {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     was_left_click_ = true;

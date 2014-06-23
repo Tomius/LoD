@@ -5,13 +5,13 @@
 #include <algorithm>
 #include "engine/game_engine.h"
 
-CharacterMovement::CharacterMovement(
-                  GLFWwindow* window,
-                  engine::Transform& transform,
-                  engine::RigidBody& rigid_body,
-                  float horizontal_speed,
-                  float rotationSpeed_PerSec)
-  : transform_(transform)
+CharacterMovement::CharacterMovement(engine::Scene *scene,
+                                     engine::Transform& transform,
+                                     engine::RigidBody& rigid_body,
+                                     float horizontal_speed,
+                                     float rotationSpeed_PerSec)
+  : engine::Behaviour(scene)
+  , transform_(transform)
   , rigid_body_(rigid_body)
   , curr_rot_(0)
   , dest_rot_(0)
@@ -24,7 +24,6 @@ CharacterMovement::CharacterMovement(
   , flip_(false)
   , can_flip_(true)
   , transition_(false)
-  , window_(window)
   , anim_(nullptr)
   , camera_(nullptr)
   , can_jump_functor_(nullptr)
@@ -58,11 +57,11 @@ void CharacterMovement::update(const engine::Scene& scene) {
   float dt =  time - prevTime;
   prevTime = time;
 
-  glm::ivec2 moveDir; // up and right is positive
-  bool w = glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS;
-  bool a = glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS;
-  bool s = glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS;
-  bool d = glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS;
+  glm::ivec2 moveDir;  // up and right is positive
+  bool w = glfwGetKey(scene_->window(), GLFW_KEY_W) == GLFW_PRESS;
+  bool a = glfwGetKey(scene_->window(), GLFW_KEY_A) == GLFW_PRESS;
+  bool s = glfwGetKey(scene_->window(), GLFW_KEY_S) == GLFW_PRESS;
+  bool d = glfwGetKey(scene_->window(), GLFW_KEY_D) == GLFW_PRESS;
 
   if (w && !s) {
     moveDir.y = 1;
@@ -85,7 +84,7 @@ void CharacterMovement::update(const engine::Scene& scene) {
   if (walking_) {
     glm::vec3 fwd = cam.forward();
     double cameraRot = -atan2(fwd.z, fwd.x);
-    double moveRot = atan2(moveDir.y, moveDir.x); // +y is forward
+    double moveRot = atan2(moveDir.y, moveDir.x);  // +y is forward
     dest_rot_ = cameraRot + moveRot;
     dest_rot_ = fmod(dest_rot_, 2*M_PI);
 

@@ -16,6 +16,7 @@ class Behaviour;
 
 class GameObject {
  protected:
+  Scene* scene_;
   GameObject* parent_;
   std::vector<std::unique_ptr<GameObject>> components_;
   std::vector<Behaviour*> behaviours_;
@@ -24,6 +25,7 @@ class GameObject {
   Transform transform;
   std::unique_ptr<RigidBody> rigid_body;
 
+  explicit GameObject(Scene* scene) : scene_(scene) {}
   virtual ~GameObject() {}
 
   void addRigidBody(const HeightMapInterface& height_map,
@@ -36,22 +38,31 @@ class GameObject {
   T* addComponent(Args&&... args) {
     static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
 
-    T *obj = new T {std::forward<Args>(args)...};
-    transform.addChild(obj->transform);
-    obj->parent_ = this;
-    components_.push_back(std::unique_ptr<GameObject>(obj));
+    try {
+      T *obj = new T {scene_, std::forward<Args>(args)...};
+      transform.addChild(obj->transform);
+      obj->parent_ = this;
+      components_.push_back(std::unique_ptr<GameObject>(obj));
 
-    // is_base_of wonldn't work as Behaviour is incomplete here
-    Behaviour* behaviour = dynamic_cast<Behaviour*>(obj);
-    if (behaviour) {
-      behaviours_.push_back(behaviour);
+      // is_base_of wouldn't work as Behaviour is incomplete here
+      Behaviour* behaviour = dynamic_cast<Behaviour*>(obj);
+      if (behaviour) {
+        behaviours_.push_back(behaviour);
+      }
+
+      return obj;
+    } catch (const std::exception& ex) {
+      std::cout << ex.what() << std::endl;
+      return nullptr;
     }
-
-    return obj;
   }
 
-  GameObject* parent() {return parent_;}
-  const GameObject* parent() const {return parent_;}
+  GameObject* parent() { return parent_; }
+  const GameObject* parent() const { return parent_; }
+
+  Scene* scene() { return scene_; }
+  const Scene* scene() const { return scene_; }
+  void set_scene(Scene* scene) { scene_ = scene; }
 
   virtual void shadowRender(const Scene& scene) {}
   virtual void render(const Scene& scene) {}
@@ -61,7 +72,8 @@ class GameObject {
   virtual void shadowRenderAll(const Scene& scene);
   virtual void renderAll(const Scene& scene);
   virtual void render2DAll(const Scene& scene);
-  virtual void screenResizedAll(const Scene& scene, size_t width, size_t height);
+  virtual void screenResizedAll(const Scene& scene, size_t width,
+                                size_t height);
 
   virtual void updateAll(const Scene& scene);
   virtual void keyActionAll(const Scene& scene, int key, int scancode,

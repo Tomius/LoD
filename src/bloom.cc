@@ -1,20 +1,20 @@
 // Copyright (c) 2014, Tamas Csala
 
 #include "./bloom.h"
+#include "engine/scene.h"
 #include "oglwrap/smart_enums.h"
 
-BloomEffect::BloomEffect()
-    : vs_("bloom.vert")
-    , fs_("bloom.frag")
+BloomEffect::BloomEffect(engine::Scene *scene)
+    : engine::GameObject(scene)
+    , prog_(scene->shader_manager()->get("bloom.vert"),
+            scene->shader_manager()->get("bloom.frag"))
     , uScreenSize_(prog_, "uScreenSize") {
-  prog_ << vs_ << fs_;
-  prog_.link().use();
+  prog_.use();
 
   gl::UniformSampler(prog_, "uTex").set(0);
+  rect_.setupPositions(prog_ | "aPosition");
 
   prog_.validate();
-
-  rect_.setupPositions(prog_ | "aPosition");
 
   tex_.active(0);
   tex_.bind();

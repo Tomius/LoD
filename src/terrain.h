@@ -13,24 +13,25 @@
 #include "engine/cdlod/terrain_mesh.h"
 
 class Terrain : public engine::GameObject {
+ public:
+  explicit Terrain(engine::Scene* scene);
+  virtual ~Terrain() {}
+
+  const engine::HeightMapInterface& height_map() { return height_map_; }
+  virtual void render(const engine::Scene& scene) override;
+
+ private:
+  engine::HeightMap<GLushort> height_map_;
+  engine::cdlod::TerrainMesh mesh_;
+  engine::ShaderProgram prog_;  // has to be inited after mesh_
+
   gl::Texture2D grassMaps_[2], grassNormalMap_;
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_,
                              uModelMatrix_, uShadowCP_;
   gl::LazyUniform<int> uNumUsedShadowMaps_;
   gl::LazyUniform<glm::ivec2> uShadowAtlasSize_;
 
-  engine::HeightMap<GLushort> height_map_;
-  engine::cdlod::TerrainMesh mesh_;
-  engine::ShaderProgram prog_;  // has to be inited after mesh_
-
   const engine::Transform& initTransform();
-
- public:
-  explicit Terrain(engine::ShaderManager* shader_manager);
-  virtual ~Terrain() {}
-
-  const engine::HeightMapInterface& height_map() { return height_map_; }
-  virtual void render(const engine::Scene& scene) override;
 };
 
 #endif  // LOD_TERRAIN_H_

@@ -8,8 +8,15 @@
 #include "engine/gui/label.h"
 
 class FpsDisplay : public engine::Behaviour {
-  engine::gui::Label *label_;
+ public:
+  explicit FpsDisplay(engine::Scene* scene) : engine::Behaviour(scene) {
+    label_ = addComponent<engine::gui::Label>(L"FPS: ", glm::vec2{0.8f, 0.9f},
+             engine::gui::Font{"src/engine/gui/freetype-gl/fonts/Vera.ttf", 30,
+             glm::vec4(1, 0, 0, 1)});
+  }
 
+ private:
+  engine::gui::Label *label_;
   static constexpr float refresh_interval = 0.1f;
 
   virtual void update(const engine::Scene& scene) override {
@@ -20,18 +27,10 @@ class FpsDisplay : public engine::Behaviour {
     accum_time += scene.camera_time().dt;
     if (accum_time > refresh_interval) {
       label_->set_text(L"FPS: " +
-        std::to_wstring(int(calls * (1.0f/accum_time))));
+        std::to_wstring(static_cast<int>(calls * (1.0f/accum_time))));
       accum_time = calls = 0;
     }
   }
-
- public:
-  FpsDisplay() {
-    label_ = addComponent<engine::gui::Label>(L"FPS: ", glm::vec2{0.8f, 0.9f},
-             engine::gui::Font{"src/engine/gui/freetype-gl/fonts/Vera.ttf", 30,
-             glm::vec4(1, 0, 0, 1)});
-  }
-
 };
 
 #endif

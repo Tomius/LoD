@@ -25,9 +25,10 @@ class Label : public engine::GameObject {
   std::wstring text_;
 
  public:
-  Label(const std::wstring& text, glm::vec2 pos,
+  Label(engine::Scene* scene, const std::wstring& text, glm::vec2 pos,
         const Font& font = Font{}, size_t cursor_pos = -1)
-      : font_(font), idx_cnt_(0), pos_(pos), text_(text) {
+      : engine::GameObject(scene), font_(font)
+      , idx_cnt_(0), pos_(pos), text_(text) {
     gl::VertexShader vs("text.vert");
     gl::FragmentShader fs("text.frag");
 
@@ -149,9 +150,9 @@ class Label : public engine::GameObject {
     attribs_.bind();
     attribs_.data(attribs_vec);
     (prog_ | "aPosition").pointer(2, gl::kFloat, false,
-                                  4*sizeof(float), 0).enable();
-    (prog_ | "aTexCoord").pointer(2, gl::kFloat, false, 4*sizeof(float),
-                                  (const void*)(2*sizeof(float))).enable();
+                                  4*sizeof(GLfloat), 0).enable();
+    (prog_ | "aTexCoord").pointer(2, gl::kFloat, false, 4*sizeof(GLfloat),
+                                  (const void*)(2*sizeof(GLfloat))).enable();
     vao_.unbind();
 
     idx_cnt_ = attribs_vec.size();
@@ -189,7 +190,7 @@ class Label : public engine::GameObject {
     set_position(pos_);
   }
 
-  virtual void screenResized(const Scene& scene, size_t width,
+  virtual void screenResized(const Scene&, size_t width,
                              size_t height) override {
     prog_.use();
     gl::Uniform<glm::mat4>(prog_, "uProjectionMatrix") =
@@ -197,7 +198,7 @@ class Label : public engine::GameObject {
     set_position(pos_);
   }
 
-  virtual void render2D(const Scene& scene) override {
+  virtual void render2D(const Scene&) override {
     prog_.use();
     vao_.bind();
 

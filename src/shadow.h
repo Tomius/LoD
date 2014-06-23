@@ -13,15 +13,6 @@
 class Skybox;
 
 class Shadow {
-  gl::Texture2D tex_;
-  gl::Framebuffer fbo_;
-
-  size_t w_, h_, size_;
-  size_t xsize_, ysize_, curr_depth_, max_depth_;
-  std::vector<glm::mat4> cp_matrices_;
-
-  Skybox* skybox_;
-
  public:
   Shadow(Skybox* skybox, int shadow_map_size,
          int atlas_x_size, int atlas_y_size);
@@ -52,6 +43,16 @@ class Shadow {
   size_t getDepth() const;
   size_t getMaxDepth() const;
   void end();
+
+ private:
+  gl::Texture2D tex_;
+  gl::Framebuffer fbo_;
+
+  size_t w_, h_, size_;
+  size_t xsize_, ysize_, curr_depth_, max_depth_;
+  std::vector<glm::mat4> cp_matrices_;
+
+  Skybox* skybox_;
 };
 
 #endif  // LOD_SHADOW_H_

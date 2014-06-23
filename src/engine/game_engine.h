@@ -27,6 +27,7 @@ class GameEngine {
 
     try {
       scene_ = new Scene_t();
+      scene_->set_window(window_);
     } catch(const std::exception& err) {
       std::cerr << "Unable to load scene:\n" << err.what() << std::endl;
       std::cerr << "Stopping now." << std::endl;

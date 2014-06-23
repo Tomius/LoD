@@ -6,11 +6,14 @@
 #include <vector>
 #include <memory>
 
-#include "../shadow.h"
+#include "./oglwrap_config.h"
 #include "../oglwrap/oglwrap.h"
 
 #include "./timer.h"
 #include "./camera.h"
+#include "./shader_manager.h"
+
+#include "../shadow.h"
 
 namespace engine {
 
@@ -20,36 +23,48 @@ class Scene {
   std::vector<std::unique_ptr<GameObject>> gameobjects_;
   std::unique_ptr<Camera> camera_;
   std::unique_ptr<Shadow> shadow_;
+  ShaderManager shader_manager_;
   Timer game_time_, environment_time_, camera_time_;
+  GLFWwindow* window_;
 
  public:
   virtual ~Scene() {}
 
   // setters and getters
   virtual float gravity() const { return 9.81f; }
+
   const Timer& game_time() const { return game_time_; }
   Timer& game_time() { return game_time_; }
+
   const Timer& environment_time() const { return environment_time_; }
   Timer& environment_time() { return environment_time_; }
+
   const Timer& camera_time() const { return camera_time_; }
   Timer& camera_time() { return camera_time_; }
+
   const Camera* camera() const { return camera_.get(); }
-  Camera* camera() { return camera_.get(); }
+  //  Camera* camera() { return camera_.get(); }
+
   const Shadow* shadow() const { return shadow_.get(); }
   Shadow* shadow() { return shadow_.get(); }
+
+  ShaderManager* shader_manager() { return &shader_manager_; }
+
+  GLFWwindow* window() const { return window_; }
+  void set_window(GLFWwindow* window) { window_ = window; }
 
   template<typename T, typename... Args>
   T* addGameObject(Args&&... args) {
     static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
 
-    T *go = new T{std::forward<Args>(args)...};
+    T *go = new T{this, std::forward<Args>(args)...};
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }
 
   template<typename... Args>
   GameObject* addGameObject(Args&&... args) {
-    GameObject *go = new GameObject{std::forward<Args>(args)...};
+    GameObject *go = new GameObject{this, std::forward<Args>(args)...};
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }

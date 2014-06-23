@@ -29,14 +29,9 @@ struct BoxParams {
 };
 
 class Box : public engine::GameObject {
-  BoxParams params_;
-  Label *label_;
-
-  gl::FullScreenRectangle rect_;
-  gl::Program prog_;
-
  public:
-  explicit Box(const BoxParams& params) : params_(params), label_(nullptr) {
+  Box(engine::Scene* scene, const BoxParams& params)
+      : engine::GameObject(scene), params_(params), label_(nullptr) {
     gl::VertexShader vs("box.vert");
     gl::FragmentShader fs("box.frag");
     prog_ << vs << fs;
@@ -96,6 +91,12 @@ class Box : public engine::GameObject {
   }
 
  private:
+  BoxParams params_;
+  Label *label_;
+
+  gl::FullScreenRectangle rect_;
+  gl::Program prog_;
+
   virtual void screenResized(const Scene&, size_t width, size_t height) override {
     glm::vec2 border_width = params_.border_width /
         (params_.extent * glm::vec2(0.99f * width, 0.99f * height));

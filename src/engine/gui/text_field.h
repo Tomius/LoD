@@ -17,6 +17,27 @@ namespace engine {
 namespace gui {
 
 class TextField : public engine::Behaviour {
+ public:
+  TextField(Scene* scene, glm::vec2 center,
+            glm::vec2 extent, const std::wstring& text)
+      : engine::Behaviour(scene), pos_(center), extent_(extent)
+      , cursor_pos_(text.size()), text_(text), cursor_visible_(false)
+      , modified_(false), focused_(false) {
+    BoxParams params;
+    params.center = center;
+    params.extent = extent;
+    params.style = engine::gui::BoxParams::Style::kFlat;
+    params.bg_color = glm::vec4{0, 0, 0, 0.3};
+    params.border_color = glm::vec4{1, 1, 1, 1};
+    params.border_width = 1;
+    params.roundness = 7;
+    params.label_pos = center - glm::vec2(0, 0.6) * extent;
+    params.label_text = text;
+    params.label_cursor_pos = cursor_pos_;
+    box_ = addComponent<Box>(params);
+  }
+
+ private:
   glm::vec2 pos_, extent_;
   Box *box_;
   size_t cursor_pos_;
@@ -106,24 +127,6 @@ class TextField : public engine::Behaviour {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
       focused_ = mouse_over_;
     }
-  }
-
- public:
-  TextField(glm::vec2 center, glm::vec2 extent, const std::wstring& text)
-      : pos_(center), extent_(extent), cursor_pos_(text.size()), text_(text)
-      , cursor_visible_(false), modified_(false), focused_(false) {
-    BoxParams params;
-    params.center = center;
-    params.extent = extent;
-    params.style = engine::gui::BoxParams::Style::kFlat;
-    params.bg_color = glm::vec4{0, 0, 0, 0.3};
-    params.border_color = glm::vec4{1, 1, 1, 1};
-    params.border_width = 1;
-    params.roundness = 7;
-    params.label_pos = center - glm::vec2(0, 0.6) * extent;
-    params.label_text = text;
-    params.label_cursor_pos = cursor_pos_;
-    box_ = addComponent<Box>(params);
   }
 };
 

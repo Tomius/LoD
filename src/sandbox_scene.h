@@ -10,7 +10,7 @@
 #include "engine/gui/text_field.h"
 #include "oglwrap/smart_enums.h"
 
-#include "./mideu_scene.h"
+#include "./main_scene.h"
 
 struct SandboxScene : public engine::Scene {
   SandboxScene() {
@@ -59,7 +59,7 @@ struct SandboxScene : public engine::Scene {
                                               L"dis one?",
                                               glm::vec4{1, 0.05f, 0.05f, 1},
                                               glm::vec4{1, 1, 1, 1}, 20);
-      blue_pill->addPressCallback([](){engine::GameEngine::LoadScene<MideuScene>();});
+      blue_pill->addPressCallback([](){engine::GameEngine::LoadScene<MainScene>();});
 
     Button *orange_pill = addGameObject<Button>(glm::vec2{0.2f, -0.2f},
                                                 glm::vec2{0.08f, 0.04f},

@@ -11,16 +11,18 @@ const engine::Transform& Terrain::initTransform() {
   return transform;
 }
 
-Terrain::Terrain(engine::ShaderManager* manager)
-    : uProjectionMatrix_(prog_, "uProjectionMatrix")
+Terrain::Terrain(engine::Scene* scene)
+    : engine::GameObject(scene)
+    , height_map_("terrain/output.png", initTransform())
+    , mesh_(scene->shader_manager(), height_map_)
+    , prog_(scene->shader_manager()->get("terrain.vert"),
+            scene->shader_manager()->get("terrain.frag"))
+    , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")
     , uShadowCP_(prog_, "uShadowCP")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
-    , uShadowAtlasSize_(prog_, "uShadowAtlasSize")
-    , height_map_("terrain/output.png", initTransform())
-    , mesh_(manager, height_map_)
-    , prog_(manager->get("terrain.vert"), manager->get("terrain.frag")) {
+    , uShadowAtlasSize_(prog_, "uShadowAtlasSize") {
   prog_.use();
   mesh_.setup(prog_, 1);
   gl::UniformSampler(prog_, "uGrassMap0").set(2);
@@ -55,9 +57,9 @@ Terrain::Terrain(engine::ShaderManager* manager)
   prog_.validate();
 }
 
-void Terrain::render(const engine::Scene& scene) {
-  const engine::Camera& cam = *scene.camera();
-  const Shadow *shadow = scene.shadow();
+void Terrain::render(const engine::Scene&) {
+  const engine::Camera& cam = *scene_->camera();
+  const Shadow *shadow = scene_->shadow();
 
   prog_.use();
   prog_.update();

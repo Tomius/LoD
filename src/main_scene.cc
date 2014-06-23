@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "./mideu_scene.h"
+#include "./main_scene.h"
 
 #include <iostream>
 #include <string>
@@ -31,14 +31,11 @@ static void PrintDebugTime() {
   last_debug_time = curr_time;
 }
 
-MideuScene::MideuScene() {
+MainScene::MainScene() {
   GLFWwindow* window = engine::GameEngine::window();
 
   // Disable cursor
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-  // FIXME
-  static engine::ShaderManager manager;
 
   // The scene builds quite slow, put some picture for the user.
   last_debug_time = 0;
@@ -48,24 +45,24 @@ MideuScene::MideuScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the skybox");
-    Skybox *skybox = addGameObject<Skybox>(&manager);
+    Skybox *skybox = addGameObject<Skybox>();
   PrintDebugTime();
 
   PrintDebugText("Initializing the shadow maps");
-    Shadow *shadow = addShadow(skybox, 512, 1, 1);
+    addShadow(skybox, 512, 1, 1);
   PrintDebugTime();
 
   PrintDebugText("Initializing the terrain");
-    Terrain *terrain = addGameObject<Terrain>(&manager);
+    Terrain *terrain = addGameObject<Terrain>();
     const engine::HeightMapInterface& height_map = terrain->height_map();
   PrintDebugTime();
 
   PrintDebugText("Initializing Ayumi");
-    Ayumi *ayumi = addGameObject<Ayumi>(&manager, window, shadow);
+    Ayumi *ayumi = addGameObject<Ayumi>();
     ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
 
     CharacterMovement *charmove = ayumi->addComponent<CharacterMovement>(
-        window, ayumi->transform, *ayumi->rigid_body);
+        ayumi->transform, *ayumi->rigid_body);
     ayumi->charmove(charmove);
   PrintDebugTime();
 
@@ -87,7 +84,7 @@ MideuScene::MideuScene() {
   charmove->setCamera(cam);
 
   PrintDebugText("Initializing the trees");
-    addGameObject<Tree>(&manager, shadow, height_map);
+    addGameObject<Tree>(height_map);
   PrintDebugTime();
 
   PrintDebugText("Initializing the resources for the bloom effect");

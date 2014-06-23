@@ -6,12 +6,14 @@
 
 constexpr float day_duration = 256.0f, day_start = 8.0f;
 
-Skybox::Skybox(engine::ShaderManager* manager)
-    : time_(day_start)
-    , prog_(manager->get("skybox.vert"), manager->get("skybox.frag"))
+Skybox::Skybox(engine::Scene* scene)
+    : engine::Behaviour(scene)
+    , time_(day_start)
+    , prog_(scene->shader_manager()->get("skybox.vert"),
+            scene->shader_manager()->get("skybox.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix") {
-  engine::ShaderFile *sky_fs = manager->get("sky.frag");
+  engine::ShaderFile *sky_fs = scene->shader_manager()->get("sky.frag");
   sky_fs->set_update_func([this](const gl::Program& prog) {
     gl::Uniform<glm::vec3>(prog, "uSunPos") = getSunPos();
   });
@@ -32,12 +34,12 @@ glm::vec3 Skybox::getLightSourcePos() const {
   return sun_pos.y > 0 ? sun_pos : -sun_pos;
 }
 
-void Skybox::update(const engine::Scene& scene) {
-  time_ = scene.environment_time().current + day_start;
+void Skybox::update(const engine::Scene&) {
+  time_ = scene_->environment_time().current + day_start;
 }
 
-void Skybox::render(const engine::Scene& scene) {
-  const engine::Camera& cam = *scene.camera();
+void Skybox::render(const engine::Scene&) {
+  const engine::Camera& cam = *scene_->camera();
 
   // We don't need the camera matrix's translation part for the skybox
   const float* f = glm::value_ptr(cam.matrix());

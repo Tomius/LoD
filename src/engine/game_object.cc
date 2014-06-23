@@ -1,26 +1,32 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "./game_object.h"
 #include "./behaviour.h"
+
+#define _TRY(YourCode) \
+  try { \
+    YourCode; \
+  } catch (const std::exception& ex) { \
+    std::cout << ex.what() << std::endl; \
+  }
 
 namespace engine {
 
 void GameObject::shadowRenderAll(const Scene& scene) {
-  shadowRender(scene);
+  _TRY(shadowRender(scene));
   for (auto& component : components_) {
     component->shadowRenderAll(scene);
   }
 }
 
 void GameObject::renderAll(const Scene& scene) {
-  render(scene);
+  _TRY(render(scene));
   for (auto& component : components_) {
     component->renderAll(scene);
   }
 }
 
 void GameObject::render2DAll(const Scene& scene) {
-  render2D(scene);
+  _TRY(render2D(scene));
   for (auto& component : components_) {
     component->render2DAll(scene);
   }
@@ -31,7 +37,7 @@ void GameObject::screenResizedAll(const Scene& scene, size_t width,
   for (auto& behaviour : components_) {
     behaviour->screenResizedAll(scene, width, height);
   }
-  screenResized(scene, width, height);
+  _TRY(screenResized(scene, width, height));
 }
 
 void GameObject::updateAll(const Scene& scene) {

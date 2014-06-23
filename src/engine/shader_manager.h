@@ -10,7 +10,7 @@
 
 #include "./oglwrap_config.h"
 #include "../oglwrap/shader.h"
-#include "./scene.h"
+#include "../oglwrap/oglwrap.h"
 
 namespace engine {
 

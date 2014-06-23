@@ -9,6 +9,9 @@ namespace engine {
 
 class Behaviour : public GameObject {
  public:
+  explicit Behaviour(Scene* scene) : GameObject(scene) {}
+  virtual ~Behaviour() {}
+
   virtual void update(const Scene& scene) {}
   virtual void keyAction(const Scene& scene, int key, int scancode,
                          int action, int mods) {}
@@ -19,51 +22,16 @@ class Behaviour : public GameObject {
                                   int action, int mods) {}
   virtual void mouseMoved(const Scene& scene, double xpos, double ypos) {}
 
-  virtual void updateAll(const Scene& scene) override {
-    for (auto& component : behaviours_) {
-      component->updateAll(scene);
-    }
-    update(scene);
-  }
-
+  virtual void updateAll(const Scene& scene) override;
   virtual void keyActionAll(const Scene& scene, int key, int scancode,
-                            int action, int mods) override {
-    for (auto& component : behaviours_) {
-      component->keyActionAll(scene, key, scancode, action, mods);
-    }
-    keyAction(scene, key, scancode, action, mods);
-  }
-
-  void charTypedAll(const Scene& scene, unsigned codepoint) {
-    for (auto& behaviour : behaviours_) {
-      behaviour->charTypedAll(scene, codepoint);
-    }
-    charTyped(scene, codepoint);
-  }
-
+                            int action, int mods) override;
+  virtual void charTypedAll(const Scene& scene, unsigned codepoint) override;
   virtual void mouseScrolledAll(const Scene& scene, double xoffset,
-                                double yoffset) override {
-    for (auto& component : behaviours_) {
-      component->mouseScrolledAll(scene, xoffset, yoffset);
-    }
-    mouseScrolled(scene, xoffset, yoffset);
-  }
-
+                                double yoffset) override;
   virtual void mouseButtonPressedAll(const Scene& scene, int button,
-                                     int action, int mods) override {
-    for (auto& component : behaviours_) {
-      component->mouseButtonPressedAll(scene, button, action, mods);
-    }
-    mouseButtonPressed(scene, button, action, mods);
-  }
-
+                                     int action, int mods) override;
   virtual void mouseMovedAll(const Scene& scene, double xpos,
-                             double ypos) override {
-    for (auto& component : behaviours_) {
-      component->mouseMovedAll(scene, xpos, ypos);
-    }
-    mouseMoved(scene, xpos, ypos);
-  }
+                             double ypos) override;
 };
 
 }  // namespace engine

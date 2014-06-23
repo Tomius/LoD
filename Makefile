@@ -131,6 +131,10 @@ $(BINARY): $(OBJECTS)
 	@ $(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
 %.h:
+	@
 %.hpp:
+	@
 %.inl:
+	@
 %:
+	@

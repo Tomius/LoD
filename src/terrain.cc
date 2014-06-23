@@ -31,7 +31,7 @@ Terrain::Terrain(engine::Scene* scene)
     grassMaps_[i].bind();
     // no alpha channel here
     grassMaps_[i].loadTexture(
-      i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg", "CSRGBA");
+      i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg", "CSRGB");
     grassMaps_[i].generateMipmap();
     grassMaps_[i].maxAnisotropy();
     grassMaps_[i].minFilter(gl::kLinearMipmapLinear);
@@ -44,7 +44,7 @@ Terrain::Terrain(engine::Scene* scene)
   grassNormalMap_.bind();
   {
     // the normal map doesn't have an alpha channel, and is not is srgb space
-    grassNormalMap_.loadTexture("textures/grass_normal.jpg", "CRGBA");
+    grassNormalMap_.loadTexture("textures/grass_normal.jpg", "CRGB");
     grassNormalMap_.generateMipmap();
     grassNormalMap_.minFilter(gl::kLinearMipmapLinear);
     grassNormalMap_.magFilter(gl::kLinear);

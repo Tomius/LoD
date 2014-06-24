@@ -3,6 +3,7 @@
 #version 120
 
 #include "sky.frag"
+#include "fog.frag"
 
 // This might be overwritten by the c++ code.
 #define SHADOW_MAP_NUM 16
@@ -130,7 +131,7 @@ void main() {
   vec3 rock_color_0 = texture2D(uGrassMap1, vTexCoord*256).rgb;
   vec3 rock_color_1 = texture2D(uGrassMap1, vTexCoord*16).rgb;
 
-  float height_factor = clamp(sqrt(max(w_vPos.y - 64, 0) / 128), 0, 1);
+  float height_factor = clamp(sqrt(max(w_vPos.y - 80, 0) / 128), 0, 1);
 
   vec3 color_0 = mix(grass_color_0, rock_color_0, height_factor);
   vec3 color_1 = mix(grass_color_1, rock_color_1, height_factor/2);
@@ -144,11 +145,5 @@ void main() {
   }
   vec3 final_color = diffuse_color * (visibility + AmbientPower()) * lighting;
 
-  // Fog
-  vec3 fog_color = AmbientColor() / 3;
-  float length_from_camera = length(c_vPos);
-  float alpha = clamp((length_from_camera - kFogMin) /
-                      (kFogMax - kFogMin), 0, 1) / 4;
-
-  gl_FragColor = vec4(mix(final_color, fog_color, alpha), 1);
+  gl_FragColor = vec4(ApplyFog(final_color, c_vPos), 1);
 }

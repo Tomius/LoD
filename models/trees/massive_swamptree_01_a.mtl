@@ -1,0 +1,48 @@
+# Blender MTL File: 'massive_swamptree_01_a.blend'
+# Material Count: 4
+
+newmtl None
+Ns 0
+Ka 0.000000 0.000000 0.000000
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2
+map_d massive_swamptree_01_bark_diffuse.dds
+map_Kd massive_swamptree_01_bark_diffuse.dds
+
+newmtl massive_swamptree_01_bark
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_d massive_swamptree_01_bark_diffuse.dds
+map_Kd massive_swamptree_01_bark_diffuse.dds
+map_Bump massive_swamptree_01_bark_normal.dds
+
+newmtl massive_swamptree_01_bark_NONE
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_d massive_swamptree_01_bark_diffuse.dds
+map_Kd massive_swamptree_01_bark_diffuse.dds
+map_Bump massive_swamptree_01_bark_normal.dds
+
+newmtl massive_swamptree_01_branch
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 0.000000
+illum 2
+map_d massive_swamptree_01_branch_diffuse.dds
+map_Kd massive_swamptree_01_branch_diffuse.dds
+map_Bump massive_swamptree_01_branch_normal.dds

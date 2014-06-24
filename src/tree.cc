@@ -2,13 +2,31 @@
 
 #include "./tree.h"
 #include "engine/scene.h"
+#include "oglwrap/debug/insertion.h"
 
 Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
     : engine::GameObject(scene)
-    , mesh_{{"models/trees/swamptree.dae",
-            aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs},
-            {"models/trees/tree.obj",
-            aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs}}
+    , mesh_{{"models/trees/massive_swamptree_01_a.obj",
+            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcess_PreTransformVertices},
+            {"models/trees/massive_swamptree_01_b.obj",
+            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcess_PreTransformVertices},
+            {"models/trees/cedar_01_a_source.obj",
+            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcess_PreTransformVertices},
+            {"models/trees/bigleafplant_01_small_low.obj",
+            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcess_PreTransformVertices},
+            {"models/trees/bigleafplant_01_small_mid.obj",
+            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcess_PreTransformVertices},
+            {"models/trees/bigleafplant_01_tall.obj",
+            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcess_PreTransformVertices},
+            {"models/trees/bigleafplant_01_tall_bend.obj",
+            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcess_PreTransformVertices}}
     , prog_(scene->shader_manager()->get("tree.vert"),
             scene->shader_manager()->get("tree.frag"))
     , shadow_prog_(scene->shader_manager()->get("tree_shadow.vert"),
@@ -35,14 +53,14 @@ Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
   prog_.validate();
 
   // Get the trees' positions.
-  const int kTreeDist = 256;
+  const int kTreeDist = 128;
   glm::vec2 extent = height_map.extent();
   for (int i = kTreeDist; i + kTreeDist < extent.x; i += kTreeDist) {
     for (int j = kTreeDist; j + kTreeDist < extent.y; j += kTreeDist) {
       glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
                                     j + rand()%(kTreeDist/2) - kTreeDist/4);
       glm::vec3 pos =
-        glm::vec3(coord.x, height_map.heightAt(coord.x, coord.y)-1.0f, coord.y);
+        glm::vec3(coord.x, height_map.heightAt(coord.x, coord.y), coord.y);
       glm::vec3 scale = glm::vec3(1.0f + rand() / RAND_MAX,
                                   1.0f + rand() / RAND_MAX,
                                   1.0f + rand() / RAND_MAX) * 2.0f;
@@ -53,10 +71,7 @@ Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
       matrix[3] = glm::vec4(pos, 1);
       matrix = glm::scale(matrix, scale);
 
-      // int type = rand() % kTreeTypeNum;
-      // tree.obj textures are not srgb, but swamptree's textures are.
-      // Workaround until I fix that
-      int type = 0;
+      int type = rand() % kTreeTypeNum;
 
       engine::BoundingBox bbox = mesh_[type].boundingBox(matrix);
       glm::vec4 bsphere = mesh_[type].bSphere();
@@ -78,9 +93,8 @@ void Tree::shadowRender() {
   for (size_t i = 0; i < trees_.size() &&
       shadow->getDepth() < shadow->getMaxDepth(); i++) {
     if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
-      shadow_uMCP_ = shadow->modelCamProjMat(trees_[i].bsphere,
-                                             trees_[i].mat,
-                                             glm::mat4());
+      shadow_uMCP_ = shadow->modelCamProjMat(
+          trees_[i].bsphere, trees_[i].mat, glm::mat4{});
       mesh_[trees_[i].type].render();
       shadow->push();
     }
@@ -108,9 +122,10 @@ void Tree::render() {
       continue;
     }
 
+    auto& mesh = mesh_[trees_[i].type];
     glm::mat4 model_mx = trees_[i].mat;
     uModelCameraMatrix_.set(cam_mx * model_mx);
     uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
-    mesh_[trees_[i].type].render();
+    mesh.render();
   }
 }

@@ -20,7 +20,7 @@ class Tree : public engine::GameObject {
   virtual void render() override;
 
  private:
-  static constexpr int kTreeTypeNum = 2;
+  static constexpr int kTreeTypeNum = 7;
   engine::MeshRenderer mesh_[kTreeTypeNum];
   engine::ShaderProgram prog_, shadow_prog_;
 

@@ -119,6 +119,10 @@ size_t Shadow::getMaxDepth() const {
 }
 
 void Shadow::end() {
-  fbo_.unbind();
+  if (default_fbo_) {
+    default_fbo_->bind();
+  } else {
+    fbo_.unbind();
+  }
   gl::Viewport(w_, h_);
 }

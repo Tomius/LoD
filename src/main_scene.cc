@@ -48,9 +48,9 @@ MainScene::MainScene() {
     Skybox *skybox = addGameObject<Skybox>();
   PrintDebugTime();
 
-  // PrintDebugText("Initializing the shadow maps");
-  //   addShadow(skybox, 512, 1, 1);
-  // PrintDebugTime();
+  PrintDebugText("Initializing the shadow maps");
+    Shadow *shadow = addShadow(skybox, 512, 1, 1);
+  PrintDebugTime();
 
   PrintDebugText("Initializing the terrain");
     Terrain *terrain = addGameObject<Terrain>();
@@ -90,6 +90,8 @@ MainScene::MainScene() {
   addGameObject<FpsDisplay>();
 
   PrintDebugText("Initializing the resources for the bloom effect");
-    addGameObject<BloomEffect>();
+    BloomEffect *bloom = addGameObject<BloomEffect>();
   PrintDebugTime();
+
+  shadow->set_default_fbo(bloom->fbo());
 }

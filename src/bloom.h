@@ -16,10 +16,8 @@
 class BloomEffect : public engine::Behaviour {
  public:
   explicit BloomEffect(engine::Scene *scene);
-  virtual ~BloomEffect() {}
-  virtual void screenResized(size_t width, size_t height) override;
-  virtual void update() override;
-  virtual void render() override;
+
+  gl::Framebuffer* fbo() { return &fbo_; }
 
  private:
   engine::ShaderProgram prog_;
@@ -30,6 +28,10 @@ class BloomEffect : public engine::Behaviour {
   gl::FullScreenRectangle rect_;
 
   GLuint width_, height_;
+
+  virtual void screenResized(size_t width, size_t height) override;
+  virtual void update() override;
+  virtual void render() override;
 };
 
 

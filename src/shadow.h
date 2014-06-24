@@ -42,11 +42,14 @@ class Shadow {
   void push();
   size_t getDepth() const;
   size_t getMaxDepth() const;
+  void set_default_fbo(gl::Framebuffer *default_fbo) {
+    default_fbo_ = default_fbo;
+  }
   void end();
 
  private:
   gl::Texture2D tex_;
-  gl::Framebuffer fbo_;
+  gl::Framebuffer fbo_, *default_fbo_;
 
   size_t w_, h_, size_;
   size_t xsize_, ysize_, curr_depth_, max_depth_;

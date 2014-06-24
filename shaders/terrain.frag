@@ -73,8 +73,6 @@ float Visibility() {
   return max(visibility, 0.0);
 }
 
-const float kFogMin = 128.0;
-const float kFogMax = 2048.0;
 const float kSpecularShininess = 64.0;
 
 void CalculateLighting(vec3 c_normal, vec3 c_light_dir,

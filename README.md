@@ -16,18 +16,18 @@ Dependencies:
 * [oglwrap](https://github.com/Tomius/oglwrap) - my C++ OpenGL wrapper.
 * GLFW3 - for window handling
 * Magick++ - for image loading.
-* Assimp - for loading the character in.
+* Assimp - for loading 3D models.
 
 
 How to build (Debian/Ubuntu):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev && git clone https://github.com/assimp/assimp.git && cd assimp && cmake . && sudo make -j4 install && cd .. && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD/src/engine/gui/freetype-gl && cmake . && make -j4 && cd ../../../.. && make -j4 && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD/src/engine/gui/freetype-gl && cmake . && make -j4 && cd ../../../.. && make -j4 && ./LoD
 ```
 
 How to build (linux):
 ---------------------
-* get the external dependencies: libmagick++-dev libglew-dev [assimp](https://github.com/assimp/assimp) [glfw](https://github.com/glfw/glfw)
+* get the external dependencies: libmagick++-dev libglew-dev libassimp-dev [glfw](https://github.com/glfw/glfw)
 * initialize the oglwrap submodule: git submodule init && git submodule update
 * build freetype-gl (included): cd src/engine/gui/freetype-gl && cmake . && make
 * build with make (uses clang++), run with ./LoD

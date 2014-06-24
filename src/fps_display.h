@@ -9,25 +9,32 @@
 
 class FpsDisplay : public engine::Behaviour {
  public:
-  explicit FpsDisplay(engine::Scene* scene) : engine::Behaviour(scene) {
+  explicit FpsDisplay(engine::Scene* scene)
+      : engine::Behaviour(scene), sum_frame_num_(0), sum_time_(0) {
     label_ = addComponent<engine::gui::Label>(L"FPS: ", glm::vec2{0.8f, 0.9f},
              engine::gui::Font{"src/engine/gui/freetype-gl/fonts/Vera.ttf", 30,
              glm::vec4(1, 0, 0, 1)});
   }
+  ~FpsDisplay() {
+    std::cout << "Average FPS: " << sum_frame_num_ / sum_time_ << std::endl;
+  }
 
  private:
   engine::gui::Label *label_;
-  static constexpr float refresh_interval = 0.1f;
+  static constexpr float kRefreshInterval = 0.1f;
+  double sum_frame_num_, sum_time_;
 
   virtual void update() override {
-    static double accum_time = 0;
+    static double accum_time = scene_->camera_time().dt;
     static int calls = 0;
 
     calls++;
     accum_time += scene_->camera_time().dt;
-    if (accum_time > refresh_interval) {
+    if (accum_time > kRefreshInterval) {
       label_->set_text(L"FPS: " +
-        std::to_wstring(static_cast<int>(calls * (1.0f/accum_time))));
+        std::to_wstring(static_cast<int>(calls / accum_time)));
+      sum_frame_num_ += calls;
+      sum_time_ += accum_time;
       accum_time = calls = 0;
     }
   }

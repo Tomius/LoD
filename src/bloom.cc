@@ -5,22 +5,36 @@
 #include "oglwrap/smart_enums.h"
 
 BloomEffect::BloomEffect(engine::Scene *scene)
-    : engine::GameObject(scene)
+    : engine::Behaviour(scene)
     , prog_(scene->shader_manager()->get("bloom.vert"),
             scene->shader_manager()->get("bloom.frag"))
     , uScreenSize_(prog_, "uScreenSize") {
   prog_.use();
 
   gl::UniformSampler(prog_, "uTex").set(0);
+  gl::UniformSampler(prog_, "uDepthTex").set(1);
   rect_.setupPositions(prog_ | "aPosition");
 
   prog_.validate();
 
-  tex_.active(0);
-  tex_.bind();
-  tex_.minFilter(gl::kLinear);
-  tex_.magFilter(gl::kLinear);
-  tex_.unbind();
+  color_tex_.bind();
+  color_tex_.upload(gl::kRgb, 1, 1, gl::kRgb, gl::kFloat, nullptr);
+  color_tex_.minFilter(gl::kLinear);
+  color_tex_.magFilter(gl::kLinear);
+  color_tex_.unbind();
+
+  depth_tex_.bind();
+  depth_tex_.upload(gl::kDepthComponent, 1, 1,
+                    gl::kDepthComponent, gl::kFloat, nullptr);
+  depth_tex_.minFilter(gl::kLinear);
+  depth_tex_.magFilter(gl::kLinear);
+  depth_tex_.unbind();
+
+  fbo_.bind();
+  fbo_.attachTexture(gl::kColorAttachment0, color_tex_);
+  fbo_.attachTexture(gl::kDepthAttachment, depth_tex_);
+  fbo_.validate();
+  // fbo_.unbind();
 }
 
 void BloomEffect::screenResized(size_t w, size_t h) {
@@ -29,22 +43,29 @@ void BloomEffect::screenResized(size_t w, size_t h) {
   prog_.use();
   uScreenSize_ = glm::vec2(w, h);
 
-  tex_.active(0);
-  tex_.bind();
-  tex_.upload(gl::kRgb, width_, height_, gl::kRgb, gl::kFloat, nullptr);
-  tex_.unbind();
+  color_tex_.bind();
+  color_tex_.upload(gl::kRgb, width_, height_, gl::kRgb, gl::kFloat, nullptr);
+  color_tex_.unbind();
+
+  depth_tex_.bind();
+  depth_tex_.upload(gl::kDepthComponent, width_, height_,
+                    gl::kDepthComponent, gl::kFloat, nullptr);
+  depth_tex_.unbind();
+}
+
+void BloomEffect::update() {
+  fbo_.bind();
+  gl::Clear().Color().Depth();
 }
 
 void BloomEffect::render() {
-  // Copy the backbuffer to the texture that our shader can fetch.
-  tex_.active(0);
-  tex_.bind();
-  tex_.copy(gl::kRgb, 0, 0, width_, height_);
-
-  gl::Clear().Color().Depth();
+  fbo_.Unbind();
+  color_tex_.bind(0);
+  depth_tex_.bind(1);
 
   prog_.use();
   rect_.render();
 
-  tex_.unbind();
+  depth_tex_.unbind(1);
+  color_tex_.unbind(0);
 }

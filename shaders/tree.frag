@@ -18,7 +18,7 @@ void main() {
   vec3 final_color = color.rgb * HemisphereLighting(w_vNormal);
 
   float actual_alpha = min(color.a, VisibilityRangeAlpha(c_vPos));
-  if (actual_alpha < 1e-3) { discard; }
+  if (actual_alpha < 1e-1) { discard; }
 
   gl_FragColor = vec4(ApplyFog(final_color, c_vPos), actual_alpha);
 }

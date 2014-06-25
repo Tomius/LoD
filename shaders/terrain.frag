@@ -35,7 +35,7 @@ int min(int a, int b) {
 const float kMaxShadow = 0.8;
 
 vec2 GetShadowAtlasOffset(int i) {
-  return vec2(i / uShadowAtlasSize.x, mod(i, uShadowAtlasSize.y));
+  return vec2(i / uShadowAtlasSize.x, mod(i, uShadowAtlasSize.x));
 }
 
 vec2 AtlasLookup(vec2 tc, int i) {

@@ -24,8 +24,6 @@ Shadow::Shadow(Skybox* skybox, int shadow_map_size,
   tex_.wrapS(gl::kClampToBorder);
   tex_.wrapT(gl::kClampToBorder);
   tex_.borderColor(glm::vec4(1.0f));
-  tex_.compareFunc(gl::kLequal);
-  tex_.compareMode(gl::kCompareRefToTexture);
   tex_.unbind();
 
   // Setup the FBO

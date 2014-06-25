@@ -9,8 +9,8 @@ using engine::GameEngine;
 int main() {
   try {
     GameEngine::InitContext();
-    // GameEngine::LoadScene<MainScene>();  // The real Land of Dreams scene
-    GameEngine::LoadScene<SandboxScene>();  // Just for testing GUI elements
+    GameEngine::LoadScene<MainScene>();  // The real Land of Dreams scene
+    //  GameEngine::LoadScene<SandboxScene>();  // Just for testing GUI elements
     GameEngine::Run();
   } catch(const std::exception& err) {
     std::cerr << err.what();

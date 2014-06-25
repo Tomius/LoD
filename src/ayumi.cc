@@ -29,7 +29,7 @@ engine::ShaderFile* Ayumi::loadShadowVertexShader(
 Ayumi::Ayumi(engine::Scene* scene)
     : engine::Behaviour(scene)
     , mesh_("models/ayumi/ayumi.dae",
-            aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs)
+            aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs)
     , anim_(mesh_.getAnimData())
     , prog_(loadVertexShader(scene->shader_manager()),
             scene->shader_manager()->get("ayumi.frag"))

@@ -16,7 +16,7 @@ varying mat3  vNormalMatrix;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap0, uGrassMap1, uGrassNormalMap;
-uniform sampler2DShadow uShadowMap;
+uniform sampler2D uShadowMap;
 
 uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;
@@ -57,17 +57,13 @@ float Visibility() {
   for (int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
-    if (!isValid(shadowCoord.xy)) {
-      continue;
-    }
+    if (!isValid(shadowCoord.xy)) { continue; }
 
-    visibility -= modifier * (1 - shadow2D(
-      uShadowMap,
-      vec3(
-        AtlasLookup(shadowCoord.xy, i),
-        (shadowCoord.z) / shadowCoord.w
-      )
-    ).r);
+    // shadow coeffecient - change this to to affect shadow darkness/fade
+    float c = 1.5;
+    float texel = texture2D(uShadowMap, AtlasLookup(shadowCoord.xy, i)).r;
+    if (texel == 1.0) { continue; }
+    visibility -= modifier*(1 - clamp(exp(-c * (shadowCoord.z - texel)), 0.0, 1.0));
   }
 
   return max(visibility, 0.0);

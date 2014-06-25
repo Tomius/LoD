@@ -49,7 +49,7 @@ MainScene::MainScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the shadow maps");
-    Shadow *shadow = addShadow(skybox, 512, 1, 1);
+    Shadow *shadow = addShadow(skybox, 2048, 2, 2);
   PrintDebugTime();
 
   PrintDebugText("Initializing the terrain");

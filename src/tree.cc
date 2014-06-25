@@ -7,25 +7,13 @@
 Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
     : engine::GameObject(scene)
     , mesh_{{"models/trees/massive_swamptree_01_a.obj",
-            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
             aiProcess_PreTransformVertices},
             {"models/trees/massive_swamptree_01_b.obj",
-            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
             aiProcess_PreTransformVertices},
             {"models/trees/cedar_01_a_source.obj",
-            aiProcess_GenNormals | aiProcess_FlipUVs |
-            aiProcess_PreTransformVertices},
-            {"models/trees/bigleafplant_01_small_low.obj",
-            aiProcess_GenNormals | aiProcess_FlipUVs |
-            aiProcess_PreTransformVertices},
-            {"models/trees/bigleafplant_01_small_mid.obj",
-            aiProcess_GenNormals | aiProcess_FlipUVs |
-            aiProcess_PreTransformVertices},
-            {"models/trees/bigleafplant_01_tall.obj",
-            aiProcess_GenNormals | aiProcess_FlipUVs |
-            aiProcess_PreTransformVertices},
-            {"models/trees/bigleafplant_01_tall_bend.obj",
-            aiProcess_GenNormals | aiProcess_FlipUVs |
+            aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
             aiProcess_PreTransformVertices}}
     , prog_(scene->shader_manager()->get("tree.vert"),
             scene->shader_manager()->get("tree.frag"))
@@ -53,7 +41,7 @@ Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
   prog_.validate();
 
   // Get the trees' positions.
-  const int kTreeDist = 128;
+  const int kTreeDist = 150;
   glm::vec2 extent = height_map.extent();
   for (int i = kTreeDist; i + kTreeDist < extent.x; i += kTreeDist) {
     for (int j = kTreeDist; j + kTreeDist < extent.y; j += kTreeDist) {
@@ -92,7 +80,7 @@ void Tree::shadowRender() {
   auto campos = cam.pos();
   for (size_t i = 0; i < trees_.size() &&
       shadow->getDepth() < shadow->getMaxDepth(); i++) {
-    if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 300) {
+    if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 150) {
       shadow_uMCP_ = shadow->modelCamProjMat(
           trees_[i].bsphere, trees_[i].mat, glm::mat4{});
       mesh_[trees_[i].type].render();

@@ -19,7 +19,7 @@ BloomEffect::BloomEffect(engine::Scene *scene)
 
   color_tex_.bind();
   color_tex_.upload(gl::kRgb, 1, 1, gl::kRgb, gl::kFloat, nullptr);
-  color_tex_.minFilter(gl::kLinear);
+  color_tex_.minFilter(gl::kLinearMipmapLinear);
   color_tex_.magFilter(gl::kLinear);
   color_tex_.unbind();
 
@@ -34,7 +34,7 @@ BloomEffect::BloomEffect(engine::Scene *scene)
   fbo_.attachTexture(gl::kColorAttachment0, color_tex_);
   fbo_.attachTexture(gl::kDepthAttachment, depth_tex_);
   fbo_.validate();
-  // fbo_.unbind();
+  fbo_.unbind();
 }
 
 void BloomEffect::screenResized(size_t w, size_t h) {
@@ -61,6 +61,7 @@ void BloomEffect::update() {
 void BloomEffect::render() {
   fbo_.Unbind();
   color_tex_.bind(0);
+  color_tex_.generateMipmap();
   depth_tex_.bind(1);
 
   prog_.use();

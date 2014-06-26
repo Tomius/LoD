@@ -19,16 +19,12 @@ float DistanceFromCamera() {
 }
 
 vec3 DoF(vec3 texel_color) {
-  float level = DistanceFromCamera() / zFar * (mipmap_count-1);
+  float level = sqrt(DistanceFromCamera() / zFar) * (mipmap_count-1);
   float floor_level = floor(level);
-  if (floor_level == 0) {
-    return texel_color;
-  } else {
-    vec3 color = texel_color;
-    for (int i = 1; i < floor_level; ++i) {
-      color += texture2DLod(uTex, coord, i).rgb;
-    }
-    color += (level-floor_level) * texture2DLod(uTex, coord, floor_level+1).rgb;
-    return color / level;
+  vec3 color = texel_color;
+  for (int i = 1; i <= floor_level; ++i) {
+    color += texture2DLod(uTex, coord, i).rgb;
   }
+  color += (level-floor_level) * texture2DLod(uTex, coord, floor_level+1).rgb;
+  return color / (1 + level);
 }

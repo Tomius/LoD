@@ -2,8 +2,9 @@
 
 #version 120
 
-uniform sampler2D uTex, uDepthTex;
-uniform float zNear = 1.0, zFar = 3000.0;
+#include "depth_of_field.frag"
+
+uniform sampler2D uTex;
 uniform vec2 uScreenSize;
 
 ivec2 tex_coord = ivec2(gl_FragCoord.xy);
@@ -47,19 +48,6 @@ vec3 Glow() {
         + sqr(neighbours[8])) / 4;
 }
 
-// see http://web.archive.org/web/20130416194336/http://olivers.posterous.com/linear-depth-in-glsl-for-real
-float DistanceFromCamera() {
-  float z_b = texture2D(uDepthTex, tex_coord/uScreenSize).x;
-  float z_n = 2.0 * z_b - 1.0;
-  return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
-}
-
-vec3 DoF() {
-  vec3 blurred = texture2DLod(uTex, tex_coord/uScreenSize, 3).rgb;
-  float depth_alpha = DistanceFromCamera() / zFar;
-  return mix(neighbours[4], blurred, depth_alpha);
-}
-
 vec3 FilmicToneMap(vec3 color) {
   vec3 x = max(color - 0.004, 0);
   return (x*(6.2*x+0.5)) / (x*(6.2*x+1.7)+0.06);
@@ -67,6 +55,6 @@ vec3 FilmicToneMap(vec3 color) {
 
 void main() {
   FetchNeighbours();
-  vec3 color = Glow() + DoF();
-  gl_FragColor = vec4(FilmicToneMap(color), 1.0);
+  vec3 color = /*Glow() + */DoF(neighbours[4]);
+  gl_FragColor = vec4(/*FilmicToneMap(*/color/*)*/, 1.0);
 }

@@ -45,7 +45,7 @@ vec3 Glow() {
         + sqr(neighbours[5]) * 2
         + sqr(neighbours[6])
         + sqr(neighbours[7]) * 2
-        + sqr(neighbours[8])) / 4;
+        + sqr(neighbours[8])) / 8;
 }
 
 vec3 FilmicToneMap(vec3 color) {
@@ -55,6 +55,6 @@ vec3 FilmicToneMap(vec3 color) {
 
 void main() {
   FetchNeighbours();
-  vec3 color = /*Glow() + */DoF(neighbours[4]);
-  gl_FragColor = vec4(/*FilmicToneMap(*/color/*)*/, 1.0);
+  vec3 color = Glow() + DoF(neighbours[4]);
+  gl_FragColor = vec4(FilmicToneMap(color), 1.0);
 }

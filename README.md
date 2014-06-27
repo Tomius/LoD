@@ -17,26 +17,36 @@ Dependencies:
 * GLFW3 - for window handling
 * Magick++ - for image loading.
 * Assimp - for loading 3D models.
+* Bullet - for physics (isn't fully integrated yet)
 
 
 How to build (Debian/Ubuntu):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD/src/engine/gui/freetype-gl && cmake . && make -j4 && cd ../../../.. && make -j4 && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD/src/engine/gui/freetype-gl && cmake . && make -j4 && cd ../../../.. && make -j4 && ./LoD
 ```
 
 How to build (linux):
 ---------------------
-* get the external dependencies: libmagick++-dev libglew-dev libassimp-dev [glfw](https://github.com/glfw/glfw)
+* get the external dependencies: libmagick++-dev libglew-dev libassimp-dev libbullet-dev [libglfw3-dev](https://github.com/glfw/glfw)
 * initialize the oglwrap submodule: git submodule init && git submodule update
 * build freetype-gl (included): cd src/engine/gui/freetype-gl && cmake . && make
 * build with make (uses clang++), run with ./LoD
 
 Acknowledgements
 ================
+* *Darkz* for useful feedback and help with the fixing of several bugs.
+* *Kristóf Marussy (kris7t)* for a lot of useful advices and catching many implementation-dependent bugs.
 
-- *Darkz* for useful feedback and help with the fixing of several bugs.
-- *Kristóf Marussy (kris7t)* for a lot of useful advices and catching many implementation-dependent bugs.
+Inspirations, resources and tools:
+---------------------------
+* [World Machine](http://www.world-machine.com) - Used for heightmap generation
+* [X-blades](http://www.x-blades.com/) - Borrowed Ayumi's character design from this game
+* [Autodesk Maya](http://www.autodesk.com/products/autodesk-maya/overview) && [Blender](http://www.blender.org/) - Used for modelling and animating 3D assets.
+* [Oglplus sky example](http://oglplus.org/oglplus/html/oglplus_2023_sky_8cpp-example.html) - My skybox is based on this one.
+* [Konserian highlands](http://opengameart.org/content/konserian-highlands-set) - Used the trees from this 3D art pack
+* [Gamasutra fast blur artice](http://www.gamasutra.com/view/feature/3102/four_tricks_for_fast_blurring_in_.php) - The mipmap based DoF was inspired by this.
+* [Filip Strugar's CDLOD paper](http://www.vertexasylum.com/downloads/cdlod/cdlod_latest.pdf) - Implemented the current Level of Detail algorithm for the terrain using this paper (with some changes).
 
 ----------------------
 If you have any problem, please post in the issues tab or mail me at icyplusplus@gmail.com. Any feedback would be appreciated.

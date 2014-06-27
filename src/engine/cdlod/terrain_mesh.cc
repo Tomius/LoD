@@ -9,7 +9,7 @@ namespace cdlod {
 TerrainMesh::TerrainMesh(engine::ShaderManager* manager,
                          const HeightMapInterface& height_map)
     : mesh_(height_map), height_map_(height_map) {
-  gl::ShaderSource vs_src{"cdlod_terrain.vert"};
+  gl::ShaderSource vs_src{"engine/cdlod_terrain.vert"};
 
   #ifdef glVertexAttribDivisor
     if (glVertexAttribDivisor)
@@ -18,7 +18,7 @@ TerrainMesh::TerrainMesh(engine::ShaderManager* manager,
   #endif
       vs_src.insertMacroValue("VERTEX_ATTRIB_DIVISOR", false);
 
-  manager->publish("cdlod_terrain.vert", vs_src);
+  manager->publish("engine/cdlod_terrain.vert", vs_src);
 }
 
 void TerrainMesh::setup(const gl::Program& program, int tex_unit) {

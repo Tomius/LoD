@@ -48,7 +48,7 @@ Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
       glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
                                     j + rand()%(kTreeDist/2) - kTreeDist/4);
       glm::vec3 pos =
-        glm::vec3(coord.x, height_map.heightAt(coord.x, coord.y), coord.y);
+        glm::vec3(coord.x, height_map.heightAt(coord.x, coord.y)-1, coord.y);
       glm::vec3 scale = glm::vec3(1.0f + rand() / RAND_MAX,
                                   1.0f + rand() / RAND_MAX,
                                   1.0f + rand() / RAND_MAX) * 2.0f;

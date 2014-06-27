@@ -2,7 +2,7 @@
 
 #version 120
 
-#include "cdlod_terrain.vert"
+#include "engine/cdlod_terrain.vert"
 
 uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
 uniform vec2 CDLODTerrain_uTexSize;

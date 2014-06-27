@@ -4,6 +4,7 @@
 
 #include "sky.frag"
 #include "fog.frag"
+#include "hemisphere_lighting.frag"
 
 // This might be overwritten by the c++ code.
 #define SHADOW_MAP_NUM 16
@@ -101,7 +102,7 @@ void main() {
   vec3 c_normal = mat3(uCameraMatrix) * w_normal;
 
   // Lighting
-  vec3 lighting;
+  vec3 lighting = HemisphereLighting(w_vNormal);
   vec3 w_sun_dir = SunPos();
   if (w_sun_dir.y > 0) {
     float diffuse_power, specular_power;
@@ -109,14 +110,14 @@ void main() {
     CalculateLighting(c_normal, c_sun_dir, diffuse_power, specular_power);
     diffuse_power *= pow(SunPower(), 0.3);
     specular_power *= pow(SunPower(), 0.3);
-    lighting = SunColor() * (diffuse_power + specular_power + 1.5f*AmbientPower() + 0.1);
+    lighting += SunColor() * (diffuse_power + specular_power);
   } else {
     float diffuse_power, specular_power;
     vec3 c_moon_dir = mat3(uCameraMatrix) * -w_sun_dir;
     CalculateLighting(c_normal, c_moon_dir, diffuse_power, specular_power);
     diffuse_power *= pow(MoonPower(), 0.3);
     specular_power *= pow(MoonPower(), 0.3);
-    lighting = MoonColor() * (diffuse_power + specular_power + 1.5f*AmbientPower() + 0.1);
+    lighting += MoonColor() * (diffuse_power + specular_power);
   }
 
   vec3 grass_color_0 = texture2D(uGrassMap0, vTexCoord*256).rgb;

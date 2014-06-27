@@ -49,7 +49,7 @@ attribute vec3 aNormal;
 uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
 uniform mat4 uBones[BONE_NUM];
 
-varying vec3 c_vNormal;
+varying vec3 w_vNormal, c_vNormal;
 varying vec3 w_vPos, c_vPos;
 varying vec2 vTexCoord;
 
@@ -89,7 +89,9 @@ mat4 getBoneMatrix() {
 void main() {
   mat4 BoneMatrix = getBoneMatrix();
 
-  c_vNormal = vec3(uCameraMatrix * (uModelMatrix * (BoneMatrix * vec4(aNormal, 0.0))));
+  vec3 w_normal = mat3(uModelMatrix) * (mat3(BoneMatrix) * aNormal);
+  w_vNormal = w_normal;
+  c_vNormal = mat3(uCameraMatrix) * w_normal;
   vTexCoord = aTexCoord;
 
   vec4 w_pos = uModelMatrix * (BoneMatrix * aPosition);

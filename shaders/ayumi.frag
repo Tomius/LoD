@@ -3,8 +3,9 @@
 #version 120
 
 #include "sky.frag"
+#include "hemisphere_lighting.frag"
 
-varying vec3 c_vNormal;
+varying vec3 w_vNormal, c_vNormal;
 varying vec3 w_vPos, c_vPos;
 varying vec2 vTexCoord;
 
@@ -32,7 +33,7 @@ void CalculateLighting(vec3 c_light_dir, out float diffuse_power,
 void main() {
   float spec_mask = texture2D(uSpecularTexture, vTexCoord).r;
 
-  vec3 lighting;
+  vec3 lighting = HemisphereLighting(w_vNormal);
   vec3 w_sun_dir = SunPos();
 
   if (w_sun_dir.y > 0) {
@@ -41,14 +42,14 @@ void main() {
     CalculateLighting(c_sun_dir, diffuse_power, specular_power);
     diffuse_power *= pow(SunPower(), 0.3);
     specular_power *= pow(SunPower(), 0.3);
-    lighting = SunColor() * (diffuse_power + spec_mask*specular_power + AmbientPower());
+    lighting += SunColor() * (diffuse_power + spec_mask*specular_power);
   } else {
     float diffuse_power, specular_power;
     vec3 c_moon_dir = mat3(uCameraMatrix) * -w_sun_dir;
     CalculateLighting(c_moon_dir, diffuse_power, specular_power);
     diffuse_power *= pow(MoonPower(), 0.3);
     specular_power *= pow(MoonPower(), 0.3);
-    lighting = MoonColor() * (diffuse_power + spec_mask*specular_power + AmbientPower());
+    lighting += MoonColor() * (diffuse_power + spec_mask*specular_power);
   }
 
   vec3 diffuse_color = texture2D(uDiffuseTexture, vTexCoord).rgb;

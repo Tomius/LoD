@@ -2,7 +2,6 @@
 
 #version 120
 
-#include "sky.frag"
 #include "fog.frag"
 #include "visibility_range_limit.frag"
 #include "hemisphere_lighting.frag"

@@ -16,7 +16,8 @@ PRECOMPILED_HEADER = $(PRECOMPILED_HEADER_SRC).$(CXX_PRECOMPILED_HEADER_EXTENSIO
 PRECOMPILED_HEADER_DEP = $(subst $(SRC_DIR),$(OBJ_DIR),$(PRECOMPILED_HEADER).d)
 
 BASE_CXXFLAGS = -std=c++11 -Wall -Qunused-arguments \
-					 			`pkg-config --cflags glfw3` `Magick++-config --cxxflags --cppflags`
+					 			`pkg-config --cflags glfw3` \
+					 			`Magick++-config --cxxflags --cppflags`
 
 ifeq ($(MAKECMDGOALS),release)
 	CXXFLAGS = -O3 -DOGLWRAP_DEBUG=0 $(BASE_CXXFLAGS)
@@ -26,10 +27,17 @@ endif
 
 CXXFLAG_PRECOMPILED_HEADER = -include $(PRECOMPILED_HEADER_SRC)
 
-BASE_LDFLAGS =  -lGL -lGLU -lGLEW -lassimp `pkg-config --libs glfw3` \
-								-lXxf86vm -lX11 -lXrandr -lXi -lm -lXcursor -lpthread \
-								`Magick++-config --ldflags --libs` -lfreetype \
-								-Lsrc/engine/gui/freetype-gl -lfreetype-gl
+OPENGL_LDFLAGS = -lGL -lGLEW
+ASSIMP_LDFLAGS = -lassimp
+GLFW_LDFALGS = `pkg-config --libs glfw3` \
+								-lXxf86vm -lX11 -lXrandr -lXi -lXcursor -lpthread
+IMAGEMAGIC_LDFLAGS = `Magick++-config --ldflags --libs`
+FREETYPE_GL_LDFLAGS = -lfreetype -Lsrc/engine/gui/freetype-gl -lfreetype-gl
+BULLET_FLAGS = -lBulletSoftBody -lBulletDynamics -lBulletCollision \
+							 -lLinearMath -I/usr/include/bullet/
+
+BASE_LDFLAGS = -lm $(OPENGL_LDFLAGS) $(ASSIMP_LDFLAGS) $(GLFW_LDFALGS) \
+							 $(IMAGEMAGIC_LDFLAGS) $(FREETYPE_GL_LDFLAGS) $(BULLET_FLAGS)
 
 ifeq ($(MAKECMDGOALS),release)
 	LDFLAGS = $(BASE_LDFLAGS)

@@ -110,6 +110,5 @@ vec3 MoonColor() { return vec3(0.4); }
 
 float AmbientPower() { return 0.25 * max(max(SunPower(), MoonPower()), 0.3); }
 vec3 AmbientColor() {
-  return max(SunPower() * SunColor() + MoonPower() * MoonColor(),
-             vec3(AmbientPower()));
+  return SunPower() * SunColor() + MoonPower()*MoonColor()/2;
 }

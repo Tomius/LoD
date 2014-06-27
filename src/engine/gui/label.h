@@ -29,8 +29,8 @@ class Label : public engine::GameObject {
         const Font& font = Font{}, size_t cursor_pos = -1)
       : engine::GameObject(scene), font_(font)
       , idx_cnt_(0), pos_(pos), text_(text) {
-    gl::VertexShader vs("text.vert");
-    gl::FragmentShader fs("text.frag");
+    gl::VertexShader vs("engine/text.vert");
+    gl::FragmentShader fs("engine/text.frag");
 
     (prog_ << vs << fs).link().use();
     gl::Uniform<glm::vec4>(prog_, "uColor") = font.color();

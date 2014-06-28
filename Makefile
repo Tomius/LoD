@@ -91,7 +91,7 @@ endif
 # The dependency list files
 %.d:
 	@ # print some text for the user if its the first .d file
-	@ if mkdir $(OBJ_DIR)/deps 2> /dev/null; then $(call printf,[  0%] ,Calculating CXX dependencies,$(YELLOW)); fi;
+	@ if mkdir $(OBJ_DIR)/deps 2> /dev/null; then $(call printf,[  0%] ,Scanning dependencies,$(YELLOW)); fi;
 
 	@ # if the file doesn't exist, create its directory,
 	@ # else create a .d2 file to sign, that we have just created it (see %.o)
@@ -105,12 +105,12 @@ endif
 
 # We need a dep list for the precompiled header too
 $(PRECOMPILED_HEADER_DEP):
-	@ if mkdir $(OBJ_DIR)/deps 2> /dev/null; then $(call printf,[  0%] ,Calculating CXX dependencies,$(YELLOW)); fi;
+	@ if mkdir $(OBJ_DIR)/deps 2> /dev/null; then $(call printf,[  0%] ,Scanning dependencies,$(YELLOW)); fi;
 	@ if [ ! -f $@ ]; then mkdir -p $(dir $@); touch $(@:.d=.d2); fi;
 	@ $(CXX) $(CXXFLAGS) -x c++-header -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION).d=)) -MT $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.d=)) -MF $@
 
 %.o:
-	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building CXX object $@,$(GREEN))
+	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building object $@,$(GREEN))
 
 	@ # One of the depencies changed, which probably introduced new dependencies,
 	@ # that we don't depend on now. So if a new header is included from a header,
@@ -129,13 +129,13 @@ $(PRECOMPILED_HEADER_DEP):
 	@ $(CXX) $(CXXFLAGS) $(CXXFLAG_PRECOMPILED_HEADER) -c $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.o=.cc)) -o $@
 
 $(PRECOMPILED_HEADER):
-	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building CXX precompiled header $@,$(CYAN))
+	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building precompiled header $@,$(CYAN))
 	@ rm -f $(PRECOMPILED_HEADER)-*
 	@ if [ -f $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2 ]; then rm $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2;	else $(CXX) $(CXXFLAGS) -x c++-header -MM $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -MT $@ -MF $(subst $(SRC_DIR),$(OBJ_DIR),$@).d; fi;
 	@ $(CXX) $(CXXFLAGS) -x c++-header $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -o $@
 
 $(BINARY): $(OBJECTS)
-	@ $(call printf,[100%] ,Linking CXX executable $@,$(BOLD)$(RED))
+	@ $(call printf,[100%] ,Linking executable $@,$(BOLD)$(RED))
 	@ $(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
 %.h:

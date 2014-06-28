@@ -27,8 +27,6 @@ class Skybox : public engine::Behaviour {
   float time_;
   gl::Cube cube_;
 
-  gl::VertexShader vs_;
-  gl::FragmentShader fs_;
   engine::ShaderProgram prog_;
 
   gl::LazyUniform<glm::mat4> uProjectionMatrix_;

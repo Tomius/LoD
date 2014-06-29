@@ -33,7 +33,7 @@ void CalculateLighting(vec3 c_light_dir, out float diffuse_power,
 void main() {
   float spec_mask = texture2D(uSpecularTexture, vTexCoord).r;
 
-  vec3 lighting = HemisphereLighting(w_vNormal);
+  vec3 lighting = HemisphereLighting(normalize(w_vNormal));
   vec3 w_sun_dir = SunPos();
 
   if (w_sun_dir.y > 0) {

@@ -57,14 +57,14 @@ class Scene {
   T* addGameObject(Args&&... args) {
     static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
 
-    T *go = new T{this, std::forward<Args>(args)...};
+    T *go = new T(this, std::forward<Args>(args)...);
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }
 
   template<typename... Args>
   GameObject* addGameObject(Args&&... args) {
-    GameObject *go = new GameObject{this, std::forward<Args>(args)...};
+    GameObject *go = new GameObject(this, std::forward<Args>(args)...);
     gameobjects_.push_back(std::unique_ptr<GameObject>(go));
     return go;
   }
@@ -73,14 +73,14 @@ class Scene {
   T* addShadow(Args&&... args) {
     static_assert(std::is_base_of<Shadow, T>::value, "Unknown type");
 
-    auto shadow = new T{std::forward<Args>(args)...};
+    auto shadow = new T(std::forward<Args>(args)...);
     shadow_ = std::unique_ptr<Shadow>(shadow);
     return shadow;
   }
 
   template<typename... Args>
   Shadow* addShadow(Args&&... args) {
-    auto shadow = new Shadow{std::forward<Args>(args)...};
+    auto shadow = new Shadow(std::forward<Args>(args)...);
     shadow_ = std::unique_ptr<Shadow>(shadow);
     return shadow;
   }
@@ -89,7 +89,7 @@ class Scene {
   T* addCamera(Args&&... args) {
     static_assert(std::is_base_of<Camera, T>::value, "Unknown type");
 
-    auto camera = new T{std::forward<Args>(args)...};
+    auto camera = new T(std::forward<Args>(args)...);
     camera_ = std::unique_ptr<Camera>(camera);
     return camera;
   }
@@ -108,7 +108,7 @@ class Scene {
     }
   }
 
- private:
+ protected:
   virtual void update() {
     game_time_.tick();
     environment_time_.tick();

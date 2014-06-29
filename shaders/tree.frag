@@ -14,7 +14,11 @@ uniform sampler2D uDiffuseTexture;
 
 void main() {
   vec4 color = texture2D(uDiffuseTexture, vTexCoord);
-  vec3 final_color = color.rgb * HemisphereLighting(w_vNormal);
+  vec3 normal = normalize(w_vNormal);
+  // Trees have fake normals, and they need fake lighting...
+  vec3 lighting = 0.6*HemisphereLighting(normal) +
+                  0.4*HemisphereLighting(-normal);
+  vec3 final_color = color.rgb * lighting;
 
   float actual_alpha = min(color.a, VisibilityRangeAlpha(c_vPos));
   if (actual_alpha < 1e-1) { discard; }

@@ -102,7 +102,7 @@ void main() {
   vec3 c_normal = mat3(uCameraMatrix) * w_normal;
 
   // Lighting
-  vec3 lighting = HemisphereLighting(w_vNormal);
+  vec3 lighting = HemisphereLighting(w_normal);
   vec3 w_sun_dir = SunPos();
   if (w_sun_dir.y > 0) {
     float diffuse_power, specular_power;

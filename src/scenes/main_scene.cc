@@ -5,19 +5,19 @@
 #include <iostream>
 #include <string>
 
-#include "engine/game_engine.h"
-#include "engine/shader_manager.h"
+#include "../engine/game_engine.h"
+#include "../engine/shader_manager.h"
 
-#include "./charmove.h"
-#include "./skybox.h"
-#include "./terrain.h"
-#include "./bloom.h"
-#include "./ayumi.h"
-#include "./tree.h"
-#include "./shadow.h"
-#include "./fps_display.h"
+#include "../charmove.h"
+#include "../skybox.h"
+#include "../terrain.h"
+#include "../bloom.h"
+#include "../ayumi.h"
+#include "../tree.h"
+#include "../shadow.h"
+#include "../fps_display.h"
 
-#include "./loading_screen.h"
+#include "../loading_screen.h"
 
 static double last_debug_time = 0;
 
@@ -87,11 +87,11 @@ MainScene::MainScene() {
     addGameObject<Tree>(height_map);
   PrintDebugTime();
 
-  addGameObject<FpsDisplay>();
-
   PrintDebugText("Initializing the resources for the bloom effect");
     BloomEffect *bloom = addGameObject<BloomEffect>();
   PrintDebugTime();
 
   shadow->set_default_fbo(bloom->fbo());
+
+  addGameObject<FpsDisplay>();
 }

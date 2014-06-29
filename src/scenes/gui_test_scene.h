@@ -1,19 +1,19 @@
 // Copyright (c) 2014, Tamas Csala
 
-#ifndef LOD_SANDBOX_SCENE_H_
-#define LOD_SANDBOX_SCENE_H_
+#ifndef LOD_SCENES_GUI_TEST_SCENE_H_
+#define LOD_SCENES_GUI_TEST_SCENE_H_
 
-#include "engine/scene.h"
-#include "engine/gui/label.h"
-#include "engine/gui/box.h"
-#include "engine/gui/button.h"
-#include "engine/gui/text_field.h"
-#include "oglwrap/smart_enums.h"
+#include "../engine/scene.h"
+#include "../engine/gui/label.h"
+#include "../engine/gui/box.h"
+#include "../engine/gui/button.h"
+#include "../engine/gui/text_field.h"
+#include "../oglwrap/smart_enums.h"
 
 #include "./main_scene.h"
 
-struct SandboxScene : public engine::Scene {
-  SandboxScene() {
+struct GuiTestScene : public engine::Scene {
+  GuiTestScene() {
     using engine::gui::Font;
     using engine::gui::Label;
     using engine::gui::Box;

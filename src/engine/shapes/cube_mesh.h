@@ -8,21 +8,39 @@
 #include "../../oglwrap/uniform.h"
 #include "../../oglwrap/shapes/cube.h"
 
-#include "engine/scene.h"
-#include "engine/game_object.h"
+#include "../scene.h"
+#include "../game_object.h"
 
 namespace engine {
 namespace shapes {
 
 class CubeMesh : public engine::GameObject {
+ public:
+  CubeMesh(Scene* scene, const glm::vec3& color = glm::vec3())
+      : engine::GameObject(scene)
+      , scene_(scene)
+      , prog_(scene->shader_manager()->get("engine/simple_shape.vert"),
+              scene->shader_manager()->get("engine/simple_shape.frag"))
+      , uProjectionMatrix_(prog_, "uProjectionMatrix")
+      , uCameraMatrix_(prog_, "uCameraMatrix")
+      , uModelMatrix_(prog_, "uModelMatrix")
+      , uColor_(prog_, "uColor") {
+    prog_.use();
+    cube_.setupPositions(prog_ | "aPosition");
+    cube_.setupNormals(prog_ | "aNormal");
+    uColor_ = color;
+  }
+
+  glm::vec3 color() { return uColor_; }
+  void set_color(const glm::vec3& color) { uColor_ = color; }
 
  private:
+  Scene* scene_;
   gl::Cube cube_;
 
   engine::ShaderProgram prog_;
-
-  gl::LazyUniform<glm::mat4> uProjectionMatrix_;
-  gl::LazyUniform<glm::mat3> uCameraMatrix_;
+  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_;
+  gl::LazyUniform<glm::vec3> uColor_;
 
   virtual void render() override {
     prog_.use();

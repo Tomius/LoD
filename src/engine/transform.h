@@ -191,7 +191,7 @@ class Transformation {
     if (glm::length(axis) > 1e-3) {
       // Dot gives us the cosine of their angle
       T cosangle = glm::dot(local, world);
-      // We need the angle in degrees
+      // We need the angle in radians
       T angle = std::acos(cosangle);
       // Rotate with the calced values
       set_rot(glm::quat_cast(glm::rotate(mat4(), angle, axis)));

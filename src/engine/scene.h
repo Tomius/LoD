@@ -66,6 +66,14 @@ class Scene {
     return go;
   }
 
+  template<typename T>
+  T* addGameObject(T* ptr) {
+    static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
+
+    gameobjects_.push_back(std::unique_ptr<GameObject>(ptr));
+    return ptr;
+  }
+
   template<typename T, typename... Args>
   T* addShadow(Args&&... args) {
     static_assert(std::is_base_of<Shadow, T>::value, "Unknown type");
@@ -172,7 +180,13 @@ class Scene {
   }
 
  protected:
+  // Bullet classes
+  std::unique_ptr<btCollisionConfiguration> collision_config_;
+  std::unique_ptr<btDispatcher> dispatcher_;
+  std::unique_ptr<btBroadphaseInterface> broadphase_;
+  std::unique_ptr<btConstraintSolver> solver_;
   std::unique_ptr<btDynamicsWorld> world_;
+
   std::vector<std::unique_ptr<GameObject>> gameobjects_;
   std::unique_ptr<Camera> camera_;
   std::unique_ptr<Shadow> shadow_;

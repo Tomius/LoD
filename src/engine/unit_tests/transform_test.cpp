@@ -103,29 +103,29 @@ void TestLocRotScaleLevel1(Transform& parent, Transform& child) {
   Transform p = parent;
 
   // Location
-  child.local_pos(RandomVec());
+  child.set_local_pos(RandomVec());
 
   CheckPos(parent, child, "Translation effect on child");
   AssertEquals(parent, p, "Child's translation has no effect parent");
 
   // Rotation
-  parent.rot(RandomQuat());
+  parent.set_rot(RandomQuat());
 
   CheckPos(parent, child, "Rotation effect on child");
   AssertEquals(parent.pos(), p.pos(), "Rotation invariant on local_pos");
 
   p = parent;
-  child.rot(parent.rot());
+  child.set_rot(parent.rot());
   AssertEquals(parent, p, "Child's rotation has no effect parent");
 
   // Scale
-  parent.local_scale(RandomVec());
+  parent.set_local_scale(RandomVec());
 
   CheckPos(parent, child, "Scale effect on child's position");
   AssertEquals(parent.pos(), p.pos(), "Scale invariant on local_pos");
 
   p = parent;
-  child.scale(parent.scale());
+  child.set_scale(parent.scale());
   AssertEquals(parent, p, "Child's scaling has no effect parent");
 }
 
@@ -134,32 +134,32 @@ void TestLocRotScaleLevel2(Transform& gparent, Transform& parent, Transform& chi
   Transform gp = gparent;
 
   // Location
-  child.local_pos(RandomVec());
+  child.set_local_pos(RandomVec());
 
   CheckPos(parent, child, "Translation effect on child");
   AssertEquals(parent, p, "Child's translation has no effect parent");
 
   // Rotation
-  parent.rot(RandomQuat());
+  parent.set_rot(RandomQuat());
 
   CheckPos(parent, child, "Rotation effect on child");
   AssertEquals(parent.pos(), p.pos(), "Rotation invariant on local_pos");
 
   p = parent;
   gp = gparent;
-  child.rot(parent.rot());
+  child.set_rot(parent.rot());
   AssertEquals(parent, p, "Child's rotation has no effect on parent");
   AssertEquals(gparent, gp, "Child's rotation has no effect on gparent");
 
   // Scale
-  parent.local_scale(RandomVec());
+  parent.set_local_scale(RandomVec());
 
   CheckPos(parent, child, "Scale effect on child");
   AssertEquals(parent.pos(), p.pos(), "Scale invariant on local_pos");
 
   p = parent;
   gp = gparent;
-  child.scale(parent.scale());
+  child.set_scale(parent.scale());
   AssertEquals(parent, p, "Child's scaling has no effect parent");
   AssertEquals(gparent, gp, "Child's scaling has no effect on gparent");
 }
@@ -171,14 +171,14 @@ void DirectionTest() {
   AssertEquals(t.up(), glm::dvec3(0, 1, 0), "Up");
   AssertEquals(t.right(), glm::dvec3(1, 0, 0), "Right");
 
-  t.rot(glm::quat_cast(glm::rotate(glm::dmat4(), M_PI_2, glm::dvec3(1, 0, 0))));
+  t.set_rot(glm::quat_cast(glm::rotate(glm::dmat4(), M_PI_2, glm::dvec3(1, 0, 0))));
 
   AssertEquals(t.forward(), glm::dvec3(0, 1, 0), "Forward");
   AssertEquals(t.up(), glm::dvec3(0, 0, 1), "Up");
   AssertEquals(t.right(), glm::dvec3(1, 0, 0), "Right");
 
   for (int i = 0; i < 1000; ++i) {
-    t.rot(RandomQuat());
+    t.set_rot(RandomQuat());
     AssertEquals(glm::dot(t.forward(), t.right()), 0.0, "Forward and right should be ortho");
     AssertEquals(glm::dot(t.forward(), t.up()), 0.0, "Forward and up should be ortho");
     AssertEquals(glm::dot(t.right(), t.up()), 0.0, "Right and up should be ortho");
@@ -201,37 +201,37 @@ void GlobalSettings(Transform& t) {
   int pnum = GetParentsNum(&t);
   std::string prnts = " on a transform with " + std::to_string(pnum) + " parents";
 
-  t.pos(v);
+  t.set_pos(v);
   AssertEquals(t.pos(), v, "Setting global position" + prnts);
 
-  t.rot(q);
+  t.set_rot(q);
   AssertEquals(t.rot(), q, "Setting global rotation" + prnts);
 
-  t.scale(v);
+  t.set_scale(v);
   AssertEquals(t.scale(), v, "Setting global scaling" + prnts);
 
   v = RandomVec();
-  t.forward(v);
+  t.set_forward(v);
   AssertEquals(t.forward(), glm::normalize(v), "Setting global forward" + prnts);
 
   v = RandomVec();
-  t.right(v);
+  t.set_right(v);
   AssertEquals(t.right(), glm::normalize(v), "Setting global right" + prnts);
 
   v = RandomVec();
-  t.up(v);
+  t.set_up(v);
   AssertEquals(t.up(), glm::normalize(v), "Setting global up" + prnts);
 
   for (int i = 0; i < 1000; ++i) {
-    t.rot(v = glm::normalize(RandomVec()), u = glm::normalize(RandomVec()));
+    t.set_rot(v = glm::normalize(RandomVec()), u = glm::normalize(RandomVec()));
     AssertEquals(t.rot()*v, u, "Setting rot with 'v', 'u'" + prnts);
   }
 
   // There are special cases for rot
-  t.rot(v, v);
+  t.set_rot(v, v);
   AssertEquals(t.rot()*v, v, "Setting rot with 'v', 'v'" + prnts);
 
-  t.rot(v, -v);
+  t.set_rot(v, -v);
   AssertEquals(t.rot()*v, -v, "Setting rot with 'v', '-v'" + prnts);
 }
 
@@ -239,10 +239,9 @@ int main() {
   srand(time(nullptr));
 
   Transform parent, child, grand_child;
-  parent.pos(RandomVec());
+  parent.set_pos(RandomVec());
   parent.addChild(child);
-  child.addChild(grand_child)
-;
+  child.addChild(grand_child);
   TestParentChild(parent, child, grand_child);
 
   // Test with a thousand random transformations

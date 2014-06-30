@@ -15,104 +15,100 @@ using engine::shapes::CubeMesh;
 
 class BulletRigidBody : public engine::Behaviour {
  public:
-  template <typename Shape_t, typename... Args>
-  explicit BulletRigidBody(engine::Scene* scene, float mass, Args&&... args)
-      : engine::Behaviour(scene) {
-    shape_ = engine::make_unique<Shape_t>(std::forward<Args>(args)...);
+  BulletRigidBody(engine::Scene* scene, const glm::vec3& pos, float mass,
+                  btCollisionShape* shape, const glm::quat& rot = glm::quat())
+      : engine::Behaviour(scene), static_(mass == 0.0f) {
+    shape_ = std::unique_ptr<btCollisionShape>(shape);
     btVector3 inertia(0, 0, 0);
-    if (mass != 0.0f) {
+    if (!static_) {
       shape_->calculateLocalInertia(mass, inertia);
     }
-    motion_state_ = engine::make_unique<btDefaultMotionState>();
+    btTransform transform;
+    transform.setIdentity();
+    transform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+    transform.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
+    motion_state_ = engine::make_unique<btDefaultMotionState>(transform);
     btRigidBody::btRigidBodyConstructionInfo info(mass, motion_state_.get(),
                                                   shape_.get(), inertia);
     rigid_body_ = engine::make_unique<btRigidBody>(info);
     scene_->world()->addRigidBody(rigid_body_.get());
   }
 
+  virtual ~BulletRigidBody() {
+    scene_->world()->removeCollisionObject(rigid_body_.get());
+  }
+
+  btRigidBody* rigid_body() { return rigid_body_.get(); }
+  const btRigidBody* rigid_body() const { return rigid_body_.get(); }
+
  private:
+  bool static_;
+  std::unique_ptr<btCollisionShape> shape_;
   std::unique_ptr<btMotionState> motion_state_;
   std::unique_ptr<btRigidBody> rigid_body_;
-  std::unique_ptr<btCollisionShape> shape_;
+
   virtual void update() override {
+    if (static_) { return; }
+
     btTransform t;
-    rigid_body_->getMotionState()->getWorldTransform(t);
+    t.setIdentity();
+    motion_state_->getWorldTransform(t);
     const btVector3& o = t.getOrigin();
     parent_->transform.set_pos(glm::vec3(o.x(), o.y(), o.z()));
-    const btVector3& axis = t.getRotation().getAxis();
-    const btScalar& w = t.getRotation().getW();
-    parent_->transform.set_rot(glm::quat(w, axis.x(), axis.y(), axis.z()));
+    const btQuaternion& r = t.getRotation();
+    parent_->transform.set_rot(glm::quat(r.getW(), r.getX(),
+                                         r.getY(), r.getZ()));
   }
 };
 
-struct RigidBodyDeleter {
-  void operator()(btRigidBody *ptr) const {
-    delete ptr->getMotionState();
-    delete ptr->getCollisionShape();
-    delete ptr;
+class StaticPlane : public engine::GameObject {
+ public:
+  explicit StaticPlane(engine::Scene* scene) : engine::GameObject(scene) {
+    btCollisionShape* shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
+    addComponent<BulletRigidBody>(glm::vec3(), 0.0f, shape);
+    auto plane_mesh = addComponent<CubeMesh>(glm::vec3(0.5, 0.5, 0.5));
+    plane_mesh->transform.set_local_scale(glm::vec3(400, 1, 400));
   }
 };
 
-using RigidBodyPtr = std::unique_ptr<btRigidBody, RigidBodyDeleter>;
+class RedCube : public engine::GameObject {
+ public:
+  explicit RedCube(engine::Scene* scene, const glm::vec3& pos,
+                   const glm::vec3& v, const glm::quat& rot)
+      : engine::GameObject(scene) {
+    btVector3 half_extents(1.0f, 1.0f, 1.0f);
+    btCollisionShape* shape = new btBoxShape(half_extents);
+    auto rbody = addComponent<BulletRigidBody>(pos, 1.0f, shape, rot);
+    rbody->rigid_body()->setLinearVelocity(btVector3(v.x, v.y, v.z));
+    addComponent<CubeMesh>(glm::vec3(1.0, 0.0, 0.0));
+  }
+};
 
 class BulletBasicsScene : public engine::Scene {
-  std::unique_ptr<btCollisionConfiguration> collision_config_;
-  std::unique_ptr<btDispatcher> dispatcher_;
-  // should Bullet examine every object, or just what close to each other
-  std::unique_ptr<btBroadphaseInterface> broadphase_;
-  // solve collisions, apply forces, impulses
-  std::unique_ptr<btConstraintSolver> solver_;
-
-  std::vector<RigidBodyPtr> rbodies_;
-
-  void addSphere() {
-    const float radius = 1.0f;
-    const float mass = 1.0f;
-    btTransform transform;
-    transform.setIdentity();
+  void addSmallRedCube() {
     auto cam = camera();
-    glm::vec3 pos = cam->pos() + 2.0f*cam->forward();
-    transform.setOrigin(btVector3(pos.x, pos.y, pos.z));
-    btSphereShape* sphere = new btSphereShape(radius);
-    btVector3 inertia(0, 0, 0);
-    if (mass != 0.0f) {
-      sphere->calculateLocalInertia(mass, inertia);
-    }
-    btMotionState* motion = new btDefaultMotionState(transform);
-    btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
-    btRigidBody* rbody = new btRigidBody(info);
-    rbodies_.push_back(RigidBodyPtr(rbody));
-    world_->addRigidBody(rbody);
-    auto plane_mesh = addGameObject<CubeMesh>(glm::vec3(1.0, 0.0, 0.0));
-    plane_mesh->transform.set_local_pos(pos);
+    glm::vec3 pos = cam->pos() + 3.0f*cam->forward();
+    addGameObject<RedCube>(pos, 10.0f*cam->forward(), cam->rot());
   }
 
  public:
-  BulletBasicsScene()
-      : collision_config_(new btDefaultCollisionConfiguration())
-      , dispatcher_(new btCollisionDispatcher(collision_config_.get()))
-      // Dynamic bounding volume tree broadphase
-      // Alternatively I could use btAxisSweep3 for finite bound worlds.
-      , broadphase_(new btDbvtBroadphase())
-      , solver_(new btSequentialImpulseConstraintSolver()) {
+  BulletBasicsScene() {
+    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    collision_config_ = engine::make_unique<btDefaultCollisionConfiguration>();
+    dispatcher_ =
+        engine::make_unique<btCollisionDispatcher>(collision_config_.get());
+    // Dynamic bounding volume tree broadphase
+    // Alternatively I could use btAxisSweep3 for finite bound worlds.
+    broadphase_ = engine::make_unique<btDbvtBroadphase>();
+    solver_ = engine::make_unique<btSequentialImpulseConstraintSolver>();
     world_ = engine::make_unique<btDiscreteDynamicsWorld>(
         dispatcher_.get(), broadphase_.get(),
         solver_.get(), collision_config_.get());
-    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     world_->setGravity(btVector3(0, -9.81, 0));
 
     // Add a plane
-    btTransform transform;
-    transform.setIdentity();
-    transform.setOrigin(btVector3(0, 0, 0));
-    btStaticPlaneShape* plane = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
-    btMotionState* motion = new btDefaultMotionState(transform);
-    btRigidBody::btRigidBodyConstructionInfo info(0.0, motion, plane);
-    btRigidBody* rbody = new btRigidBody(info);
-    rbodies_.push_back(RigidBodyPtr(rbody));
-    world_->addRigidBody(rbody);
-    auto plane_mesh = addGameObject<CubeMesh>(glm::vec3(0.5, 0.5, 0.5));
-    plane_mesh->transform.set_local_scale(glm::vec3(100, 1, 100));
+    addGameObject<StaticPlane>();
 
     // Add a camera
     addCamera<engine::FreeFlyCamera>(window(), M_PI/3, 1, 500,
@@ -121,17 +117,12 @@ class BulletBasicsScene : public engine::Scene {
 
   virtual void update() override {
     world_->stepSimulation(game_time().dt);
-    for (auto& rbody : rbodies_) {
-      btTransform t;
-      rbody->getMotionState()->getWorldTransform(t);
-      // apply that shit to the other shit
-    }
     Scene::update();
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {
     if (action == GLFW_PRESS && key == GLFW_KEY_SPACE) {
-      addSphere();
+      addSmallRedCube();
     }
   }
 };

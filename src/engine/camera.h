@@ -106,7 +106,6 @@ class Camera : public Transform {
 };
 
 class FreeFlyCamera : public Camera {
-  glm::vec3 fwd_;
   GLFWwindow* window_;
   bool first_call_;
 
@@ -125,19 +124,10 @@ class FreeFlyCamera : public Camera {
       , window_(window)
       , first_call_(true)
       , speed_per_sec_(speed_per_sec)
-      , cos_max_pitch_angle_(0.95)
+      , cos_max_pitch_angle_(0.95f)
       , mouse_sensitivity_(mouse_sensitivity) {
     set_pos(pos);
     set_forward(target - pos);
-  }
-
-  // The forward value is cached
-  virtual glm::vec3 forward() const override {
-    return fwd_;
-  }
-
-  virtual void set_forward(const glm::vec3& new_fwd) override {
-    fwd_ = glm::normalize(new_fwd);
   }
 
   // We want the camera to always treat Y as up.
@@ -215,8 +205,6 @@ class FreeFlyCamera : public Camera {
  * It can be controlled with mouse movement, and mouse wheel mouseScrolled.
  */
 class ThirdPersonalCamera : public Camera {
-  glm::vec3 fwd_;
-
   // We shouldn't interpolate at the first call.
   bool first_call_;
 
@@ -247,7 +235,7 @@ class ThirdPersonalCamera : public Camera {
       , curr_dist_mod_(1.0f)
       , dest_dist_mod_(1.0f)
       , initial_distance_(glm::length(target.pos() - position))
-      , cos_max_pitch_angle_(0.8f)
+      , cos_max_pitch_angle_(0.95f)
       , mouse_sensitivity_(mouse_sensitivity)
       , mouse_scroll_sensitivity_(mouse_scroll_sensitivity)
       , height_map_(height_map)
@@ -271,15 +259,6 @@ class ThirdPersonalCamera : public Camera {
   virtual void set_pos(const glm::vec3& new_pos) override {
     set_local_pos(new_pos - target().pos() +
                   forward() * (curr_dist_mod_*initial_distance_));
-  }
-
-  // The forward value is cached
-  virtual glm::vec3 forward() const override {
-    return fwd_;
-  }
-
-  virtual void set_forward(const glm::vec3& new_fwd) override {
-    fwd_ = glm::normalize(new_fwd);
   }
 
   // We want the camera to always treat Y as up.
@@ -388,8 +367,8 @@ class ThirdPersonalCamera : public Camera {
   }
 
   void raiseDistanceOverTerrain(double diff) {
-    fwd_ = glm::normalize(forward()*curr_dist_mod_*initial_distance_ -
-                          glm::vec3(0, diff, 0));
+    set_forward(glm::normalize(forward()*curr_dist_mod_*initial_distance_ -
+                          glm::vec3(0, diff, 0)));
   }
 
  public:

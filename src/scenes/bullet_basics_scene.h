@@ -10,6 +10,9 @@
 #include "../engine/camera.h"
 #include "../engine/behaviour.h"
 #include "../engine/shapes/cube_mesh.h"
+#include "../engine/gui/label.h"
+
+#include "./main_scene.h"
 
 using engine::shapes::CubeMesh;
 
@@ -67,6 +70,7 @@ class StaticPlane : public engine::GameObject {
     btCollisionShape* shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     addComponent<BulletRigidBody>(glm::vec3(), 0.0f, shape);
     auto plane_mesh = addComponent<CubeMesh>(glm::vec3(0.5, 0.5, 0.5));
+    plane_mesh->transform.set_local_pos(glm::vec3(0, -0.5f, 0));
     plane_mesh->transform.set_local_scale(glm::vec3(400, 1, 400));
   }
 };
@@ -76,7 +80,7 @@ class RedCube : public engine::GameObject {
   explicit RedCube(engine::Scene* scene, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot)
       : engine::GameObject(scene) {
-    btVector3 half_extents(1.0f, 1.0f, 1.0f);
+    btVector3 half_extents(0.5f, 0.5f, 0.5f);
     btCollisionShape* shape = new btBoxShape(half_extents);
     auto rbody = addComponent<BulletRigidBody>(pos, 1.0f, shape, rot);
     rbody->rigid_body()->setLinearVelocity(btVector3(v.x, v.y, v.z));
@@ -107,12 +111,20 @@ class BulletBasicsScene : public engine::Scene {
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
 
-    // Add a plane
     addGameObject<StaticPlane>();
 
-    // Add a camera
     addCamera<engine::FreeFlyCamera>(window(), M_PI/3, 1, 500,
                                      glm::vec3(10, 5, 0), glm::vec3(), 25, 2);
+
+    auto label = addGameObject<engine::gui::Label>(
+        L"Press space to shoot a cube.", glm::vec2(0, -0.9));
+    label->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
+    label->set_font_size(20);
+
+    auto label2 = addGameObject<engine::gui::Label>(
+        L"You can load the main scene by pressing the home button.", glm::vec2(0, -0.95));
+    label2->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
+    label2->set_font_size(14);
   }
 
   virtual void update() override {
@@ -121,8 +133,12 @@ class BulletBasicsScene : public engine::Scene {
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {
-    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE) {
-      addSmallRedCube();
+    if (action == GLFW_PRESS) {
+      if (key == GLFW_KEY_SPACE) {
+        addSmallRedCube();
+      } else if (key == GLFW_KEY_HOME) {
+        engine::GameEngine::LoadScene<MainScene>();
+      }
     }
   }
 };

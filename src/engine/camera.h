@@ -220,6 +220,8 @@ class ThirdPersonalCamera : public Camera {
 
   GLFWwindow* window_;
 
+  glm::vec3 fwd_;
+
  public:
   ThirdPersonalCamera(GLFWwindow* window,
                       float fov,
@@ -259,6 +261,14 @@ class ThirdPersonalCamera : public Camera {
   virtual void set_pos(const glm::vec3& new_pos) override {
     set_local_pos(new_pos - target().pos() +
                   forward() * (curr_dist_mod_*initial_distance_));
+  }
+
+  virtual glm::vec3 forward() const override {
+    return fwd_;
+  }
+
+  virtual void set_forward(const glm::vec3& fwd) override {
+    fwd_ = glm::normalize(fwd);
   }
 
   // We want the camera to always treat Y as up.

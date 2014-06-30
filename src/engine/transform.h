@@ -15,6 +15,7 @@ namespace engine {
 
 template<typename T, glm::precision P = glm::precision::highp>
 class Transformation {
+ protected:
   using vec3 = glm::detail::tvec3<T, P>;
   using vec4 = glm::detail::tvec4<T, P>;
   using mat3 = glm::detail::tmat3x3<T, P>;

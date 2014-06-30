@@ -220,8 +220,6 @@ class ThirdPersonalCamera : public Camera {
 
   GLFWwindow* window_;
 
-  glm::vec3 fwd_;
-
  public:
   ThirdPersonalCamera(GLFWwindow* window,
                       float fov,
@@ -263,13 +261,9 @@ class ThirdPersonalCamera : public Camera {
                   forward() * (curr_dist_mod_*initial_distance_));
   }
 
-  virtual glm::vec3 forward() const override {
-    return fwd_;
-  }
-
-  virtual void set_forward(const glm::vec3& fwd) override {
-    fwd_ = glm::normalize(fwd);
-  }
+  // We shouldn't inherit the parent's rotation, like how a normal Transform does
+  virtual const quat rot() const override { return rot_; }
+  virtual void set_rot(const quat& new_rot) override { rot_ = new_rot; }
 
   // We want the camera to always treat Y as up.
   virtual glm::vec3 up() const override {

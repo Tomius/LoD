@@ -7,6 +7,8 @@ varying vec3 w_vNormal;
 uniform vec3 uColor = vec3(1.0);
 
 void main() {
-  vec3 fake_lighting = mix(vec3(0.3), vec3(0.9), (1 + normalize(w_vNormal).y)/2);
+  vec3 fake_light_pos = normalize(vec3(0.4, 0.8, 0.2));
+  float dot_value = dot(normalize(w_vNormal), fake_light_pos);
+  vec3 fake_lighting = mix(vec3(0.3), vec3(0.9), (1 + dot_value)/2);
   gl_FragColor = vec4(uColor * fake_lighting, 1);
 }

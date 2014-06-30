@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <memory>
+#include <bullet/btBulletDynamicsCommon.h>
 
 #include "./oglwrap_config.h"
 #include "../oglwrap/oglwrap.h"
@@ -20,18 +21,14 @@ namespace engine {
 class GameObject;
 
 class Scene {
-  std::vector<std::unique_ptr<GameObject>> gameobjects_;
-  std::unique_ptr<Camera> camera_;
-  std::unique_ptr<Shadow> shadow_;
-  ShaderManager shader_manager_;
-  Timer game_time_, environment_time_, camera_time_;
-  GLFWwindow* window_;
-
  public:
+  Scene();
   virtual ~Scene() {}
 
-  // setters and getters
   virtual float gravity() const { return 9.81f; }
+
+  const btDynamicsWorld* world() const { return world_.get(); }
+  btDynamicsWorld* world() { return world_.get(); }
 
   const Timer& game_time() const { return game_time_; }
   Timer& game_time() { return game_time_; }
@@ -43,7 +40,7 @@ class Scene {
   Timer& camera_time() { return camera_time_; }
 
   const Camera* camera() const { return camera_.get(); }
-  //  Camera* camera() { return camera_.get(); }
+  Camera* camera() { return camera_.get(); }
 
   const Shadow* shadow() const { return shadow_.get(); }
   Shadow* shadow() { return shadow_.get(); }
@@ -108,62 +105,6 @@ class Scene {
     }
   }
 
- protected:
-  virtual void update() {
-    game_time_.tick();
-    environment_time_.tick();
-    camera_time_.tick();
-
-    for (auto& i : gameobjects_) {
-      i->updateAll();
-    }
-
-    if (camera_) {
-      camera_->update(camera_time_);
-    }
-  }
-
-  virtual void shadowRender() {
-    if (!camera_)
-      return;
-
-    if (shadow_) {
-      shadow_->begin(); {
-        for (auto& i : gameobjects_) {
-          i->shadowRenderAll();
-        }
-      } shadow_->end();
-    }
-  }
-
-  virtual void render() {
-    if (!camera_)
-      return;
-
-    for (auto& i : gameobjects_) {
-      i->renderAll();
-    }
-  }
-
-  virtual void render2D() {
-    auto capabilities = gl::TemporarySet({{gl::kBlend, true},
-                                          {gl::kCullFace, false},
-                                          {gl::kDepthTest, false}});
-    gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
-
-    for (auto& i : gameobjects_) {
-      i->render2DAll();
-    }
-  }
-
- public:
-  virtual void turn() {
-    update();
-    shadowRender();
-    render();
-    render2D();
-  }
-
   virtual void keyAction(int key, int scancode, int action, int mods) {
     if (camera_) {
       camera_->keyAction(camera_time_, key, scancode, action, mods);
@@ -220,6 +161,69 @@ class Scene {
 
     for (auto& i : gameobjects_) {
       i->mouseMovedAll(xpos, ypos);
+    }
+  }
+
+  virtual void turn() {
+    update();
+    shadowRender();
+    render();
+    render2D();
+  }
+
+ protected:
+  std::unique_ptr<btDynamicsWorld> world_;
+  std::vector<std::unique_ptr<GameObject>> gameobjects_;
+  std::unique_ptr<Camera> camera_;
+  std::unique_ptr<Shadow> shadow_;
+  ShaderManager shader_manager_;
+  Timer game_time_, environment_time_, camera_time_;
+  GLFWwindow* window_;
+
+  virtual void update() {
+    game_time_.tick();
+    environment_time_.tick();
+    camera_time_.tick();
+
+    for (auto& i : gameobjects_) {
+      i->updateAll();
+    }
+
+    if (camera_) {
+      camera_->update(camera_time_);
+    }
+  }
+
+  virtual void shadowRender() {
+    if (!camera_)
+      return;
+
+    if (shadow_) {
+      shadow_->begin(); {
+        for (auto& i : gameobjects_) {
+          i->shadowRenderAll();
+        }
+      } shadow_->end();
+    }
+  }
+
+  virtual void render() {
+    if (!camera_)
+      return;
+
+    for (auto& i : gameobjects_) {
+      i->renderAll();
+    }
+  }
+
+  virtual void render2D() {
+    auto capabilities = gl::TemporarySet({{gl::kBlend, true},
+                                          {gl::kCullFace, false},
+                                          {gl::kDepthTest, false}});
+    gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
+
+    for (auto& i : gameobjects_) {
+      i->render2DAll();
     }
   }
 };

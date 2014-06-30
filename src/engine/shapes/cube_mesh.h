@@ -18,7 +18,6 @@ class CubeMesh : public engine::GameObject {
  public:
   CubeMesh(Scene* scene, const glm::vec3& color = glm::vec3())
       : engine::GameObject(scene)
-      , scene_(scene)
       , prog_(scene->shader_manager()->get("engine/simple_shape.vert"),
               scene->shader_manager()->get("engine/simple_shape.frag"))
       , uProjectionMatrix_(prog_, "uProjectionMatrix")
@@ -35,7 +34,6 @@ class CubeMesh : public engine::GameObject {
   void set_color(const glm::vec3& color) { uColor_ = color; }
 
  private:
-  Scene* scene_;
   gl::Cube cube_;
 
   engine::ShaderProgram prog_;

@@ -18,7 +18,7 @@ PRECOMPILED_HEADER_DEP = $(subst $(SRC_DIR),$(OBJ_DIR),$(PRECOMPILED_HEADER).d)
 BASE_CXXFLAGS = -std=c++11 -Wall -Weffc++ -Qunused-arguments \
 					 			`pkg-config --cflags glfw3` \
 					 			`pkg-config --cflags bullet` \
-					 			`Magick++-config --cxxflags --cppflags`
+					 			`Magick++-config --cxxflags`
 
 ifeq ($(MAKECMDGOALS),release)
 	CXXFLAGS = -O3 -DOGLWRAP_DEBUG=0 $(BASE_CXXFLAGS)

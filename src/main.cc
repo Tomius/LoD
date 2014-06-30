@@ -10,9 +10,9 @@ using engine::GameEngine;
 int main() {
   try {
     GameEngine::InitContext();
-    GameEngine::LoadScene<MainScene>();  // The real Land of Dreams scene
+    //  GameEngine::LoadScene<MainScene>();  // The real Land of Dreams scene
     //  GameEngine::LoadScene<GuiTestScene>();  // Just for testing GUI elements
-    //  GameEngine::LoadScene<BulletBasicsScene>();  // Bullet basics
+    GameEngine::LoadScene<BulletBasicsScene>();  // Bullet basics
     GameEngine::Run();
   } catch(const std::exception& err) {
     std::cerr << err.what();

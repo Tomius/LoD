@@ -7,7 +7,7 @@
 
 const engine::Transform& Terrain::initTransform() {
   //  transform.local_scale() = glm::vec3(4, 1, 4); TODO
-  transform.local_scale() = glm::vec3(1, 1.0f, 1);
+  //  transform.local_pos() = glm::vec3(-2048, 0, -2048); // TODO
   return transform;
 }
 

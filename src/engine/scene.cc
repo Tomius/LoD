@@ -5,6 +5,6 @@
 
 namespace engine {
 
-Scene::Scene() : window_(GameEngine::window()) {}
+Scene::Scene() : window_(GameEngine::window()), target_layer_(0) {}
 
 }  // namespace engine

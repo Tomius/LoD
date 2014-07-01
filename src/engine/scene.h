@@ -179,6 +179,9 @@ class Scene {
     render2D();
   }
 
+  int target_layer() const { return target_layer_; }
+  void set_target_layer(int value) { target_layer_ = value; }
+
  protected:
   // Bullet classes
   std::unique_ptr<btCollisionConfiguration> collision_config_;
@@ -193,6 +196,7 @@ class Scene {
   ShaderManager shader_manager_;
   Timer game_time_, environment_time_, camera_time_;
   GLFWwindow* window_;
+  int target_layer_;
 
   virtual void update() {
     game_time_.tick();

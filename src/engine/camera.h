@@ -166,8 +166,8 @@ class FreeFlyCamera : public Camera {
 
     // Mouse movement - update the coordinate system
     if (diff.x || diff.y) {
-      float dx(diff.x * mouse_sensitivity_ * timer.dt / 4);
-      float dy(-diff.y * mouse_sensitivity_ * timer.dt / 4);
+      float dx(diff.x * mouse_sensitivity_ * timer.dt / 16);
+      float dy(-diff.y * mouse_sensitivity_ * timer.dt / 16);
 
       // If we are looking up / down, we don't want to be able
       // to rotate to the other side

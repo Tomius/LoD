@@ -4,7 +4,7 @@
 #define ENGINE_CDLOD_QUAD_TREE_H_
 
 #include <memory>
-#include "quad_grid_mesh.h"
+#include "./quad_grid_mesh.h"
 #include "../camera.h"
 #include "../collision/bounding_box.h"
 #include "../height_map_interface.h"

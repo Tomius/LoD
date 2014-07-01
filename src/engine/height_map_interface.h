@@ -72,6 +72,9 @@ class HeightMapInterface {
   // Uploads the heightmap to a texture object
   virtual void upload(gl::Texture2D& tex) const = 0;
 
+  // Returns a pointer to the heightfield data
+  virtual const void* data() const = 0;
+
   // Returns dvec2{min, max} of area between (x-w/2, y-h/2) and (x+w/2, y+h/2)
   // it returns {0, 0} if the area requested doesn't contain a single valid value
   virtual glm::dvec2 getMinMaxOfArea(int x, int y, int w, int h) const;

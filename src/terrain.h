@@ -18,7 +18,6 @@ class Terrain : public engine::GameObject {
   virtual ~Terrain() {}
 
   const engine::HeightMapInterface& height_map() { return height_map_; }
-  virtual void render() override;
 
  private:
   engine::HeightMap<GLushort> height_map_;
@@ -31,6 +30,7 @@ class Terrain : public engine::GameObject {
   gl::LazyUniform<int> uNumUsedShadowMaps_;
   gl::LazyUniform<glm::ivec2> uShadowAtlasSize_;
 
+  virtual void render() override;
   const engine::Transform& initTransform();
 };
 

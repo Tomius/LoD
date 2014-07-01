@@ -15,17 +15,12 @@ class Scene;
 class Behaviour;
 
 class GameObject {
- protected:
-  Scene* scene_;
-  GameObject* parent_;
-  std::vector<std::unique_ptr<GameObject>> components_;
-  std::vector<Behaviour*> behaviours_;
-
  public:
   Transform transform;
   std::unique_ptr<RigidBody> rigid_body;
 
-  explicit GameObject(Scene* scene) : scene_(scene) {}
+  explicit GameObject(Scene* scene)
+      : scene_(scene), enabled_(true), layer_(0), group_(0) {}
   virtual ~GameObject() {}
 
   void addRigidBody(const HeightMapInterface& height_map,
@@ -52,7 +47,7 @@ class GameObject {
 
       return obj;
     } catch (const std::exception& ex) {
-      std::cout << ex.what() << std::endl;
+      std::cerr << ex.what() << std::endl;
       return nullptr;
     }
   }
@@ -63,6 +58,15 @@ class GameObject {
   Scene* scene() { return scene_; }
   const Scene* scene() const { return scene_; }
   void set_scene(Scene* scene) { scene_ = scene; }
+
+  bool enabled() const { return enabled_; }
+  void set_enabled(bool value) { enabled_ = value; }
+
+  int layer() const { return layer_; }
+  void set_layer(int value) { layer_ = value; }
+
+  int group() const { return group_; }
+  void set_group(int value) { group_ = value; }
 
   virtual void shadowRender() {}
   virtual void render() {}
@@ -80,7 +84,16 @@ class GameObject {
   virtual void mouseScrolledAll(double xoffset, double yoffset);
   virtual void mouseButtonPressedAll(int button, int action, int mods);
   virtual void mouseMovedAll(double xpos, double ypos);
+
+ protected:
+  Scene* scene_;
+  GameObject* parent_;
+  std::vector<std::unique_ptr<GameObject>> components_;
+  std::vector<Behaviour*> behaviours_;
+  bool enabled_;
+  int layer_, group_;
 };
+
 }  // namespace engine
 
 #endif

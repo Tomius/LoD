@@ -12,6 +12,8 @@
 
 #include "./timer.h"
 #include "./camera.h"
+#include "./game_object.h"
+#include "./behaviour.h"
 #include "./shader_manager.h"
 
 #include "../shadow.h"
@@ -20,10 +22,16 @@ namespace engine {
 
 class GameObject;
 
-class Scene {
+class Scene : public Behaviour {
  public:
   Scene();
-  virtual ~Scene() {}
+  virtual ~Scene() {
+    // The GameObject's destructor have to run here
+    // as they might use the scene ptr in their destructor
+    for (auto& comp_ptr : components_) {
+      comp_ptr.reset();
+    }
+  }
 
   virtual float gravity() const { return 9.81f; }
 
@@ -50,29 +58,7 @@ class Scene {
   GLFWwindow* window() const { return window_; }
   void set_window(GLFWwindow* window) { window_ = window; }
 
-  template<typename T, typename... Args>
-  T* addGameObject(Args&&... args) {
-    static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
-
-    T *go = new T(this, std::forward<Args>(args)...);
-    gameobjects_.push_back(std::unique_ptr<GameObject>(go));
-    return go;
-  }
-
-  template<typename... Args>
-  GameObject* addGameObject(Args&&... args) {
-    GameObject *go = new GameObject(this, std::forward<Args>(args)...);
-    gameobjects_.push_back(std::unique_ptr<GameObject>(go));
-    return go;
-  }
-
-  template<typename T>
-  T* addGameObject(T* ptr) {
-    static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
-
-    gameobjects_.push_back(std::unique_ptr<GameObject>(ptr));
-    return ptr;
-  }
+  GameObject* addGameObject() { return addComponent<GameObject>(); }
 
   template<typename T, typename... Args>
   T* addShadow(Args&&... args) {
@@ -99,7 +85,7 @@ class Scene {
     return camera;
   }
 
-  virtual void screenResized(size_t w, size_t h) {
+  virtual void screenResized(size_t w, size_t h) override {
     if (shadow_) {
       shadow_->screenResized(w, h);
     }
@@ -107,19 +93,11 @@ class Scene {
     if (camera_) {
       camera_->screenResized(w, h);
     }
-
-    for (auto& i : gameobjects_) {
-      i->screenResizedAll(w, h);
-    }
   }
 
-  virtual void keyAction(int key, int scancode, int action, int mods) {
+  virtual void keyAction(int key, int scancode, int action, int mods) override {
     if (camera_) {
       camera_->keyAction(camera_time_, key, scancode, action, mods);
-    }
-
-    for (auto& i : gameobjects_) {
-      i->keyActionAll(key, scancode, action, mods);
     }
 
     if (action == GLFW_PRESS) {
@@ -136,47 +114,29 @@ class Scene {
     }
   }
 
-  virtual void charTyped(unsigned codepoint) {
-    for (auto& i : gameobjects_) {
-      i->charTypedAll(codepoint);
-    }
-  }
-
-  virtual void mouseScrolled(double xoffset, double yoffset) {
+  virtual void mouseScrolled(double xoffset, double yoffset) override {
     if (camera_) {
       camera_->mouseScrolled(camera_time_, xoffset, yoffset);
     }
-
-    for (auto& i : gameobjects_) {
-      i->mouseScrolledAll(xoffset, yoffset);
-    }
   }
 
-  virtual void mouseButtonPressed(int button, int action, int mods) {
+  virtual void mouseButtonPressed(int button, int action, int mods) override {
     if (camera_) {
       camera_->mouseButtonPressed(camera_time_, button, action, mods);
     }
-
-    for (auto& i : gameobjects_) {
-      i->mouseButtonPressedAll(button, action, mods);
-    }
   }
 
-  virtual void mouseMoved(double xpos, double ypos) {
+  virtual void mouseMoved(double xpos, double ypos) override {
     if (camera_) {
       camera_->mouseMoved(camera_time_, xpos, ypos);
-    }
-
-    for (auto& i : gameobjects_) {
-      i->mouseMovedAll(xpos, ypos);
     }
   }
 
   virtual void turn() {
-    update();
-    shadowRender();
-    render();
-    render2D();
+    updateAll();
+    shadowRenderAll();
+    renderAll();
+    render2DAll();
   }
 
   int target_layer() const { return target_layer_; }
@@ -190,7 +150,6 @@ class Scene {
   std::unique_ptr<btConstraintSolver> solver_;
   std::unique_ptr<btDynamicsWorld> world_;
 
-  std::vector<std::unique_ptr<GameObject>> gameobjects_;
   std::unique_ptr<Camera> camera_;
   std::unique_ptr<Shadow> shadow_;
   ShaderManager shader_manager_;
@@ -198,51 +157,37 @@ class Scene {
   GLFWwindow* window_;
   int target_layer_;
 
-  virtual void update() {
+  virtual void updateAll() override {
     game_time_.tick();
     environment_time_.tick();
     camera_time_.tick();
 
-    for (auto& i : gameobjects_) {
-      i->updateAll();
-    }
+    Behaviour::updateAll();
 
     if (camera_) {
       camera_->update(camera_time_);
     }
   }
 
-  virtual void shadowRender() {
-    if (!camera_)
-      return;
-
-    if (shadow_) {
+  virtual void shadowRenderAll() override {
+    if (camera_ && shadow_) {
       shadow_->begin(); {
-        for (auto& i : gameobjects_) {
-          i->shadowRenderAll();
-        }
+        Behaviour::shadowRenderAll();
       } shadow_->end();
     }
   }
 
-  virtual void render() {
-    if (!camera_)
-      return;
-
-    for (auto& i : gameobjects_) {
-      i->renderAll();
-    }
+  virtual void renderAll() override {
+    if (camera_) { Behaviour::renderAll(); }
   }
 
-  virtual void render2D() {
+  virtual void render2DAll() override {
     auto capabilities = gl::TemporarySet({{gl::kBlend, true},
                                           {gl::kCullFace, false},
                                           {gl::kDepthTest, false}});
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
-    for (auto& i : gameobjects_) {
-      i->render2DAll();
-    }
+    Behaviour::render2DAll();
   }
 };
 

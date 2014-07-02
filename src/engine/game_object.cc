@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "./behaviour.h"
+#include "./game_object.h"
 
 #define _TRY(YourCode) \
   try { \
@@ -12,66 +12,90 @@
 namespace engine {
 
 void GameObject::shadowRenderAll() {
-  _TRY(shadowRender());
-  for (auto& component : components_) {
-    component->shadowRenderAll();
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(shadowRender());
+    } else {
+      component->shadowRenderAll();
+    }
   }
 }
 
 void GameObject::renderAll() {
-  _TRY(render());
-  for (auto& component : components_) {
-    component->renderAll();
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(render());
+    } else {
+      component->renderAll();
+    }
   }
 }
 
 void GameObject::render2DAll() {
-  _TRY(render2D());
-  for (auto& component : components_) {
-    component->render2DAll();
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(render2D());
+    } else {
+      component->render2DAll();
+    }
   }
 }
 
 void GameObject::screenResizedAll(size_t width, size_t height) {
-  for (auto& behaviour : components_) {
-    behaviour->screenResizedAll(width, height);
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(screenResized(width, height));
+    } else {
+      component->screenResizedAll(width, height);
+    }
   }
-  _TRY(screenResized(width, height));
 }
 
 void GameObject::updateAll() {
-  for (auto& behaviour : behaviours_) {
-    behaviour->updateAll();
+  for (auto& component : sorted_components_) {
+    if (component != this) {
+      component->updateAll();
+    }
   }
 }
 
 void GameObject::keyActionAll(int key, int scancode, int action, int mods) {
-  for (auto& behaviour : behaviours_) {
-    behaviour->keyActionAll(key, scancode, action, mods);
+  for (auto& component : sorted_components_) {
+    if (component != this) {
+      component->keyActionAll(key, scancode, action, mods);
+    }
   }
 }
 
 void GameObject::charTypedAll(unsigned codepoint) {
-  for (auto& behaviour : behaviours_) {
-    behaviour->charTypedAll(codepoint);
+  for (auto& component : sorted_components_) {
+    if (component != this) {
+      component->charTypedAll(codepoint);
+    }
   }
 }
 
 void GameObject::mouseScrolledAll(double xoffset, double yoffset) {
-  for (auto& behaviour : behaviours_) {
-    behaviour->mouseScrolledAll(xoffset, yoffset);
+  for (auto& component : sorted_components_) {
+    if (component != this) {
+      component->mouseScrolledAll(xoffset, yoffset);
+    }
   }
 }
 
 void GameObject::mouseButtonPressedAll(int button, int action, int mods) {
-  for (auto& behaviour : behaviours_) {
-    behaviour->mouseButtonPressedAll(button, action, mods);
+  for (auto& component : sorted_components_) {
+    if (component != this) {
+      component->mouseButtonPressedAll(button, action, mods);
+    }
   }
 }
 
 void GameObject::mouseMovedAll(double xpos, double ypos) {
-  for (auto& behaviour : behaviours_) {
-    behaviour->mouseMovedAll(xpos, ypos);
+  for (auto& component : sorted_components_) {
+    if (component != this) {
+      component->mouseMovedAll(xpos, ypos);
+    }
   }
 }
 

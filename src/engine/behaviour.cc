@@ -12,45 +12,63 @@
 namespace engine {
 
 void Behaviour::updateAll() {
-  for (auto& component : behaviours_) {
-    component->updateAll();
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(update());
+    } else {
+      component->updateAll();
+    }
   }
-  _TRY(update());
 }
 
 void Behaviour::keyActionAll(int key, int scancode, int action, int mods) {
-  for (auto& component : behaviours_) {
-    component->keyActionAll(key, scancode, action, mods);
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(keyAction(key, scancode, action, mods));
+    } else {
+      component->keyActionAll(key, scancode, action, mods);
+    }
   }
-  _TRY(keyAction(key, scancode, action, mods));
 }
 
 void Behaviour::charTypedAll(unsigned codepoint) {
-  for (auto& behaviour : behaviours_) {
-    behaviour->charTypedAll(codepoint);
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(charTyped(codepoint));
+    } else {
+      component->charTypedAll(codepoint);
+    }
   }
-  _TRY(charTyped(codepoint));
 }
 
 void Behaviour::mouseScrolledAll(double xoffset, double yoffset) {
-  for (auto& component : behaviours_) {
-    component->mouseScrolledAll(xoffset, yoffset);
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(mouseScrolled(xoffset, yoffset));
+    } else {
+      component->mouseScrolledAll(xoffset, yoffset);
+    }
   }
-  _TRY(mouseScrolled(xoffset, yoffset));
 }
 
 void Behaviour::mouseButtonPressedAll(int button, int action, int mods) {
-  for (auto& component : behaviours_) {
-    component->mouseButtonPressedAll(button, action, mods);
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(mouseButtonPressed(button, action, mods));
+    } else {
+      component->mouseButtonPressedAll(button, action, mods);
+    }
   }
-  _TRY(mouseButtonPressed(button, action, mods));
 }
 
 void Behaviour::mouseMovedAll(double xpos, double ypos) {
-  for (auto& component : behaviours_) {
-    component->mouseMovedAll(xpos, ypos);
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(mouseMoved(xpos, ypos));
+    } else {
+      component->mouseMovedAll(xpos, ypos);
+    }
   }
-  _TRY(mouseMoved(xpos, ypos));
 }
 
 }  // namespace engine

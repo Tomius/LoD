@@ -92,12 +92,12 @@ class BulletBasicsScene : public engine::Scene {
   void addSmallRedCube() {
     auto cam = camera();
     glm::vec3 pos = cam->pos() + 3.0f*cam->forward();
-    addGameObject<RedCube>(pos, 10.0f*cam->forward(), cam->rot());
+    addComponent<RedCube>(pos, 10.0f*cam->forward(), cam->rot());
   }
 
  public:
   BulletBasicsScene() {
-    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     collision_config_ = engine::make_unique<btDefaultCollisionConfiguration>();
     dispatcher_ =
@@ -111,17 +111,17 @@ class BulletBasicsScene : public engine::Scene {
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
 
-    addGameObject<StaticPlane>();
+    addComponent<StaticPlane>();
 
     addCamera<engine::FreeFlyCamera>(window(), M_PI/3, 1, 500,
                                      glm::vec3(10, 5, 0), glm::vec3(), 25, 2);
 
-    auto label = addGameObject<engine::gui::Label>(
+    auto label = addComponent<engine::gui::Label>(
         L"Press space to shoot a cube.", glm::vec2(0, -0.9));
     label->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label->set_font_size(20);
 
-    auto label2 = addGameObject<engine::gui::Label>(
+    auto label2 = addComponent<engine::gui::Label>(
         L"You can load the main scene by pressing the home button.", glm::vec2(0, -0.95));
     label2->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label2->set_font_size(14);

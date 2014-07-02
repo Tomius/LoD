@@ -45,7 +45,7 @@ MainScene::MainScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the skybox");
-    Skybox *skybox = addGameObject<Skybox>();
+    Skybox *skybox = addComponent<Skybox>();
   PrintDebugTime();
 
   PrintDebugText("Initializing the shadow maps");
@@ -53,12 +53,12 @@ MainScene::MainScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the terrain");
-    Terrain *terrain = addGameObject<Terrain>();
+    Terrain *terrain = addComponent<Terrain>();
     const engine::HeightMapInterface& height_map = terrain->height_map();
   PrintDebugTime();
 
   PrintDebugText("Initializing Ayumi");
-    Ayumi *ayumi = addGameObject<Ayumi>();
+    Ayumi *ayumi = addComponent<Ayumi>();
     ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
 
     CharacterMovement *charmove = ayumi->addComponent<CharacterMovement>(
@@ -84,14 +84,14 @@ MainScene::MainScene() {
   charmove->setCamera(cam);
 
   PrintDebugText("Initializing the trees");
-    addGameObject<Tree>(height_map);
+    addComponent<Tree>(height_map);
   PrintDebugTime();
 
   PrintDebugText("Initializing the resources for the bloom effect");
-    BloomEffect *bloom = addGameObject<BloomEffect>();
+    BloomEffect *bloom = addComponent<BloomEffect>();
   PrintDebugTime();
 
   shadow->set_default_fbo(bloom->fbo());
 
-  addGameObject<FpsDisplay>();
+  addComponent<FpsDisplay>();
 }

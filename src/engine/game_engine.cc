@@ -140,7 +140,7 @@ void GameEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
     }
   }
 
-  scene_->keyAction(key, scancode, action, mods);
+  scene_->keyActionAll(key, scancode, action, mods);
 }
 
 }  // namespace engine

@@ -70,26 +70,26 @@ class GameEngine {
                           int action, int mods);
 
   static void CharCallback(GLFWwindow* window, unsigned codepoint) {
-    scene_->charTyped(codepoint);
+    scene_->charTypedAll(codepoint);
   }
 
   static void ScreenResizeCallback(GLFWwindow* window, int width, int height) {
     gl::Viewport(width, height);
-    scene_->screenResized(width, height);
+    scene_->screenResizedAll(width, height);
   }
 
   static void MouseScrolledCallback(GLFWwindow* window, double xoffset,
                                     double yoffset) {
-    scene_->mouseScrolled(xoffset, yoffset);
+    scene_->mouseScrolledAll(xoffset, yoffset);
   }
 
   static void MouseButtonPressed(GLFWwindow* window, int button,
                                  int action, int mods) {
-    scene_->mouseButtonPressed(button, action, mods);
+    scene_->mouseButtonPressedAll(button, action, mods);
   }
 
   static void MouseMoved(GLFWwindow* window,  double xpos, double ypos) {
-    scene_->mouseMoved(xpos, ypos);
+    scene_->mouseMovedAll(xpos, ypos);
   }
 };
 

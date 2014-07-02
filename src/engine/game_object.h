@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 #include "./camera.h"
 #include "./rigid_body.h"
@@ -20,13 +21,15 @@ class GameObject {
   std::unique_ptr<RigidBody> rigid_body;
 
   explicit GameObject(Scene* scene)
-      : scene_(scene), enabled_(true), layer_(0), group_(0) {}
+      : scene_(scene), enabled_(true), layer_(0), group_(0) {
+    sorted_components_.push_back(this);
+  }
   virtual ~GameObject() {}
 
   void addRigidBody(const HeightMapInterface& height_map,
                     double starting_height = NAN) {
     rigid_body = std::unique_ptr<RigidBody>(
-        new RigidBody {transform, height_map, starting_height});
+        new RigidBody(transform, height_map, starting_height));
   }
 
   template<typename T, typename... Args>
@@ -34,16 +37,12 @@ class GameObject {
     static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");
 
     try {
-      T *obj = new T {scene_, std::forward<Args>(args)...};
+      T *obj = new T(scene_, std::forward<Args>(args)...);
       transform.addChild(obj->transform);
       obj->parent_ = this;
       components_.push_back(std::unique_ptr<GameObject>(obj));
-
-      // is_base_of wouldn't work as Behaviour is incomplete here
-      Behaviour* behaviour = dynamic_cast<Behaviour*>(obj);
-      if (behaviour) {
-        behaviours_.push_back(behaviour);
-      }
+      sorted_components_.push_back(obj);
+      sort_components();
 
       return obj;
     } catch (const std::exception& ex) {
@@ -60,13 +59,25 @@ class GameObject {
   void set_scene(Scene* scene) { scene_ = scene; }
 
   bool enabled() const { return enabled_; }
-  void set_enabled(bool value) { enabled_ = value; }
+  void set_enabled(bool value) {
+    enabled_ = value;
+    sort_components();
+    if (parent_) {
+      parent_->sort_components();
+    }
+  }
 
   int layer() const { return layer_; }
   void set_layer(int value) { layer_ = value; }
 
   int group() const { return group_; }
-  void set_group(int value) { group_ = value; }
+  void set_group(int value) {
+    group_ = value;
+    sort_components();
+    if (parent_) {
+      parent_->sort_components();
+    }
+  }
 
   virtual void shadowRender() {}
   virtual void render() {}
@@ -89,9 +100,37 @@ class GameObject {
   Scene* scene_;
   GameObject* parent_;
   std::vector<std::unique_ptr<GameObject>> components_;
-  std::vector<Behaviour*> behaviours_;
+  std::vector<GameObject*> sorted_components_;
   bool enabled_;
   int layer_, group_;
+
+  struct CompareGameObjects {
+    bool operator() (GameObject* x, GameObject* y) const {
+      if (x->enabled() == true) {
+        if (y->enabled() == true) {
+          if (x->group() == y->group()) {
+            if (y->parent() == x) {
+              return true;  // we should render the parent before the children
+            } else {
+              return false;
+            }
+          } else {
+            return x->group() < y->group();
+          }
+        } else {
+          return true;
+        }
+      } else {
+        return false;
+      }
+    }
+  };
+
+  void sort_components() {
+    std::sort(sorted_components_.begin(),
+              sorted_components_.end(),
+              CompareGameObjects{});
+  }
 };
 
 }  // namespace engine

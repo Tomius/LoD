@@ -12,6 +12,7 @@
 #include "../engine/shapes/cube_mesh.h"
 #include "../engine/gui/label.h"
 
+#include "../bloom.h"
 #include "./main_scene.h"
 
 using engine::shapes::CubeMesh;
@@ -97,7 +98,7 @@ class BulletBasicsScene : public engine::Scene {
 
  public:
   BulletBasicsScene() {
-    // glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     collision_config_ = engine::make_unique<btDefaultCollisionConfiguration>();
     dispatcher_ =
@@ -111,10 +112,13 @@ class BulletBasicsScene : public engine::Scene {
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
 
+    addComponent<Skybox>();
     addComponent<StaticPlane>();
+    auto bloom = addComponent<BloomEffect>();
+    bloom->set_group(1);
 
     addCamera<engine::FreeFlyCamera>(window(), M_PI/3, 1, 500,
-                                     glm::vec3(10, 5, 0), glm::vec3(), 25, 2);
+                                     glm::vec3(10, 5, 0), glm::vec3(), 25, 10);
 
     auto label = addComponent<engine::gui::Label>(
         L"Press space to shoot a cube.", glm::vec2(0, -0.9));

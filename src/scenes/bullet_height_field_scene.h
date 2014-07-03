@@ -114,7 +114,7 @@ class BulletHeightFieldScene : public engine::Scene {
 
  public:
   BulletHeightFieldScene() {
-    // glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     collision_config_ = engine::make_unique<btDefaultCollisionConfiguration>();
     dispatcher_ =
@@ -129,14 +129,14 @@ class BulletHeightFieldScene : public engine::Scene {
     world_->setGravity(btVector3(0, -9.81, 0));
 
     addComponent<Skybox>();
-    // addComponent<Terrain>();
+    addComponent<Terrain>();
     // addComponent<HeightField>();
     auto bloom = addComponent<BloomEffect>();
     bloom->set_group(1);
 
     addCamera<engine::FreeFlyCamera>(window(), M_PI/3, 1, 3000,
-                                     glm::vec3(10, 255, 0),
-                                     glm::vec3(0, 250, 0), 25, 2);
+                                     glm::vec3(2058, 255, 2048),
+                                     glm::vec3(2048, 250, 2048), 25, 10);
 
     auto label = addComponent<engine::gui::Label>(
         L"Press space to shoot a cube.", glm::vec2(0, -0.9));

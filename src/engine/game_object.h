@@ -3,6 +3,7 @@
 #ifndef ENGINE_GAME_OBJECT_H_
 #define ENGINE_GAME_OBJECT_H_
 
+#include <set>
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -21,8 +22,8 @@ class GameObject {
   std::unique_ptr<RigidBody> rigid_body;
 
   explicit GameObject(Scene* scene)
-      : scene_(scene), enabled_(true), layer_(0), group_(0) {
-    sorted_components_.push_back(this);
+      : scene_(scene), layer_(0), group_(0), enabled_(true) {
+    sorted_components_.insert(this);
   }
   virtual ~GameObject() {}
 
@@ -41,8 +42,7 @@ class GameObject {
       transform.addChild(obj->transform);
       obj->parent_ = this;
       components_.push_back(std::unique_ptr<GameObject>(obj));
-      sorted_components_.push_back(obj);
-      sort_components();
+      components_just_enabled_.push_back(obj);
 
       return obj;
     } catch (const std::exception& ex) {
@@ -61,9 +61,16 @@ class GameObject {
   bool enabled() const { return enabled_; }
   void set_enabled(bool value) {
     enabled_ = value;
-    sort_components();
-    if (parent_) {
-      parent_->sort_components();
+    if (value) {
+      components_just_enabled_.push_back(this);
+      if (parent_) {
+        parent_->components_just_enabled_.push_back(this);
+      }
+    } else {
+      components_just_disabled_.push_back(this);
+      if (parent_) {
+        parent_->components_just_disabled_.push_back(this);
+      }
     }
   }
 
@@ -73,9 +80,11 @@ class GameObject {
   int group() const { return group_; }
   void set_group(int value) {
     group_ = value;
-    sort_components();
+    components_just_enabled_.push_back(this);
+    components_just_disabled_.push_back(this);
     if (parent_) {
-      parent_->sort_components();
+      parent_->components_just_enabled_.push_back(this);
+      parent_->components_just_disabled_.push_back(this);
     }
   }
 
@@ -100,37 +109,27 @@ class GameObject {
   Scene* scene_;
   GameObject* parent_;
   std::vector<std::unique_ptr<GameObject>> components_;
-  std::vector<GameObject*> sorted_components_;
-  bool enabled_;
-  int layer_, group_;
+  std::vector<GameObject*> components_just_enabled_, components_just_disabled_;
 
   struct CompareGameObjects {
     bool operator() (GameObject* x, GameObject* y) const {
-      if (x->enabled() == true) {
-        if (y->enabled() == true) {
-          if (x->group() == y->group()) {
-            if (y->parent() == x) {
-              return true;  // we should render the parent before the children
-            } else {
-              return false;
-            }
-          } else {
-            return x->group() < y->group();
-          }
+      if (x->group() == y->group()) {
+        if (y->parent() == x) {
+          return true;  // we should render the parent before the children
         } else {
-          return true;
+          return false;
         }
       } else {
-        return false;
+        return x->group() < y->group();
       }
     }
   };
 
-  void sort_components() {
-    std::sort(sorted_components_.begin(),
-              sorted_components_.end(),
-              CompareGameObjects{});
-  }
+  std::multiset<GameObject*, CompareGameObjects> sorted_components_;
+  int layer_, group_;
+  bool enabled_;
+
+  void updateSortedComponents();
 };
 
 }  // namespace engine

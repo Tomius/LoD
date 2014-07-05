@@ -3,6 +3,7 @@
 #ifndef ENGINE_GAME_OBJECT_INL_H_
 #define ENGINE_GAME_OBJECT_INL_H_
 
+#include <iostream>
 #include "./game_object.h"
 
 namespace engine {

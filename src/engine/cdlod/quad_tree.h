@@ -10,7 +10,6 @@
 #include "../height_map_interface.h"
 
 namespace engine {
-
 namespace cdlod {
 
 class QuadTree {
@@ -75,7 +74,8 @@ class QuadTree {
   // render with vertex attrib divisor
   void render(const engine::Camera& cam) {
     mesh_.clearRenderList();
-    root_.selectNodes(cam.pos(), cam.frustum(), mesh_, node_dimension_);
+    root_.selectNodes(cam.transform()->pos(), cam.frustum(),
+                      mesh_, node_dimension_);
     mesh_.render();
   }
 
@@ -83,13 +83,13 @@ class QuadTree {
   void render(const engine::Camera& cam,
               const gl::UniformObject<glm::vec4>& uRenderData) {
     mesh_.clearRenderList();
-    root_.selectNodes(cam.pos(), cam.frustum(), mesh_, node_dimension_);
+    root_.selectNodes(cam.transform()->pos(), cam.frustum(),
+                      mesh_, node_dimension_);
     mesh_.render(uRenderData);
   }
 };
 
-} // namespace cdlod
-
-} // namespace engine
+}  // namespace cdlod
+}  // namespace engine
 
 #endif

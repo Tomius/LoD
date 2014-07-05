@@ -61,7 +61,7 @@ void TerrainMesh::render(const Camera& cam) {
   height_map_tex_.active(tex_unit_);
   height_map_tex_.bind();
 
-  uCamPos_->set(cam.pos());
+  uCamPos_->set(cam.transform()->pos());
 
   gl::FrontFace(gl::kCcw);
   gl::TemporaryEnable cullface{gl::kCullFace};

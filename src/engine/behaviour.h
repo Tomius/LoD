@@ -9,7 +9,10 @@ namespace engine {
 
 class Behaviour : public GameObject {
  public:
-  explicit Behaviour(GameObject* parent) : GameObject(parent) {}
+  template<typename Transform_t = Transform>
+  explicit Behaviour(GameObject* parent,
+                     const Transform_t& transform = Transform{})
+      : GameObject(parent, transform) {}
   virtual ~Behaviour() {}
 
   virtual void update() {}

@@ -47,8 +47,9 @@ class Scene : public Behaviour {
   const Timer& camera_time() const { return camera_time_; }
   Timer& camera_time() { return camera_time_; }
 
-  const Camera* camera() const { return camera_.get(); }
-  Camera* camera() { return camera_.get(); }
+  const Camera* camera() const { return camera_; }
+  Camera* camera() { return camera_; }
+  void set_camera(Camera* camera) { camera_ = camera; }
 
   const Shadow* shadow() const { return shadow_.get(); }
   Shadow* shadow() { return shadow_.get(); }
@@ -76,30 +77,13 @@ class Scene : public Behaviour {
     return shadow;
   }
 
-  template<typename T, typename... Args>
-  T* addCamera(Args&&... args) {
-    static_assert(std::is_base_of<Camera, T>::value, "Unknown type");
-
-    auto camera = new T(std::forward<Args>(args)...);
-    camera_ = std::unique_ptr<Camera>(camera);
-    return camera;
-  }
-
   virtual void screenResized(size_t w, size_t h) override {
     if (shadow_) {
       shadow_->screenResized(w, h);
     }
-
-    if (camera_) {
-      camera_->screenResized(w, h);
-    }
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {
-    if (camera_) {
-      camera_->keyAction(camera_time_, key, scancode, action, mods);
-    }
-
     if (action == GLFW_PRESS) {
       switch (key) {
         case GLFW_KEY_F1:
@@ -111,24 +95,6 @@ class Scene : public Behaviour {
         default:
           break;
       }
-    }
-  }
-
-  virtual void mouseScrolled(double xoffset, double yoffset) override {
-    if (camera_) {
-      camera_->mouseScrolled(camera_time_, xoffset, yoffset);
-    }
-  }
-
-  virtual void mouseButtonPressed(int button, int action, int mods) override {
-    if (camera_) {
-      camera_->mouseButtonPressed(camera_time_, button, action, mods);
-    }
-  }
-
-  virtual void mouseMoved(double xpos, double ypos) override {
-    if (camera_) {
-      camera_->mouseMoved(camera_time_, xpos, ypos);
     }
   }
 
@@ -150,7 +116,7 @@ class Scene : public Behaviour {
   std::unique_ptr<btConstraintSolver> solver_;
   std::unique_ptr<btDynamicsWorld> world_;
 
-  std::unique_ptr<Camera> camera_;
+  Camera* camera_;
   std::unique_ptr<Shadow> shadow_;
   ShaderManager shader_manager_;
   Timer game_time_, environment_time_, camera_time_;
@@ -163,10 +129,6 @@ class Scene : public Behaviour {
     camera_time_.tick();
 
     Behaviour::updateAll();
-
-    if (camera_) {
-      camera_->update(camera_time_);
-    }
   }
 
   virtual void shadowRenderAll() override {

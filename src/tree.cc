@@ -77,7 +77,7 @@ void Tree::shadowRender() {
   auto cullface = gl::TemporaryDisable(gl::kCullFace);
 
   const auto& cam = *scene_->camera();
-  auto campos = cam.pos();
+  auto campos = cam.transform()->pos();
   for (size_t i = 0; i < trees_.size() &&
       shadow->getDepth() < shadow->getMaxDepth(); i++) {
     if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 150) {
@@ -100,8 +100,8 @@ void Tree::render() {
   auto cullface = gl::TemporaryDisable(gl::kCullFace);
   gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
-  auto campos = cam.pos();
-  auto cam_mx = cam.matrix();
+  auto campos = cam.transform()->pos();
+  auto cam_mx = cam.cameraMatrix();
   auto frustum = cam.frustum();
   for (size_t i = 0; i < trees_.size(); i++) {
     // Check for visibility

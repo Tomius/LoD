@@ -108,8 +108,9 @@ class RedCube : public engine::GameObject {
 class BulletHeightFieldScene : public engine::Scene {
   void addSmallRedCube() {
     auto cam = camera();
-    glm::vec3 pos = cam->pos() + 3.0f*cam->forward();
-    addComponent<RedCube>(pos, 10.0f*cam->forward(), cam->rot());
+    glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
+    addComponent<RedCube>(pos, 10.0f*cam->transform()->forward(),
+                          cam->transform()->rot());
   }
 
  public:
@@ -134,9 +135,9 @@ class BulletHeightFieldScene : public engine::Scene {
     auto bloom = addComponent<BloomEffect>();
     bloom->set_group(1);
 
-    addCamera<engine::FreeFlyCamera>(window(), M_PI/3, 1, 3000,
-                                     glm::vec3(2058, 255, 2048),
-                                     glm::vec3(2048, 250, 2048), 25, 10);
+    auto cam = addComponent<engine::FreeFlyCamera>(M_PI/3, 1, 3000,
+        glm::vec3(2058, 255, 2048), glm::vec3(2048, 250, 2048), 25, 10);
+    set_camera(cam);
 
     auto label = addComponent<engine::gui::Label>(
         L"Press space to shoot a cube.", glm::vec2(0, -0.9));

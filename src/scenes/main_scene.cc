@@ -68,19 +68,22 @@ MainScene::MainScene() {
 
   charmove->setAnimation(&ayumi->getAnimation());
 
-  engine::Transform *cam_offset = addGameObject()->transform();
+  GameObject* cam_offset_go = ayumi->addComponent<GameObject>();
+  engine::Transform *cam_offset = cam_offset_go->transform();
 
   glm::vec2 center = height_map.center();
   ayumi->transform()->local_pos() =
       glm::vec3 {center.x, height_map.heightAt(center.x, center.y), center.y};
-  cam_offset->set_parent(ayumi->transform());
   cam_offset->set_local_pos(ayumi->getMesh().bSphereCenter());
 
-  engine::ThirdPersonalCamera *cam = addCamera<engine::ThirdPersonalCamera>(
-      window, static_cast<float>(M_PI/3.0f), 1.0f, 3000.0f, cam_offset,
+  engine::ThirdPersonalCamera *cam =
+    cam_offset_go->addComponent<engine::ThirdPersonalCamera>(
+      M_PI/3.0f, 1.0f, 3000.0f,
       cam_offset->pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
       height_map, 1.5f);
 
+  cam->set_group(1);
+  set_camera(cam);
   charmove->setCamera(cam);
 
   PrintDebugText("Initializing the trees");

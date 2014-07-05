@@ -80,7 +80,7 @@ void CharacterMovement::update() {
   lastMoveDir = moveDir;
 
   if (walking_) {
-    glm::vec3 fwd = cam.forward();
+    glm::vec3 fwd = cam.transform()->forward();
     double cameraRot = -atan2(fwd.z, fwd.x);
     double moveRot = atan2(moveDir.y, moveDir.x);  // +y is forward
     dest_rot_ = cameraRot + moveRot;

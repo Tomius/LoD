@@ -185,7 +185,7 @@ void Ayumi::render() {
   prog_.use();
   prog_.update();
   const auto& cam = *scene_->camera();
-  uCameraMatrix_ = cam.matrix();
+  uCameraMatrix_ = cam.cameraMatrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uModelMatrix_ = transform()->matrix() * mesh_.worldTransform();
 

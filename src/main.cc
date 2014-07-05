@@ -11,9 +11,9 @@ using engine::GameEngine;
 int main() {
   try {
     GameEngine::InitContext();
-    GameEngine::LoadScene<MainScene>();
+    // GameEngine::LoadScene<MainScene>();
     // GameEngine::LoadScene<GuiTestScene>();
-    // GameEngine::LoadScene<BulletBasicsScene>();
+    GameEngine::LoadScene<BulletBasicsScene>();
     // GameEngine::LoadScene<BulletHeightFieldScene>();
     GameEngine::Run();
   } catch(const std::exception& err) {

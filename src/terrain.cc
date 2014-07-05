@@ -57,7 +57,7 @@ void Terrain::render() {
 
   prog_.use();
   prog_.update();
-  uCameraMatrix_ = cam.matrix();
+  uCameraMatrix_ = cam.cameraMatrix();
   uProjectionMatrix_ = cam.projectionMatrix();
   uModelMatrix_ = transform()->matrix();
   if (shadow) {

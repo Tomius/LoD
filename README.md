@@ -23,14 +23,13 @@ Dependencies:
 How to build (Debian/Ubuntu):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD/src/engine/gui/freetype-gl && cmake . && make -j4 && cd ../../../.. && make -j4 && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && cd .. && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD && make -j4 && ./LoD
 ```
 
 How to build (linux):
 ---------------------
 * get the external dependencies: libmagick++-dev libglew-dev libassimp-dev libbullet-dev [libglfw3-dev](https://github.com/glfw/glfw)
 * initialize the oglwrap submodule: git submodule init && git submodule update
-* build freetype-gl (included): cd src/engine/gui/freetype-gl && cmake . && make
 * build with make (uses clang++), run with ./LoD
 
 Acknowledgements

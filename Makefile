@@ -4,6 +4,8 @@ BINARY = LoD
 SRC_DIR = src
 OBJ_DIR = .obj
 PRECOMPILED_HEADER_SRC = $(SRC_DIR)/engine/oglwrap_all.h
+FREETYPE_GL_DIR = $(SRC_DIR)/engine/gui/freetype-gl
+FREETYPE_GL_ARCHIVE = $(FREETYPE_GL_DIR)/libfreetype-gl.a
 
 CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
 OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
@@ -33,7 +35,7 @@ ASSIMP_LDFLAGS = -lassimp
 GLFW_LDFALGS = `pkg-config --libs glfw3` \
 								-lXxf86vm -lX11 -lXrandr -lXi -lXcursor -lpthread
 IMAGEMAGIC_LDFLAGS = `Magick++-config --ldflags --libs`
-FREETYPE_GL_LDFLAGS = -lfreetype -Lsrc/engine/gui/freetype-gl -lfreetype-gl
+FREETYPE_GL_LDFLAGS = -lfreetype -L$(FREETYPE_GL_DIR) -lfreetype-gl
 BULLET_FLAGS = -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
 
 BASE_LDFLAGS = -lm $(OPENGL_LDFLAGS) $(ASSIMP_LDFLAGS) $(GLFW_LDFALGS) \
@@ -68,7 +70,7 @@ nocolor: $(BINARY)
 release: $(BINARY)
 
 clean:
-	@rm -f $(BINARY) -rf $(OBJ_DIR) -f $(PRECOMPILED_HEADER)
+	@rm -f $(BINARY) -rf $(OBJ_DIR) -f $(PRECOMPILED_HEADER) -f $(FREETYPE_GL_ARCHIVE)
 
 clean_deps:
 	@find $(OBJ_DIR) -name '*.d*' | xargs rm -f
@@ -139,7 +141,11 @@ $(PRECOMPILED_HEADER):
 	@ if [ -f $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2 ]; then rm $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2;	else $(CXX) $(CXXFLAGS) -x c++-header -MM $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -MT $@ -MF $(subst $(SRC_DIR),$(OBJ_DIR),$@).d; fi;
 	@ $(CXX) $(CXXFLAGS) -x c++-header $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -o $@
 
-$(BINARY): $(OBJECTS)
+$(FREETYPE_GL_ARCHIVE):
+	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building archive $@,$(GREEN))
+	@ cd $(FREETYPE_GL_DIR) && cmake . > /dev/null && $(MAKE) all > /dev/null
+
+$(BINARY): $(OBJECTS) $(FREETYPE_GL_ARCHIVE)
 	@ $(call printf,[100%] ,Linking executable $@,$(BOLD)$(RED))
 	@ $(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 

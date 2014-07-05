@@ -39,7 +39,7 @@ class GameObject {
 
     try {
       T *obj = new T(scene_, std::forward<Args>(args)...);
-      transform.addChild(obj->transform);
+      obj->transform.set_parent(&transform);
       obj->parent_ = this;
       components_.push_back(std::unique_ptr<GameObject>(obj));
       components_just_enabled_.push_back(obj);

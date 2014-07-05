@@ -118,7 +118,7 @@ class BulletBasicsScene : public engine::Scene {
     bloom->set_group(1);
 
     addCamera<engine::FreeFlyCamera>(window(), M_PI/3, 1, 500,
-                                     glm::vec3(10, 5, 0), glm::vec3(), 25, 10);
+                                     glm::vec3(20, 5, 0), glm::vec3(), 25, 10);
 
     auto label = addComponent<engine::gui::Label>(
         L"Press space to shoot a cube.", glm::vec2(0, -0.9));

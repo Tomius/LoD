@@ -1,5 +1,8 @@
 // Copyright (c) 2014, Tamas Csala
 
+#ifndef ENGINE_TRANSFORM_H_
+#define ENGINE_TRANSFORM_H_
+
 #include <vector>
 #include <algorithm>
 
@@ -7,9 +10,6 @@
 #include "../oglwrap/glm/glm/glm.hpp"
 #include "../oglwrap/glm/glm/gtc/type_ptr.hpp"
 #include "../oglwrap/glm/glm/gtc/matrix_transform.hpp"
-
-#ifndef ENGINE_TRANSFORM_H_
-#define ENGINE_TRANSFORM_H_
 
 namespace engine {
 
@@ -23,36 +23,18 @@ class Transformation {
   using quat = glm::detail::tquat<T, P>;
 
   Transformation* parent_;
-  std::vector<Transformation*> children_;
   vec3 pos_, scale_;
   quat rot_;
 
  public:
-  Transformation()
-      : parent_(nullptr)
+  Transformation(Transformation* parent = nullptr)
+      : parent_(parent)
       , scale_(1, 1, 1) { }
 
   virtual ~Transformation() {}
 
-  void addChild(Transformation& t) {
-    t.parent_ = this;
-    children_.push_back(&t);
-  }
-
-  void removeChild(Transformation& t) {
-    auto pos = std::find(children_.begin(), children_.end(), &t);
-    if (pos != children_.end()) {
-      children_.erase(pos);
-    }
-  }
-
-  Transformation* getParent() const {
-    return parent_;
-  }
-
-  const std::vector<Transformation*>& getChildren() const {
-    return children_;
-  }
+  void set_parent(Transformation* parent) { parent_ = parent; }
+  Transformation* parent() const { return parent_; }
 
   class WorldSpacePositionProxy : public vec3 {
     Transformation& tf;
@@ -79,7 +61,8 @@ class Transformation {
 
   virtual void set_pos(const vec3& new_pos) {
     if (parent_) {
-      pos_ = vec3(parent_->worldToLocalMatrix() * vec4(new_pos - parent_->pos(), 0));
+      pos_ = vec3(parent_->worldToLocalMatrix() *
+                  vec4(new_pos - parent_->pos(), 0));
     } else {
       pos_ = new_pos;
     }

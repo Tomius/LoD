@@ -225,7 +225,7 @@ class ThirdPersonalCamera : public Camera {
                       float fov,
                       float z_near,
                       float z_far,
-                      Transform& target,
+                      Transform* target,
                       const glm::vec3& position,
                       const engine::HeightMapInterface& height_map,
                       float mouse_sensitivity = 1.0f,
@@ -234,21 +234,21 @@ class ThirdPersonalCamera : public Camera {
       , first_call_(true)
       , curr_dist_mod_(1.0f)
       , dest_dist_mod_(1.0f)
-      , initial_distance_(glm::length(target.pos() - position))
+      , initial_distance_(glm::length(target->pos() - position))
       , cos_max_pitch_angle_(0.95f)
       , mouse_sensitivity_(mouse_sensitivity)
       , mouse_scroll_sensitivity_(mouse_scroll_sensitivity)
       , height_map_(height_map)
       , window_(window) {
-    target.addChild(*this);
+    set_parent(target);
     set_pos(position);
-    set_forward((target.pos()-position) / initial_distance_);
+    set_forward((target->pos()-position) / initial_distance_);
   }
 
   virtual ~ThirdPersonalCamera() {}
 
   Transform& target() const {
-    return *getParent();
+    return *parent();
   }
 
   // The position is counted in a different way

@@ -21,12 +21,9 @@ public:
             double starting_height = NAN)
               : local_transform_(local_transform)
               , height_map_(height_map) {
-    Transform* parent = local_transform_.getParent();
-    if (parent) {
-      parent->removeChild(local_transform_);
-      parent->addChild(transform_);
-    }
-    transform_.addChild(local_transform);
+    Transform* parent = local_transform.parent();
+    transform_.set_parent(parent);
+    local_transform.set_parent(&transform_);
 
     if (std::isnan(starting_height)) {
       auto pos = local_transform_.pos();

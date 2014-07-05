@@ -9,7 +9,7 @@ namespace engine {
 
 class Behaviour : public GameObject {
  public:
-  explicit Behaviour(Scene* scene) : GameObject(scene) {}
+  explicit Behaviour(GameObject* parent) : GameObject(parent) {}
   virtual ~Behaviour() {}
 
   virtual void update() {}

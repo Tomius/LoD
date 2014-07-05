@@ -30,8 +30,8 @@ struct BoxParams {
 
 class Box : public engine::GameObject {
  public:
-  Box(engine::Scene* scene, const BoxParams& params)
-      : engine::GameObject(scene), params_(params), label_(nullptr) {
+  Box(GameObject* parent, const BoxParams& params)
+      : engine::GameObject(parent), params_(params), label_(nullptr) {
     gl::VertexShader vs("box.vert");
     gl::FragmentShader fs("box.frag");
     prog_ << vs << fs;

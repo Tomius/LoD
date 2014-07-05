@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 
+#include "../engine/rigid_body.h"
 #include "../engine/game_engine.h"
 #include "../engine/shader_manager.h"
 
@@ -59,10 +60,10 @@ MainScene::MainScene() {
 
   PrintDebugText("Initializing Ayumi");
     Ayumi *ayumi = addComponent<Ayumi>();
-    ayumi->addRigidBody(height_map, ayumi->transform.pos().y);
+    ayumi->addComponent<engine::RigidBody>(
+        &ayumi->transform, height_map, 0);
 
-    CharacterMovement *charmove = ayumi->addComponent<CharacterMovement>(
-        ayumi->transform, *ayumi->rigid_body);
+    CharacterMovement *charmove = ayumi->addComponent<CharacterMovement>();
     ayumi->charmove(charmove);
   PrintDebugTime();
 
@@ -75,6 +76,8 @@ MainScene::MainScene() {
       glm::vec3 {center.x, height_map.heightAt(center.x, center.y), center.y};
   cam_offset.set_parent(&ayumi->transform);
   cam_offset.set_local_pos(ayumi->getMesh().bSphereCenter());
+
+  cam_offset.pos();
 
   engine::ThirdPersonalCamera *cam = addCamera<engine::ThirdPersonalCamera>(
       window, static_cast<float>(M_PI/3.0f), 1.0f, 3000.0f, &cam_offset,

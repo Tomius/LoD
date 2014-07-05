@@ -10,12 +10,12 @@
 namespace engine {
 namespace gui {
 
-class Button : public engine::Behaviour {
+class Button : public Behaviour {
  public:
-  Button(Scene* scene, glm::vec2 pos, glm::vec2 extent,
+  Button(GameObject* parent, glm::vec2 pos, glm::vec2 extent,
          const std::wstring& text, glm::vec4 color, glm::vec4 font_color,
          int roundness = 7)
-      : engine::Behaviour(scene), pos_(pos)
+      : Behaviour(parent), pos_(pos)
       , extent_(extent), mouse_over_(false) {
     BoxParams params;
     params.center = pos;

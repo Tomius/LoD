@@ -14,7 +14,7 @@
 
 class Skybox : public engine::Behaviour {
  public:
-  explicit Skybox(engine::Scene* scene);
+  explicit Skybox(engine::GameObject* parent);
   virtual ~Skybox() {}
 
   glm::vec3 getSunPos() const;

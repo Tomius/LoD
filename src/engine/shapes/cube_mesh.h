@@ -14,12 +14,12 @@
 namespace engine {
 namespace shapes {
 
-class CubeMesh : public engine::GameObject {
+class CubeMesh : public GameObject {
  public:
-  CubeMesh(Scene* scene, const glm::vec3& color = glm::vec3())
-      : engine::GameObject(scene)
-      , prog_(scene->shader_manager()->get("engine/simple_shape.vert"),
-              scene->shader_manager()->get("engine/simple_shape.frag"))
+  CubeMesh(GameObject* parent, const glm::vec3& color = glm::vec3())
+      : GameObject(parent)
+      , prog_(scene_->shader_manager()->get("engine/simple_shape.vert"),
+              scene_->shader_manager()->get("engine/simple_shape.frag"))
       , uProjectionMatrix_(prog_, "uProjectionMatrix")
       , uCameraMatrix_(prog_, "uCameraMatrix")
       , uModelMatrix_(prog_, "uModelMatrix")

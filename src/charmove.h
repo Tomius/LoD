@@ -14,9 +14,7 @@
 
 class CharacterMovement : public engine::Behaviour {
  public:
-  CharacterMovement(engine::Scene *scene,
-                    engine::Transform& transform,
-                    engine::RigidBody& rigid_body,
+  CharacterMovement(engine::GameObject *parent,
                     float horizontal_speed = 10.0f,
                     float rotationSpeed_PerSec = M_PI);
 
@@ -41,7 +39,6 @@ class CharacterMovement : public engine::Behaviour {
 
  private:
   engine::Transform& transform_;
-  engine::RigidBody& rigid_body_;
 
   // Current and destination rotation angles.
   double curr_rot_, dest_rot_;

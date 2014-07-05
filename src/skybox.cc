@@ -1,19 +1,18 @@
 // Copyright (c) 2014, Tamas Csala
 
 #include "./skybox.h"
-#include "engine/scene.h"
 #include "oglwrap/smart_enums.h"
 
 constexpr float day_duration = 256.0f, day_start = 0.0f;
 
-Skybox::Skybox(engine::Scene* scene)
-    : engine::Behaviour(scene)
+Skybox::Skybox(engine::GameObject* parent)
+    : engine::Behaviour(parent)
     , time_(day_start)
-    , prog_(scene->shader_manager()->get("skybox.vert"),
-            scene->shader_manager()->get("skybox.frag"))
+    , prog_(scene_->shader_manager()->get("skybox.vert"),
+            scene_->shader_manager()->get("skybox.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix") {
-  engine::ShaderFile *sky_fs = scene->shader_manager()->get("sky.frag");
+  engine::ShaderFile *sky_fs = scene_->shader_manager()->get("sky.frag");
   sky_fs->set_update_func([this](const gl::Program& prog) {
     gl::Uniform<glm::vec3>(prog, "uSunPos") = getSunPos();
   });

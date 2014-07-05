@@ -14,7 +14,7 @@
 
 class Terrain : public engine::GameObject {
  public:
-  explicit Terrain(engine::Scene* scene);
+  explicit Terrain(engine::GameObject* parent);
   virtual ~Terrain() {}
 
   const engine::HeightMapInterface& height_map() { return height_map_; }

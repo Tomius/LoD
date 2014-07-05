@@ -11,12 +11,12 @@ const engine::Transform& Terrain::initTransform() {
   return transform;
 }
 
-Terrain::Terrain(engine::Scene* scene)
-    : engine::GameObject(scene)
+Terrain::Terrain(engine::GameObject* parent)
+    : engine::GameObject(parent)
     , height_map_("terrain/output.png", initTransform())
-    , mesh_(scene->shader_manager(), height_map_)
-    , prog_(scene->shader_manager()->get("terrain.vert"),
-            scene->shader_manager()->get("terrain.frag"))
+    , mesh_(scene_->shader_manager(), height_map_)
+    , prog_(scene_->shader_manager()->get("terrain.vert"),
+            scene_->shader_manager()->get("terrain.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")

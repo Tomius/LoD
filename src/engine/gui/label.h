@@ -14,7 +14,7 @@
 namespace engine {
 namespace gui {
 
-class Label : public engine::GameObject {
+class Label : public GameObject {
   Font font_;
   gl::VertexArray vao_;
   gl::ArrayBuffer attribs_;
@@ -25,9 +25,9 @@ class Label : public engine::GameObject {
   std::wstring text_;
 
  public:
-  Label(engine::Scene* scene, const std::wstring& text, glm::vec2 pos,
+  Label(GameObject* parent, const std::wstring& text, glm::vec2 pos,
         const Font& font = Font{}, size_t cursor_pos = -1)
-      : engine::GameObject(scene), font_(font)
+      : GameObject(parent), font_(font)
       , idx_cnt_(0), pos_(pos), text_(text) {
     gl::VertexShader vs("engine/text.vert");
     gl::FragmentShader fs("engine/text.frag");

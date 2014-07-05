@@ -5,10 +5,9 @@
 
 namespace engine {
 
-Scene::Scene()
-    : Behaviour(this)
-    , window_(GameEngine::window())
-    , target_layer_(0)
-  { }
+Scene::Scene() : Behaviour(nullptr), window_(GameEngine::window())
+               , target_layer_(0) {
+  set_scene(this);
+}
 
 }  // namespace engine

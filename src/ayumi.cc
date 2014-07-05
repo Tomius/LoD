@@ -26,15 +26,15 @@ engine::ShaderFile* Ayumi::loadShadowVertexShader(
 }
 
 
-Ayumi::Ayumi(engine::Scene* scene)
-    : engine::Behaviour(scene)
+Ayumi::Ayumi(engine::GameObject* parent)
+    : engine::Behaviour(parent)
     , mesh_("models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs)
     , anim_(mesh_.getAnimData())
-    , prog_(loadVertexShader(scene->shader_manager()),
-            scene->shader_manager()->get("ayumi.frag"))
-    , shadow_prog_(loadShadowVertexShader(scene->shader_manager()),
-                   scene->shader_manager()->get("shadow.frag"))
+    , prog_(loadVertexShader(scene_->shader_manager()),
+            scene_->shader_manager()->get("ayumi.frag"))
+    , shadow_prog_(loadShadowVertexShader(scene_->shader_manager()),
+                   scene_->shader_manager()->get("shadow.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uCameraMatrix_(prog_, "uCameraMatrix")
     , uModelMatrix_(prog_, "uModelMatrix")

@@ -4,10 +4,10 @@
 #include "engine/scene.h"
 #include "oglwrap/smart_enums.h"
 
-BloomEffect::BloomEffect(engine::Scene *scene)
-    : engine::Behaviour(scene)
-    , prog_(scene->shader_manager()->get("bloom.vert"),
-            scene->shader_manager()->get("bloom.frag"))
+BloomEffect::BloomEffect(GameObject *parent)
+    : Behaviour(parent)
+    , prog_(scene_->shader_manager()->get("bloom.vert"),
+            scene_->shader_manager()->get("bloom.frag"))
     , uScreenSize_(prog_, "uScreenSize") {
   prog_.use();
 

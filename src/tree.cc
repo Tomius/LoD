@@ -4,8 +4,8 @@
 #include "engine/scene.h"
 #include "oglwrap/debug/insertion.h"
 
-Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
-    : engine::GameObject(scene)
+Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
+    : GameObject(parent)
     , mesh_{{"models/trees/massive_swamptree_01_a.obj",
             aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
             aiProcess_PreTransformVertices},
@@ -15,10 +15,10 @@ Tree::Tree(engine::Scene *scene, const engine::HeightMapInterface& height_map)
             {"models/trees/cedar_01_a_source.obj",
             aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
             aiProcess_PreTransformVertices}}
-    , prog_(scene->shader_manager()->get("tree.vert"),
-            scene->shader_manager()->get("tree.frag"))
-    , shadow_prog_(scene->shader_manager()->get("tree_shadow.vert"),
-                   scene->shader_manager()->get("tree_shadow.frag"))
+    , prog_(scene_->shader_manager()->get("tree.vert"),
+            scene_->shader_manager()->get("tree.frag"))
+    , shadow_prog_(scene_->shader_manager()->get("tree_shadow.vert"),
+                   scene_->shader_manager()->get("tree_shadow.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")
     , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
     , uNormalMatrix_(prog_, "uNormalMatrix")

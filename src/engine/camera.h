@@ -10,7 +10,7 @@
 
 #include "./timer.h"
 #include "./transform.h"
-#include "./rigid_body.h"
+#include "./height_map_interface.h"
 #include "collision/frustum.h"
 
 namespace engine {

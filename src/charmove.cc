@@ -5,14 +5,11 @@
 #include <algorithm>
 #include "engine/game_engine.h"
 
-CharacterMovement::CharacterMovement(engine::Scene *scene,
-                                     engine::Transform& transform,
-                                     engine::RigidBody& rigid_body,
+CharacterMovement::CharacterMovement(engine::GameObject *parent,
                                      float horizontal_speed,
                                      float rotationSpeed_PerSec)
-  : engine::Behaviour(scene)
-  , transform_(transform)
-  , rigid_body_(rigid_body)
+  : engine::Behaviour(parent)
+  , transform_(parent->transform)
   , curr_rot_(0)
   , dest_rot_(0)
   , rot_speed_(rotationSpeed_PerSec)
@@ -78,7 +75,8 @@ void CharacterMovement::update() {
   static glm::ivec2 lastMoveDir;
   bool lastWalking = walking_;
   walking_ = moveDir.x || moveDir.y;
-  transition_ = transition_ || (walking_ != lastWalking) || (lastMoveDir != moveDir);
+  transition_ = transition_ || (walking_ != lastWalking) ||
+                               (lastMoveDir != moveDir);
   lastMoveDir = moveDir;
 
   if (walking_) {
@@ -127,7 +125,6 @@ void CharacterMovement::update() {
     }
   }
 
-  rigid_body_.update();
   updateHeight(time);
 }
 

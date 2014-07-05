@@ -16,11 +16,11 @@
 namespace engine {
 namespace gui {
 
-class TextField : public engine::Behaviour {
+class TextField : public Behaviour {
  public:
-  TextField(Scene* scene, glm::vec2 center,
+  TextField(GameObject* parent, glm::vec2 center,
             glm::vec2 extent, const std::wstring& text)
-      : engine::Behaviour(scene), pos_(center), extent_(extent)
+      : Behaviour(parent), pos_(center), extent_(extent)
       , cursor_pos_(text.size()), text_(text), cursor_visible_(false)
       , modified_(false), focused_(false) {
     BoxParams params;

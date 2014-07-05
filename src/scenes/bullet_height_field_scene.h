@@ -22,9 +22,9 @@ using engine::shapes::CubeMesh;
 
 class BulletRigidBody : public engine::Behaviour {
  public:
-  BulletRigidBody(engine::Scene* scene, const glm::vec3& pos, float mass,
+  BulletRigidBody(GameObject* parent, const glm::vec3& pos, float mass,
                   btCollisionShape* shape, const glm::quat& rot = glm::quat())
-      : engine::Behaviour(scene), static_(mass == 0.0f) {
+      : Behaviour(parent), static_(mass == 0.0f) {
     shape_ = std::unique_ptr<btCollisionShape>(shape);
     btVector3 inertia(0, 0, 0);
     if (!static_) {
@@ -70,7 +70,7 @@ class BulletRigidBody : public engine::Behaviour {
 
 class StaticPlane : public engine::GameObject {
  public:
-  explicit StaticPlane(engine::Scene* scene) : engine::GameObject(scene) {
+  explicit StaticPlane(GameObject* parent) : GameObject(parent) {
     btCollisionShape* shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     addComponent<BulletRigidBody>(glm::vec3(), 0.0f, shape);
     auto plane_mesh = addComponent<CubeMesh>(glm::vec3(0.5, 0.5, 0.5));
@@ -81,8 +81,8 @@ class StaticPlane : public engine::GameObject {
 
 class HeightField : public engine::GameObject {
  public:
-  explicit HeightField(engine::Scene* scene)
-      : engine::GameObject(scene) {
+  explicit HeightField(GameObject* parent)
+      : GameObject(parent) {
     Terrain* terrain = addComponent<Terrain>();
     const auto& height_map = terrain->height_map();
     btCollisionShape* shape = new btHeightfieldTerrainShape(
@@ -94,9 +94,9 @@ class HeightField : public engine::GameObject {
 
 class RedCube : public engine::GameObject {
  public:
-  explicit RedCube(engine::Scene* scene, const glm::vec3& pos,
+  explicit RedCube(GameObject* parent, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot)
-      : engine::GameObject(scene) {
+      : GameObject(parent) {
     btVector3 half_extents(0.5f, 0.5f, 0.5f);
     btCollisionShape* shape = new btBoxShape(half_extents);
     auto rbody = addComponent<BulletRigidBody>(pos, 1.0f, shape, rot);

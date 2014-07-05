@@ -13,7 +13,7 @@
 
 class Ayumi : public engine::Behaviour {
  public:
-  explicit Ayumi(engine::Scene* scene);
+  explicit Ayumi(GameObject* parent);
   virtual ~Ayumi() {}
 
   engine::AnimatedMeshRenderer& getMesh();

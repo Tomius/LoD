@@ -15,7 +15,7 @@
 
 class BloomEffect : public engine::Behaviour {
  public:
-  explicit BloomEffect(engine::Scene *scene);
+  explicit BloomEffect(GameObject *parent);
 
   gl::Framebuffer* fbo() { return &fbo_; }
 

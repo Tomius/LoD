@@ -9,7 +9,7 @@ CharacterMovement::CharacterMovement(engine::GameObject *parent,
                                      float horizontal_speed,
                                      float rotationSpeed_PerSec)
   : engine::Behaviour(parent)
-  , transform_(parent->transform)
+  , transform_(*parent->transform())
   , curr_rot_(0)
   , dest_rot_(0)
   , rot_speed_(rotationSpeed_PerSec)

@@ -17,13 +17,16 @@ class Behaviour;
 
 class GameObject {
  public:
-  Transform transform;
-
-  explicit GameObject(GameObject* parent);
+  template<typename Transform_t = Transform>
+  explicit GameObject(GameObject* parent,
+                      const Transform_t& transform = Transform{});
   virtual ~GameObject() {}
 
   template<typename T, typename... Args>
   T* addComponent(Args&&... args);
+
+  Transform* transform() { return transform_.get(); }
+  const Transform* transform() const { return transform_.get(); }
 
   GameObject* parent() { return parent_; }
   const GameObject* parent() const { return parent_; }
@@ -62,6 +65,7 @@ class GameObject {
  protected:
   Scene* scene_;
   GameObject* parent_;
+  std::unique_ptr<Transform> transform_;
   std::vector<std::unique_ptr<GameObject>> components_;
   std::vector<GameObject*> components_just_enabled_, components_just_disabled_;
 

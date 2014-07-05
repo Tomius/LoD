@@ -58,10 +58,10 @@ class BulletRigidBody : public engine::Behaviour {
     t.setIdentity();
     motion_state_->getWorldTransform(t);
     const btVector3& o = t.getOrigin();
-    parent_->transform.set_pos(glm::vec3(o.x(), o.y(), o.z()));
+    parent_->transform()->set_pos(glm::vec3(o.x(), o.y(), o.z()));
     const btQuaternion& r = t.getRotation();
-    parent_->transform.set_rot(glm::quat(r.getW(), r.getX(),
-                                         r.getY(), r.getZ()));
+    parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
+                                            r.getY(), r.getZ()));
   }
 };
 
@@ -71,8 +71,8 @@ class StaticPlane : public engine::GameObject {
     btCollisionShape* shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     addComponent<BulletRigidBody>(glm::vec3(), 0.0f, shape);
     auto plane_mesh = addComponent<CubeMesh>(glm::vec3(0.5, 0.5, 0.5));
-    plane_mesh->transform.set_local_pos(glm::vec3(0, -0.5f, 0));
-    plane_mesh->transform.set_local_scale(glm::vec3(400, 1, 400));
+    plane_mesh->transform()->set_local_pos(glm::vec3(0, -0.5f, 0));
+    plane_mesh->transform()->set_local_scale(glm::vec3(400, 1, 400));
   }
 };
 

@@ -14,7 +14,6 @@ namespace engine {
 template<typename T>
 class HeightMap : public HeightMapInterface {
   TextureSource<T, 1> tex_;
-  glm::vec3 offset_, scale_;
 
  public:
   // Loads in a texture from a file
@@ -22,11 +21,8 @@ class HeightMap : public HeightMapInterface {
   // - 'C': a compressed image will be used.
   // - 'I': an integer image will be used.
   HeightMap(const std::string& file_name,
-            const engine::Transform& transform,
             const std::string& format_string = "CR")
-      : tex_(file_name, format_string)
-      , offset_(transform.pos())
-      , scale_(transform.scale()) {
+      : tex_(file_name, format_string) {
     static_assert(std::is_same<T, unsigned char>::value ||
                   std::is_same<T, unsigned short>::value,
                   "Only uchar and ushort heightmaps are supported yet");
@@ -37,23 +33,22 @@ class HeightMap : public HeightMapInterface {
   virtual int h() const override { return tex_.h(); }
 
   virtual glm::vec2 extent() const override {
-    return glm::vec2(w()*scale_.x, h()*scale_.z);
+    return glm::vec2(w(), h());
   }
 
   virtual glm::vec2 center() const override {
-    return glm::vec2(offset_.x, offset_.z) + extent()/2.0f;
+    return extent()/2.0f;
   }
 
-  virtual bool fetchValid(double s, double t) const override {
+  virtual bool valid(double s, double t) const override {
     return tex_.valid(s, t);
   }
 
-  virtual double fetchHeightAt(int s, int t) const override {
-    float height = tex_(s, t)[0] / (std::numeric_limits<T>::max()-1.0) * 255;
-    return (height + offset_.y) * scale_.y;
+  virtual double heightAt(int s, int t) const override {
+    return tex_(s, t)[0] / (std::numeric_limits<T>::max()-1.0) * 255;
   }
 
-  virtual double fetchHeightAt(double s, double t) const override {
+  virtual double heightAt(double s, double t) const override {
     /*
      * fs, ct -- cs, ct
      *    |        |
@@ -67,24 +62,7 @@ class HeightMap : public HeightMapInterface {
     double fh = glm::mix(double(tex_(fs, ft)[0]), double(tex_(cs, ft)[0]), s-fs);
     double ch = glm::mix(double(tex_(fs, ct)[0]), double(tex_(cs, ct)[0]), s-fs);
 
-    double height = glm::mix(fh, ch, t-ft) / (std::numeric_limits<T>::max()-1) * 255;
-    return (height + offset_.y) * scale_.y;
-  }
-
-  virtual glm::dvec2 toWorldSpace(double s, double t) const override{
-    return glm::dvec2((s + offset_.x) * scale_.x, (t + offset_.z) * scale_.z);
-  }
-
-  virtual glm::dvec2 toModelSpace(double s, double t) const override {
-    return glm::dvec2(s / scale_.x - offset_.x, t / scale_.z - offset_.z);
-  }
-
-  virtual glm::vec3 toWorldSpace(const glm::vec3& p) const {
-    return p / scale_ - offset_;
-  }
-
-  virtual glm::vec3 toModelSpace(const glm::vec3& p) const {
-    return p / scale_ - offset_;
+    return glm::mix(fh, ch, t-ft) / (std::numeric_limits<T>::max()-1) * 255;
   }
 
   virtual gl::PixelDataFormat format() const override {

@@ -46,7 +46,7 @@ class CubeMesh : public GameObject {
     const auto& cam = *scene_->camera();
     uCameraMatrix_ = cam.matrix();
     uProjectionMatrix_ = cam.projectionMatrix();
-    uModelMatrix_ = transform.matrix();
+    uModelMatrix_ = transform()->matrix();
 
     cube_.render();
   }

@@ -18,8 +18,8 @@ class RigidBody : public Behaviour {
       , target_(target)
       , height_map_(height_map) {
     Transform* targets_parent = target_->parent();
-    transform.set_parent(targets_parent);
-    target_->set_parent(&transform);
+    transform()->set_parent(targets_parent);
+    target_->set_parent(transform());
 
     if (std::isnan(starting_height)) {
       auto pos = target_->pos();
@@ -40,7 +40,7 @@ class RigidBody : public Behaviour {
     float diff = new_height - last_height_;
     last_height_ = new_height;
 
-    transform.local_pos().y += diff;
+    transform()->local_pos().y += diff;
     target_->local_pos().y -= diff;
   }
 };

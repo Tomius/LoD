@@ -8,8 +8,8 @@ glm::dvec2 HeightMapInterface::getMinMaxOfArea(int x, int y, int w, int h) const
 
   for (int i = x - w/2; i <= x + w/2; ++i) {
     for (int j = y - h/2; j <= y + h/2; ++j) {
-      if (fetchValid(i, j)) {
-        int curr_height = fetchHeightAt(i, j);
+      if (valid(i, j)) {
+        int curr_height = heightAt(i, j);
         if(curr_height < curr_min) {
           curr_min = curr_height;
         }

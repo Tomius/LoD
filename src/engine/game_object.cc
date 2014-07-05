@@ -12,16 +12,9 @@
 
 namespace engine {
 
-GameObject::GameObject(GameObject* parent)
-    : scene_(parent ? parent->scene_ : nullptr), parent_(parent)
-    , layer_(0), group_(0), enabled_(true) {
-  if (parent) { transform.set_parent(&parent_->transform); }
-  sorted_components_.insert(this);
-}
-
 void GameObject::set_parent(GameObject* parent) {
   parent_ = parent;
-  if (parent) { transform.set_parent(&parent_->transform); }
+  if (parent) { transform_->set_parent(parent_->transform()); }
 }
 
 void GameObject::set_enabled(bool value) {

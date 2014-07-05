@@ -5,15 +5,9 @@
 
 #include "engine/scene.h"
 
-const engine::Transform& Terrain::initTransform() {
-  //  transform.local_scale() = glm::vec3(4, 1, 4); TODO
-  //  transform.local_pos() = glm::vec3(-2048, 0, -2048); // TODO
-  return transform;
-}
-
 Terrain::Terrain(engine::GameObject* parent)
     : engine::GameObject(parent)
-    , height_map_("terrain/output.png", initTransform())
+    , height_map_("terrain/output.png")
     , mesh_(scene_->shader_manager(), height_map_)
     , prog_(scene_->shader_manager()->get("terrain.vert"),
             scene_->shader_manager()->get("terrain.frag"))
@@ -65,7 +59,7 @@ void Terrain::render() {
   prog_.update();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
-  uModelMatrix_ = transform.matrix();
+  uModelMatrix_ = transform()->matrix();
   if (shadow) {
     for (size_t i = 0; i < shadow->getDepth(); ++i) {
       uShadowCP_[i] = shadow->shadowCPs()[i];

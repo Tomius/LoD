@@ -5,7 +5,7 @@
 #export vec3 DoF(vec3 texel_color);
 
 uniform sampler2D uTex, uDepthTex;
-uniform float zNear = 1.0, zFar = 3000.0;
+uniform float uZNear, uZFar;
 uniform vec2 uScreenSize;
 
 vec2 coord = ivec2(gl_FragCoord.xy) / uScreenSize;
@@ -15,11 +15,11 @@ int mipmap_count = 1 + int(log2(max(uScreenSize.x, uScreenSize.y)));
 float DistanceFromCamera() {
   float z_b = texture2D(uDepthTex, coord).x;
   float z_n = 2.0 * z_b - 1.0;
-  return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+  return 2.0 * uZNear * uZFar / (uZFar + uZNear - z_n * (uZFar - uZNear));
 }
 
 vec3 DoF(vec3 texel_color) {
-  float level = sqrt(DistanceFromCamera() / zFar) * (mipmap_count-1);
+  float level = sqrt(DistanceFromCamera() / uZFar) * (mipmap_count-1);
   float floor_level = floor(level);
   vec3 color = texel_color;
   for (int i = 1; i <= floor_level; ++i) {

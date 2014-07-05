@@ -7,6 +7,15 @@
 
 namespace engine {
 
+template<typename Transform_t>
+GameObject::GameObject(GameObject* parent, const Transform_t& transform)
+    : scene_(parent ? parent->scene_ : nullptr), parent_(parent)
+    , transform_(new Transform_t{transform})
+    , layer_(0), group_(0), enabled_(true) {
+  if (parent) { transform_->set_parent(parent_->transform()); }
+  sorted_components_.insert(this);
+}
+
 template<typename T, typename... Args>
 T* GameObject::addComponent(Args&&... args) {
   static_assert(std::is_base_of<GameObject, T>::value, "Unknown type");

@@ -8,7 +8,9 @@ BloomEffect::BloomEffect(GameObject *parent)
     : Behaviour(parent)
     , prog_(scene_->shader_manager()->get("bloom.vert"),
             scene_->shader_manager()->get("bloom.frag"))
-    , uScreenSize_(prog_, "uScreenSize") {
+    , uScreenSize_(prog_, "uScreenSize")
+    , uZNear_(prog_, "uZNear")
+    , uZFar_(prog_, "uZFar") {
   prog_.use();
 
   gl::UniformSampler(prog_, "uTex").set(0);
@@ -65,6 +67,10 @@ void BloomEffect::render() {
   depth_tex_.bind(1);
 
   prog_.use();
+  auto cam = scene_->camera();
+  uZNear_ = cam->z_near();
+  uZFar_ = cam->z_far();
+
   rect_.render();
 
   depth_tex_.unbind(1);

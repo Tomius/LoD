@@ -1,9 +1,11 @@
+// Copyright (c) 2014, Tamas Csala
+
 #include <thread>
-#include "quad_tree.h"
+#include <algorithm>
+#include "./quad_tree.h"
 #include "../misc.h"
 
 namespace engine {
-
 namespace cdlod {
 
 QuadTree::Node::Node(GLshort x, GLshort z, GLubyte level,
@@ -35,8 +37,8 @@ void QuadTree::Node::Init(GLshort x, GLshort z, GLubyte level,
 
 void QuadTree::Node::countMinMaxOfArea(const HeightMapInterface& hmap,
                                        double *min, double *max, bool root) {
-  glm::dvec2 min_xz = hmap.toWorldSpace(x-size/2, z-size/2);
-  glm::dvec2 max_xz = hmap.toWorldSpace(x+size/2, z+size/2);
+  glm::dvec2 min_xz(x-size/2, z-size/2);
+  glm::dvec2 max_xz(x+size/2, z+size/2);
 
   if (level == 0) {
     glm::dvec2 min_max_y = hmap.getMinMaxOfArea(x, z, size, size);
@@ -45,7 +47,7 @@ void QuadTree::Node::countMinMaxOfArea(const HeightMapInterface& hmap,
   } else {
     double tl_min, tr_min, bl_min, br_min;
     double tl_max, tr_max, bl_max, br_max;
-    if(root) {
+    if (root) {
       std::thread th_tl{CountMinMaxOfArea, tl.get(), std::ref(hmap), &tl_min, &tl_max};
       std::thread th_tr{CountMinMaxOfArea, tr.get(), std::ref(hmap), &tr_min, &tr_max};
       std::thread th_bl{CountMinMaxOfArea, bl.get(), std::ref(hmap), &bl_min, &bl_max};
@@ -72,9 +74,7 @@ void QuadTree::Node::selectNodes(const glm::vec3& cam_pos,
   float scale = 1 << level;
   float lod_range = scale * 128;
 
-  if(!bbox.collidesWithFrustum(frustum)) {
-    return;
-  }
+  if (!bbox.collidesWithFrustum(frustum)) { return; }
 
   // if we can cover the whole area or if we are a leaf
   if (!bbox.collidesWithSphere(cam_pos, lod_range) || level == 0) {
@@ -104,6 +104,5 @@ void QuadTree::Node::selectNodes(const glm::vec3& cam_pos,
   }
 }
 
-} // namespace cdlod
-
-} // namespace engine
+}  // namespace cdlod
+}  // namespace engine

@@ -31,7 +31,6 @@ class Terrain : public engine::GameObject {
   gl::LazyUniform<glm::ivec2> uShadowAtlasSize_;
 
   virtual void render() override;
-  const engine::Transform& initTransform();
 };
 
 #endif  // LOD_TERRAIN_H_

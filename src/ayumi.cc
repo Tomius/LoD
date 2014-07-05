@@ -164,7 +164,7 @@ void Ayumi::update() {
 void Ayumi::shadowRender() {
   shadow_prog_.use();
   shadow_uMCP_ =
-    scene_->shadow()->modelCamProjMat(bsphere_, transform.matrix(),
+    scene_->shadow()->modelCamProjMat(bsphere_, transform()->matrix(),
                                      mesh_.worldTransform());
   mesh_.uploadBoneInfo(shadow_uBones_);
 
@@ -187,7 +187,7 @@ void Ayumi::render() {
   const auto& cam = *scene_->camera();
   uCameraMatrix_ = cam.matrix();
   uProjectionMatrix_ = cam.projectionMatrix();
-  uModelMatrix_ = transform.matrix() * mesh_.worldTransform();
+  uModelMatrix_ = transform()->matrix() * mesh_.worldTransform();
 
   mesh_.uploadBoneInfo(uBones_);
 

@@ -23,7 +23,7 @@ uniform vec3 uSunPos;
 vec3 sun_pos = normalize(uSunPos);
 vec3 moon_pos = -sun_pos;
 
-float sqr(float x) {
+float sky_sqr(float x) {
   return x*x;
 }
 
@@ -67,7 +67,7 @@ vec3 SkyColor(vec3 look_dir) {
         // The scattering effect near the Sun
         vec3(1.0, 0.9, 0.7) * atm_color *
         pow(min(look_dir_sun_dist + 0.001 * atm_size, 1.0),
-            1024.0 / sqr(atm_size)) +
+            1024.0 / sky_sqr(atm_size)) +
         // The yellow and red tone of the sky at sunset / sunrise
         atm_color * (look_dir_sun_dist / (0.7 + pow(2.9 * sun_power, 4.0))) * pow(atm_size, 0.6) * 0.5;
 
@@ -89,7 +89,7 @@ vec3 SkyColor(vec3 look_dir) {
                   vec3(moon_power)) +
       // The scattering effect near the Moon
       vec3(0.2) * pow(min(look_dir_moon_dist + 0.001 * atm_size, 1.0),
-                          1024.0 / sqr(atm_size));
+                          1024.0 / sky_sqr(atm_size));
 
     night_color = air + vec3(0.4) * moon;
   }

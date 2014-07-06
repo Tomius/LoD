@@ -91,7 +91,7 @@ MainScene::MainScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the resources for the bloom effect");
-    BloomEffect *bloom = addComponent<BloomEffect>();
+    BloomEffect *bloom = addComponent<BloomEffect>(skybox);
   PrintDebugTime();
 
   shadow->set_default_fbo(bloom->fbo());

@@ -13,9 +13,11 @@
 #include "engine/behaviour.h"
 #include "engine/shader_manager.h"
 
+#include "./skybox.h"
+
 class BloomEffect : public engine::Behaviour {
  public:
-  explicit BloomEffect(GameObject *parent);
+  explicit BloomEffect(GameObject *parent, Skybox* skybox = nullptr);
 
   gl::Framebuffer* fbo() { return &fbo_; }
 
@@ -23,12 +25,15 @@ class BloomEffect : public engine::Behaviour {
   engine::ShaderProgram prog_;
 
   gl::Framebuffer fbo_;
-  gl::Texture2D color_tex_, depth_tex_;
+  gl::Texture2D color_tex_, depth_tex_, noise_tex_;
   gl::LazyUniform<glm::vec2> uScreenSize_;
-  gl::LazyUniform<float> uZNear_, uZFar_;
+  gl::LazyUniform<glm::vec3> s_uSunPos_;
+  gl::LazyUniform<float> uZNear_, uZFar_, uTime_;
   gl::FullScreenRectangle rect_;
 
   GLuint width_, height_;
+
+  Skybox* skybox_;
 
   virtual void screenResized(size_t width, size_t height) override;
   virtual void update() override;

@@ -93,7 +93,7 @@ class BulletBasicsScene : public engine::Scene {
   void addSmallRedCube() {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
-    addComponent<RedCube>(pos, 10.0f*cam->transform()->forward(),
+    addComponent<RedCube>(pos, 20.0f*cam->transform()->forward(),
                           cam->transform()->rot());
   }
 
@@ -113,13 +113,13 @@ class BulletBasicsScene : public engine::Scene {
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
 
-    addComponent<Skybox>();
+    auto skybox = addComponent<Skybox>();
     addComponent<StaticPlane>();
-    auto bloom = addComponent<BloomEffect>();
+    auto bloom = addComponent<BloomEffect>(skybox);
     bloom->set_group(1);
 
     auto cam = addComponent<engine::FreeFlyCamera>(
-        M_PI/3, 1, 500, glm::vec3(20, 5, 0), glm::vec3(), 25, 10);
+        M_PI/3, 1, 500, glm::vec3(20, 5, 0), glm::vec3(), 15, 10);
     set_camera(cam);
 
     auto label = addComponent<engine::gui::Label>(
@@ -134,7 +134,7 @@ class BulletBasicsScene : public engine::Scene {
   }
 
   virtual void update() override {
-    world_->stepSimulation(game_time().dt);
+    world_->stepSimulation(game_time().dt, 5);
     Scene::update();
   }
 

@@ -109,7 +109,7 @@ class BulletHeightFieldScene : public engine::Scene {
   void addSmallRedCube() {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
-    addComponent<RedCube>(pos, 10.0f*cam->transform()->forward(),
+    addComponent<RedCube>(pos, 20.0f*cam->transform()->forward(),
                           cam->transform()->rot());
   }
 
@@ -129,14 +129,14 @@ class BulletHeightFieldScene : public engine::Scene {
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
 
-    addComponent<Skybox>();
+    auto skybox = addComponent<Skybox>();
     addComponent<Terrain>();
     // addComponent<HeightField>();
-    auto bloom = addComponent<BloomEffect>();
+    auto bloom = addComponent<BloomEffect>(skybox);
     bloom->set_group(1);
 
     auto cam = addComponent<engine::FreeFlyCamera>(M_PI/3, 1, 3000,
-        glm::vec3(2058, 255, 2048), glm::vec3(2048, 250, 2048), 25, 10);
+        glm::vec3(2058, 255, 2048), glm::vec3(2048, 250, 2048), 20, 10);
     set_camera(cam);
 
     auto label = addComponent<engine::gui::Label>(
@@ -151,7 +151,7 @@ class BulletHeightFieldScene : public engine::Scene {
   }
 
   virtual void update() override {
-    world_->stepSimulation(game_time().dt);
+    world_->stepSimulation(game_time().dt, 5);
     Scene::update();
   }
 

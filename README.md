@@ -17,7 +17,8 @@ Dependencies:
 * GLFW3 - for window handling
 * Magick++ - for image loading.
 * Assimp - for loading 3D models.
-* Bullet - for physics (isn't fully integrated yet)
+* FreeType2 - for text rendering (via freetype-gl).
+* Bullet - for physics (isn't fully integrated yet).
 
 
 How to build (Debian/Ubuntu):

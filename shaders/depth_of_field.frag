@@ -19,7 +19,7 @@ float DistanceFromCamera() {
 }
 
 vec3 DoF(vec3 texel_color) {
-  float level = sqrt(DistanceFromCamera() / uZFar) * (mipmap_count-1);
+  float level = sqrt(DistanceFromCamera() / uZFar) * 0.5 * (mipmap_count-1);
   float floor_level = floor(level);
   vec3 color = texel_color;
   for (int i = 1; i <= floor_level; ++i) {

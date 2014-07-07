@@ -49,14 +49,14 @@ void GameEngine::InitContext() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     // Window creation
-    window_ = glfwCreateWindow(1024, 768, "Land of Dreams",
+    window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
                                glfwGetPrimaryMonitor(), nullptr);
     if (!window_){
       // If it failed, try a 2.1 context
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
-      window_ = glfwCreateWindow(1024, 768, "Land of Dreams",
+      window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
                                 glfwGetPrimaryMonitor(), nullptr);
 
       // If that one fails too, we can't do much...

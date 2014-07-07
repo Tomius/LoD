@@ -6,6 +6,15 @@ OBJ_DIR = .obj
 PRECOMPILED_HEADER_SRC = $(SRC_DIR)/engine/oglwrap_all.h
 FREETYPE_GL_DIR = $(SRC_DIR)/engine/gui/freetype-gl
 FREETYPE_GL_ARCHIVE = $(FREETYPE_GL_DIR)/libfreetype-gl.a
+THIRD_PARTY_DIR = $(OBJ_DIR)/third_party
+GLEW_FOUND = $(THIRD_PARTY_DIR)/glew.found
+GLFW3_FOUND = $(THIRD_PARTY_DIR)/glfw3.found
+MAGICKPP_FOUND = $(THIRD_PARTY_DIR)/magickpp.found
+ASSIMP_FOUND = $(THIRD_PARTY_DIR)/assimp.found
+FREETYPE2_FOUND = $(THIRD_PARTY_DIR)/freetype2.found
+BULLET_FOUND = $(THIRD_PARTY_DIR)/bullet.found
+THIRD_PARTY_LIBS_FOUND = $(GLEW_FOUND) $(GLFW3_FOUND) $(MAGICKPP_FOUND) \
+												 $(ASSIMP_FOUND) $(FREETYPE2_FOUND) $(BULLET_FOUND)
 
 CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
 OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
@@ -82,6 +91,7 @@ ifneq ($(MAKECMDGOALS),clean) 						 # don't create .d files just to remove them
 ifneq ($(MAKECMDGOALS),clean_deps)
 ifneq ($(MAKECMDGOALS),update)
 $(shell mkdir -p $(OBJ_DIR))							 # make OBJ_DIR for a helper file
+$(shell mkdir -p $(THIRD_PARTY_DIR))			 # make the dir for third party libs
 $(shell echo 0 > $(OBJ_DIR)/objs_current)  # reset the built object counter
 $(shell touch .MakefileObjsTotal) 				 # force the helper makefile to always run
 $(shell $(MAKE) -f .MakefileObjsTotal all) # count the number of objects to be built
@@ -145,7 +155,7 @@ $(FREETYPE_GL_ARCHIVE):
 	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building archive $@,$(GREEN))
 	@ cd $(FREETYPE_GL_DIR) && cmake . > /dev/null && $(MAKE) all > /dev/null
 
-$(BINARY): $(OBJECTS) $(FREETYPE_GL_ARCHIVE)
+$(BINARY): $(THIRD_PARTY_LIBS_FOUND) $(OBJECTS) $(FREETYPE_GL_ARCHIVE)
 	@ $(call printf,[100%] ,Linking executable $@,$(BOLD)$(RED))
 	@ $(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
@@ -157,3 +167,22 @@ $(BINARY): $(OBJECTS) $(FREETYPE_GL_ARCHIVE)
 	@
 %:
 	@
+
+$(GLEW_FOUND):
+	@if `pkg-config --atleast-version=1.8 glew`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)GLEW version 1.8 or newer is required $(NORMAL)"; exit 1; fi;
+
+$(GLFW3_FOUND):
+	@if `pkg-config --atleast-version=3.0 glfw3`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)GLFW version 3.0 or newer is required $(NORMAL)"; exit 1; fi;
+
+$(MAGICKPP_FOUND):
+	@if `pkg-config --atleast-version=6.0 Magick++`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)Magick++ version 6.0 or newer is required $(NORMAL)"; exit 1; fi;
+
+$(ASSIMP_FOUND):
+	@if `pkg-config --atleast-version=3.0 assimp`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)Assimp version 3.0 or newer is required $(NORMAL)"; exit 1; fi;
+
+$(FREETYPE2_FOUND):
+	@if `pkg-config --atleast-version=15.0 freetype2`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)FreeType2 version 15.0 or newer is required $(NORMAL)"; exit 1; fi;
+
+$(BULLET_FOUND):
+	@if `pkg-config --atleast-version=2.5 bullet`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)Bullet version 2.5 or newer is required $(NORMAL)"; exit 1; fi;
+

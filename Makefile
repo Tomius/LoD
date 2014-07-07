@@ -172,17 +172,17 @@ $(GLEW_FOUND):
 	@if `pkg-config --atleast-version=1.8 glew`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)GLEW version 1.8 or newer is required $(NORMAL)"; exit 1; fi;
 
 $(GLFW3_FOUND):
-	@if `pkg-config --atleast-version=3.0 glfw3`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)GLFW version 3.0 or newer is required $(NORMAL)"; exit 1; fi;
+	@if `pkg-config --atleast-version=3.0 glfw3`; then touch $(GLFW3_FOUND); else /bin/echo -e "$(RED)GLFW version 3.0 or newer is required $(NORMAL)"; exit 1; fi;
 
 $(MAGICKPP_FOUND):
-	@if `pkg-config --atleast-version=6.0 Magick++`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)Magick++ version 6.0 or newer is required $(NORMAL)"; exit 1; fi;
+	@if `pkg-config --atleast-version=6.0 Magick++`; then touch $(MAGICKPP_FOUND); else /bin/echo -e "$(RED)Magick++ version 6.0 or newer is required $(NORMAL)"; exit 1; fi;
 
 $(ASSIMP_FOUND):
-	@if `pkg-config --atleast-version=3.0 assimp`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)Assimp version 3.0 or newer is required $(NORMAL)"; exit 1; fi;
+	@if `pkg-config --atleast-version=3.0 assimp`; then touch $(ASSIMP_FOUND); else /bin/echo -e "$(RED)Assimp version 3.0 or newer is required $(NORMAL)"; exit 1; fi;
 
 $(FREETYPE2_FOUND):
-	@if `pkg-config --atleast-version=15.0 freetype2`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)FreeType2 version 15.0 or newer is required $(NORMAL)"; exit 1; fi;
+	@if `pkg-config --atleast-version=15.0 freetype2`; then touch $(FREETYPE2_FOUND); else /bin/echo -e "$(RED)FreeType2 version 15.0 or newer is required $(NORMAL)"; exit 1; fi;
 
 $(BULLET_FOUND):
-	@if `pkg-config --atleast-version=2.5 bullet`; then touch $(GLEW_FOUND); else /bin/echo -e "$(RED)Bullet version 2.5 or newer is required $(NORMAL)"; exit 1; fi;
+	@if `pkg-config --atleast-version=2.5 bullet`; then touch $(BULLET_FOUND); else /bin/echo -e "$(RED)Bullet version 2.5 or newer is required $(NORMAL)"; exit 1; fi;
 

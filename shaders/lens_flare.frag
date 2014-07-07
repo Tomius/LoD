@@ -4,33 +4,13 @@
 
 #version 120
 
-#export vec3 LensFlare(float depth);
+#export vec3 LensFlare();
 
-uniform sampler2D uNoiseTex;
-uniform vec2 uNoiseTexSize = vec2(64, 64), uScreenSize;
+uniform vec2 uScreenSize;
 uniform vec3 s_uSunPos;
-uniform float uTime;
 
-float noise(float t) {
-  return texture2D(uNoiseTex, vec2(t, 0.0) / uNoiseTexSize).r;
-}
-
-float noise(vec2 t) {
-  return texture2D(uNoiseTex, (t + vec2(uTime)) / uNoiseTexSize).r;
-}
-
-vec3 LensFlare(vec2 uv, vec2 pos, float depth) {
-  vec2 main = uv - pos;
+vec3 LensFlare(vec2 uv, vec2 pos) {
   vec2 uvd = uv * length(uv);
-
-  float ang = atan(main.y, main.x);
-  float dist = length(main);
-  dist = pow(dist, 0.1);
-  float n = noise(vec2((ang-uTime/9.0)*16.0, dist*32.0));
-
-  float f0 = 1.0 / (max(length(uv - pos), 0.1)*8.0 + 1.0);
-
-  f0 *= sin((ang + uTime/18.0 + noise(abs(ang)+n/2.0)*2.0)*12.0) * 0.1 + dist*0.1 + 0.8;
 
   float f21 = max(1.0/(1.0+32.0*pow(length(uvd+0.8*pos),2.0)),.0)*00.25;
   float f22 = max(1.0/(1.0+32.0*pow(length(uvd+0.85*pos),2.0)),.0)*00.23;
@@ -55,19 +35,11 @@ vec3 LensFlare(vec2 uv, vec2 pos, float depth) {
   c.r += f21 + f41 + f51 + f61;
   c.g += f22 + f42 + f52 + f62;
   c.b += f23 + f43 + f53 + f63;
-  if (depth == 1.0) {
-    c += vec3(f0/3.0);
-  }
 
   return 2.0*c;
 }
 
-vec3 color_modifier(vec3 color, float factor, float factor2) {
-  float w = color.x + color.y + color.z;
-  return mix(color, vec3(w)*factor, w*factor2);
-}
-
-vec3 LensFlare(float depth) {
+vec3 LensFlare() {
   if (s_uSunPos.z < 0.0) {
     return vec3(0.0);
   }
@@ -77,7 +49,6 @@ vec3 LensFlare(float depth) {
   vec2 s_sun_pos = s_uSunPos.xy/2;
   s_sun_pos.x *= uScreenSize.x/uScreenSize.y; //fix aspect ratio
 
-  vec3 color = vec3(1.4, 1.2, 1.0) * pow(LensFlare(uv, s_sun_pos.xy, depth), vec3(2.2));
-  color = color_modifier(color, 0.5, 0.1);
+  vec3 color = vec3(1.4, 1.2, 1.0) * pow(LensFlare(uv, s_sun_pos.xy), vec3(2.2));
   return color;
 }

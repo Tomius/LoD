@@ -30,8 +30,8 @@ class CubeMesh : public GameObject {
     uColor_ = color;
   }
 
-  glm::vec3 color() { return uColor_; }
-  void set_color(const glm::vec3& color) { uColor_ = color; }
+  glm::vec3 color() { prog_.use(); return uColor_; }
+  void set_color(const glm::vec3& color) { prog_.use(); uColor_ = color; }
 
  private:
   gl::Cube cube_;

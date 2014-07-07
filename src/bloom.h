@@ -25,10 +25,10 @@ class BloomEffect : public engine::Behaviour {
   engine::ShaderProgram prog_;
 
   gl::Framebuffer fbo_;
-  gl::Texture2D color_tex_, depth_tex_, noise_tex_;
+  gl::Texture2D color_tex_, depth_tex_;
   gl::LazyUniform<glm::vec2> uScreenSize_;
   gl::LazyUniform<glm::vec3> s_uSunPos_;
-  gl::LazyUniform<float> uZNear_, uZFar_, uTime_;
+  gl::LazyUniform<float> uZNear_, uZFar_;
   gl::FullScreenRectangle rect_;
 
   GLuint width_, height_;

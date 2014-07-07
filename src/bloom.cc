@@ -12,13 +12,11 @@ BloomEffect::BloomEffect(GameObject *parent, Skybox* skybox)
     , s_uSunPos_(prog_, "s_uSunPos")
     , uZNear_(prog_, "uZNear")
     , uZFar_(prog_, "uZFar")
-    , uTime_(prog_, "uTime")
     , skybox_(skybox) {
   prog_.use();
 
   gl::UniformSampler(prog_, "uTex").set(0);
   gl::UniformSampler(prog_, "uDepthTex").set(1);
-  gl::UniformSampler(prog_, "uNoiseTex").set(2);
   rect_.setupPositions(prog_ | "aPosition");
 
   prog_.validate();
@@ -35,13 +33,6 @@ BloomEffect::BloomEffect(GameObject *parent, Skybox* skybox)
   depth_tex_.minFilter(gl::kLinear);
   depth_tex_.magFilter(gl::kLinear);
   depth_tex_.unbind();
-
-  noise_tex_.bind();
-  noise_tex_.LoadTexture("textures/noise.png");
-  noise_tex_.minFilter(gl::kLinear);
-  noise_tex_.magFilter(gl::kLinear);
-  noise_tex_.WrapS(gl::kRepeat);
-  noise_tex_.unbind();
 
   fbo_.bind();
   fbo_.attachTexture(gl::kColorAttachment0, color_tex_);
@@ -76,7 +67,6 @@ void BloomEffect::render() {
   color_tex_.bind(0);
   color_tex_.generateMipmap();
   depth_tex_.bind(1);
-  noise_tex_.bind(2);
 
   prog_.use();
   prog_.update();
@@ -84,7 +74,6 @@ void BloomEffect::render() {
   auto cam = scene_->camera();
   uZNear_ = cam->z_near();
   uZFar_ = cam->z_far();
-  uTime_ = scene_->environment_time().current;
   if (skybox_) {
     glm::vec4 s_sun_pos = cam->projectionMatrix() * glm::vec4(
         glm::mat3(cam->cameraMatrix()) * -glm::normalize(skybox_->getSunPos()), 1.0);
@@ -94,7 +83,6 @@ void BloomEffect::render() {
 
   rect_.render();
 
-  noise_tex_.unbind(2);
   depth_tex_.unbind(1);
   color_tex_.unbind(0);
 }

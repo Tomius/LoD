@@ -67,7 +67,7 @@ class BulletRigidBody : public engine::Behaviour {
 
 class StaticPlane : public engine::GameObject {
  public:
-  explicit StaticPlane(GameObject* parent) : engine::GameObject(parent) {
+  explicit StaticPlane(GameObject* parent) : GameObject(parent) {
     btCollisionShape* shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     addComponent<BulletRigidBody>(glm::vec3(), 0.0f, shape);
     auto plane_mesh = addComponent<CubeMesh>(glm::vec3(0.5, 0.5, 0.5));
@@ -76,18 +76,50 @@ class StaticPlane : public engine::GameObject {
   }
 };
 
-class RedCube : public engine::GameObject {
+class RedCube : public engine::Behaviour {
+  CubeMesh* cube_mesh_;
  public:
   explicit RedCube(GameObject* parent, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot)
-      : engine::GameObject(parent) {
+      : Behaviour(parent) {
     btVector3 half_extents(0.5f, 0.5f, 0.5f);
     btCollisionShape* shape = new btBoxShape(half_extents);
     auto rbody = addComponent<BulletRigidBody>(pos, 1.0f, shape, rot);
-    rbody->rigid_body()->setLinearVelocity(btVector3(v.x, v.y, v.z));
-    addComponent<CubeMesh>(glm::vec3(1.0, 0.0, 0.0));
+    auto rigid_body = rbody->rigid_body();
+    rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
+    rigid_body->setCollisionFlags(rigid_body->getCollisionFlags() |
+        btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+    rigid_body->setUserPointer(this);
+    cube_mesh_ = addComponent<CubeMesh>(glm::vec3(0.5, 0.0, 0.0));
+  }
+
+  virtual void update() override {
+    glm::vec3 color = cube_mesh_->color();
+    color = glm::vec3(color.r, std::min(0.99f*color.g, 0.9f),
+                               std::min(0.99f*color.b, 0.9f));
+    cube_mesh_->set_color(color);
+  }
+
+  void AddColor(const glm::vec3& color) {
+    cube_mesh_->set_color(cube_mesh_->color() + color);
   }
 };
+
+bool CollisionCallback(btManifoldPoint& cp,
+                  const btCollisionObjectWrapper* obj1, int id1, int index1,
+                  const btCollisionObjectWrapper* obj2, int id2, int index2) {
+  RedCube* red1 = dynamic_cast<RedCube*>((engine::GameObject*)obj1->getCollisionObject()->getUserPointer());
+  RedCube* red2 = dynamic_cast<RedCube*>((engine::GameObject*)obj2->getCollisionObject()->getUserPointer());
+  if (red1 && red2) {
+    red1->AddColor(glm::vec3{0.0f, 1.0f, 1.0f});
+    red2->AddColor(glm::vec3{0.0f, 1.0f, 1.0f});
+  } else {
+    if (red1) { red1->AddColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
+    if (red2) { red2->AddColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
+  }
+
+  return false;
+}
 
 class BulletBasicsScene : public engine::Scene {
   void addSmallRedCube() {
@@ -112,6 +144,8 @@ class BulletBasicsScene : public engine::Scene {
         dispatcher_.get(), broadphase_.get(),
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
+
+    gContactAddedCallback = CollisionCallback;
 
     auto skybox = addComponent<Skybox>();
     addComponent<StaticPlane>();

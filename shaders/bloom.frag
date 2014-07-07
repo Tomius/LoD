@@ -2,10 +2,11 @@
 
 #version 120
 
+#include "sky.frag"
 #include "depth_of_field.frag"
 #include "lens_flare.frag"
 
-uniform sampler2D uTex, uDepthTex;
+uniform sampler2D uTex;
 uniform vec2 uScreenSize;
 
 ivec2 tex_coord = ivec2(gl_FragCoord.xy);
@@ -56,8 +57,10 @@ vec3 FilmicToneMap(vec3 color) {
 
 void main() {
   FetchNeighbours();
-  vec3 color = Glow() + DoF(neighbours[4]) +
-               LensFlare(texture2D(uDepthTex, tex_coord / uScreenSize).x);
+  vec3 color = Glow() + DoF(neighbours[4]);
+  if (SunPos().y > 0) {
+    color += LensFlare();
+  }
   color = FilmicToneMap(color);
   gl_FragColor = vec4(color, 1.0);
 }

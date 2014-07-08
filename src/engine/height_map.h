@@ -23,7 +23,9 @@ class HeightMap : public HeightMapInterface {
   HeightMap(const std::string& file_name,
             const std::string& format_string = "CR")
       : tex_(file_name, format_string) {
-    static_assert(std::is_same<T, unsigned char>::value ||
+    static_assert(std::is_same<T, char>::value ||
+                  std::is_same<T, unsigned char>::value ||
+                  std::is_same<T, short>::value ||
                   std::is_same<T, unsigned short>::value,
                   "Only uchar and ushort heightmaps are supported yet");
   }

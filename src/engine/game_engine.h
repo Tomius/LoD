@@ -34,12 +34,6 @@ class GameEngine {
       Destroy();
       std::terminate();
     }
-
-    // Make sure that the objects in the scene are aware of the screen size.
-    // This is depracated and is now only needed by the camera (which isn't a go)
-    int width, height;
-    glfwGetWindowSize(window_, &width, &height);
-    ScreenResizeCallback(window_, width, height);
   }
 
   static const Scene& scene() {

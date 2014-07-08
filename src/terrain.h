@@ -20,7 +20,7 @@ class Terrain : public engine::GameObject {
   const engine::HeightMapInterface& height_map() { return height_map_; }
 
  private:
-  engine::HeightMap<GLushort> height_map_;
+  engine::HeightMap<GLubyte> height_map_;
   engine::cdlod::TerrainMesh mesh_;
   engine::ShaderProgram prog_;  // has to be inited after mesh_
 

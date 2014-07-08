@@ -16,6 +16,7 @@
 
 #include "../terrain.h"
 #include "../bloom.h"
+#include "../fps_display.h"
 #include "./main_scene.h"
 
 using engine::shapes::CubeMesh;
@@ -81,29 +82,69 @@ class StaticPlane : public engine::GameObject {
 
 class HeightField : public engine::GameObject {
  public:
-  explicit HeightField(GameObject* parent)
-      : GameObject(parent) {
+  explicit HeightField(GameObject* parent) : GameObject(parent) {
     Terrain* terrain = addComponent<Terrain>();
     const auto& height_map = terrain->height_map();
-    btCollisionShape* shape = new btHeightfieldTerrainShape(
-        height_map.w(), height_map.h(), height_map.data(),
-        255, 1, PHY_SHORT, false);
-    addComponent<BulletRigidBody>(glm::vec3(), 0.0f, shape);
+    int w = height_map.w(), h = height_map.h();
+    GLubyte *data = new GLubyte[w*h];
+    for (int x = 0; x < w; ++x) {
+      for (int y = 0; y < h; ++y) {
+        data[y*w + x] = height_map.heightAt(x, y);
+      }
+    }
+    btCollisionShape* shape = new btHeightfieldTerrainShape{
+        height_map.w(), height_map.h(), data,
+        1, 0, 256, 1, PHY_UCHAR, false};
+    addComponent<BulletRigidBody>(glm::vec3{height_map.w()/2.0f, 128,
+                                            height_map.h()/2.0f}, 0.0f, shape);
   }
 };
 
-class RedCube : public engine::GameObject {
+class RedCube : public engine::Behaviour {
+  CubeMesh* cube_mesh_;
  public:
   explicit RedCube(GameObject* parent, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot)
-      : GameObject(parent) {
+      : Behaviour(parent) {
     btVector3 half_extents(0.5f, 0.5f, 0.5f);
     btCollisionShape* shape = new btBoxShape(half_extents);
     auto rbody = addComponent<BulletRigidBody>(pos, 1.0f, shape, rot);
-    rbody->rigid_body()->setLinearVelocity(btVector3(v.x, v.y, v.z));
-    addComponent<CubeMesh>(glm::vec3(1.0, 0.0, 0.0));
+    auto rigid_body = rbody->rigid_body();
+    rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
+    rigid_body->setCollisionFlags(rigid_body->getCollisionFlags() |
+        btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+    rigid_body->setUserPointer(this);
+    cube_mesh_ = addComponent<CubeMesh>(glm::vec3(0.5, 0.0, 0.0));
+  }
+
+  virtual void update() override {
+    glm::vec3 color = cube_mesh_->color();
+    color = glm::vec3(color.r, std::min(0.98f*color.g, 0.9f),
+                               std::min(0.98f*color.b, 0.9f));
+    cube_mesh_->set_color(color);
+  }
+
+  void addColor(const glm::vec3& color) {
+    cube_mesh_->set_color(cube_mesh_->color() + color);
   }
 };
+
+bool CollisionCallback(btManifoldPoint& cp,
+                  const btCollisionObjectWrapper* obj1, int id1, int index1,
+                  const btCollisionObjectWrapper* obj2, int id2, int index2) {
+  RedCube* red1 = dynamic_cast<RedCube*>((engine::GameObject*)obj1->getCollisionObject()->getUserPointer());
+  RedCube* red2 = dynamic_cast<RedCube*>((engine::GameObject*)obj2->getCollisionObject()->getUserPointer());
+  if (red1 && red2) {
+    red1->addColor(glm::vec3{0.0f, 1.0f, 1.0f});
+    red2->addColor(glm::vec3{0.0f, 1.0f, 1.0f});
+  } else {
+    if (red1) { red1->addColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
+    if (red2) { red2->addColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
+  }
+
+  return false;
+}
+
 
 class BulletHeightFieldScene : public engine::Scene {
   void addSmallRedCube() {
@@ -129,29 +170,35 @@ class BulletHeightFieldScene : public engine::Scene {
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
 
+    gContactAddedCallback = CollisionCallback;
+
     auto skybox = addComponent<Skybox>();
-    addComponent<Terrain>();
-    // addComponent<HeightField>();
+    addComponent<HeightField>();
     auto bloom = addComponent<BloomEffect>(skybox);
     bloom->set_group(1);
 
     auto cam = addComponent<engine::FreeFlyCamera>(M_PI/3, 1, 3000,
-        glm::vec3(2058, 255, 2048), glm::vec3(2048, 250, 2048), 20, 10);
+        glm::vec3(2050, 200, 2050), glm::vec3(2048, 200, 2048), 20, 5);
     set_camera(cam);
 
     auto label = addComponent<engine::gui::Label>(
         L"Press space to shoot a cube.", glm::vec2(0, -0.9));
     label->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label->set_font_size(20);
+    label->set_group(2);
 
-    auto label2 = addComponent<engine::gui::Label>(
-        L"You can load the main scene by pressing the home button.", glm::vec2(0, -0.95));
+    auto label2 = addComponent<engine::gui::Label>(L"You can load the main "
+      L"scene by pressing the home button.", glm::vec2(0, -0.95));
     label2->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label2->set_font_size(14);
+    label2->set_group(2);
+
+    auto fps = addComponent<FpsDisplay>();
+    fps->set_group(2);
   }
 
   virtual void update() override {
-    world_->stepSimulation(game_time().dt, 5);
+    world_->stepSimulation(game_time().dt, 10);
     Scene::update();
   }
 

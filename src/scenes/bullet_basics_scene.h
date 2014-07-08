@@ -100,8 +100,12 @@ class RedCube : public engine::Behaviour {
     cube_mesh_->set_color(color);
   }
 
-  void AddColor(const glm::vec3& color) {
+  void addColor(const glm::vec3& color) {
     cube_mesh_->set_color(cube_mesh_->color() + color);
+  }
+
+  void set_color(const glm::vec3& color) {
+    cube_mesh_->set_color(color);
   }
 };
 
@@ -111,11 +115,11 @@ bool CollisionCallback(btManifoldPoint& cp,
   RedCube* red1 = dynamic_cast<RedCube*>((engine::GameObject*)obj1->getCollisionObject()->getUserPointer());
   RedCube* red2 = dynamic_cast<RedCube*>((engine::GameObject*)obj2->getCollisionObject()->getUserPointer());
   if (red1 && red2) {
-    red1->AddColor(glm::vec3{0.0f, 1.0f, 1.0f});
-    red2->AddColor(glm::vec3{0.0f, 1.0f, 1.0f});
+    red1->addColor(glm::vec3{0.0f, 1.0f, 1.0f});
+    red2->addColor(glm::vec3{0.0f, 1.0f, 1.0f});
   } else {
-    if (red1) { red1->AddColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
-    if (red2) { red2->AddColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
+    if (red1) { red1->addColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
+    if (red2) { red2->addColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
   }
 
   return false;
@@ -131,7 +135,7 @@ class BulletBasicsScene : public engine::Scene {
 
  public:
   BulletBasicsScene() {
-    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     collision_config_ = engine::make_unique<btDefaultCollisionConfiguration>();
     dispatcher_ =
@@ -168,8 +172,16 @@ class BulletBasicsScene : public engine::Scene {
   }
 
   virtual void update() override {
-    world_->stepSimulation(game_time().dt, 5);
     Scene::update();
+    world_->stepSimulation(game_time().dt, 5);
+    auto cam = camera()->transform();
+    glm::vec3 pos(cam->pos()),fwd(cam->forward()*1000.0f);
+    btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(pos.x,pos.y,pos.z), btVector3(fwd.x,fwd.y,fwd.z));
+    world_->rayTest(btVector3(pos.x,pos.y,pos.z), btVector3(fwd.x,fwd.y,fwd.z),rayCallback);
+    if (rayCallback.hasHit()) {
+      auto rcube = dynamic_cast<RedCube*>(static_cast<GameObject*>(rayCallback.m_collisionObject->getUserPointer()));
+      if (rcube) { rcube->set_color(glm::vec3(0.5, 0.5, 0.5)); }
+    }
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {

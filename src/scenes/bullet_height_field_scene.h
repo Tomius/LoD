@@ -17,6 +17,7 @@
 #include "../terrain.h"
 #include "../bloom.h"
 #include "../fps_display.h"
+#include "../loading_screen.h"
 #include "./main_scene.h"
 
 using engine::shapes::CubeMesh;
@@ -69,16 +70,6 @@ class BulletRigidBody : public engine::Behaviour {
   }
 };
 
-class StaticPlane : public engine::GameObject {
- public:
-  explicit StaticPlane(GameObject* parent) : GameObject(parent) {
-    btCollisionShape* shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
-    addComponent<BulletRigidBody>(glm::vec3(), 0.0f, shape);
-    auto plane_mesh = addComponent<CubeMesh>(glm::vec3(0.5, 0.5, 0.5));
-    plane_mesh->transform()->set_local_pos(glm::vec3(0, -0.5f, 0));
-    plane_mesh->transform()->set_local_scale(glm::vec3(400, 1, 400));
-  }
-};
 
 class HeightField : public engine::GameObject {
  public:
@@ -157,6 +148,9 @@ class BulletHeightFieldScene : public engine::Scene {
  public:
   BulletHeightFieldScene() {
     glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    LoadingScreen().render();
+    glfwSwapBuffers(window());
 
     collision_config_ = engine::make_unique<btDefaultCollisionConfiguration>();
     dispatcher_ =

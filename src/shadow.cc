@@ -6,9 +6,12 @@
 #include "oglwrap/context.h"
 #include "oglwrap/smart_enums.h"
 
-Shadow::Shadow(Skybox* skybox, int shadow_map_size,
+Shadow::Shadow(GameObject* parent, Skybox* skybox, int shadow_map_size,
                int atlas_x_size, int atlas_y_size)
-    : size_(shadow_map_size)
+    : GameObject(parent)
+    , default_fbo_(nullptr)
+    , w_(0), h_(0)
+    , size_(shadow_map_size)
     , xsize_(atlas_x_size)
     , ysize_(atlas_y_size)
     , curr_depth_(0)

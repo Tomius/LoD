@@ -17,7 +17,7 @@
 
 class BloomEffect : public engine::Behaviour {
  public:
-  explicit BloomEffect(GameObject *parent, Skybox* skybox = nullptr);
+  explicit BloomEffect(GameObject *parent, Skybox* skybox);
 
   gl::Framebuffer* fbo() { return &fbo_; }
 

@@ -15,6 +15,7 @@ class GameEngine {
 
   static void Destroy() {
     delete scene_;
+    delete new_scene_;
     glfwDestroyWindow(window_);
     glfwTerminate();
   }
@@ -26,8 +27,7 @@ class GameEngine {
                   "The given template type is not a Scene");
 
     try {
-      scene_ = new Scene_t();
-      scene_->set_window(window_);
+      new_scene_ = new Scene_t();
     } catch(const std::exception& err) {
       std::cerr << "Unable to load scene:\n" << err.what() << std::endl;
       std::cerr << "Stopping now." << std::endl;
@@ -46,7 +46,7 @@ class GameEngine {
 
   static glm::vec2 window_size() {
     int width, height;
-    glfwGetWindowSize(GameEngine::window(), &width, &height);
+    glfwGetWindowSize(window(), &width, &height);
     return glm::vec2(width, height);
   }
 
@@ -54,6 +54,7 @@ class GameEngine {
 
  private:
   static Scene *scene_;
+  static Scene *new_scene_;
   static GLFWwindow *window_;
 
   // Callbacks

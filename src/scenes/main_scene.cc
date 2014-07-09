@@ -33,7 +33,7 @@ static void PrintDebugTime() {
 }
 
 MainScene::MainScene() {
-  GLFWwindow* window = engine::GameEngine::window();
+  GLFWwindow* window = this->window();
 
   // Disable cursor
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -50,7 +50,8 @@ MainScene::MainScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the shadow maps");
-    Shadow *shadow = addShadow(skybox, 2048, 2, 2);
+    Shadow *shadow = addComponent<Shadow>(skybox, 2048, 2, 2);
+    set_shadow(shadow);
   PrintDebugTime();
 
   PrintDebugText("Initializing the terrain");
@@ -64,27 +65,28 @@ MainScene::MainScene() {
 
     CharacterMovement *charmove = ayumi->addComponent<CharacterMovement>();
     ayumi->charmove(charmove);
+    charmove->setAnimation(&ayumi->getAnimation());
   PrintDebugTime();
 
-  charmove->setAnimation(&ayumi->getAnimation());
+  PrintDebugText("Initializing the camera");
+    GameObject* cam_offset_go = ayumi->addComponent<GameObject>();
+    engine::Transform *cam_offset = cam_offset_go->transform();
 
-  GameObject* cam_offset_go = ayumi->addComponent<GameObject>();
-  engine::Transform *cam_offset = cam_offset_go->transform();
+    glm::vec2 center = height_map.center();
+    ayumi->transform()->local_pos() =
+        glm::vec3 {center.x, height_map.heightAt(center.x, center.y), center.y};
+    cam_offset->set_local_pos(ayumi->getMesh().bSphereCenter());
 
-  glm::vec2 center = height_map.center();
-  ayumi->transform()->local_pos() =
-      glm::vec3 {center.x, height_map.heightAt(center.x, center.y), center.y};
-  cam_offset->set_local_pos(ayumi->getMesh().bSphereCenter());
+    engine::ThirdPersonalCamera *cam =
+      cam_offset_go->addComponent<engine::ThirdPersonalCamera>(
+        M_PI/3.0f, 1.0f, 3000.0f,
+        cam_offset->pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
+        height_map, 1.5f);
 
-  engine::ThirdPersonalCamera *cam =
-    cam_offset_go->addComponent<engine::ThirdPersonalCamera>(
-      M_PI/3.0f, 1.0f, 3000.0f,
-      cam_offset->pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
-      height_map, 1.5f);
-
-  cam->set_group(1);
-  set_camera(cam);
-  charmove->setCamera(cam);
+    cam->set_group(1);
+    set_camera(cam);
+    charmove->setCamera(cam);
+  PrintDebugTime();
 
   PrintDebugText("Initializing the trees");
     addComponent<Tree>(height_map);
@@ -92,9 +94,10 @@ MainScene::MainScene() {
 
   PrintDebugText("Initializing the resources for the bloom effect");
     BloomEffect *bloom = addComponent<BloomEffect>(skybox);
+    shadow->set_default_fbo(bloom->fbo());
   PrintDebugTime();
 
-  shadow->set_default_fbo(bloom->fbo());
-
-  addComponent<FpsDisplay>();
+  PrintDebugText("Initializing the FPS display");
+    addComponent<FpsDisplay>();
+  PrintDebugTime();
 }

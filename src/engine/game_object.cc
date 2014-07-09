@@ -2,6 +2,7 @@
 
 #include "./scene.h"
 #include "./game_object.h"
+#include "./game_engine.h"
 
 #define _TRY_(YourCode) \
   try { \
@@ -139,10 +140,9 @@ void GameObject::updateSortedComponents() {
   sorted_components_.insert(components_just_enabled_.begin(),
                             components_just_enabled_.end());
   // make sure all the componenets just enabled are aware of the screen's size
+  glm::vec2 window_size = GameEngine::window_size();
   for (const auto& component : components_just_enabled_) {
-    int width, height;
-    glfwGetWindowSize(scene_->window(), &width, &height);
-    component->screenResizedAll(width, height);
+    component->screenResizedAll(window_size.x, window_size.y);
   }
   components_just_enabled_.clear();
 }

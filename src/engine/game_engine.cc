@@ -31,8 +31,9 @@ static void GlInit(GLFWwindow* window) {
 
 namespace engine {
 
-Scene *GameEngine::scene_;
-GLFWwindow *GameEngine::window_;
+Scene *GameEngine::scene_ = nullptr;
+Scene *GameEngine::new_scene_ = nullptr;
+GLFWwindow *GameEngine::window_ = nullptr;
 
 void GameEngine::InitContext() {
   PrintDebugText("Creating the OpenGL context");
@@ -108,6 +109,11 @@ void GameEngine::InitContext() {
 
 void GameEngine::Run() {
   while (!glfwWindowShouldClose(window_)) {
+    if (new_scene_) {
+      delete scene_;
+      scene_ = new_scene_;
+      new_scene_ = nullptr;
+    }
     gl::Clear().Color().Depth();
     scene_->turn();
 

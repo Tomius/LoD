@@ -12,11 +12,11 @@
 
 class Skybox;
 
-class Shadow {
+class Shadow : public engine::GameObject {
  public:
-  Shadow(Skybox* skybox, int shadow_map_size,
+  Shadow(GameObject* parent, Skybox* skybox, int shadow_map_size,
          int atlas_x_size, int atlas_y_size);
-  void screenResized(size_t width, size_t height);
+  virtual void screenResized(size_t width, size_t height) override;
   glm::mat4 projMat(float size) const;
   glm::mat4 camMat(glm::vec3 lightSrcPos, glm::vec4 targetBSphere) const;
   glm::mat4 modelCamProjMat(glm::vec4 targetBSphere,

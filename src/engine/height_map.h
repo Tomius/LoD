@@ -47,7 +47,7 @@ class HeightMap : public HeightMapInterface {
   }
 
   virtual double heightAt(int s, int t) const override {
-    return tex_(s, t)[0] / (std::numeric_limits<T>::max()-1.0) * 255;
+    return tex_(s, t)[0] / double(std::numeric_limits<T>::max()) * 255;
   }
 
   virtual double heightAt(double s, double t) const override {
@@ -64,7 +64,7 @@ class HeightMap : public HeightMapInterface {
     double fh = glm::mix(double(tex_(fs, ft)[0]), double(tex_(cs, ft)[0]), s-fs);
     double ch = glm::mix(double(tex_(fs, ct)[0]), double(tex_(cs, ct)[0]), s-fs);
 
-    return glm::mix(fh, ch, t-ft) / (std::numeric_limits<T>::max()-1) * 255;
+    return glm::mix(fh, ch, t-ft) / double(std::numeric_limits<T>::max()) * 255;
   }
 
   virtual gl::PixelDataFormat format() const override {

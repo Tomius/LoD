@@ -72,4 +72,14 @@ void Behaviour::mouseMovedAll(double xpos, double ypos) {
   }
 }
 
+void Behaviour::collisionAll(const GameObject* other) {
+  for (auto& component : sorted_components_) {
+    if (component == this) {
+      _TRY(collision(other));
+    } else {
+      component->collisionAll(other);
+    }
+  }
+}
+
 }  // namespace engine

@@ -29,6 +29,10 @@ class Behaviour : public GameObject {
   virtual void mouseScrolledAll(double xoffset, double yoffset) override;
   virtual void mouseButtonPressedAll(int button, int action, int mods) override;
   virtual void mouseMovedAll(double xpos, double ypos) override;
+
+  // experimental
+  virtual void collision(const GameObject* other) {}
+  virtual void collisionAll(const GameObject* other) override;
 };
 
 }  // namespace engine

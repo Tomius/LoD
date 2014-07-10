@@ -132,6 +132,15 @@ void GameObject::mouseMovedAll(double xpos, double ypos) {
   }
 }
 
+void GameObject::collisionAll(const GameObject* other) {
+  for (auto& component : sorted_components_) {
+    if (component != this) {
+      component->collisionAll(other);
+    }
+  }
+}
+
+
 void GameObject::updateSortedComponents() {
   for (const auto& element : components_just_disabled_) {
     sorted_components_.erase(element);

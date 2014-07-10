@@ -61,6 +61,7 @@ class GameObject {
   virtual void mouseScrolledAll(double xoffset, double yoffset);
   virtual void mouseButtonPressedAll(int button, int action, int mods);
   virtual void mouseMovedAll(double xpos, double ypos);
+  virtual void collisionAll(const GameObject* other);
 
  protected:
   Scene* scene_;

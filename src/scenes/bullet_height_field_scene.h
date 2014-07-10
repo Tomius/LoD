@@ -4,6 +4,7 @@
 #define LOD_SCENES_BULLET_HEIGHT_FIELD_SCENE_H_
 
 #include <vector>
+#include <algorithm>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
@@ -25,8 +26,9 @@ using engine::shapes::CubeMesh;
 class BulletRigidBody : public engine::Behaviour {
  public:
   BulletRigidBody(GameObject* parent, const glm::vec3& pos, float mass,
-                  btCollisionShape* shape, const glm::quat& rot = glm::quat())
-      : Behaviour(parent), static_(mass == 0.0f) {
+                  btCollisionShape* shape, const glm::quat& rot = glm::quat(),
+                  bool no_rotation = false)
+      : Behaviour(parent), static_(mass == 0.0f), no_rot_(no_rotation) {
     shape_ = std::unique_ptr<btCollisionShape>(shape);
     btVector3 inertia(0, 0, 0);
     if (!static_) {
@@ -51,7 +53,7 @@ class BulletRigidBody : public engine::Behaviour {
   const btRigidBody* rigid_body() const { return rigid_body_.get(); }
 
  private:
-  bool static_;
+  bool static_, no_rot_;
   std::unique_ptr<btCollisionShape> shape_;
   std::unique_ptr<btMotionState> motion_state_;
   std::unique_ptr<btRigidBody> rigid_body_;
@@ -64,12 +66,13 @@ class BulletRigidBody : public engine::Behaviour {
     motion_state_->getWorldTransform(t);
     const btVector3& o = t.getOrigin();
     parent_->transform()->set_pos(glm::vec3(o.x(), o.y(), o.z()));
-    const btQuaternion& r = t.getRotation();
-    parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
-                                         r.getY(), r.getZ()));
+    if (!no_rot_) {
+      const btQuaternion& r = t.getRotation();
+      parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
+                                              r.getY(), r.getZ()));
+    }
   }
 };
-
 
 class HeightField : public engine::GameObject {
  public:
@@ -92,7 +95,6 @@ class HeightField : public engine::GameObject {
 };
 
 class RedCube : public engine::Behaviour {
-  CubeMesh* cube_mesh_;
  public:
   explicit RedCube(GameObject* parent, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot)
@@ -107,6 +109,18 @@ class RedCube : public engine::Behaviour {
     rigid_body->setUserPointer(this);
     cube_mesh_ = addComponent<CubeMesh>(glm::vec3(0.5, 0.0, 0.0));
   }
+
+  virtual void collision(const GameObject* other) override {
+    const RedCube* red = dynamic_cast<const RedCube*>(other);
+    if (red) {
+      addColor(glm::vec3{0.0f, 1.0f, 1.0f});
+    } else {
+      addColor(glm::vec3{0.0f, 1.0f, 0.0f});
+    }
+  }
+
+ private:
+  CubeMesh* cube_mesh_;
 
   virtual void update() override {
     glm::vec3 color = cube_mesh_->color();
@@ -123,19 +137,12 @@ class RedCube : public engine::Behaviour {
 bool CollisionCallback(btManifoldPoint& cp,
                   const btCollisionObjectWrapper* obj1, int id1, int index1,
                   const btCollisionObjectWrapper* obj2, int id2, int index2) {
-  RedCube* red1 = dynamic_cast<RedCube*>((engine::GameObject*)obj1->getCollisionObject()->getUserPointer());
-  RedCube* red2 = dynamic_cast<RedCube*>((engine::GameObject*)obj2->getCollisionObject()->getUserPointer());
-  if (red1 && red2) {
-    red1->addColor(glm::vec3{0.0f, 1.0f, 1.0f});
-    red2->addColor(glm::vec3{0.0f, 1.0f, 1.0f});
-  } else {
-    if (red1) { red1->addColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
-    if (red2) { red2->addColor(glm::vec3{0.0f, 1.0f, 0.0f}); }
-  }
-
+  auto go1 = (engine::GameObject*)obj1->getCollisionObject()->getUserPointer();
+  auto go2 = (engine::GameObject*)obj2->getCollisionObject()->getUserPointer();
+  if (go1) { go1->collisionAll(go2); }
+  if (go2) { go2->collisionAll(go1); }
   return false;
 }
-
 
 class BulletHeightFieldScene : public engine::Scene {
   void addSmallRedCube() {

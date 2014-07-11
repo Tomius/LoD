@@ -13,6 +13,19 @@
 
 namespace engine {
 
+GameObject* GameObject::addComponent(std::unique_ptr<GameObject>&& component) {
+  try {
+    GameObject *obj = component.get();
+    components_.push_back(std::move(component));
+    components_just_enabled_.push_back(obj);
+
+    return obj;
+  } catch (const std::exception& ex) {
+    std::cerr << ex.what() << std::endl;
+    return nullptr;
+  }
+}
+
 void GameObject::set_parent(GameObject* parent) {
   parent_ = parent;
   if (parent) { transform_->set_parent(parent_->transform()); }

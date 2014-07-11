@@ -1,13 +1,13 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "./bloom.h"
+#include "./after_effects.h"
 #include "engine/scene.h"
 #include "oglwrap/smart_enums.h"
 
-BloomEffect::BloomEffect(GameObject *parent, Skybox* skybox)
+AfterEffects::AfterEffects(GameObject *parent, Skybox* skybox)
     : Behaviour(parent)
-    , prog_(scene_->shader_manager()->get("bloom.vert"),
-            scene_->shader_manager()->get("bloom.frag"))
+    , prog_(scene_->shader_manager()->get("after_effects.vert"),
+            scene_->shader_manager()->get("after_effects.frag"))
     , uScreenSize_(prog_, "uScreenSize")
     , s_uSunPos_(prog_, "s_uSunPos")
     , uZNear_(prog_, "uZNear")
@@ -41,7 +41,7 @@ BloomEffect::BloomEffect(GameObject *parent, Skybox* skybox)
   fbo_.unbind();
 }
 
-void BloomEffect::screenResized(size_t w, size_t h) {
+void AfterEffects::screenResized(size_t w, size_t h) {
   width_ = w;
   height_ = h;
   prog_.use();
@@ -57,12 +57,12 @@ void BloomEffect::screenResized(size_t w, size_t h) {
   depth_tex_.unbind();
 }
 
-void BloomEffect::update() {
+void AfterEffects::update() {
   fbo_.bind();
   gl::Clear().Color().Depth();
 }
 
-void BloomEffect::render() {
+void AfterEffects::render() {
   fbo_.Unbind();
   color_tex_.bind(0);
   color_tex_.generateMipmap();

@@ -20,12 +20,8 @@ static void PrintDebugTime() {
   last_debug_time = curr_time;
 }
 
-static void GlInit(GLFWwindow* window) {
-  gl::ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  gl::ClearDepth(1.0f);
+static void GlInit() {
   gl::Enable(gl::kDepthTest);
-  gl::Enable(gl::kDepthClamp);
-  gl::CullFace(gl::kBack);
   gl::Hint(gl::kTextureCompressionHint, gl::kFastest);
 }
 
@@ -34,6 +30,7 @@ namespace engine {
 Scene *GameEngine::scene_ = nullptr;
 Scene *GameEngine::new_scene_ = nullptr;
 GLFWwindow *GameEngine::window_ = nullptr;
+ShaderManager *GameEngine::shader_manager_ = new ShaderManager{};
 
 void GameEngine::InitContext() {
   PrintDebugText("Creating the OpenGL context");
@@ -45,13 +42,12 @@ void GameEngine::InitContext() {
     }
 
     // First try to open a 3.3 context (for VertexAttribDivisor)
-    glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     // Window creation
     window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
-                               glfwGetPrimaryMonitor(), nullptr);
+                               nullptr /*glfwGetPrimaryMonitor()*/, nullptr);
     if (!window_){
       // If it failed, try a 2.1 context
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -78,18 +74,17 @@ void GameEngine::InitContext() {
   std::cout << " - Resolution: "  << width << " x " << height << std::endl;
 
   if (ogl_version < 2.1) {
-    std::cout << "At least OpenGL version 2.1 is required to run this program\n";
+    std::cerr << "At least OpenGL version 2.1 is required to run this program\n";
     std::terminate();
   }
 
-  // If it's ok, set it for the window
   glfwMakeContextCurrent(window_);
 
   // GLEW init
   glewExperimental = GL_TRUE;
   GLenum err = glewInit();
   if (err != GLEW_OK) {
-    std::cout << "GlewInit error: " << glewGetErrorString(err) << std::endl;
+    std::cerr << "GlewInit error: " << glewGetErrorString(err) << std::endl;
     std::terminate();
   }
   gl::GetError();
@@ -97,7 +92,7 @@ void GameEngine::InitContext() {
   // No V-sync needed.
   glfwSwapInterval(0);
 
-  GlInit(window_);
+  GlInit();
 
   glfwSetKeyCallback(window_, KeyCallback);
   glfwSetCharCallback(window_, CharCallback);

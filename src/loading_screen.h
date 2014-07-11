@@ -6,7 +6,7 @@
 #include "engine/oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
-#include "oglwrap/shapes/full_screen_rect.h"
+#include "oglwrap/shapes/rectangle.h"
 #include "oglwrap/textures/texture_2D.h"
 #include "oglwrap/smart_enums.h"
 
@@ -14,7 +14,7 @@
 
 class LoadingScreen {
   gl::Texture2D tex_;
-  gl::FullScreenRectangle rect_;
+  gl::Rectangle rect_;
 
   gl::Program prog_;
 

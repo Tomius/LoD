@@ -12,7 +12,7 @@
 #include "../engine/shapes/cube_mesh.h"
 #include "../engine/gui/label.h"
 
-#include "../bloom.h"
+#include "../after_effects.h"
 #include "./main_scene.h"
 
 using engine::shapes::CubeMesh;
@@ -153,8 +153,8 @@ class BulletBasicsScene : public engine::Scene {
 
     auto skybox = addComponent<Skybox>();
     addComponent<StaticPlane>();
-    auto bloom = addComponent<BloomEffect>(skybox);
-    bloom->set_group(1);
+    auto after_effects = addComponent<AfterEffects>(skybox);
+    after_effects->set_group(1);
 
     auto cam = addComponent<engine::FreeFlyCamera>(
         M_PI/3, 1, 500, glm::vec3(20, 5, 0), glm::vec3(), 15, 10);

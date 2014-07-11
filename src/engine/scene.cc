@@ -14,4 +14,9 @@ Scene::Scene()
   set_scene(this);
 }
 
+ShaderManager* Scene::shader_manager() {
+  return GameEngine::shader_manager();
+}
+
+
 }  // namespace engine

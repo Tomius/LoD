@@ -55,7 +55,7 @@ class Scene : public Behaviour {
   Shadow* shadow() { return shadow_; }
   void set_shadow(Shadow* shadow) { shadow_ = shadow; }
 
-  ShaderManager* shader_manager() { return &shader_manager_; }
+  ShaderManager* shader_manager();
 
   GLFWwindow* window() const { return window_; }
   void set_window(GLFWwindow* window) { window_ = window; }
@@ -95,7 +95,6 @@ class Scene : public Behaviour {
 
   Camera* camera_;
   Shadow* shadow_;
-  ShaderManager shader_manager_;
   Timer game_time_, environment_time_, camera_time_;
   GLFWwindow* window_;
   int target_layer_;

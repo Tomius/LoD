@@ -165,7 +165,7 @@ void CharacterMovement::updateHeight(float time) {
       } else {
         pos.y += vert_speed_ * dt;
       }
-      vert_speed_ -= dt * engine::GameEngine::scene().gravity();
+      vert_speed_ -= dt * scene_->gravity();
     }
   }
 }

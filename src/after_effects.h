@@ -1,13 +1,13 @@
 // Copyright (c) 2014, Tamas Csala
 
-#ifndef LOD_BLOOM_H_
-#define LOD_BLOOM_H_
+#ifndef LOD_AFTER_EFFECTS_H_
+#define LOD_AFTER_EFFECTS_H_
 
 #include "engine/oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/framebuffer.h"
-#include "oglwrap/shapes/full_screen_rect.h"
+#include "oglwrap/shapes/rectangle.h"
 #include "oglwrap/textures/texture_2D.h"
 
 #include "engine/behaviour.h"
@@ -15,9 +15,9 @@
 
 #include "./skybox.h"
 
-class BloomEffect : public engine::Behaviour {
+class AfterEffects : public engine::Behaviour {
  public:
-  explicit BloomEffect(GameObject *parent, Skybox* skybox);
+  explicit AfterEffects(GameObject *parent, Skybox* skybox);
 
   gl::Framebuffer* fbo() { return &fbo_; }
 
@@ -29,7 +29,7 @@ class BloomEffect : public engine::Behaviour {
   gl::LazyUniform<glm::vec2> uScreenSize_;
   gl::LazyUniform<glm::vec3> s_uSunPos_;
   gl::LazyUniform<float> uZNear_, uZFar_;
-  gl::FullScreenRectangle rect_;
+  gl::Rectangle rect_;
 
   GLuint width_, height_;
 

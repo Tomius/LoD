@@ -6,6 +6,7 @@
 #include <set>
 #include <memory>
 #include <vector>
+#include <iostream>
 #include <algorithm>
 
 #include "./transform.h"
@@ -13,7 +14,6 @@
 namespace engine {
 
 class Scene;
-class Behaviour;
 
 class GameObject {
  public:
@@ -23,7 +23,9 @@ class GameObject {
   virtual ~GameObject() {}
 
   template<typename T, typename... Args>
-  T* addComponent(Args&&... args);
+  T* addComponent(Args&&... contructor_args);
+
+  GameObject* addComponent(std::unique_ptr<GameObject>&& component);
 
   Transform* transform() { return transform_.get(); }
   const Transform* transform() const { return transform_.get(); }
@@ -62,6 +64,27 @@ class GameObject {
   virtual void mouseButtonPressedAll(int button, int action, int mods);
   virtual void mouseMovedAll(double xpos, double ypos);
   virtual void collisionAll(const GameObject* other);
+
+  // experimental
+  template<typename T>
+  T* stealComponent(GameObject* go) {
+    for (auto& comp_ptr : go->components_) {
+      GameObject* comp = comp_ptr.get();
+      T* t = dynamic_cast<T*>(comp);
+      if (t) {
+        components_.push_back(std::unique_ptr<GameObject>(comp_ptr.release()));
+        components_just_enabled_.push_back(comp);
+        comp->parent_ = this;
+        comp->transform_->set_parent(transform_.get());
+        comp->scene_ = scene_;
+        return t;
+      } else {
+        t = stealComponent<T>(comp);
+        if (t) { return t; }
+      }
+    }
+    return nullptr;
+  }
 
  protected:
   Scene* scene_;

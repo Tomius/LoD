@@ -16,7 +16,7 @@
 #include "../engine/gui/label.h"
 
 #include "../terrain.h"
-#include "../bloom.h"
+#include "../after_effects.h"
 #include "../fps_display.h"
 #include "../loading_screen.h"
 #include "./main_scene.h"
@@ -113,9 +113,9 @@ class RedCube : public engine::Behaviour {
   virtual void collision(const GameObject* other) override {
     const RedCube* red = dynamic_cast<const RedCube*>(other);
     if (red) {
-      addColor(glm::vec3{0.0f, 1.0f, 1.0f});
+      addColor(glm::vec3{0.0f, 0.02f, 0.02f});
     } else {
-      addColor(glm::vec3{0.0f, 1.0f, 0.0f});
+      addColor(glm::vec3{0.0f, 0.02f, 0.0f});
     }
   }
 
@@ -130,7 +130,8 @@ class RedCube : public engine::Behaviour {
   }
 
   void addColor(const glm::vec3& color) {
-    cube_mesh_->set_color(cube_mesh_->color() + color);
+    cube_mesh_->set_color(glm::clamp(cube_mesh_->color() + color,
+                                     glm::vec3{}, glm::vec3{1}));
   }
 };
 
@@ -154,7 +155,7 @@ class BulletHeightFieldScene : public engine::Scene {
 
  public:
   BulletHeightFieldScene() {
-    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     LoadingScreen().render();
     glfwSwapBuffers(window());
@@ -175,8 +176,8 @@ class BulletHeightFieldScene : public engine::Scene {
 
     auto skybox = addComponent<Skybox>();
     addComponent<HeightField>();
-    auto bloom = addComponent<BloomEffect>(skybox);
-    bloom->set_group(1);
+    auto after_effects = addComponent<AfterEffects>(skybox);
+    after_effects->set_group(1);
 
     auto cam = addComponent<engine::FreeFlyCamera>(M_PI/3, 1, 3000,
         glm::vec3(2050, 200, 2050), glm::vec3(2048, 200, 2048), 20, 5);

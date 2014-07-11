@@ -10,7 +10,7 @@ namespace engine {
 
 template<typename... Args>
 ShaderFile* ShaderManager::load(Args&&... args) {
-  auto shader = new ShaderFile{this, std::forward<Args>(args)...};
+  auto shader = new ShaderFile{std::forward<Args>(args)...};
   shaders_[shader->filename()] = std::unique_ptr<ShaderFile>{shader};
   return shader;
 }

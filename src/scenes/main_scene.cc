@@ -12,7 +12,7 @@
 #include "../charmove.h"
 #include "../skybox.h"
 #include "../terrain.h"
-#include "../bloom.h"
+#include "../after_effects.h"
 #include "../ayumi.h"
 #include "../tree.h"
 #include "../shadow.h"
@@ -28,7 +28,7 @@ static void PrintDebugText(const std::string& str) {
 
 static void PrintDebugTime() {
   double curr_time = glfwGetTime();
-  std::cout << curr_time - last_debug_time << " ms" << std::endl;
+  std::cout << curr_time - last_debug_time << " s" << std::endl;
   last_debug_time = curr_time;
 }
 
@@ -36,10 +36,10 @@ MainScene::MainScene() {
   GLFWwindow* window = this->window();
 
   // Disable cursor
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // The scene builds quite slow, put some picture for the user.
-  last_debug_time = 0;
+  last_debug_time = glfwGetTime();
   PrintDebugText("Drawing the loading screen");
     LoadingScreen().render();
     glfwSwapBuffers(window);
@@ -54,10 +54,13 @@ MainScene::MainScene() {
     set_shadow(shadow);
   PrintDebugTime();
 
-  PrintDebugText("Initializing the terrain");
-    Terrain *terrain = addComponent<Terrain>();
-    const engine::HeightMapInterface& height_map = terrain->height_map();
-  PrintDebugTime();
+  Terrain *terrain = stealComponent<Terrain>(engine::GameEngine::scene());
+  if (!terrain) {
+    PrintDebugText("Initializing the terrain");
+     terrain = addComponent<Terrain>();
+    PrintDebugTime();
+  }
+  const engine::HeightMapInterface& height_map = terrain->height_map();
 
   PrintDebugText("Initializing Ayumi");
     Ayumi *ayumi = addComponent<Ayumi>();
@@ -92,9 +95,9 @@ MainScene::MainScene() {
     addComponent<Tree>(height_map);
   PrintDebugTime();
 
-  PrintDebugText("Initializing the resources for the bloom effect");
-    BloomEffect *bloom = addComponent<BloomEffect>(skybox);
-    shadow->set_default_fbo(bloom->fbo());
+  PrintDebugText("Initializing the resources for the after effects");
+    AfterEffects *after_effects = addComponent<AfterEffects>(skybox);
+    shadow->set_default_fbo(after_effects->fbo());
   PrintDebugTime();
 
   PrintDebugText("Initializing the FPS display");

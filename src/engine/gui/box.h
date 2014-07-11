@@ -5,7 +5,7 @@
 
 #include <string>
 #include "./label.h"
-#include "../../oglwrap/shapes/full_screen_rect.h"
+#include "../../oglwrap/shapes/rectangle.h"
 
 namespace engine {
 namespace gui {
@@ -94,7 +94,7 @@ class Box : public engine::GameObject {
   BoxParams params_;
   Label *label_;
 
-  gl::FullScreenRectangle rect_;
+  gl::Rectangle rect_;
   gl::Program prog_;
 
   virtual void screenResized(size_t width, size_t height) override {

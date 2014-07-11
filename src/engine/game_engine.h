@@ -8,6 +8,8 @@
 
 namespace engine {
 
+class ShaderManager;
+
 class GameEngine {
  public:
   // Initializes the OpenGL context
@@ -36,13 +38,11 @@ class GameEngine {
     }
   }
 
-  static const Scene& scene() {
-    return *scene_;
-  }
+  static Scene* scene() { return scene_; }
 
-  static GLFWwindow* window() {
-    return window_;
-  }
+  static GLFWwindow* window() { return window_; }
+
+  static ShaderManager* shader_manager() { return shader_manager_; }
 
   static glm::vec2 window_size() {
     int width, height;
@@ -56,6 +56,7 @@ class GameEngine {
   static Scene *scene_;
   static Scene *new_scene_;
   static GLFWwindow *window_;
+  static ShaderManager *shader_manager_;
 
   // Callbacks
   static void ErrorCallback(int error, const char* message) {

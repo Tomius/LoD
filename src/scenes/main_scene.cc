@@ -36,7 +36,7 @@ MainScene::MainScene() {
   GLFWwindow* window = this->window();
 
   // Disable cursor
-  // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // The scene builds quite slow, put some picture for the user.
   last_debug_time = glfwGetTime();

@@ -155,7 +155,7 @@ class BulletHeightFieldScene : public engine::Scene {
 
  public:
   BulletHeightFieldScene() {
-    // glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     LoadingScreen().render();
     glfwSwapBuffers(window());

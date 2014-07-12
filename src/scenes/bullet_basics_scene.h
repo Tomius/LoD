@@ -135,7 +135,7 @@ class BulletBasicsScene : public engine::Scene {
 
  public:
   BulletBasicsScene() {
-    //glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     collision_config_ = engine::make_unique<btDefaultCollisionConfiguration>();
     dispatcher_ =

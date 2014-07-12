@@ -20,7 +20,7 @@ class Label : public GameObject {
   gl::ArrayBuffer attribs_;
   gl::Program prog_;
 
-  size_t idx_cnt_;
+  size_t vertex_count_;
   glm::vec2 pos_, size_;
   std::wstring text_;
 
@@ -28,7 +28,7 @@ class Label : public GameObject {
   Label(GameObject* parent, const std::wstring& text, glm::vec2 pos,
         const Font& font = Font{}, size_t cursor_pos = -1)
       : GameObject(parent), font_(font)
-      , idx_cnt_(0), pos_(pos), text_(text) {
+      , vertex_count_(0), pos_(pos), text_(text) {
     gl::VertexShader vs("engine/text.vert");
     gl::FragmentShader fs("engine/text.frag");
 
@@ -155,7 +155,7 @@ class Label : public GameObject {
                                   (const void*)(2*sizeof(GLfloat))).enable();
     vao_.unbind();
 
-    idx_cnt_ = attribs_vec.size();
+    vertex_count_ = attribs_vec.size();
   }
 
   const Font& font() const { return font_; }
@@ -203,7 +203,7 @@ class Label : public GameObject {
 
     gl::Texture2D::Active(0);
     font_.bindTexture();
-    gl::DrawArrays(gl::kTriangles, 0, idx_cnt_);
+    gl::DrawArrays(gl::kTriangles, 0, vertex_count_);
 
     vao_.unbind();
   }

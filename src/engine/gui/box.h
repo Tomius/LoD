@@ -32,8 +32,8 @@ class Box : public engine::GameObject {
  public:
   Box(GameObject* parent, const BoxParams& params)
       : engine::GameObject(parent), params_(params), label_(nullptr) {
-    gl::VertexShader vs("box.vert");
-    gl::FragmentShader fs("box.frag");
+    gl::VertexShader vs("engine/box.vert");
+    gl::FragmentShader fs("engine/box.frag");
     prog_ << vs << fs;
     prog_.link().use();
 

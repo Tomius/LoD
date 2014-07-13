@@ -39,7 +39,7 @@ bool CheckCorner() {
 }
 
 bool IsBorder() {
-  // distance from the nearest borders
+  // distances from the nearest edges
   vec2 dist = abs(0.5 - abs(vTexCoord-vec2(0.5)));
   return CheckCorner() || dist.x < uBorderWidth.x || dist.y < uBorderWidth.y;
 }

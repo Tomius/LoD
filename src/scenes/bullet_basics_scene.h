@@ -193,6 +193,12 @@ class BulletBasicsScene : public engine::Scene {
       }
     }
   }
+
+  virtual void mouseButtonPressed(int button, int action, int mods) override {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+      addSmallRedCube();
+    }
+  }
 };
 
 #endif

@@ -97,7 +97,7 @@ class HeightField : public engine::GameObject {
 class RedCube : public engine::Behaviour {
  public:
   explicit RedCube(GameObject* parent, const glm::vec3& pos,
-                   const glm::vec3& v, const glm::quat& rot)
+                   const glm::vec3& v, const glm::quat& rot = glm::quat{})
       : Behaviour(parent) {
     btVector3 half_extents(0.5f, 0.5f, 0.5f);
     btCollisionShape* shape = new btBoxShape(half_extents);
@@ -146,11 +146,21 @@ bool CollisionCallback(btManifoldPoint& cp,
 }
 
 class BulletHeightFieldScene : public engine::Scene {
-  void addSmallRedCube() {
+  void shootCube() {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
     addComponent<RedCube>(pos, 20.0f*cam->transform()->forward(),
                           cam->transform()->rot());
+  }
+
+  void dropCubes() {
+    auto cam = camera();
+    glm::vec3 base_pos = cam->transform()->pos() - 2.0f*cam->transform()->up();
+    for(int x = -2; x <= 2; ++x) {
+      for(int y = -2; y <= 2; ++y) {
+        addComponent<RedCube>(base_pos + 1.5f*glm::vec3(x, 0, y), glm::vec3());
+      }
+    }
   }
 
  public:
@@ -184,33 +194,46 @@ class BulletHeightFieldScene : public engine::Scene {
     set_camera(cam);
 
     auto label = addComponent<engine::gui::Label>(
-        L"Press space to shoot a cube.", glm::vec2(0, -0.9));
+        L"Press left click to shoot a cube.", glm::vec2(0, -0.85));
     label->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label->set_font_size(20);
     label->set_group(2);
 
-    auto label2 = addComponent<engine::gui::Label>(L"You can load the main "
-      L"scene by pressing the home button.", glm::vec2(0, -0.95));
+    auto label2 = addComponent<engine::gui::Label>(
+        L"Press space to drop a bunch of cubes.", glm::vec2(0, -0.9));
     label2->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
-    label2->set_font_size(14);
+    label2->set_font_size(20);
     label2->set_group(2);
+
+
+    auto label3 = addComponent<engine::gui::Label>(L"You can load the main "
+      L"scene by pressing the home button.", glm::vec2(0, -0.95));
+    label3->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
+    label3->set_font_size(14);
+    label3->set_group(2);
 
     auto fps = addComponent<FpsDisplay>();
     fps->set_group(2);
   }
 
   virtual void update() override {
-    world_->stepSimulation(game_time().dt, 10);
+    world_->stepSimulation(game_time().dt, 5);
     Scene::update();
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {
     if (action == GLFW_PRESS) {
       if (key == GLFW_KEY_SPACE) {
-        addSmallRedCube();
+        dropCubes();
       } else if (key == GLFW_KEY_HOME) {
         engine::GameEngine::LoadScene<MainScene>();
       }
+    }
+  }
+
+  virtual void mouseButtonPressed(int button, int action, int mods) override {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+      shootCube();
     }
   }
 };

@@ -17,42 +17,46 @@ namespace shapes {
 class CubeMesh : public GameObject {
  public:
   CubeMesh(GameObject* parent, const glm::vec3& color = glm::vec3())
-      : GameObject(parent)
-      , prog_(scene_->shader_manager()->get("engine/simple_shape.vert"),
-              scene_->shader_manager()->get("engine/simple_shape.frag"))
-      , uProjectionMatrix_(prog_, "uProjectionMatrix")
-      , uCameraMatrix_(prog_, "uCameraMatrix")
-      , uModelMatrix_(prog_, "uModelMatrix")
-      , uColor_(prog_, "uColor"), color_(color) {
-    prog_.use();
-    cube_.setupPositions(prog_ | "aPosition");
-    cube_.setupNormals(prog_ | "aNormal");
-    uColor_ = color;
+      : GameObject(parent), color_(color) {
+    if (!cube_) {
+      cube_ = new gl::Cube{{gl::Cube::kPosition, gl::Cube::kNormal}};
+    }
+    if (!prog_) {
+      prog_ = new engine::ShaderProgram{
+                  scene_->shader_manager()->get("engine/simple_shape.vert"),
+                  scene_->shader_manager()->get("engine/simple_shape.frag")};
+      (*prog_ | "aPosition").bindLocation(cube_->kPosition);
+      (*prog_ | "aNormal").bindLocation(cube_->kNormal);
+      uProjectionMatrix_ = new gl::LazyUniform<glm::mat4>{*prog_, "uProjectionMatrix"};
+      uCameraMatrix_ = new gl::LazyUniform<glm::mat4>{*prog_, "uCameraMatrix"};
+      uModelMatrix_ = new gl::LazyUniform<glm::mat4>{*prog_, "uModelMatrix"};
+      uColor_ = new gl::LazyUniform<glm::vec3>{*prog_, "uColor"};
+    }
   }
 
   glm::vec3 color() { return color_; }
-  void set_color(const glm::vec3& color) {
-    prog_.use();
-    uColor_ = color_ = color;
-  }
+  void set_color(const glm::vec3& color) { color_ = color; }
 
  private:
-  gl::Cube cube_;
+  static gl::Cube *cube_;
 
-  engine::ShaderProgram prog_;
-  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_, uModelMatrix_;
-  gl::LazyUniform<glm::vec3> uColor_;
+  static engine::ShaderProgram *prog_;
+  static gl::LazyUniform<glm::mat4> *uProjectionMatrix_, *uCameraMatrix_, *uModelMatrix_;
+  static gl::LazyUniform<glm::vec3> *uColor_;
   glm::vec3 color_;
 
   virtual void render() override {
-    prog_.use();
-    prog_.update();
+    prog_->use();
+    prog_->update();
     const auto& cam = *scene_->camera();
-    uCameraMatrix_ = cam.cameraMatrix();
-    uProjectionMatrix_ = cam.projectionMatrix();
-    uModelMatrix_ = transform()->matrix();
+    uCameraMatrix_->set(cam.cameraMatrix());
+    uProjectionMatrix_->set(cam.projectionMatrix());
+    uModelMatrix_->set(transform()->matrix());
+    uColor_->set(color_);
 
-    cube_.render();
+    gl::FrontFace(cube_->faceWinding());
+    gl::TemporaryEnable cullface{gl::kCullFace};
+    cube_->render();
   }
 };
 

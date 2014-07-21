@@ -5,8 +5,8 @@
 
 #include <vector>
 #include <algorithm>
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 #include "../engine/misc.h"
 #include "../engine/scene.h"
@@ -104,8 +104,6 @@ class RedCube : public engine::Behaviour {
     auto rbody = addComponent<BulletRigidBody>(pos, 1.0f, shape, rot);
     auto rigid_body = rbody->rigid_body();
     rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
-    rigid_body->setCollisionFlags(rigid_body->getCollisionFlags() |
-        btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
     rigid_body->setUserPointer(this);
     cube_mesh_ = addComponent<CubeMesh>(glm::vec3(0.5, 0.0, 0.0));
   }
@@ -125,7 +123,7 @@ class RedCube : public engine::Behaviour {
   virtual void update() override {
     glm::vec3 color = cube_mesh_->color();
     color = glm::vec3(color.r, std::min(0.98f*color.g, 0.9f),
-                               std::min(0.98f*color.b, 0.9f));
+                               std::min(0.995f*color.b, 0.9f));
     cube_mesh_->set_color(color);
   }
 
@@ -134,16 +132,6 @@ class RedCube : public engine::Behaviour {
                                      glm::vec3{}, glm::vec3{1}));
   }
 };
-
-bool CollisionCallback(btManifoldPoint& cp,
-                  const btCollisionObjectWrapper* obj1, int id1, int index1,
-                  const btCollisionObjectWrapper* obj2, int id2, int index2) {
-  auto go1 = (engine::GameObject*)obj1->getCollisionObject()->getUserPointer();
-  auto go2 = (engine::GameObject*)obj2->getCollisionObject()->getUserPointer();
-  if (go1) { go1->collisionAll(go2); }
-  if (go2) { go2->collisionAll(go1); }
-  return false;
-}
 
 class BulletHeightFieldScene : public engine::Scene {
   void shootCube() {
@@ -182,8 +170,6 @@ class BulletHeightFieldScene : public engine::Scene {
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
 
-    gContactAddedCallback = CollisionCallback;
-
     auto skybox = addComponent<Skybox>();
     addComponent<HeightField>();
     auto after_effects = addComponent<AfterEffects>(skybox);
@@ -216,8 +202,33 @@ class BulletHeightFieldScene : public engine::Scene {
     fps->set_group(2);
   }
 
+  void findCollisions() {
+    int num_manifolds = world_->getDispatcher()->getNumManifolds();
+    for (int i = 0; i < num_manifolds; ++i) {
+      btPersistentManifold* contact_manifold =
+         world_->getDispatcher()->getManifoldByIndexInternal(i);
+      const btCollisionObject* obA = contact_manifold->getBody0();
+      const btCollisionObject* obB = contact_manifold->getBody1();
+
+      int num_contacts = contact_manifold->getNumContacts();
+      for (int j = 0; j < num_contacts; ++j) {
+        btManifoldPoint& pt = contact_manifold->getContactPoint(j);
+        if (pt.getDistance() < 0.0f) {
+          // const btVector3& ptA = pt.getPositionWorldOnA();
+          // const btVector3& ptB = pt.getPositionWorldOnB();
+          // const btVector3& normalOnB = pt.m_normalWorldOnB;
+          auto go1 = (engine::GameObject*)obA->getUserPointer();
+          auto go2 = (engine::GameObject*)obB->getUserPointer();
+          if (go1) { go1->collisionAll(go2); }
+          if (go2) { go2->collisionAll(go1); }
+        }
+      }
+    }
+  }
+
   virtual void update() override {
     world_->stepSimulation(game_time().dt, 5);
+    findCollisions();
     Scene::update();
   }
 

@@ -4,7 +4,7 @@
 #define ENGINE_COLLISION_PLANE_H_
 
 #define GLM_FORCE_RADIANS
-#include "../../oglwrap/glm/glm/glm.hpp"
+#include <glm/glm.hpp>
 
 struct Plane {
   glm::vec3 normal;

@@ -4,7 +4,7 @@
 #define ENGINE_COLLISION_BOUNDING_BOX_H_
 
 #define GLM_FORCE_RADIANS
-#include "../../oglwrap/glm/glm/glm.hpp"
+#include <glm/glm.hpp>
 #include "../misc.h"
 #include "./frustum.h"
 

@@ -5,7 +5,7 @@
 
 #include <string>
 #include "freetype-gl/freetype-gl.h"
-#include "../../oglwrap/glm/glm/glm.hpp"
+#include <glm/glm.hpp>
 
 #include "./font_manager.h"
 #include "../misc.h"

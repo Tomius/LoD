@@ -7,9 +7,9 @@
 #include <algorithm>
 
 #define GLM_FORCE_RADIANS
-#include "../oglwrap/glm/glm/glm.hpp"
-#include "../oglwrap/glm/glm/gtc/type_ptr.hpp"
-#include "../oglwrap/glm/glm/gtc/matrix_transform.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace engine {
 

@@ -6,7 +6,7 @@
 #include <cmath>
 
 #define GLM_FORCE_RADIANS
-#include "../oglwrap/glm/glm/gtx/rotate_vector.hpp"
+#include <glm/gtx/rotate_vector.hpp>
 
 #include "./timer.h"
 #include "./behaviour.h"

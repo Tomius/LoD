@@ -16,6 +16,7 @@ class FpsDisplay : public engine::Behaviour {
              engine::gui::Font{"src/engine/gui/freetype-gl/fonts/Vera.ttf", 30,
              glm::vec4(1, 0, 0, 1)});
   }
+
   ~FpsDisplay() {
     std::cout << "Average FPS: " << sum_frame_num_ / sum_time_ << std::endl;
   }

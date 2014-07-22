@@ -24,14 +24,24 @@ Dependencies:
 How to build (Debian/Ubuntu):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && cd .. && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD && make -j4 && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev libglm-dev && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && cd .. && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD && make -j4 && ./LoD
 ```
 
-How to build (linux):
+How to build (Linux):
 ---------------------
-* get the external dependencies: libmagick++-dev libglew-dev libassimp-dev libbullet-dev [libglfw3-dev](https://github.com/glfw/glfw)
+* get the external dependencies: libmagick++-dev libglew-dev libassimp-dev libbullet-dev libglm-dev [libglfw3-dev](https://github.com/glfw/glfw)
 * initialize the oglwrap submodule: git submodule init && git submodule update
 * build with make (uses clang++), run with ./LoD
+
+How to build (Windows):
+-----------------------
+* dowload all the third party libraries pre-compiled from [here](https://dl.dropboxusercontent.com/u/37129007/LoD/thirdparty.zip)
+* add thirdparty/include to compiler search path
+* add thirdparty/lib to linker search path
+* specify the linker inputs \(thirdparty/lib/linker_inputs\.txt\), or the linker flags \(thirdparty/lib/linker_flags\.txt\)
+* enable c++11 mode with your compiler
+* compile every .cc file, but none of the .c or .cpp files
+* copy the thirdparty/bin files to the exe's directory
 
 Acknowledgements
 ================
@@ -47,6 +57,7 @@ Inspirations, resources and tools:
 * [Konserian highlands](http://opengameart.org/content/konserian-highlands-set) - Used the trees from this 3D art pack
 * [Gamasutra fast blur artice](http://www.gamasutra.com/view/feature/3102/four_tricks_for_fast_blurring_in_.php) - The mipmap based DoF was inspired by this.
 * [Filip Strugar's CDLOD paper](http://www.vertexasylum.com/downloads/cdlod/cdlod_latest.pdf) - Implemented the current Level of Detail algorithm for the terrain using this paper (with some changes).
+* [Musk's lens flare](https://www.shadertoy.com/view/XdfXRX) - The lens flare I use is based on this.
 
 ----------------------
 If you have any problem, please post in the issues tab or mail me at icyplusplus@gmail.com. Any feedback would be appreciated.

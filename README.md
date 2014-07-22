@@ -1,7 +1,7 @@
 Land of Dreams
-===
+==============
 
-Simple attempt of drawing big terrains in OpenGL with CDLOD. The project also involves character animation with GPU skinning. It uses my c++ OpenGL wrapper: oglwrap. It aims Unix platforms (it doesn't use anything platform specific, but it only has build tools for Unix).
+A simple game engine, written in C++ using OpenGL 2.1. It features a CDLOD terrain renderer, a mesh loader and render using assimp, GPU skinning animation built on top of that, as well as exponential shadowmaps and several aftereffects (gamma correction, tone mapping, bloom, depth of field, lens flare)
 
 **This is just an educational project.** I don't own the rights for every media in the application.
 

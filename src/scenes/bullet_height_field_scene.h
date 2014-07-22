@@ -127,7 +127,7 @@ class RedCube : public engine::Behaviour {
   virtual void update() override {
     glm::vec3 color = cube_mesh_->color();
     color = glm::vec3(color.r, std::min(0.98f*color.g, 0.9f),
-                               std::min(0.995f*color.b, 0.9f)));
+                               std::min(0.995f*color.b, 0.9f));
     cube_mesh_->set_color(color);
   }
 

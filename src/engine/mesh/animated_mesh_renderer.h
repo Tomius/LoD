@@ -13,9 +13,10 @@
 #include "./anim_state.h"
 #include "./skinning_data.h"
 #include "./anim_info.h"
-#include "./animation.h"
 
 namespace engine {
+
+class Animation;
 
 /// A class for loading and displaying animations.
 class AnimatedMeshRenderer : public MeshRenderer {
@@ -24,8 +25,6 @@ class AnimatedMeshRenderer : public MeshRenderer {
 
   /// The animations.
   AnimData anims_;
-
-  friend class Animation;
 
  public:
   /**

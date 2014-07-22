@@ -3,7 +3,7 @@
 #include "./skybox.h"
 #include "oglwrap/smart_enums.h"
 
-constexpr float day_duration = 256.0f, day_start = 0.0f;
+const float day_duration = 256.0f, day_start = 0.0f;
 
 Skybox::Skybox(engine::GameObject* parent)
     : engine::Behaviour(parent)
@@ -46,7 +46,7 @@ void Skybox::render() {
   uCameraMatrix_ = glm::mat3(cam->cameraMatrix());
   uProjectionMatrix_ = cam->projectionMatrix();
 
-  auto depth_test = gl::TemporaryDisable(gl::kDepthTest);
+  gl::TemporaryDisable depth_test{gl::kDepthTest};
 
   gl::DepthMask(false);
   cube_.render();

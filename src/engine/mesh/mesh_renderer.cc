@@ -368,7 +368,8 @@ BoundingBox MeshRenderer::boundingBox(const glm::mat4& matrix) const {
   // Idea: get the minimums and maximums of the vertex positions
   // in each coordinate. Then the average of the mins and maxes
   // will be the center of the cuboid
-  float infty = 1.0f / 0.0f;
+  float zero = 0.0f; // This is needed to bypass a visual c++ compile error
+  float infty = 1.0f / zero;
   glm::vec3 mins{infty, infty, infty}, maxes{-infty, -infty, -infty};
   for (size_t entry = 0; entry < entries_.size(); entry++) {
     const aiMesh* mesh = scene_->mMeshes[entry];

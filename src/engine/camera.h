@@ -140,15 +140,15 @@ class FreeFlyCamera : public Camera {
       : Camera(parent, fov, z_near, z_far)
       , first_call_(true)
       , speed_per_sec_(speed_per_sec)
-      , mouse_sensitivity_(mouse_sensitivity) {
+      , mouse_sensitivity_(mouse_sensitivity)
+      , cos_max_pitch_angle_(0.95f) {
     transform()->set_pos(pos);
     transform()->set_forward(target - pos);
   }
 
  private:
   bool first_call_;
-  const float speed_per_sec_, mouse_sensitivity_;
-  static constexpr float cos_max_pitch_angle_ = 0.95f;
+  const float speed_per_sec_, mouse_sensitivity_, cos_max_pitch_angle_;
 
   virtual void update() override;
 };

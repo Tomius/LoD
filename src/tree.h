@@ -4,6 +4,7 @@
 #define LOD_TREE_H_
 
 #include <vector>
+#include <array>
 
 #include "engine/oglwrap_config.h"
 #include "engine/scene.h"
@@ -20,8 +21,9 @@ class Tree : public engine::GameObject {
   virtual void render() override;
 
  private:
-  static constexpr int kTreeTypeNum = 3;
-  engine::MeshRenderer mesh_[kTreeTypeNum];
+  // It should be std::array<engine::MeshRenderer, 3>, but calling its ctor
+  // in the initializer list causes sigsegv in the visual c++ compiler.
+  std::array<std::unique_ptr<engine::MeshRenderer>, 3> meshes_;
   engine::ShaderProgram prog_, shadow_prog_;
 
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;

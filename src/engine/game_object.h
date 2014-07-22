@@ -68,6 +68,8 @@ class GameObject {
   // experimental
   template<typename T>
   T* stealComponent(GameObject* go) {
+    if (!go) { return nullptr; }
+
     for (auto& comp_ptr : go->components_) {
       GameObject* comp = comp_ptr.get();
       T* t = dynamic_cast<T*>(comp);

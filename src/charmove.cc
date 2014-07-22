@@ -155,7 +155,8 @@ void CharacterMovement::updateHeight(float time) {
     }
 
     if (!jumping_) {
-      const float offs = std::max(fabs(pos.y / 2.0f), 0.05) * dt * 20.0f;
+      const float offs =
+          std::max<float>(fabs(pos.y / 2.0f), 0.05f) * dt * 20.0f;
       if (fabs(pos.y) > offs) {
         pos.y -= pos.y / fabs(pos.y) * offs;
       }

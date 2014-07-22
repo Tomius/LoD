@@ -3,7 +3,8 @@
 namespace engine {
 
 glm::dvec2 HeightMapInterface::getMinMaxOfArea(int x, int y, int w, int h) const {
-  double infinity = 1.0/0.0;
+  double zero = 0.0;
+  double infinity = 1.0 / zero;
   double curr_min = infinity, curr_max = -infinity;
 
   for (int i = x - w/2; i <= x + w/2; ++i) {

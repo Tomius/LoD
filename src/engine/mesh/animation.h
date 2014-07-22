@@ -4,8 +4,7 @@
 #define ENGINE_MESH_ANIMATATION_H_
 
 #include "anim_info.h"
-
-class AnimatedMeshRenderer;
+#include "animated_mesh_renderer.h"
 
 namespace engine {
 

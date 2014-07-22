@@ -6,6 +6,7 @@
 // | |__| (_| | | | | (_| | | (_) |  _| | |_| | | |  __/ (_| | | | | | \__ \
 // |_____\__,_|_| |_|\__,_|  \___/|_|   |____/|_|  \___|\__,_|_| |_| |_|___/
 
+
 #include "engine/game_engine.h"
 #include "scenes/main_scene.h"
 #include "scenes/gui_test_scene.h"
@@ -14,7 +15,7 @@
 
 using engine::GameEngine;
 
-int main() {
+int main(int argc, char* argv[]) {
   try {
     GameEngine::InitContext();
     // GameEngine::LoadScene<MainScene>();

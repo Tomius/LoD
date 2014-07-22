@@ -5,7 +5,7 @@
 
 #include <vector>
 #include <memory>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "./oglwrap_config.h"
 #include "../oglwrap/oglwrap.h"
@@ -120,9 +120,9 @@ class Scene : public Behaviour {
   }
 
   virtual void render2DAll() override {
-    auto capabilities = gl::TemporarySet({{gl::kBlend, true},
-                                          {gl::kCullFace, false},
-                                          {gl::kDepthTest, false}});
+    gl::TemporarySet capabilities{{{gl::kBlend, true},
+                                   {gl::kCullFace, false},
+                                   {gl::kDepthTest, false}}};
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
     Behaviour::render2DAll();

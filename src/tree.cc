@@ -6,15 +6,6 @@
 
 Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
     : GameObject(parent)
-    , mesh_{{"models/trees/massive_swamptree_01_a.obj",
-            aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
-            aiProcess_PreTransformVertices},
-            {"models/trees/massive_swamptree_01_b.obj",
-            aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
-            aiProcess_PreTransformVertices},
-            {"models/trees/cedar_01_a_source.obj",
-            aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
-            aiProcess_PreTransformVertices}}
     , prog_(scene_->shader_manager()->get("tree.vert"),
             scene_->shader_manager()->get("tree.frag"))
     , shadow_prog_(scene_->shader_manager()->get("tree_shadow.vert"),
@@ -29,11 +20,24 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
 
   prog_.use();
 
-  for (int i = 0; i < kTreeTypeNum; ++i) {
-    mesh_[i].setupPositions(prog_ | "aPosition");
-    mesh_[i].setupTexCoords(prog_ | "aTexCoord");
-    mesh_[i].setupNormals(prog_ | "aNormal");
-    mesh_[i].setupDiffuseTextures(1);
+  meshes_[0] = engine::make_unique<engine::MeshRenderer>(
+    "models/trees/massive_swamptree_01_a.obj",
+    aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
+    aiProcess_PreTransformVertices);
+  meshes_[1] = engine::make_unique<engine::MeshRenderer>(
+    "models/trees/massive_swamptree_01_b.obj",
+    aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
+    aiProcess_PreTransformVertices);
+  meshes_[2] = engine::make_unique<engine::MeshRenderer>(
+    "models/trees/cedar_01_a_source.obj",
+    aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
+    aiProcess_PreTransformVertices);
+
+  for (int i = 0; i < meshes_.size(); ++i) {
+    meshes_[i]->setupPositions(prog_ | "aPosition");
+    meshes_[i]->setupTexCoords(prog_ | "aTexCoord");
+    meshes_[i]->setupNormals(prog_ | "aNormal");
+    meshes_[i]->setupDiffuseTextures(1);
   }
 
   gl::UniformSampler(prog_, "uDiffuseTexture").set(1);
@@ -59,10 +63,10 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
       matrix[3] = glm::vec4(pos, 1);
       matrix = glm::scale(matrix, scale);
 
-      int type = rand() % kTreeTypeNum;
+      int type = rand() % meshes_.size();
 
-      engine::BoundingBox bbox = mesh_[type].boundingBox(matrix);
-      glm::vec4 bsphere = mesh_[type].bSphere();
+      engine::BoundingBox bbox = meshes_[type]->boundingBox(matrix);
+      glm::vec4 bsphere = meshes_[type]->bSphere();
       bsphere.w *= 1.2;  // removes peter panning (but decreases quality)
 
       trees_.push_back(TreeInfo{type, matrix, bsphere, bbox});
@@ -74,7 +78,7 @@ void Tree::shadowRender() {
   shadow_prog_.use();
 
   auto shadow = scene_->shadow();
-  auto cullface = gl::TemporaryDisable(gl::kCullFace);
+  gl::TemporaryDisable cullface{gl::kCullFace};
 
   const auto& cam = *scene_->camera();
   auto campos = cam.transform()->pos();
@@ -83,7 +87,7 @@ void Tree::shadowRender() {
     if (glm::length(glm::vec3(trees_[i].mat[3]) - campos) < 150) {
       shadow_uMCP_ = shadow->modelCamProjMat(
           trees_[i].bsphere, trees_[i].mat, glm::mat4{});
-      mesh_[trees_[i].type].render();
+      meshes_[trees_[i].type]->render();
       shadow->push();
     }
   }
@@ -96,8 +100,8 @@ void Tree::render() {
   const auto& cam = *scene_->camera();
   uProjectionMatrix_ = cam.projectionMatrix();
 
-  auto blend = gl::TemporaryEnable(gl::kBlend);
-  auto cullface = gl::TemporaryDisable(gl::kCullFace);
+  gl::TemporarySet capabilities{{{gl::kBlend, true},
+                                 {gl::kCullFace, false}}};
   gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
   auto campos = cam.transform()->pos();
@@ -110,10 +114,10 @@ void Tree::render() {
       continue;
     }
 
-    auto& mesh = mesh_[trees_[i].type];
+    auto& mesh = meshes_[trees_[i].type];
     glm::mat4 model_mx = trees_[i].mat;
     uModelCameraMatrix_.set(cam_mx * model_mx);
     uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
-    mesh.render();
+    mesh->render();
   }
 }

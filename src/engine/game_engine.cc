@@ -126,7 +126,7 @@ void GameEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
       case GLFW_KEY_ESCAPE:
         glfwSetWindowShouldClose(window, GL_TRUE);
         break;
-      case GLFW_KEY_F11:
+      case GLFW_KEY_F11: {
         static bool fix_mouse = false;
         fix_mouse = !fix_mouse;
 
@@ -135,7 +135,7 @@ void GameEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
         } else {
           glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
-        break;
+      } break;
       default:
         break;
     }

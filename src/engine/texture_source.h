@@ -3,6 +3,7 @@
 #ifndef ENGINE_TEXTURE_SOURCE_H_
 #define ENGINE_TEXTURE_SOURCE_H_
 
+#include <array>
 #include <string>
 #include <vector>
 

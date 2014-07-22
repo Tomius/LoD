@@ -4,8 +4,8 @@
 #define ENGINE_GUI_FONT_H_
 
 #include <string>
-#include "freetype-gl/freetype-gl.h"
 #include <glm/glm.hpp>
+#include "freetype-gl/freetype-gl.h"
 
 #include "./font_manager.h"
 #include "../misc.h"
@@ -102,9 +102,7 @@ class Font {
     , vertical_alignment_(yalign) { }
 
   Font(const Font&) = default;
-  Font(Font&&) = default;
   Font& operator=(const Font&) = default;
-  Font& operator=(Font&&) = default;
 
   const std::string& filename() const { return data_->filename(); }
   const glm::vec4& color() const { return color_; }

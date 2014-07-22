@@ -11,6 +11,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#ifndef M_PI
+  #define M_PI 3.14159265359f
+#endif
+
 namespace engine {
 
 template<typename T, glm::precision P = glm::precision::highp>
@@ -187,11 +191,11 @@ class Transformation {
         if (fabs(glm::dot(local, vec3(1, 0, 0))) > 1e-3) {
           // If not, we can use it, to generate the axis to rotate around
           vec3 axis = glm::cross(vec3(1, 0, 0), local);
-          set_rot(glm::quat_cast(glm::rotate(mat4(), T{M_PI}, axis)));
+          set_rot(glm::quat_cast(glm::rotate(mat4(), T(M_PI), axis)));
         } else {
           // Else we can use the Y axis for the same purpose
           vec3 axis = glm::cross(vec3(0, 1, 0), local);
-          set_rot(glm::quat_cast(glm::rotate(mat4(), T{M_PI}, axis)));
+          set_rot(glm::quat_cast(glm::rotate(mat4(), T(M_PI), axis)));
         }
       } else {
         set_rot(quat{});

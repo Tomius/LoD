@@ -19,7 +19,7 @@ void FreeFlyCamera::update() {
     first_call_ = false;
   }
 
-  float dt = scene_->camera_time().dt;
+  const float dt = scene_->camera_time().dt;
 
   // Mouse movement - update the coordinate system
   if (diff.x || diff.y) {
@@ -71,7 +71,7 @@ void ThirdPersonalCamera::update() {
     first_call_ = false;
   }
 
-  float dt = scene_->camera_time().dt;
+  const float dt = scene_->camera_time().dt;
 
   // Mouse movement - update the coordinate system
   if (diff.x || diff.y) {
@@ -97,7 +97,7 @@ void ThirdPersonalCamera::update() {
   glm::vec3 tpos(target_->pos()), fwd(transform()->forward());
   glm::vec3 pos(tpos - fwd*curr_dist_mod_*initial_distance_);
 
-  constexpr float collision_offset = 1.2f;
+  const float collision_offset = 1.2f;
 
   if (distanceOverTerrain(pos) > collision_offset) {
     // Interpolate the mouseScrolled if there isn't any collision

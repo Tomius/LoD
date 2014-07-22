@@ -58,13 +58,14 @@ float Visibility() {
   for (int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
-    if (!isValid(shadowCoord.xy)) { continue; }
-
-    // shadow coeffecient - change this to to affect shadow darkness/fade
-    float c = 2.5;
-    float texel = texture2D(uShadowMap, AtlasLookup(shadowCoord.xy, i)).r;
-    if (texel == 1.0) { continue; }
-    visibility -= modifier*(1 - clamp(exp(-c * (shadowCoord.z - texel)), 0.0, 1.0));
+    if (isValid(shadowCoord.xy)) {
+      // shadow coeffecient - change this to affect shadow darkness/fade
+      float c = 2.5;
+      float texel = texture2D(uShadowMap, AtlasLookup(shadowCoord.xy, i)).r;
+      if (texel < 0.999) {
+	      visibility -= modifier*(1 - clamp(exp(-c * (shadowCoord.z - texel)), 0.0, 1.0));
+	    }
+    }
   }
 
   return max(visibility, 0.0);

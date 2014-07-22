@@ -45,8 +45,8 @@ public:
     tex_.active(0);
     tex_.bind();
 
-    auto capabilies = gl::TemporarySet({{gl::kCullFace, false},
-                                        {gl::kDepthTest, false}});
+    gl::TemporarySet capabilies{{{gl::kCullFace, false},
+                                 {gl::kDepthTest, false}}};
 
     rect_.render();
     tex_.unbind();

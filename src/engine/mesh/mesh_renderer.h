@@ -30,7 +30,7 @@ class MeshRenderer {
     gl::ArrayBuffer verts, normals, tex_coords;
     gl::IndexBuffer indices;
     unsigned idx_count, material_index;
-    static constexpr unsigned kInvalidMaterial = unsigned(-1);
+    static const unsigned kInvalidMaterial = unsigned(-1);
     gl::IndexType idx_type;
 
     MeshEntry() : material_index(kInvalidMaterial) {}

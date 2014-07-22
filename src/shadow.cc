@@ -91,7 +91,6 @@ void Shadow::begin() {
   curr_depth_ = 0;
 
   // Clear the shadowmap atlas
-  gl::Viewport(size_*xsize_, size_*ysize_);
   gl::Clear().Depth();
 
   // Setup the 0th shadowmap

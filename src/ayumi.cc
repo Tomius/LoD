@@ -170,7 +170,7 @@ void Ayumi::shadowRender() {
 
   gl::CullFace(gl::kFront);
   gl::FrontFace(gl::kCcw);
-  auto cullface = gl::TemporaryEnable(gl::kCullFace);
+  gl::TemporaryEnable cullface{gl::kCullFace};
   mesh_.disableTextures();
 
   mesh_.render();
@@ -192,7 +192,7 @@ void Ayumi::render() {
   mesh_.uploadBoneInfo(uBones_);
 
   gl::FrontFace(gl::kCcw);
-  auto cullface = gl::TemporaryEnable(gl::kCullFace);
+  gl::TemporaryEnable cullface{gl::kCullFace};
 
   mesh_.render();
 }

@@ -8,6 +8,10 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
+// fck windows.h
+#undef min
+#undef max
+
 #include "../engine/misc.h"
 #include "../engine/scene.h"
 #include "../engine/camera.h"
@@ -123,7 +127,7 @@ class RedCube : public engine::Behaviour {
   virtual void update() override {
     glm::vec3 color = cube_mesh_->color();
     color = glm::vec3(color.r, std::min(0.98f*color.g, 0.9f),
-                               std::min(0.995f*color.b, 0.9f));
+                               std::min(0.995f*color.b, 0.9f)));
     cube_mesh_->set_color(color);
   }
 
@@ -225,6 +229,7 @@ class BulletHeightFieldScene : public engine::Scene {
       }
     }
   }
+
 
   virtual void update() override {
     world_->stepSimulation(game_time().dt, 5);

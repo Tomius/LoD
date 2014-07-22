@@ -130,9 +130,17 @@ TextureSource<T, NUM_COMPONENTS>::internalFormat() const {
       } else if (format_string_ == "RG") {
         return gl::kCompressedRg;
       } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-        return srgb_ ? gl::kCompressedSrgb : gl::kCompressedRgb;
+        if (srgb_) {
+          return gl::kCompressedSrgb;
+        } else {
+          return gl::kCompressedRgb;
+        }
       } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-        return srgb_ ? gl::kCompressedSrgbAlpha : gl::kCompressedRgba;
+        if (srgb_) {
+          return gl::kCompressedSrgbAlpha;
+        } else {
+          return gl::kCompressedRgba;
+        }
       } else {
         abort();
       }
@@ -142,9 +150,17 @@ TextureSource<T, NUM_COMPONENTS>::internalFormat() const {
       } else if (format_string_ == "RG") {
         return gl::kRg8;
       } else if (format_string_ == "RGB" || format_string_ == "BGR") {
-        return srgb_ ? gl::kSrgb8 : gl::kRgb8;
+        if (srgb_) {
+          return gl::kSrgb8;
+        } else {
+          return gl::kRgb8;
+        }
       } else if (format_string_ == "RGBA" || format_string_ == "BGRA") {
-        return srgb_ ? gl::kSrgb8Alpha8 : gl::kRgba8;
+        if (srgb_) {
+          return gl::kSrgb8Alpha8;
+        } else {
+          return gl::kRgba8;
+        }
       } else {
         abort();
       }

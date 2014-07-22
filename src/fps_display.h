@@ -10,8 +10,8 @@
 class FpsDisplay : public engine::Behaviour {
  public:
   explicit FpsDisplay(engine::GameObject* parent)
-      : engine::Behaviour(parent), sum_frame_num_(0)
-      , sum_time_(0), kRefreshInterval(0.1f) {
+      : engine::Behaviour(parent), kRefreshInterval(0.1f)
+      , sum_frame_num_(0), sum_time_(0) {
     label_ = addComponent<engine::gui::Label>(L"FPS: ", glm::vec2{0.8f, 0.9f},
              engine::gui::Font{"src/engine/gui/freetype-gl/fonts/Vera.ttf", 30,
              glm::vec4(1, 0, 0, 1)});

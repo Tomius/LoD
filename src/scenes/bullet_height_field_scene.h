@@ -27,54 +27,62 @@
 
 using engine::shapes::CubeMesh;
 
-class BulletRigidBody : public engine::Behaviour {
+class BulletRigidBody : public engine::Behaviour, public btMotionState {
  public:
-  BulletRigidBody(GameObject* parent, const glm::vec3& pos, float mass,
-                  btCollisionShape* shape, const glm::quat& rot = glm::quat(),
-                  bool no_rotation = false)
-      : Behaviour(parent), static_(mass == 0.0f), no_rot_(no_rotation) {
-    shape_ = std::unique_ptr<btCollisionShape>(shape);
-    btVector3 inertia(0, 0, 0);
-    if (!static_) {
-      shape_->calculateLocalInertia(mass, inertia);
-    }
-    btTransform transform;
-    transform.setIdentity();
-    transform.setOrigin(btVector3(pos.x, pos.y, pos.z));
-    transform.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
-    motion_state_ = engine::make_unique<btDefaultMotionState>(transform);
-    btRigidBody::btRigidBodyConstructionInfo info(mass, motion_state_.get(),
-                                                  shape_.get(), inertia);
-    rigid_body_ = engine::make_unique<btRigidBody>(info);
-    scene_->world()->addRigidBody(rigid_body_.get());
+  BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape)
+      : Behaviour(parent) {
+    init(mass, shape);
+  }
+
+  BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
+                  const glm::vec3& pos)
+      : Behaviour(parent) {
+    transform()->set_pos(pos);
+    init(mass, shape);
+  }
+
+  BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
+                  const glm::vec3& pos, const glm::fquat& rot)
+      : Behaviour(parent) {
+    transform()->set_pos(pos);
+    transform()->set_rot(rot);
+    init(mass, shape);
   }
 
   virtual ~BulletRigidBody() {
-    scene_->world()->removeCollisionObject(rigid_body_.get());
+    scene_->world()->removeCollisionObject(bt_rigid_body_.get());
   }
 
-  btRigidBody* rigid_body() { return rigid_body_.get(); }
-  const btRigidBody* rigid_body() const { return rigid_body_.get(); }
+  btRigidBody* bt_rigid_body() { return bt_rigid_body_.get(); }
+  const btRigidBody* bt_rigid_body() const { return bt_rigid_body_.get(); }
 
  private:
-  bool static_, no_rot_;
   std::unique_ptr<btCollisionShape> shape_;
-  std::unique_ptr<btMotionState> motion_state_;
-  std::unique_ptr<btRigidBody> rigid_body_;
+  std::unique_ptr<btRigidBody> bt_rigid_body_;
 
-  virtual void update() override {
-    if (static_) { return; }
+  void init(float mass, btCollisionShape* shape) {
+    shape_ = std::unique_ptr<btCollisionShape>(shape);
+    btVector3 inertia(0, 0, 0);
+    shape_->calculateLocalInertia(mass, inertia);
+    btRigidBody::btRigidBodyConstructionInfo
+        info{mass, this, shape_.get(), inertia};
+    bt_rigid_body_ = engine::make_unique<btRigidBody>(info);
+    scene_->world()->addRigidBody(bt_rigid_body_.get());
+  }
 
-    btTransform t;
-    t.setIdentity();
-    motion_state_->getWorldTransform(t);
+  virtual void getWorldTransform(btTransform &t) const override {
+    const glm::vec3& pos = transform()->pos();
+    t.setOrigin(btVector3{pos.x, pos.y, pos.z});
+    const glm::fquat& rot = transform()->rot();
+    t.setRotation(btQuaternion{rot.x, rot.y, rot.z, rot.w});
+  }
+
+  virtual void setWorldTransform(const btTransform &t) override {
     const btVector3& o = t.getOrigin();
     parent_->transform()->set_pos(glm::vec3(o.x(), o.y(), o.z()));
-    if (!no_rot_) {
-      const btQuaternion& r = t.getRotation();
-      parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
-                                              r.getY(), r.getZ()));
-    }
+    const btQuaternion& r = t.getRotation();
+    parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
+                                            r.getY(), r.getZ()));
   }
 };
 
@@ -90,31 +98,35 @@ class HeightField : public engine::GameObject {
         data[y*w + x] = height_map.heightAt(x, y);
       }
     }
+
     btCollisionShape* shape = new btHeightfieldTerrainShape{
         height_map.w(), height_map.h(), data,
         1, 0, 256, 1, PHY_UCHAR, false};
-    addComponent<BulletRigidBody>(glm::vec3{height_map.w()/2.0f, 128,
-                                            height_map.h()/2.0f}, 0.0f, shape);
+
+    glm::vec3 pos{height_map.w()/2.0f, 128, height_map.h()/2.0f};
+    addComponent<BulletRigidBody>(0.0f, shape, pos);
   }
 };
 
-class RedCube : public engine::Behaviour {
+class BulletCube : public engine::Behaviour {
  public:
-  explicit RedCube(GameObject* parent, const glm::vec3& pos,
+  explicit BulletCube(GameObject* parent, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot = glm::quat{})
       : Behaviour(parent) {
+    transform()->set_pos(pos);
+    transform()->set_rot(rot);
     btVector3 half_extents(0.5f, 0.5f, 0.5f);
     btCollisionShape* shape = new btBoxShape(half_extents);
-    auto rbody = addComponent<BulletRigidBody>(pos, 1.0f, shape, rot);
-    auto rigid_body = rbody->rigid_body();
-    rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
-    rigid_body->setUserPointer(this);
+    auto rbody = addComponent<BulletRigidBody>(1.0f, shape);
+    auto bt_rigid_body = rbody->bt_rigid_body();
+    bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
+    bt_rigid_body->setUserPointer(this);
     cube_mesh_ = addComponent<CubeMesh>(glm::vec3(0.5, 0.0, 0.0));
   }
 
   virtual void collision(const GameObject* other) override {
-    const RedCube* red = dynamic_cast<const RedCube*>(other);
-    if (red) {
+    const BulletCube* other_as_cube = dynamic_cast<const BulletCube*>(other);
+    if (other_as_cube) {
       addColor(glm::vec3{0.0f, 0.02f, 0.02f});
     } else {
       addColor(glm::vec3{0.0f, 0.02f, 0.0f});
@@ -141,16 +153,16 @@ class BulletHeightFieldScene : public engine::Scene {
   void shootCube() {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
-    addComponent<RedCube>(pos, 20.0f*cam->transform()->forward(),
+    addComponent<BulletCube>(pos, 20.0f*cam->transform()->forward(),
                           cam->transform()->rot());
   }
 
   void dropCubes() {
     auto cam = camera();
     glm::vec3 base_pos = cam->transform()->pos() - 2.0f*cam->transform()->up();
-    for(int x = -2; x <= 2; ++x) {
-      for(int y = -2; y <= 2; ++y) {
-        addComponent<RedCube>(base_pos + 1.5f*glm::vec3(x, 0, y), glm::vec3());
+    for (int x = -2; x <= 2; ++x) {
+      for (int y = -2; y <= 2; ++y) {
+        addComponent<BulletCube>(base_pos + 1.5f*glm::vec3(x, 0, y), glm::vec3());
       }
     }
   }
@@ -230,11 +242,18 @@ class BulletHeightFieldScene : public engine::Scene {
     }
   }
 
-
   virtual void update() override {
     world_->stepSimulation(game_time().dt, 5);
     findCollisions();
     Scene::update();
+
+    // static int last_time = game_time().current;
+    // if (int(game_time().current) > last_time) {
+    //   std::cout << std::endl;
+    //   CProfileManager::dumpAll();
+    //   std::cout << std::endl;
+    //   last_time = game_time().current;
+    // }
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {

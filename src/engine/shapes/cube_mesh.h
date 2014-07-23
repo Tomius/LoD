@@ -47,7 +47,6 @@ class CubeMesh : public GameObject {
 
   virtual void render() override {
     prog_->use();
-    prog_->update();
     const auto& cam = *scene_->camera();
     uCameraMatrix_->set(cam.cameraMatrix());
     uProjectionMatrix_->set(cam.projectionMatrix());

@@ -1,7 +1,7 @@
 Land of Dreams
 ==============
 
-A simple game engine, written in C++ using OpenGL 2.1. It features a CDLOD terrain renderer, a mesh loader and render using assimp, GPU skinning animation built on top of that, as well as exponential shadowmaps and several aftereffects (gamma correction, tone mapping, bloom, depth of field, lens flare)
+A simple OpenGL 2.1 game engine, written in C++. It features a CDLOD terrain renderer, a mesh loader and render using assimp, GPU skinning animation built on top of that, as well as exponential shadowmaps and several aftereffects (gamma correction, tone mapping, bloom, depth of field, lens flare)
 
 **This is just an educational project.** I don't own the rights for every media in the application.
 

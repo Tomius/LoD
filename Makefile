@@ -15,6 +15,7 @@ FREETYPE2_FOUND = $(THIRD_PARTY_DIR)/freetype2.found
 BULLET_FOUND = $(THIRD_PARTY_DIR)/bullet.found
 THIRD_PARTY_LIBS_FOUND = $(GLEW_FOUND) $(GLFW3_FOUND) $(MAGICKPP_FOUND) \
 												 $(ASSIMP_FOUND) $(FREETYPE2_FOUND) $(BULLET_FOUND)
+PKG_CONFIG_LIB_NAMES = glew assimp glfw3 Magick++ freetype2 bullet
 
 CPP_FILES := $(shell find -L $(SRC_DIR) -name '*.cc')
 OBJECTS := $(subst $(SRC_DIR),$(OBJ_DIR),$(CPP_FILES:.cc=.o))
@@ -26,34 +27,27 @@ CXX_PRECOMPILED_HEADER_EXTENSION = pch
 PRECOMPILED_HEADER = $(PRECOMPILED_HEADER_SRC).$(CXX_PRECOMPILED_HEADER_EXTENSION)
 PRECOMPILED_HEADER_DEP = $(subst $(SRC_DIR),$(OBJ_DIR),$(PRECOMPILED_HEADER).d)
 
-BASE_CXXFLAGS = -std=c++11 -Wall -Weffc++ -Qunused-arguments \
-					 			`pkg-config --cflags glfw3` \
-					 			`pkg-config --cflags bullet` \
-					 			`Magick++-config --cxxflags`
+BASE_CXXFLAGS := -std=c++11 -Wall -Weffc++ -Qunused-arguments \
+					 			`pkg-config --cflags $(PKG_CONFIG_LIB_NAMES)`
 
 ifeq ($(MAKECMDGOALS),release)
 	CXXFLAGS = -O3 -DOGLWRAP_DEBUG=0 $(BASE_CXXFLAGS)
 else
-	CXXFLAGS = -g -rdynamic $(BASE_CXXFLAGS)
+	CXXFLAGS = -g $(BASE_CXXFLAGS)
 endif
 
 CXXFLAG_PRECOMPILED_HEADER = -include $(PRECOMPILED_HEADER_SRC)
 
-OPENGL_LDFLAGS = -lGL -lGLEW
-ASSIMP_LDFLAGS = -lassimp
-GLFW_LDFALGS = `pkg-config --libs glfw3` \
-								-lXxf86vm -lX11 -lXrandr -lXi -lXcursor -lpthread
-IMAGEMAGIC_LDFLAGS = `Magick++-config --ldflags --libs`
-FREETYPE_GL_LDFLAGS = -lfreetype -L$(FREETYPE_GL_DIR) -lfreetype-gl
-BULLET_FLAGS = -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
+PKG_CONFIG_LDFLAGS := `pkg-config --libs $(PKG_CONFIG_LIB_NAMES)`
+GLFW_X11_LDFALGS = -lXxf86vm -lX11 -lXrandr -lXi -lXcursor -lpthread
+FREETYPE_GL_LDFLAGS = -L$(FREETYPE_GL_DIR) -lfreetype-gl
 
-BASE_LDFLAGS = -lm $(OPENGL_LDFLAGS) $(ASSIMP_LDFLAGS) $(GLFW_LDFALGS) \
-							 $(IMAGEMAGIC_LDFLAGS) $(FREETYPE_GL_LDFLAGS) $(BULLET_FLAGS)
+BASE_LDFLAGS = -lm $(PKG_CONFIG_LDFLAGS) $(GLFW_X11_LDFALGS) $(FREETYPE_GL_LDFLAGS)
 
 ifeq ($(MAKECMDGOALS),release)
 	LDFLAGS = $(BASE_LDFLAGS)
 else
-	LDFLAGS = -g -rdynamic $(BASE_LDFLAGS)
+	LDFLAGS = -rdynamic $(BASE_LDFLAGS)
 endif
 
 # Terminal font colors

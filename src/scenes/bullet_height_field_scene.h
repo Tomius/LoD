@@ -67,6 +67,7 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
     btRigidBody::btRigidBodyConstructionInfo
         info{mass, this, shape_.get(), inertia};
     bt_rigid_body_ = engine::make_unique<btRigidBody>(info);
+    bt_rigid_body_->setContactProcessingThreshold(0.0f); // ++performace
     scene_->world()->addRigidBody(bt_rigid_body_.get());
   }
 
@@ -121,6 +122,11 @@ class BulletCube : public engine::Behaviour {
     auto bt_rigid_body = rbody->bt_rigid_body();
     bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
     bt_rigid_body->setUserPointer(this);
+    // Continous Collision Detection (CCD) is needed, when the cubes move more
+    // than half their extents (0.5f here), or otherwise, they would fall through
+    // other objects
+    bt_rigid_body->setCcdMotionThreshold(0.5f);
+    bt_rigid_body->setCcdSweptSphereRadius(0.25f);
     cube_mesh_ = addComponent<CubeMesh>(glm::vec3(0.5, 0.0, 0.0));
   }
 
@@ -139,7 +145,7 @@ class BulletCube : public engine::Behaviour {
   virtual void update() override {
     glm::vec3 color = cube_mesh_->color();
     color = glm::vec3(color.r, std::min(0.98f*color.g, 0.9f),
-                               std::min(0.995f*color.b, 0.9f));
+                               std::min(0.98f*color.b, 0.9f));
     cube_mesh_->set_color(color);
   }
 
@@ -150,10 +156,10 @@ class BulletCube : public engine::Behaviour {
 };
 
 class BulletHeightFieldScene : public engine::Scene {
-  void shootCube() {
+  void shootCube(float speed = 20.0f) {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
-    addComponent<BulletCube>(pos, 20.0f*cam->transform()->forward(),
+    addComponent<BulletCube>(pos, speed*cam->transform()->forward(),
                           cam->transform()->rot());
   }
 
@@ -185,6 +191,8 @@ class BulletHeightFieldScene : public engine::Scene {
         dispatcher_.get(), broadphase_.get(),
         solver_.get(), collision_config_.get());
     world_->setGravity(btVector3(0, -9.81, 0));
+
+    world_->getSolverInfo().m_numIterations /= 2; // ++performance
 
     auto skybox = addComponent<Skybox>();
     addComponent<HeightField>();
@@ -243,7 +251,9 @@ class BulletHeightFieldScene : public engine::Scene {
   }
 
   virtual void update() override {
-    world_->stepSimulation(game_time().dt, 5);
+    // With CCD, there's no need to run step simulation more than one times.
+    world_->stepSimulation(game_time().dt, 0);
+
     findCollisions();
     Scene::update();
 
@@ -267,8 +277,12 @@ class BulletHeightFieldScene : public engine::Scene {
   }
 
   virtual void mouseButtonPressed(int button, int action, int mods) override {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-      shootCube();
+    if (action == GLFW_PRESS) {
+      if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        shootCube();
+      } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        shootCube(200.0f);
+      }
     }
   }
 };

@@ -141,7 +141,7 @@ class FreeFlyCamera : public Camera {
       , first_call_(true)
       , speed_per_sec_(speed_per_sec)
       , mouse_sensitivity_(mouse_sensitivity)
-      , cos_max_pitch_angle_(0.95f) {
+      , cos_max_pitch_angle_(0.98f) {
     transform()->set_pos(pos);
     transform()->set_forward(target - pos);
   }
@@ -169,7 +169,7 @@ class ThirdPersonalCamera : public Camera {
       , curr_dist_mod_(1.0f)
       , dest_dist_mod_(1.0f)
       , initial_distance_(glm::length(target_->pos() - position))
-      , cos_max_pitch_angle_(0.95f)
+      , cos_max_pitch_angle_(0.98f)
       , mouse_sensitivity_(mouse_sensitivity)
       , mouse_scroll_sensitivity_(mouse_scroll_sensitivity)
       , height_map_(height_map) {

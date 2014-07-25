@@ -16,7 +16,7 @@
 #include "../engine/scene.h"
 #include "../engine/camera.h"
 #include "../engine/behaviour.h"
-#include "../engine/shapes/cube_mesh.h"
+#include "../engine/debug/debug_shape.h"
 #include "../engine/gui/label.h"
 
 #include "../terrain.h"
@@ -24,8 +24,6 @@
 #include "../fps_display.h"
 #include "../loading_screen.h"
 #include "./main_scene.h"
-
-using engine::shapes::CubeMesh;
 
 class BulletRigidBody : public engine::Behaviour, public btMotionState {
  public:
@@ -67,7 +65,7 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
     btRigidBody::btRigidBodyConstructionInfo
         info{mass, this, shape_.get(), inertia};
     bt_rigid_body_ = engine::make_unique<btRigidBody>(info);
-    bt_rigid_body_->setContactProcessingThreshold(0.0f); // ++performace
+    if (mass == 0.0f) { bt_rigid_body_->setRestitution(1.0f); }
     scene_->world()->addRigidBody(bt_rigid_body_.get());
   }
 
@@ -121,37 +119,75 @@ class BulletCube : public engine::Behaviour {
     auto rbody = addComponent<BulletRigidBody>(1.0f, shape);
     auto bt_rigid_body = rbody->bt_rigid_body();
     bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
+    // bt_rigid_body->setGravity(btVector3{0, 0, 0});
+    // bt_rigid_body->setMassProps(1.0f, btVector3{0, 0, 0});
     bt_rigid_body->setUserPointer(this);
+    bt_rigid_body->setRestitution(0.3f);
     // Continous Collision Detection (CCD) is needed, when the cubes move more
-    // than half their extents (0.5f here), or otherwise, they would fall through
-    // other objects
+    // than half their extents (0.5f) in a frame, or otherwise, they would
+    // fall through other objects
     bt_rigid_body->setCcdMotionThreshold(0.5f);
     bt_rigid_body->setCcdSweptSphereRadius(0.25f);
-    cube_mesh_ = addComponent<CubeMesh>(glm::vec3(0.5, 0.0, 0.0));
+    mesh_ = addComponent<engine::debug::Cube>(glm::vec3(0.5, 0.0, 0.0));
   }
 
   virtual void collision(const GameObject* other) override {
-    const BulletCube* other_as_cube = dynamic_cast<const BulletCube*>(other);
-    if (other_as_cube) {
-      addColor(glm::vec3{0.0f, 0.02f, 0.02f});
-    } else {
-      addColor(glm::vec3{0.0f, 0.02f, 0.0f});
-    }
+    addColor(glm::vec3{0.0f, 0.02f, 0.0f});
   }
 
  private:
-  CubeMesh* cube_mesh_;
+  engine::debug::Cube* mesh_;
 
   virtual void update() override {
-    glm::vec3 color = cube_mesh_->color();
+    glm::vec3 color = mesh_->color();
     color = glm::vec3(color.r, std::min(0.98f*color.g, 0.9f),
                                std::min(0.98f*color.b, 0.9f));
-    cube_mesh_->set_color(color);
+    mesh_->set_color(color);
   }
 
   void addColor(const glm::vec3& color) {
-    cube_mesh_->set_color(glm::clamp(cube_mesh_->color() + color,
-                                     glm::vec3{}, glm::vec3{1}));
+    mesh_->set_color(glm::clamp(mesh_->color() + color,
+                                glm::vec3{}, glm::vec3{1}));
+  }
+};
+
+class BulletSphere : public engine::Behaviour {
+ public:
+  explicit BulletSphere(GameObject* parent, const glm::vec3& pos,
+                        const glm::vec3& v, const glm::quat& rot = glm::quat{})
+      : Behaviour(parent) {
+    transform()->set_pos(pos);
+    transform()->set_rot(rot);
+    btCollisionShape* shape = new btSphereShape(0.5f);
+    auto rbody = addComponent<BulletRigidBody>(1.0f, shape);
+    auto bt_rigid_body = rbody->bt_rigid_body();
+    bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
+    // bt_rigid_body->setGravity(btVector3{0, 0, 0});
+    // bt_rigid_body->setMassProps(1.0f, btVector3{0, 0, 0});
+    bt_rigid_body->setUserPointer(this);
+    bt_rigid_body->setRestitution(0.5f);
+    bt_rigid_body->setCcdMotionThreshold(0.5f);
+    bt_rigid_body->setCcdSweptSphereRadius(0.25f);
+    mesh_ = addComponent<engine::debug::Sphere>(glm::vec3(0.5, 0.0, 0.0));
+  }
+
+  virtual void collision(const GameObject* other) override {
+    addColor(glm::vec3{0.0f, 0.02f, 0.0f});
+  }
+
+ private:
+  engine::debug::Sphere* mesh_;
+
+  virtual void update() override {
+    glm::vec3 color = mesh_->color();
+    color = glm::vec3(color.r, std::min(0.98f*color.g, 0.9f),
+                               std::min(0.98f*color.b, 0.9f));
+    mesh_->set_color(color);
+  }
+
+  void addColor(const glm::vec3& color) {
+    mesh_->set_color(glm::clamp(mesh_->color() + color,
+                                glm::vec3{}, glm::vec3{1}));
   }
 };
 
@@ -159,8 +195,8 @@ class BulletHeightFieldScene : public engine::Scene {
   void shootCube(float speed = 20.0f) {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
-    addComponent<BulletCube>(pos, speed*cam->transform()->forward(),
-                          cam->transform()->rot());
+    addComponent<BulletSphere>(pos, speed*cam->transform()->forward(),
+                             cam->transform()->rot());
   }
 
   void dropCubes() {
@@ -204,9 +240,9 @@ class BulletHeightFieldScene : public engine::Scene {
     set_camera(cam);
 
     auto label = addComponent<engine::gui::Label>(
-        L"Press left click to shoot a cube.", glm::vec2(0, -0.85));
+        L"Press left click to shoot a slow, or right click to shoot a fast sphere.", glm::vec2(0, -0.85));
     label->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
-    label->set_font_size(20);
+    label->set_font_size(16);
     label->set_group(2);
 
     auto label2 = addComponent<engine::gui::Label>(
@@ -237,7 +273,7 @@ class BulletHeightFieldScene : public engine::Scene {
       int num_contacts = contact_manifold->getNumContacts();
       for (int j = 0; j < num_contacts; ++j) {
         btManifoldPoint& pt = contact_manifold->getContactPoint(j);
-        if (pt.getDistance() < 0.0f) {
+        if (pt.getDistance() < 1e-3f) {
           // const btVector3& ptA = pt.getPositionWorldOnA();
           // const btVector3& ptB = pt.getPositionWorldOnB();
           // const btVector3& normalOnB = pt.m_normalWorldOnB;
@@ -256,14 +292,6 @@ class BulletHeightFieldScene : public engine::Scene {
 
     findCollisions();
     Scene::update();
-
-    // static int last_time = game_time().current;
-    // if (int(game_time().current) > last_time) {
-    //   std::cout << std::endl;
-    //   CProfileManager::dumpAll();
-    //   std::cout << std::endl;
-    //   last_time = game_time().current;
-    // }
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {

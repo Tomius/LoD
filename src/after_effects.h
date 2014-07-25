@@ -7,7 +7,7 @@
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/framebuffer.h"
-#include "oglwrap/shapes/rectangle.h"
+#include "oglwrap/shapes/rectangle_shape.h"
 #include "oglwrap/textures/texture_2D.h"
 
 #include "engine/behaviour.h"
@@ -29,7 +29,7 @@ class AfterEffects : public engine::Behaviour {
   gl::LazyUniform<glm::vec2> uScreenSize_;
   gl::LazyUniform<glm::vec3> s_uSunPos_;
   gl::LazyUniform<float> uZNear_, uZFar_;
-  gl::Rectangle rect_;
+  gl::RectangleShape rect_;
 
   GLuint width_, height_;
 

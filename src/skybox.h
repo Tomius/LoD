@@ -6,7 +6,7 @@
 #include "engine/oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
-#include "oglwrap/shapes/cube.h"
+#include "oglwrap/shapes/cube_shape.h"
 #include "oglwrap/textures/texture_cube.h"
 
 #include "engine/scene.h"
@@ -25,7 +25,7 @@ class Skybox : public engine::Behaviour {
 
  private:
   float time_;
-  gl::Cube cube_;
+  gl::CubeShape cube_;
 
   engine::ShaderProgram prog_;
 

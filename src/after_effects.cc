@@ -17,7 +17,7 @@ AfterEffects::AfterEffects(GameObject *parent, Skybox* skybox)
 
   gl::UniformSampler(prog_, "uTex").set(0);
   gl::UniformSampler(prog_, "uDepthTex").set(1);
-  rect_.setupPositions(prog_ | "aPosition");
+  (prog_ | "aPosition").bindLocation(rect_.kPosition);
 
   prog_.validate();
 

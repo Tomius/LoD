@@ -5,7 +5,7 @@
 
 #include <string>
 #include "./label.h"
-#include "../../oglwrap/shapes/rectangle.h"
+#include "../../oglwrap/shapes/rectangle_shape.h"
 
 namespace engine {
 namespace gui {
@@ -31,14 +31,15 @@ struct BoxParams {
 class Box : public engine::GameObject {
  public:
   Box(GameObject* parent, const BoxParams& params)
-      : engine::GameObject(parent), params_(params), label_(nullptr) {
+      : engine::GameObject(parent), params_(params), label_(nullptr)
+      , rect_({gl::RectangleShape::kPosition, gl::RectangleShape::kTexCoord}) {
     gl::VertexShader vs("engine/box.vert");
     gl::FragmentShader fs("engine/box.frag");
     prog_ << vs << fs;
     prog_.link().use();
 
-    rect_.setupPositions(prog_ | "aPosition");
-    rect_.setupTexCoords(prog_ | "aTexCoord");
+    (prog_ | "aPosition").bindLocation(rect_.kPosition);
+    (prog_ | "aTexCoord").bindLocation(rect_.kTexCoord);
     gl::Uniform<glm::vec2>(prog_, "uOffset") = params_.center;
     gl::Uniform<glm::vec2>(prog_, "uScale") = params_.extent;
     gl::Uniform<glm::vec4>(prog_, "uBorderColor") = params_.border_color;
@@ -94,7 +95,7 @@ class Box : public engine::GameObject {
   BoxParams params_;
   Label *label_;
 
-  gl::Rectangle rect_;
+  gl::RectangleShape rect_;
   gl::Program prog_;
 
   virtual void screenResized(size_t width, size_t height) override {

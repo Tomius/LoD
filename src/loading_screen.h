@@ -6,7 +6,7 @@
 #include "engine/oglwrap_config.h"
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
-#include "oglwrap/shapes/rectangle.h"
+#include "oglwrap/shapes/rectangle_shape.h"
 #include "oglwrap/textures/texture_2D.h"
 #include "oglwrap/smart_enums.h"
 
@@ -14,12 +14,13 @@
 
 class LoadingScreen {
   gl::Texture2D tex_;
-  gl::Rectangle rect_;
+  gl::RectangleShape rect_;
 
   gl::Program prog_;
 
 public:
-  LoadingScreen() {
+  LoadingScreen()
+      : rect_({gl::RectangleShape::kPosition, gl::RectangleShape::kTexCoord}) {
     gl::VertexShader vs("loading.vert");
     gl::FragmentShader fs("loading.frag");
     prog_ << vs << fs;
@@ -36,8 +37,8 @@ public:
 
     prog_.validate();
 
-    rect_.setupPositions(prog_ | "aPosition");
-    rect_.setupTexCoords(prog_ | "aTexCoord", true);
+    (prog_ | "aPosition").bindLocation(rect_.kPosition);
+    (prog_ | "aTexCoord").bindLocation(rect_.kTexCoord);
   }
 
   void render() {

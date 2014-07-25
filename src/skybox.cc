@@ -8,7 +8,7 @@ const float day_duration = 256.0f, day_start = 0.0f;
 Skybox::Skybox(engine::GameObject* parent)
     : engine::Behaviour(parent)
     , time_(day_start)
-    , cube_({gl::Cube::kPosition})
+    , cube_({gl::CubeShape::kPosition})
     , prog_(scene_->shader_manager()->get("skybox.vert"),
             scene_->shader_manager()->get("skybox.frag"))
     , uProjectionMatrix_(prog_, "uProjectionMatrix")

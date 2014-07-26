@@ -200,13 +200,15 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
                       float mouse_sensitivity = 1.0f)
       : FreeFlyCamera(parent, fov, z_near, z_far, pos, target,
                       speed_per_sec, mouse_sensitivity) {
-    btCollisionShape* shape = new btSphereShape(2.0f);
+    float radius = 2.0f * z_near;
+    btCollisionShape* shape = new btSphereShape(radius);
     auto rbody = addComponent<BulletRigidBody>(0.001f, shape, true);
     bt_rigid_body_ = rbody->bt_rigid_body();
     bt_rigid_body_->setGravity(btVector3{0, 0, 0});
+    bt_rigid_body_->setActivationState(DISABLE_DEACTIVATION);
 
-    bt_rigid_body_->setCcdMotionThreshold(2.0f);
-    bt_rigid_body_->setCcdSweptSphereRadius(0.5f);
+    bt_rigid_body_->setCcdMotionThreshold(radius);
+    bt_rigid_body_->setCcdSweptSphereRadius(radius/2.0f);
   }
 
  private:
@@ -252,16 +254,16 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
     float ds = dt * speed_per_sec_;
     glm::vec3 offset;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-      offset = transform()->forward() * ds;
+      offset += transform()->forward() * ds;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-      offset = -transform()->forward() * ds;
+      offset -= transform()->forward() * ds;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-      offset = transform()->right() * ds;
+      offset += transform()->right() * ds;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-      offset = -transform()->right() * ds;
+      offset -= transform()->right() * ds;
     }
     if (scene_->game_time().dt) {
       offset /= float(scene_->game_time().dt);
@@ -273,7 +275,7 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
 };
 
 class BulletHeightFieldScene : public engine::Scene {
-  void shootCube(float speed = 20.0f) {
+  void shootSphere(float speed = 20.0f) {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
     addComponent<BulletSphere>(pos, speed*cam->transform()->forward());
@@ -281,17 +283,19 @@ class BulletHeightFieldScene : public engine::Scene {
 
   void dropCubes() {
     auto cam = camera();
-    glm::vec3 base_pos = cam->transform()->pos() - 2.0f*cam->transform()->up();
+    glm::vec3 base_pos = cam->transform()->pos() - 3.0f*cam->transform()->up();
     for (int x = -2; x <= 2; ++x) {
       for (int y = -2; y <= 2; ++y) {
-        addComponent<BulletCube>(base_pos + 1.5f*glm::vec3(x, 0, y), glm::vec3());
+        addComponent<BulletCube>(base_pos + 1.02f*glm::vec3(x, 0, y), glm::vec3());
       }
     }
   }
 
  public:
   BulletHeightFieldScene() {
+#if !ENGINE_NO_FULLSCREEN
     glfwSetInputMode(window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+#endif
 
     LoadingScreen().render();
     glfwSwapBuffers(window());
@@ -311,6 +315,7 @@ class BulletHeightFieldScene : public engine::Scene {
     world_->getSolverInfo().m_numIterations /= 2; // ++performance
 
     auto skybox = addComponent<Skybox>();
+    skybox->set_group(-1);
     addComponent<HeightField>();
     auto after_effects = addComponent<AfterEffects>(skybox);
     after_effects->set_group(1);
@@ -367,10 +372,9 @@ class BulletHeightFieldScene : public engine::Scene {
   }
 
   virtual void update() override {
-    // With CCD, there's no need to run step simulation more than one times.
-    world_->stepSimulation(game_time().dt, 5);
-    findCollisions();
     Scene::update();
+    world_->stepSimulation(game_time().dt, 0);
+    findCollisions();
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {
@@ -379,6 +383,11 @@ class BulletHeightFieldScene : public engine::Scene {
         dropCubes();
       } else if (key == GLFW_KEY_HOME) {
         engine::GameEngine::LoadScene<MainScene>();
+      } else if (key == GLFW_KEY_DELETE) {
+        auto v0 = findComponents<BulletSphere>();
+        removeComponents(v0.begin(), v0.end());
+        auto v1 = findComponents<BulletCube>();
+        removeComponents(v1.begin(), v1.end());
       }
     }
   }
@@ -386,9 +395,9 @@ class BulletHeightFieldScene : public engine::Scene {
   virtual void mouseButtonPressed(int button, int action, int mods) override {
     if (action == GLFW_PRESS) {
       if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        shootCube();
+        shootSphere();
       } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-        shootCube(200.0f);
+        shootSphere(200.0f);
       }
     }
   }

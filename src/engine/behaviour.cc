@@ -12,7 +12,7 @@
 namespace engine {
 
 void Behaviour::updateAll() {
-  updateSortedComponents();
+  internalUpdate();
   for (auto& component : sorted_components_) {
     if (component == this) {
       _TRY(update());

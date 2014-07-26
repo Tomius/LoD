@@ -6,6 +6,8 @@
 #include <typeinfo>
 #include "./scene.h"
 
+// #define ENGINE_NO_FULLSCREEN 1
+
 namespace engine {
 
 class ShaderManager;

@@ -6,11 +6,8 @@
 namespace engine {
 
 Scene::Scene()
-    : Behaviour(nullptr)
-    , camera_(nullptr)
-    , shadow_(nullptr)
-    , window_(GameEngine::window())
-    , target_layer_(0) {
+    : Behaviour(nullptr), camera_(nullptr), shadow_(nullptr)
+    , window_(GameEngine::window()) {
   set_scene(this);
 }
 

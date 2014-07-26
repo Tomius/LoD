@@ -18,6 +18,9 @@ GameObject* GameObject::addComponent(std::unique_ptr<GameObject>&& component) {
     GameObject *obj = component.get();
     components_.push_back(std::move(component));
     components_just_enabled_.push_back(obj);
+    obj->parent_ = this;
+    obj->transform_->set_parent(transform_.get());
+    obj->scene_ = scene_;
 
     return obj;
   } catch (const std::exception& ex) {
@@ -97,7 +100,7 @@ void GameObject::screenResizedAll(size_t width, size_t height) {
 }
 
 void GameObject::updateAll() {
-  updateSortedComponents();
+  internalUpdate();
   for (auto& component : sorted_components_) {
     if (component != this) {
       component->updateAll();
@@ -153,8 +156,13 @@ void GameObject::collisionAll(const GameObject* other) {
   }
 }
 
+void GameObject::internalUpdate() {
+  removeComponents();
+  updateSortedComponents();
+}
 
 void GameObject::updateSortedComponents() {
+  removeComponents();
   for (const auto& element : components_just_disabled_) {
     sorted_components_.erase(element);
   }
@@ -169,13 +177,24 @@ void GameObject::updateSortedComponents() {
   components_just_enabled_.clear();
 }
 
+void GameObject::removeComponents() {
+  if (!remove_predicate_.components_.empty()) {
+    components_.erase(std::remove_if(components_.begin(), components_.end(),
+      remove_predicate_), components_.end());
+    remove_predicate_.components_.clear();
+  }
+}
+
 bool GameObject::CompareGameObjects::operator()(GameObject* x,
                                                 GameObject* y) const {
+  assert(x && y);
   if (x->group() == y->group()) {
     if (y->parent() == x) {
       return true;  // we should render the parent before the children
-    } else {
+    } else if (x->parent() == y) {
       return false;
+    } else {
+      return x < y;
     }
   } else {
     return x->group() < y->group();

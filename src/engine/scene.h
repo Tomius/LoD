@@ -82,9 +82,6 @@ class Scene : public Behaviour {
     render2DAll();
   }
 
-  int target_layer() const { return target_layer_; }
-  void set_target_layer(int value) { target_layer_ = value; }
-
  protected:
   // Bullet classes
   std::unique_ptr<btCollisionConfiguration> collision_config_;
@@ -97,7 +94,6 @@ class Scene : public Behaviour {
   Shadow* shadow_;
   Timer game_time_, environment_time_, camera_time_;
   GLFWwindow* window_;
-  int target_layer_;
 
   virtual void updateAll() override {
     game_time_.tick();

@@ -19,13 +19,30 @@ class GameObject {
  public:
   template<typename Transform_t = Transform>
   explicit GameObject(GameObject* parent,
-                      const Transform_t& transform = Transform{});
+                      const Transform_t& transform = Transform_t{});
   virtual ~GameObject() {}
 
   template<typename T, typename... Args>
   T* addComponent(Args&&... contructor_args);
-
   GameObject* addComponent(std::unique_ptr<GameObject>&& component);
+
+  // Returns the first component found by depth first search in the
+  // GameObject hierarchy whose type is T
+  template<typename T>
+  T* findComponent() const { return FindComponent<T>(this); }
+
+  // Returns all the components in the GameObject heirarchy whose type is T
+  template<typename T>
+  std::vector<T*> findComponents() const;
+
+  // Detaches a componenent from its parent, and adopts it.
+  // Returns true on success.
+  bool stealComponent(GameObject* component_to_steal);
+
+  void removeComponent(GameObject* component_to_remove);
+
+  template <typename T>
+  void removeComponents(T begin, T end);
 
   Transform* transform() { return transform_.get(); }
   const Transform* transform() const { return transform_.get(); }
@@ -40,9 +57,6 @@ class GameObject {
 
   bool enabled() const { return enabled_; }
   void set_enabled(bool value);
-
-  int layer() const { return layer_; }
-  void set_layer(int value) { layer_ = value; }
 
   int group() const { return group_; }
   void set_group(int value);
@@ -65,29 +79,6 @@ class GameObject {
   virtual void mouseMovedAll(double xpos, double ypos);
   virtual void collisionAll(const GameObject* other);
 
-  // experimental
-  template<typename T>
-  T* stealComponent(GameObject* go) {
-    if (!go) { return nullptr; }
-
-    for (auto& comp_ptr : go->components_) {
-      GameObject* comp = comp_ptr.get();
-      T* t = dynamic_cast<T*>(comp);
-      if (t) {
-        components_.push_back(std::unique_ptr<GameObject>(comp_ptr.release()));
-        components_just_enabled_.push_back(comp);
-        comp->parent_ = this;
-        comp->transform_->set_parent(transform_.get());
-        comp->scene_ = scene_;
-        return t;
-      } else {
-        t = stealComponent<T>(comp);
-        if (t) { return t; }
-      }
-    }
-    return nullptr;
-  }
-
  protected:
   Scene* scene_;
   GameObject* parent_;
@@ -99,11 +90,28 @@ class GameObject {
     bool operator() (GameObject* x, GameObject* y) const;
   };
 
-  std::multiset<GameObject*, CompareGameObjects> sorted_components_;
-  int layer_, group_;
+  std::set<GameObject*, CompareGameObjects> sorted_components_;
+  int group_;
   bool enabled_;
 
+  void internalUpdate();
+
+ private:
+  template<typename T>
+  static T* FindComponent(const GameObject* obj);
+
+  template<typename T>
+  static void FindComponents(const GameObject* obj, std::vector<T*> *found);
+
+  struct ComponentRemoveHelper {
+    std::set<GameObject*> components_;
+    bool operator()(const std::unique_ptr<GameObject>& go_ptr) {
+      return components_.find(go_ptr.get()) != components_.end();
+    }
+  } remove_predicate_;
+
   void updateSortedComponents();
+  void removeComponents();
 };
 
 }  // namespace engine

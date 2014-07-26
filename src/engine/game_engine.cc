@@ -46,15 +46,26 @@ void GameEngine::InitContext() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     // Window creation
+#if ENGINE_NO_FULLSCREEN
+    window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
+                               nullptr, nullptr);
+#else
     window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
                                glfwGetPrimaryMonitor(), nullptr);
+#endif
+
     if (!window_){
       // If it failed, try a 2.1 context
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
-      window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
-                                glfwGetPrimaryMonitor(), nullptr);
+#if ENGINE_NO_FULLSCREEN
+    window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
+                               nullptr, nullptr);
+#else
+    window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
+                               glfwGetPrimaryMonitor(), nullptr);
+#endif
 
       // If that one fails too, we can't do much...
       if (!window_) {

@@ -36,7 +36,9 @@ MainScene::MainScene() {
   GLFWwindow* window = this->window();
 
   // Disable cursor
+#if !ENGINE_NO_FULLSCREEN
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+#endif
 
   // The scene builds quite slow, put some picture for the user.
   last_debug_time = glfwGetTime();
@@ -54,8 +56,8 @@ MainScene::MainScene() {
     set_shadow(shadow);
   PrintDebugTime();
 
-  Terrain *terrain = stealComponent<Terrain>(engine::GameEngine::scene());
-  if (!terrain) {
+  Terrain *terrain = engine::GameEngine::scene()->findComponent<Terrain>();
+  if (!stealComponent(terrain)) {
     PrintDebugText("Initializing the terrain");
      terrain = addComponent<Terrain>();
     PrintDebugTime();

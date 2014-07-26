@@ -27,21 +27,22 @@
 
 class BulletRigidBody : public engine::Behaviour, public btMotionState {
  public:
-  BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape)
-      : Behaviour(parent) {
+  BulletRigidBody(GameObject* parent, float mass,
+                  btCollisionShape* shape, bool ignore_rotation = false)
+      : Behaviour(parent), ignore_rotation_(ignore_rotation) {
     init(mass, shape);
   }
 
   BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
-                  const glm::vec3& pos)
-      : Behaviour(parent) {
+                  const glm::vec3& pos, bool ignore_rotation = false)
+      : Behaviour(parent), ignore_rotation_(ignore_rotation) {
     transform()->set_pos(pos);
     init(mass, shape);
   }
 
   BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
                   const glm::vec3& pos, const glm::fquat& rot)
-      : Behaviour(parent) {
+      : Behaviour(parent), ignore_rotation_(false) {
     transform()->set_pos(pos);
     transform()->set_rot(rot);
     init(mass, shape);
@@ -57,6 +58,7 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
  private:
   std::unique_ptr<btCollisionShape> shape_;
   std::unique_ptr<btRigidBody> bt_rigid_body_;
+  bool ignore_rotation_;
 
   void init(float mass, btCollisionShape* shape) {
     shape_ = std::unique_ptr<btCollisionShape>(shape);
@@ -65,6 +67,7 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
     btRigidBody::btRigidBodyConstructionInfo
         info{mass, this, shape_.get(), inertia};
     bt_rigid_body_ = engine::make_unique<btRigidBody>(info);
+    bt_rigid_body_->setUserPointer(parent_);
     if (mass == 0.0f) { bt_rigid_body_->setRestitution(1.0f); }
     scene_->world()->addRigidBody(bt_rigid_body_.get());
   }
@@ -72,16 +75,20 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
   virtual void getWorldTransform(btTransform &t) const override {
     const glm::vec3& pos = transform()->pos();
     t.setOrigin(btVector3{pos.x, pos.y, pos.z});
-    const glm::fquat& rot = transform()->rot();
-    t.setRotation(btQuaternion{rot.x, rot.y, rot.z, rot.w});
+    if (!ignore_rotation_) {
+      const glm::fquat& rot = transform()->rot();
+      t.setRotation(btQuaternion{rot.x, rot.y, rot.z, rot.w});
+    }
   }
 
   virtual void setWorldTransform(const btTransform &t) override {
     const btVector3& o = t.getOrigin();
     parent_->transform()->set_pos(glm::vec3(o.x(), o.y(), o.z()));
-    const btQuaternion& r = t.getRotation();
-    parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
-                                            r.getY(), r.getZ()));
+    if (!ignore_rotation_) {
+      const btQuaternion& r = t.getRotation();
+      parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
+                                              r.getY(), r.getZ()));
+    }
   }
 };
 
@@ -100,7 +107,7 @@ class HeightField : public engine::GameObject {
 
     btCollisionShape* shape = new btHeightfieldTerrainShape{
         height_map.w(), height_map.h(), data,
-        1, 0, 256, 1, PHY_UCHAR, false};
+        1, 0, 256, 1, PHY_UCHAR, true};
 
     glm::vec3 pos{height_map.w()/2.0f, 128, height_map.h()/2.0f};
     addComponent<BulletRigidBody>(0.0f, shape, pos);
@@ -119,9 +126,6 @@ class BulletCube : public engine::Behaviour {
     auto rbody = addComponent<BulletRigidBody>(1.0f, shape);
     auto bt_rigid_body = rbody->bt_rigid_body();
     bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
-    // bt_rigid_body->setGravity(btVector3{0, 0, 0});
-    // bt_rigid_body->setMassProps(1.0f, btVector3{0, 0, 0});
-    bt_rigid_body->setUserPointer(this);
     bt_rigid_body->setRestitution(0.3f);
     // Continous Collision Detection (CCD) is needed, when the cubes move more
     // than half their extents (0.5f) in a frame, or otherwise, they would
@@ -154,17 +158,13 @@ class BulletCube : public engine::Behaviour {
 class BulletSphere : public engine::Behaviour {
  public:
   explicit BulletSphere(GameObject* parent, const glm::vec3& pos,
-                        const glm::vec3& v, const glm::quat& rot = glm::quat{})
+                        const glm::vec3& v)
       : Behaviour(parent) {
     transform()->set_pos(pos);
-    transform()->set_rot(rot);
     btCollisionShape* shape = new btSphereShape(0.5f);
     auto rbody = addComponent<BulletRigidBody>(1.0f, shape);
     auto bt_rigid_body = rbody->bt_rigid_body();
     bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
-    // bt_rigid_body->setGravity(btVector3{0, 0, 0});
-    // bt_rigid_body->setMassProps(1.0f, btVector3{0, 0, 0});
-    bt_rigid_body->setUserPointer(this);
     bt_rigid_body->setRestitution(0.5f);
     bt_rigid_body->setCcdMotionThreshold(0.5f);
     bt_rigid_body->setCcdSweptSphereRadius(0.25f);
@@ -191,12 +191,92 @@ class BulletSphere : public engine::Behaviour {
   }
 };
 
+class BulletFreeFlyCamera : public engine::FreeFlyCamera {
+ public:
+  BulletFreeFlyCamera(GameObject* parent, float fov, float z_near,
+                      float z_far, const glm::vec3& pos,
+                      const glm::vec3& target = glm::vec3(),
+                      float speed_per_sec = 5.0f,
+                      float mouse_sensitivity = 1.0f)
+      : FreeFlyCamera(parent, fov, z_near, z_far, pos, target,
+                      speed_per_sec, mouse_sensitivity) {
+    btCollisionShape* shape = new btSphereShape(2.0f);
+    auto rbody = addComponent<BulletRigidBody>(0.001f, shape, true);
+    bt_rigid_body_ = rbody->bt_rigid_body();
+    bt_rigid_body_->setGravity(btVector3{0, 0, 0});
+
+    bt_rigid_body_->setCcdMotionThreshold(2.0f);
+    bt_rigid_body_->setCcdSweptSphereRadius(0.5f);
+  }
+
+ private:
+  btRigidBody* bt_rigid_body_;
+
+  virtual void update() override {
+    glm::dvec2 cursor_pos;
+    GLFWwindow* window = scene_->window();
+    glfwGetCursorPos(window, &cursor_pos.x, &cursor_pos.y);
+    static glm::dvec2 prev_cursor_pos;
+    glm::dvec2 diff = cursor_pos - prev_cursor_pos;
+    prev_cursor_pos = cursor_pos;
+
+    // We get invalid diff values at the startup
+    if (first_call_) {
+      diff = glm::dvec2(0, 0);
+      first_call_ = false;
+    }
+
+    const float dt = scene_->camera_time().dt;
+
+    // Mouse movement - update the coordinate system
+    if (diff.x || diff.y) {
+      float dx(diff.x * mouse_sensitivity_ * dt / 16);
+      float dy(-diff.y * mouse_sensitivity_ * dt / 16);
+
+      // If we are looking up / down, we don't want to be able
+      // to rotate to the other side
+      float dot_up_fwd = glm::dot(transform()->up(), transform()->forward());
+      if (dot_up_fwd > cos_max_pitch_angle_ && dy > 0) {
+        dy = 0;
+      }
+      if (dot_up_fwd < -cos_max_pitch_angle_ && dy < 0) {
+        dy = 0;
+      }
+
+      transform()->set_forward(transform()->forward() +
+                               transform()->right()*dx +
+                               transform()->up()*dy);
+    }
+
+    // Calculate the offset
+    float ds = dt * speed_per_sec_;
+    glm::vec3 offset;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+      offset = transform()->forward() * ds;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+      offset = -transform()->forward() * ds;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+      offset = transform()->right() * ds;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+      offset = -transform()->right() * ds;
+    }
+    if (scene_->game_time().dt) {
+      offset /= float(scene_->game_time().dt);
+    }
+
+    // Update the "position"
+    bt_rigid_body_->setLinearVelocity(btVector3{offset.x, offset.y, offset.z});
+  }
+};
+
 class BulletHeightFieldScene : public engine::Scene {
   void shootCube(float speed = 20.0f) {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
-    addComponent<BulletSphere>(pos, speed*cam->transform()->forward(),
-                             cam->transform()->rot());
+    addComponent<BulletSphere>(pos, speed*cam->transform()->forward());
   }
 
   void dropCubes() {
@@ -235,7 +315,7 @@ class BulletHeightFieldScene : public engine::Scene {
     auto after_effects = addComponent<AfterEffects>(skybox);
     after_effects->set_group(1);
 
-    auto cam = addComponent<engine::FreeFlyCamera>(M_PI/3, 1, 3000,
+    auto cam = addComponent<BulletFreeFlyCamera>(M_PI/3, 1, 3000,
         glm::vec3(2050, 200, 2050), glm::vec3(2048, 200, 2048), 20, 5);
     set_camera(cam);
 
@@ -288,8 +368,7 @@ class BulletHeightFieldScene : public engine::Scene {
 
   virtual void update() override {
     // With CCD, there's no need to run step simulation more than one times.
-    world_->stepSimulation(game_time().dt, 0);
-
+    world_->stepSimulation(game_time().dt, 5);
     findCollisions();
     Scene::update();
   }

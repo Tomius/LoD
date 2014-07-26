@@ -34,10 +34,6 @@ class CameraTransform : public Transform {
     set_forward(glm::cross(up(), new_right));
   }
 
-  virtual glm::mat4 localToWorldMatrix() const override {
-    return glm::lookAt(pos(), pos()+forward(), up());
-  }
-
  private:
   vec3 up_;
 };
@@ -58,7 +54,8 @@ class Camera : public Behaviour {
   }
 
   glm::mat4 cameraMatrix() const {
-    return transform()->matrix();
+    const Transform* t = transform();
+    return glm::lookAt(t->pos(), t->pos()+t->forward(), t->up());
   }
 
   glm::mat4 projectionMatrix() const {
@@ -146,10 +143,11 @@ class FreeFlyCamera : public Camera {
     transform()->set_forward(target - pos);
   }
 
- private:
+ protected:
   bool first_call_;
   const float speed_per_sec_, mouse_sensitivity_, cos_max_pitch_angle_;
 
+ private:
   virtual void update() override;
 };
 

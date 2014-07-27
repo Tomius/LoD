@@ -49,6 +49,7 @@ MainScene::MainScene() {
 
   PrintDebugText("Initializing the skybox");
     Skybox *skybox = addComponent<Skybox>();
+    skybox->set_group(-1);
   PrintDebugTime();
 
   PrintDebugText("Initializing the shadow maps");
@@ -88,7 +89,6 @@ MainScene::MainScene() {
         cam_offset->pos() + glm::vec3(ayumi->getMesh().bSphereRadius() * 2),
         height_map, 1.5f);
 
-    cam->set_group(1);
     set_camera(cam);
     charmove->setCamera(cam);
   PrintDebugTime();
@@ -100,9 +100,11 @@ MainScene::MainScene() {
   PrintDebugText("Initializing the resources for the after effects");
     AfterEffects *after_effects = addComponent<AfterEffects>(skybox);
     shadow->set_default_fbo(after_effects->fbo());
+    after_effects->set_group(1);
   PrintDebugTime();
 
   PrintDebugText("Initializing the FPS display");
-    addComponent<FpsDisplay>();
+    auto fps = addComponent<FpsDisplay>();
+    fps->set_group(2);
   PrintDebugTime();
 }

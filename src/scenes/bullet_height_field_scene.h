@@ -206,6 +206,9 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
     bt_rigid_body_ = rbody->bt_rigid_body();
     bt_rigid_body_->setGravity(btVector3{0, 0, 0});
     bt_rigid_body_->setActivationState(DISABLE_DEACTIVATION);
+    bt_rigid_body_->setMassProps(0.001f, btVector3(0, 0, 0));
+    bt_rigid_body_->setFriction(0.0f);
+    bt_rigid_body_->setRestitution(0.0f);
 
     bt_rigid_body_->setCcdMotionThreshold(radius);
     bt_rigid_body_->setCcdSweptSphereRadius(radius/2.0f);
@@ -251,23 +254,20 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
     }
 
     // Calculate the offset
-    float ds = dt * speed_per_sec_;
     glm::vec3 offset;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-      offset += transform()->forward() * ds;
+      offset += transform()->forward();
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-      offset -= transform()->forward() * ds;
+      offset -= transform()->forward();
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-      offset += transform()->right() * ds;
+      offset += transform()->right();
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-      offset -= transform()->right() * ds;
+      offset -= transform()->right();
     }
-    if (scene_->game_time().dt) {
-      offset /= float(scene_->game_time().dt);
-    }
+    offset *= speed_per_sec_;
 
     // Update the "position"
     bt_rigid_body_->setLinearVelocity(btVector3{offset.x, offset.y, offset.z});
@@ -373,7 +373,7 @@ class BulletHeightFieldScene : public engine::Scene {
 
   virtual void update() override {
     Scene::update();
-    world_->stepSimulation(game_time().dt, 0);
+    world_->stepSimulation(game_time().dt, 4);
     findCollisions();
   }
 

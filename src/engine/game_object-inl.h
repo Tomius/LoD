@@ -23,6 +23,7 @@ T* GameObject::addComponent(Args&&... args) {
 
   try {
     T *obj = new T(this, std::forward<Args>(args)...);
+    obj->uid_ = NextUid();
     components_.push_back(std::unique_ptr<GameObject>(obj));
     components_just_enabled_.push_back(obj);
 
@@ -90,10 +91,16 @@ inline bool GameObject::stealComponent(GameObject* go) {
       comp->parent_ = this;
       comp->transform_->set_parent(transform_.get());
       comp->scene_ = scene_;
+      comp->uid_ = NextUid();
       return true;
     }
   }
   return false;
+}
+
+inline int GameObject::NextUid() {
+  static int uid = 0;
+  return uid++;
 }
 
 inline void GameObject::removeComponent(GameObject* component_to_remove) {

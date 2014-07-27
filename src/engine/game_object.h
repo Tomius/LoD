@@ -91,7 +91,7 @@ class GameObject {
   };
 
   std::set<GameObject*, CompareGameObjects> sorted_components_;
-  int group_;
+  int uid_, group_;
   bool enabled_;
 
   void internalUpdate();
@@ -102,6 +102,8 @@ class GameObject {
 
   template<typename T>
   static void FindComponents(const GameObject* obj, std::vector<T*> *found);
+
+  static int NextUid();
 
   struct ComponentRemoveHelper {
     std::set<GameObject*> components_;

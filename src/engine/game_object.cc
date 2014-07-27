@@ -19,6 +19,7 @@ GameObject* GameObject::addComponent(std::unique_ptr<GameObject>&& component) {
     components_.push_back(std::move(component));
     components_just_enabled_.push_back(obj);
     obj->parent_ = this;
+    obj->uid_ = NextUid();
     obj->transform_->set_parent(transform_.get());
     obj->scene_ = scene_;
 
@@ -189,12 +190,16 @@ bool GameObject::CompareGameObjects::operator()(GameObject* x,
                                                 GameObject* y) const {
   assert(x && y);
   if (x->group() == y->group()) {
+    // if x and y are in the same group and they are in a parent child
+    // relation, then the parent should be handled first
     if (y->parent() == x) {
-      return true;  // we should render the parent before the children
+      return true;
     } else if (x->parent() == y) {
       return false;
     } else {
-      return x < y;
+      // if x and y aren't "relatives", then the
+      // order of adding them should count
+      return x->uid_ < y->uid_;
     }
   } else {
     return x->group() < y->group();

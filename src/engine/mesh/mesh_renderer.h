@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <climits>
+#include <btBulletDynamicsCommon.h>
 
 #include "../oglwrap_config.h"
 #include "../../oglwrap/buffer.h"
@@ -87,10 +88,21 @@ public:
   MeshRenderer(const std::string& filename,
                gl::Bitfield<aiPostProcessSteps> flags);
 
+  template <typename IdxType>
+  /// Returns a vector of the indices
+  std::vector<IdxType> indices();
+
+  /// Returns a vector of the vertices
+  std::vector<float> vertices();
+
+  /// Sets up a btTriangleIndexVertexArray, and returns a vector of indices
+  /// that should be stored throughout the lifetime of the bullet object
+  std::vector<int> btTriangles(btTriangleIndexVertexArray* triangles);
+
 private:
   template <typename IdxType>
   /// A template for setting different types (byte/short/int) of indices.
-  /** This expect the correct vao to be already bound!
+  /** This expects the correct vao to be already bound!
     * @param index - The index of the entry */
   void setIndices(size_t index);
 
@@ -111,8 +123,8 @@ public:
   /// Checks if every mesh in the scene has tex_coords
   /** Returns true if all of the meshes in the scene have texture
     * coordinates in the specified texture coordinate set.
-    * @param texCoordSet - Specifies the index of the texture coordinate set that should be inspected */
-  bool hasTexCoords(unsigned char texCoordSet = 0);
+    * @param tex_coord_set - Specifies the index of the texture coordinate set that should be inspected */
+  bool hasTexCoords(unsigned char tex_coord_set = 0);
 
   /// Loads in vertex texture coordinates (the 0th set), and the materials.
   /** Uploads the vertex textures coordinates data to an attribute array,
@@ -120,9 +132,9 @@ public:
     * the mesh. May write to the stderr if a material is missing.
     * Calling this function changes the currently active VAO and ArrayBuffer.
     * @param attrib - The attribute array to use as destination.
-    * @param texCoordSet Specifies the index of the texture coordinate set that should be used */
+    * @param tex_coord_set Specifies the index of the texture coordinate set that should be used */
   void setupTexCoords(gl::VertexAttribArray attrib,
-                      unsigned char texCoordSet = 0);
+                      unsigned char tex_coord_set = 0);
 
   /**
    * @brief Loads in a specified type of texture for every mesh. If no texture
@@ -186,9 +198,10 @@ public:
 
   /// Disables the use of textures for rendering.
   void disableTextures() { textures_enabled_ = true; }
+};
 
-}; // MeshRenderer class
+}  // namespace engine
 
-} // namespace engine
+#include "./mesh_renderer-inl.h"
 
 #endif  // ENGINE_MESH_MESH_RENDERER_H_

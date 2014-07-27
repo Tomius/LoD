@@ -15,7 +15,7 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
     , uNormalMatrix_(prog_, "uNormalMatrix")
     , shadow_uMCP_(shadow_prog_, "uMCP") {
   shadow_prog_.use();
-  gl::UniformSampler(shadow_prog_, "uDiffuseTexture").set(1);
+  gl::UniformSampler(shadow_prog_, "uDiffuseTexture").set(0);
   shadow_prog_.validate();
 
   prog_.use();
@@ -37,10 +37,10 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
     meshes_[i]->setupPositions(prog_ | "aPosition");
     meshes_[i]->setupTexCoords(prog_ | "aTexCoord");
     meshes_[i]->setupNormals(prog_ | "aNormal");
-    meshes_[i]->setupDiffuseTextures(1);
+    meshes_[i]->setupDiffuseTextures(0);
   }
 
-  gl::UniformSampler(prog_, "uDiffuseTexture").set(1);
+  gl::UniformSampler(prog_, "uDiffuseTexture").set(0);
 
   prog_.validate();
 

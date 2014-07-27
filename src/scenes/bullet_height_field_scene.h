@@ -95,8 +95,8 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
 class HeightField : public engine::GameObject {
  public:
   explicit HeightField(GameObject* parent) : GameObject(parent) {
-    Terrain* terrain = addComponent<Terrain>();
-    const auto& height_map = terrain->height_map();
+    terrain_ = addComponent<Terrain>();
+    const auto& height_map = terrain_->height_map();
     int w = height_map.w(), h = height_map.h();
     GLubyte *data = new GLubyte[w*h];
     for (int x = 0; x < w; ++x) {
@@ -112,6 +112,7 @@ class HeightField : public engine::GameObject {
     glm::vec3 pos{height_map.w()/2.0f, 128, height_map.h()/2.0f};
     addComponent<BulletRigidBody>(0.0f, shape, pos);
   }
+ Terrain* terrain_;
 };
 
 class BulletCube : public engine::Behaviour {
@@ -167,7 +168,7 @@ class BulletSphere : public engine::Behaviour {
     bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
     bt_rigid_body->setRestitution(0.5f);
     bt_rigid_body->setCcdMotionThreshold(0.5f);
-    bt_rigid_body->setCcdSweptSphereRadius(0.25f);
+    bt_rigid_body->setCcdSweptSphereRadius(0.4f);
     mesh_ = addComponent<engine::debug::Sphere>(glm::vec3(0.5, 0.0, 0.0));
   }
 
@@ -274,6 +275,75 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
   }
 };
 
+class BulletTree : public engine::GameObject {
+ public:
+  BulletTree(GameObject *parent, const glm::vec3& pos)
+      : GameObject(parent)
+      , mesh_("models/trees/massive_swamptree_01_a.obj",
+              aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
+              aiProcess_PreTransformVertices)
+      , collision_mesh_("models/trees/massive_swamptree_01_a_collider.obj",
+                        aiProcess_PreTransformVertices)
+      , prog_(scene_->shader_manager()->get("tree.vert"),
+              scene_->shader_manager()->get("tree.frag"))
+      , uProjectionMatrix_(prog_, "uProjectionMatrix")
+      , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
+      , uNormalMatrix_(prog_, "uNormalMatrix") {
+    transform()->set_pos(pos);
+
+    prog_.use();
+    mesh_.setupPositions(prog_ | "aPosition");
+    mesh_.setupTexCoords(prog_ | "aTexCoord");
+    mesh_.setupNormals(prog_ | "aNormal");
+    mesh_.setupDiffuseTextures(0);
+    gl::UniformSampler(prog_, "uDiffuseTexture").set(0);
+    bbox_ = mesh_.boundingBox(transform()->matrix());
+
+    triangles_ = std::unique_ptr<btTriangleIndexVertexArray>{
+      new btTriangleIndexVertexArray()};
+    indices_ = collision_mesh_.btTriangles(triangles_.get());
+
+    btCollisionShape* shape = new btBvhTriangleMeshShape(triangles_.get(), true);
+    addComponent<BulletRigidBody>(0, shape);
+  }
+
+ private:
+  engine::MeshRenderer mesh_, collision_mesh_;
+  engine::ShaderProgram prog_;
+  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
+  gl::LazyUniform<glm::mat3> uNormalMatrix_;
+  engine::BoundingBox bbox_;
+  std::vector<int> indices_;
+  std::unique_ptr<btTriangleIndexVertexArray> triangles_;
+
+  virtual void render() override {
+    prog_.use();
+    prog_.update();
+
+    const auto& cam = *scene_->camera();
+    uProjectionMatrix_ = cam.projectionMatrix();
+
+    gl::TemporarySet capabilities{{{gl::kBlend, true},
+                                   {gl::kCullFace, false}}};
+    gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
+
+    auto campos = cam.transform()->pos();
+    auto cam_mx = cam.cameraMatrix();
+    auto frustum = cam.frustum();
+
+    // Check for visibility
+    if (!bbox_.collidesWithFrustum(frustum) ||
+        glm::length(transform()->pos() - campos) > 1500) {
+      return;
+    }
+
+    glm::mat4 model_mx = transform()->matrix();
+    uModelCameraMatrix_.set(cam_mx * model_mx);
+    uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
+    mesh_.render();
+  }
+};
+
 class BulletHeightFieldScene : public engine::Scene {
   void shootSphere(float speed = 20.0f) {
     auto cam = camera();
@@ -316,7 +386,12 @@ class BulletHeightFieldScene : public engine::Scene {
 
     auto skybox = addComponent<Skybox>();
     skybox->set_group(-1);
-    addComponent<HeightField>();
+
+    auto hf = addComponent<HeightField>();
+    glm::vec2 center = hf->terrain_->height_map().center();
+    float height = hf->terrain_->height_map().heightAt(center.x, center.y);
+    addComponent<BulletTree>(glm::vec3{center.x, height, center.y});
+
     auto after_effects = addComponent<AfterEffects>(skybox);
     after_effects->set_group(1);
 

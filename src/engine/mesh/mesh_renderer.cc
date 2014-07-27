@@ -1,9 +1,8 @@
 // Copyright (c) 2014, Tamas Csala
 
-#include "./mesh_renderer.h"
 
 #include <vector>
-
+#include "./mesh_renderer.h"
 #include "../../oglwrap/context.h"
 #include "../../oglwrap/smart_enums.h"
 
@@ -14,7 +13,7 @@ namespace engine {
   * @param flags - The assimp post-process flags. */
 MeshRenderer::MeshRenderer(const std::string& filename,
                            gl::Bitfield<aiPostProcessSteps> flags)
-    : scene_(importer_.ReadFile(filename.c_str(), flags | aiProcess_Triangulate))
+    : scene_(importer_.ReadFile(filename.c_str(), flags|aiProcess_Triangulate))
     , filename_(filename)
     , entries_(scene_->mNumMeshes)
     , is_setup_positions_(false)
@@ -33,6 +32,52 @@ MeshRenderer::MeshRenderer(const std::string& filename,
     glm::inverse(engine::convertMatrix(scene_->mRootNode->mTransformation));
 }
 
+std::vector<int> MeshRenderer::btTriangles(btTriangleIndexVertexArray* triangles) {
+  std::vector<int> indices_vector;
+
+  for (int mesh_idx = 0; mesh_idx < scene_->mNumMeshes; ++mesh_idx) {
+    const aiMesh* mesh = scene_->mMeshes[mesh_idx];
+    btIndexedMesh btMesh;
+    btMesh.m_numVertices = mesh->mNumVertices;
+    btMesh.m_vertexBase = (const unsigned char*)mesh->mVertices;
+    btMesh.m_vertexStride = sizeof(aiVector3D);
+    btMesh.m_vertexType = PHY_FLOAT;
+
+    auto indices_begin_idx = indices_vector.size();
+    indices_vector.reserve(indices_vector.size() + mesh->mNumFaces * 3);
+    for (size_t face_idx = 0; face_idx < mesh->mNumFaces; face_idx++) {
+      const aiFace& face = mesh->mFaces[face_idx];
+      if (face.mNumIndices == 3) {  // The invalid faces are just ignored.
+        indices_vector.push_back(face.mIndices[0]);
+        indices_vector.push_back(face.mIndices[1]);
+        indices_vector.push_back(face.mIndices[2]);
+      }
+    }
+    btMesh.m_numTriangles = (indices_vector.size()-indices_begin_idx)/3;
+    btMesh.m_triangleIndexBase = (const unsigned char*)&indices_vector[indices_begin_idx];
+    btMesh.m_triangleIndexStride = 3*sizeof(int);
+    btMesh.m_indexType = PHY_INTEGER;
+
+    triangles->addIndexedMesh(btMesh, PHY_INTEGER);
+  }
+
+  return indices_vector;
+}
+
+/// Returns a vector of the vertices
+std::vector<float> MeshRenderer::vertices() {
+  std::vector<float> verts_vector;
+  assert(3*sizeof(float) == sizeof(aiVector3D));
+
+  for (int mesh_idx = 0; mesh_idx < scene_->mNumMeshes; ++mesh_idx) {
+    const aiMesh* mesh = scene_->mMeshes[mesh_idx];
+    verts_vector.insert(verts_vector.end(), (float*)mesh->mVertices,
+                        (float*)(mesh->mVertices+mesh->mNumVertices));
+  }
+
+  return verts_vector;
+}
+
 template <typename IdxType>
 /// A template for setting different types (byte/short/int) of indices.
 /** This expect the correct vao to be already bound!
@@ -46,7 +91,7 @@ void MeshRenderer::setIndices(size_t index) {
 
   for (size_t i = 0; i < mesh->mNumFaces; i++) {
     const aiFace& face = mesh->mFaces[i];
-    if (face.mNumIndices == 3) { // The invalid vertices are just ignored.
+    if (face.mNumIndices == 3) {  // The invalid faces are just ignored.
       indices_vector.push_back(face.mIndices[0]);
       indices_vector.push_back(face.mIndices[1]);
       indices_vector.push_back(face.mIndices[2]);
@@ -87,21 +132,12 @@ void MeshRenderer::setupPositions(gl::VertexAttribArray attrib) {
 
   for (size_t i = 0; i < entries_.size(); i++) {
     const aiMesh* mesh = scene_->mMeshes[i];
+    entries_[i].vao.bind();
 
     // ~~~~~~<{ Load the vertices }>~~~~~~
 
-    std::vector<aiVector3D> verts_vector;
-    size_t vertNum = mesh->mNumVertices;
-    verts_vector.reserve(vertNum);
-
-    for (size_t i = 0; i < vertNum; i++) {
-      verts_vector.push_back(mesh->mVertices[i]);
-    }
-
-    entries_[i].vao.bind();
-
     entries_[i].verts.bind();
-    entries_[i].verts.data(verts_vector);
+    entries_[i].verts.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mVertices);
     attrib.setup<glm::vec3>().enable();
 
     // ~~~~~~<{ Load the indices }>~~~~~~
@@ -143,20 +179,10 @@ void MeshRenderer::setupNormals(gl::VertexAttribArray attrib) {
 
   for (size_t i = 0; i < entries_.size(); i++) {
     const aiMesh* mesh = scene_->mMeshes[i];
-
-    std::vector<aiVector3D> normalsVector;
-
-    size_t vertNum = mesh->mNumVertices;
-    normalsVector.reserve(vertNum);
-
-    for (size_t i = 0; i < vertNum; i++) {
-      normalsVector.push_back(mesh->mNormals[i]);
-    }
-
     entries_[i].vao.bind();
 
     entries_[i].normals.bind();
-    entries_[i].normals.data(normalsVector);
+    entries_[i].normals.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mNormals);
     attrib.setup<float>(3).enable();
   }
 
@@ -167,11 +193,11 @@ void MeshRenderer::setupNormals(gl::VertexAttribArray attrib) {
 /// Checks if every mesh in the scene has tex_coords
 /** Returns true if all of the meshes in the scene have texture
   * coordinates in the specified texture coordinate set.
-  * @param texCoordSet  Specifies the index of the texture coordinate
+  * @param tex_coord_set  Specifies the index of the texture coordinate
   *                     set that should be inspected */
-bool MeshRenderer::hasTexCoords(unsigned char texCoordSet) {
+bool MeshRenderer::hasTexCoords(unsigned char tex_coord_set) {
   for (size_t i = 0; i < entries_.size(); i++) {
-    if (!scene_->mMeshes[i]->HasTextureCoords(texCoordSet)) {
+    if (!scene_->mMeshes[i]->HasTextureCoords(tex_coord_set)) {
       return false;
     }
   }
@@ -185,10 +211,10 @@ bool MeshRenderer::hasTexCoords(unsigned char texCoordSet) {
   * the mesh. May write to the stderr if a material is missing.
   * Calling this function changes the currently active VAO and ArrayBuffer.
   * @param attrib - The attribute array to use as destination.
-  * @param texCoordSet  Specifies the index of the texture coordinate set
+  * @param tex_coord_set  Specifies the index of the texture coordinate set
   *                     that should be used */
 void MeshRenderer::setupTexCoords(gl::VertexAttribArray attrib,
-                                  unsigned char texCoordSet) {
+                                  unsigned char tex_coord_set) {
   if (!is_setup_tex_coords_) {
     is_setup_tex_coords_ = true;
   } else {
@@ -210,15 +236,15 @@ void MeshRenderer::setupTexCoords(gl::VertexAttribArray attrib,
 
     std::vector<aiVector2D> tex_coords_vector;
 
-    size_t vertNum = mesh->mNumVertices;
-    if (mesh->HasTextureCoords(texCoordSet)) {
-      tex_coords_vector.reserve(vertNum);
-      for (size_t i = 0; i < vertNum; i++) {
-        const aiVector3D& texC = mesh->mTextureCoords[texCoordSet][i];
-        tex_coords_vector.push_back(aiVector2D(texC.x, texC.y));
+    size_t vert_num = mesh->mNumVertices;
+    if (mesh->HasTextureCoords(tex_coord_set)) {
+      tex_coords_vector.reserve(vert_num);
+      for (size_t i = 0; i < vert_num; i++) {
+        const aiVector3D& tex_coord = mesh->mTextureCoords[tex_coord_set][i];
+        tex_coords_vector.emplace_back(tex_coord.x, tex_coord.y);
       }
     } else {
-      tex_coords_vector.resize(vertNum);
+      tex_coords_vector.resize(vert_num);
     }
 
     entries_[i].vao.bind();
@@ -365,10 +391,7 @@ glm::mat4 MeshRenderer::worldTransform() const {
 
 /// Gives information about the mesh's bounding cuboid.
 BoundingBox MeshRenderer::boundingBox(const glm::mat4& matrix) const {
-  // Idea: get the minimums and maximums of the vertex positions
-  // in each coordinate. Then the average of the mins and maxes
-  // will be the center of the cuboid
-  float zero = 0.0f; // This is needed to bypass a visual c++ compile error
+  float zero = 0.0f;  // This is needed to bypass a visual c++ compile error
   float infty = 1.0f / zero;
   glm::vec3 mins{infty, infty, infty}, maxes{-infty, -infty, -infty};
   for (size_t entry = 0; entry < entries_.size(); entry++) {

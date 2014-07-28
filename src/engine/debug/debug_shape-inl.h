@@ -9,9 +9,9 @@ namespace engine {
 namespace debug {
 
 template<typename Shape_t>
-Shape_t *DebugShape<Shape_t>::shape_{nullptr};
+Shape_t *DebugShape<Shape_t>::shape_ = nullptr;
 template<typename Shape_t>
-engine::ShaderProgram *DebugShape<Shape_t>::prog_{nullptr};
+engine::ShaderProgram *DebugShape<Shape_t>::prog_ = nullptr;
 template<typename Shape_t>
 gl::LazyUniform<glm::mat4> *DebugShape<Shape_t>::uProjectionMatrix_;
 template<typename Shape_t>

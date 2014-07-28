@@ -15,6 +15,7 @@
 #include "./game_object.h"
 #include "./behaviour.h"
 #include "./shader_manager.h"
+#include "./auto_reset_event.h"
 
 #include "../shadow.h"
 
@@ -31,6 +32,11 @@ class Scene : public Behaviour {
     for (auto& comp_ptr : components_) {
       comp_ptr.reset();
     }
+
+    // close the physics thread
+    physics_thread_should_quit_ = true;
+    physics_can_run_.set();
+    physics_thread_.join();
   }
 
   virtual float gravity() const { return 9.81f; }
@@ -77,9 +83,11 @@ class Scene : public Behaviour {
 
   virtual void turn() {
     updateAll();
+    physics_can_run_.set();
     shadowRenderAll();
     renderAll();
     render2DAll();
+    physics_finished_.waitOne();
   }
 
  protected:
@@ -90,6 +98,12 @@ class Scene : public Behaviour {
   std::unique_ptr<btConstraintSolver> solver_;
   std::unique_ptr<btDynamicsWorld> world_;
 
+  // physics thread data
+  AutoResetEvent physics_can_run_, physics_finished_;
+  bool physics_thread_should_quit_;
+  std::thread physics_thread_;
+
+  // Own data
   Camera* camera_;
   Shadow* shadow_;
   Timer game_time_, environment_time_, camera_time_;
@@ -122,6 +136,12 @@ class Scene : public Behaviour {
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
     Behaviour::render2DAll();
+  }
+
+  virtual void updatePhysics() {
+    if (world_) {
+      world_->stepSimulation(game_time().dt, 0);
+    }
   }
 };
 

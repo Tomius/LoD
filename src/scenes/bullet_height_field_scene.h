@@ -29,20 +29,20 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
  public:
   BulletRigidBody(GameObject* parent, float mass,
                   btCollisionShape* shape, bool ignore_rotation = false)
-      : Behaviour(parent), ignore_rotation_(ignore_rotation) {
+      : Behaviour(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
     init(mass, shape);
   }
 
   BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
                   const glm::vec3& pos, bool ignore_rotation = false)
-      : Behaviour(parent), ignore_rotation_(ignore_rotation) {
+      : Behaviour(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
     transform()->set_pos(pos);
     init(mass, shape);
   }
 
   BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
                   const glm::vec3& pos, const glm::fquat& rot)
-      : Behaviour(parent), ignore_rotation_(false) {
+      : Behaviour(parent), ignore_rotation_(false), up_to_date_(true) {
     transform()->set_pos(pos);
     transform()->set_rot(rot);
     init(mass, shape);
@@ -58,7 +58,8 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
  private:
   std::unique_ptr<btCollisionShape> shape_;
   std::unique_ptr<btRigidBody> bt_rigid_body_;
-  bool ignore_rotation_;
+  bool ignore_rotation_, up_to_date_;
+  btTransform new_transform_;
 
   void init(float mass, btCollisionShape* shape) {
     shape_ = std::unique_ptr<btCollisionShape>(shape);
@@ -73,21 +74,33 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
   }
 
   virtual void getWorldTransform(btTransform &t) const override {
-    const glm::vec3& pos = transform()->pos();
-    t.setOrigin(btVector3{pos.x, pos.y, pos.z});
-    if (!ignore_rotation_) {
-      const glm::fquat& rot = transform()->rot();
-      t.setRotation(btQuaternion{rot.x, rot.y, rot.z, rot.w});
+    if (up_to_date_) {
+      const glm::vec3& pos = transform()->pos();
+      t.setOrigin(btVector3{pos.x, pos.y, pos.z});
+      if (!ignore_rotation_) {
+        const glm::fquat& rot = transform()->rot();
+        t.setRotation(btQuaternion{rot.x, rot.y, rot.z, rot.w});
+      }
+    } else {
+      t = new_transform_;
     }
   }
 
   virtual void setWorldTransform(const btTransform &t) override {
-    const btVector3& o = t.getOrigin();
-    parent_->transform()->set_pos(glm::vec3(o.x(), o.y(), o.z()));
-    if (!ignore_rotation_) {
-      const btQuaternion& r = t.getRotation();
-      parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
-                                              r.getY(), r.getZ()));
+    new_transform_ = t;
+    up_to_date_ = false;
+  }
+
+  virtual void update() override {
+    if (!up_to_date_) {
+      const btVector3& o = new_transform_.getOrigin();
+      parent_->transform()->set_pos(glm::vec3(o.x(), o.y(), o.z()));
+      if (!ignore_rotation_) {
+        const btQuaternion& r = new_transform_.getRotation();
+        parent_->transform()->set_rot(glm::quat(r.getW(), r.getX(),
+                                                r.getY(), r.getZ()));
+      }
+      up_to_date_ = true;
     }
   }
 };
@@ -448,8 +461,11 @@ class BulletHeightFieldScene : public engine::Scene {
 
   virtual void update() override {
     Scene::update();
-    world_->stepSimulation(game_time().dt, 4);
     findCollisions();
+  }
+
+  virtual void updatePhysics() override {
+    world_->stepSimulation(game_time().dt, 4);
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {

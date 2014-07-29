@@ -14,11 +14,11 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
     , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
     , uNormalMatrix_(prog_, "uNormalMatrix")
     , shadow_uMCP_(shadow_prog_, "uMCP") {
-  shadow_prog_.use();
+  gl::Use(shadow_prog_);
   gl::UniformSampler(shadow_prog_, "uDiffuseTexture").set(0);
   shadow_prog_.validate();
 
-  prog_.use();
+  gl::Use(prog_);
 
   meshes_[0] = engine::make_unique<engine::MeshRenderer>(
     "models/trees/massive_swamptree_01_a.obj",
@@ -75,7 +75,7 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
 }
 
 void Tree::shadowRender() {
-  shadow_prog_.use();
+  gl::Use(shadow_prog_);
 
   auto shadow = scene_->shadow();
   gl::TemporaryDisable cullface{gl::kCullFace};
@@ -94,7 +94,7 @@ void Tree::shadowRender() {
 }
 
 void Tree::render() {
-  prog_.use();
+  gl::Use(prog_);
   prog_.update();
 
   const auto& cam = *scene_->camera();

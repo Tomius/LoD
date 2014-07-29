@@ -98,8 +98,8 @@ void AnimatedMeshRenderer::loadBones() {
 
     // -------======{[ Upload the bone data ]}======-------
 
-    entries_[entry].vao.bind();
-    skinning_data_.vertex_bone_data_buffers[entry].bind();
+    gl::Bind(entries_[entry].vao);
+    gl::Bind(skinning_data_.vertex_bone_data_buffers[entry]);
 
     // I can't just upload to the buffer with .data(), as bones aren't stored
     // in a continuous buffer, and it is an array of not fixed sized arrays,
@@ -149,8 +149,8 @@ void AnimatedMeshRenderer::loadBones() {
   }
 
   // Unbind our things, so they won't be modified from outside
-  gl::VertexArray::Unbind();
-  gl::ArrayBuffer::Unbind();
+  gl::Unbind(gl::kArrayBuffer);
+  gl::Unbind(gl::kVertexArray);
 }
 
 /**
@@ -190,15 +190,15 @@ template <typename Index_t>
  */
 void AnimatedMeshRenderer::shaderPlumbBones(
     gl::IndexType idx_t,
-    gl::LazyVertexAttribArray boneIDs,
-    gl::LazyVertexAttribArray bone_weights,
+    gl::LazyVertexAttrib boneIDs,
+    gl::LazyVertexAttrib bone_weights,
     bool integerIDs) {
   const size_t per_attrib_size =
       sizeof(SkinningData::VertexBoneData_PerAttribute<Index_t>);
 
   for (size_t entry = 0; entry < entries_.size(); entry++) {
-    entries_[entry].vao.bind();
-    skinning_data_.vertex_bone_data_buffers[entry].bind();
+    gl::Bind(entries_[entry].vao);
+    gl::Bind(skinning_data_.vertex_bone_data_buffers[entry]);
     unsigned char current_attrib_max = skinning_data_.per_mesh_attrib_max[entry];
 
     for (unsigned char boneAttribSet = 0;
@@ -236,8 +236,8 @@ void AnimatedMeshRenderer::shaderPlumbBones(
   }
 
   // Unbind our things, so they won't be modified from outside
-  gl::VertexArray::Unbind();
-  gl::ArrayBuffer::Unbind();
+  gl::Unbind(gl::kArrayBuffer);
+  gl::Unbind(gl::kVertexArray);
 }
 
 /**
@@ -360,8 +360,8 @@ size_t AnimatedMeshRenderer::getBoneAttribNum() {
  * @param integerIDs     If true, boneIDs are uploaded as integers
  *                       (#version 130+) else they are uploaded as floats
  */
-void AnimatedMeshRenderer::setupBones(gl::LazyVertexAttribArray boneIDs,
-                                      gl::LazyVertexAttribArray bone_weights,
+void AnimatedMeshRenderer::setupBones(gl::LazyVertexAttrib boneIDs,
+                                      gl::LazyVertexAttrib bone_weights,
                                       bool integerIDs) {
 if (!skinning_data_.is_setup_bones) {
     skinning_data_.is_setup_bones = true;

@@ -55,13 +55,10 @@ class MeshRenderer {
   /// A struct containin the state and data of a material type.
   struct MaterialInfo {
     bool active;
-    int texUnit;
+    int tex_unit;
     std::vector<gl::Texture2D> textures;
 
-
-    MaterialInfo()
-      : active(false), texUnit(0) {
-    }
+    MaterialInfo() : active(false), tex_unit(0) {}
   };
 
   /// The materials.
@@ -112,13 +109,13 @@ public:
     * Calling this function changes the currently active VAO, ArrayBuffer and IndexBuffer.
     * The mesh cannot be drawn without calling this function.
     * @param attrib - The attribute array to use as destination. */
-  void setupPositions(gl::VertexAttribArray attrib);
+  void setupPositions(gl::VertexAttrib attrib);
 
   /// Loads in vertex normals, and uploads it to an attribute array.
   /** Uploads the vertex normals data to an attribute array, and sets it up for use.
     * Calling this function changes the currently active VAO and ArrayBuffer.
     * @param attrib - The attribute array to use as destination. */
-  void setupNormals(gl::VertexAttribArray attrib);
+  void setupNormals(gl::VertexAttrib attrib);
 
   /// Checks if every mesh in the scene has tex_coords
   /** Returns true if all of the meshes in the scene have texture
@@ -133,7 +130,7 @@ public:
     * Calling this function changes the currently active VAO and ArrayBuffer.
     * @param attrib - The attribute array to use as destination.
     * @param tex_coord_set Specifies the index of the texture coordinate set that should be used */
-  void setupTexCoords(gl::VertexAttribArray attrib,
+  void setupTexCoords(gl::VertexAttrib attrib,
                       unsigned char tex_coord_set = 0);
 
   /**

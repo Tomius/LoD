@@ -17,12 +17,12 @@ Terrain::Terrain(engine::GameObject* parent)
     , uShadowCP_(prog_, "uShadowCP")
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowAtlasSize_(prog_, "uShadowAtlasSize") {
-  prog_.use();
+  gl::Use(prog_);
   mesh_.setup(prog_, 1);
   gl::UniformSampler(prog_, "uGrassMap0").set(2);
   gl::UniformSampler(prog_, "uGrassMap1").set(3);
   for (int i = 0; i < 2; ++i) {
-    grassMaps_[i].bind();
+    gl::Bind(grassMaps_[i]);
     // no alpha channel here
     grassMaps_[i].loadTexture(
       i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg", "CSRGB");
@@ -35,7 +35,7 @@ Terrain::Terrain(engine::GameObject* parent)
   }
 
   gl::UniformSampler(prog_, "uGrassNormalMap").set(4);
-  grassNormalMap_.bind();
+  gl::Bind(grassNormalMap_);
   {
     // the normal map doesn't have an alpha channel, and is not is srgb space
     grassNormalMap_.loadTexture("textures/grass_normal.jpg", "CRGB");
@@ -55,7 +55,7 @@ void Terrain::render() {
   const engine::Camera& cam = *scene_->camera();
   const Shadow *shadow = scene_->shadow();
 
-  prog_.use();
+  gl::Use(prog_);
   prog_.update();
   uCameraMatrix_ = cam.cameraMatrix();
   uProjectionMatrix_ = cam.projectionMatrix();
@@ -68,17 +68,21 @@ void Terrain::render() {
     uShadowAtlasSize_ = shadow->getAtlasDimensions();
   }
 
-  grassMaps_[0].bind(2);
-  grassMaps_[1].bind(3);
-  grassNormalMap_.bind(4);
-  if (shadow) { shadow->shadowTex().bind(5); }
+  gl::BindToTexUnit(grassMaps_[0], 2);
+  gl::BindToTexUnit(grassMaps_[1], 3);
+  gl::BindToTexUnit(grassNormalMap_, 4);
+  if (shadow) {
+    gl::BindToTexUnit(shadow->shadowTex(), 5);
+  }
 
   mesh_.render(cam);
 
-  if (shadow) { shadow->shadowTex().unbind(5); }
-  grassNormalMap_.unbind(4);
-  grassMaps_[1].unbind(3);
-  grassMaps_[0].unbind(2);
+  if (shadow) {
+    gl::UnbindFromTexUnit(shadow->shadowTex(), 5);
+  }
+  gl::UnbindFromTexUnit(grassNormalMap_, 4);
+  gl::UnbindFromTexUnit(grassMaps_[1], 3);
+  gl::UnbindFromTexUnit(grassMaps_[0], 2);
 }
 
 

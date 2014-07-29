@@ -11,7 +11,7 @@ namespace engine {
 
 template<typename T, char NUM_COMPONENTS>
 TextureSource<T, NUM_COMPONENTS>::TextureSource(const std::string& file_name,
-                                            std::string format_string) {
+                                                std::string format_string) {
   // Preprocess format_string: 'S', 'C' and 'I' have special meaning
   size_t s_pos = format_string.find('S');
   if(s_pos != std::string::npos) {
@@ -119,7 +119,7 @@ gl::PixelDataFormat TextureSource<T, NUM_COMPONENTS>::format() const {
 
 template<typename T, char NUM_COMPONENTS>
 gl::PixelDataInternalFormat
-TextureSource<T, NUM_COMPONENTS>::internalFormat() const {
+TextureSource<T, NUM_COMPONENTS>::internal_format() const {
   // FIXME: The integer and unsigned integer textures have different internalFormats
   // like kR8I and kR8Ui
   if (std::is_same<T, char>::value ||
@@ -216,7 +216,7 @@ gl::PixelDataType TextureSource<T, NUM_COMPONENTS>::type() const {
 
 template<typename T, char NUM_COMPONENTS>
 void TextureSource<T, NUM_COMPONENTS>::upload(gl::Texture2D& tex) const {
-  upload(tex, internalFormat());
+  upload(tex, internal_format());
 }
 
 template<typename T, char NUM_COMPONENTS>

@@ -35,8 +35,8 @@ class Box : public engine::GameObject {
       , rect_({gl::RectangleShape::kPosition, gl::RectangleShape::kTexCoord}) {
     gl::VertexShader vs("engine/box.vert");
     gl::FragmentShader fs("engine/box.frag");
-    prog_ << vs << fs;
-    prog_.link().use();
+    (prog_ << vs << fs).link();
+    gl::Use(prog_);
 
     (prog_ | "aPosition").bindLocation(rect_.kPosition);
     (prog_ | "aTexCoord").bindLocation(rect_.kTexCoord);
@@ -64,7 +64,7 @@ class Box : public engine::GameObject {
   }
 
   void set_inverted(bool value) {
-    prog_.use();
+    gl::Use(prog_);
     if (value) {
       gl::Uniform<glm::vec4>(prog_, "uBgTopColor") = params_.bg_top_mid_color;
       gl::Uniform<glm::vec4>(prog_, "uBgTopMidColor") = params_.bg_top_color;
@@ -102,7 +102,7 @@ class Box : public engine::GameObject {
     glm::vec2 border_width = params_.border_width /
         (params_.extent * glm::vec2(0.99f * width, 0.99f * height));
 
-    prog_.use();
+    gl::Use(prog_);
     gl::Uniform<glm::vec2>(prog_, "uBorderWidth") = border_width;
 
     glm::vec2 corners[4] = {glm::vec2{-1, -1}, glm::vec2{-1, +1},
@@ -123,7 +123,7 @@ class Box : public engine::GameObject {
   }
 
   virtual void render2D() override {
-    prog_.use();
+    gl::Use(prog_);
     rect_.render();
   }
 };

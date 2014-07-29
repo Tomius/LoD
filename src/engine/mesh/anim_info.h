@@ -7,7 +7,6 @@
 #include <memory>
 
 #include "../oglwrap_config.h"
-#include "../../oglwrap/general.h"
 
 #include "anim_state.h"
 #include "../assimp.h"

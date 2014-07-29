@@ -42,7 +42,7 @@ DebugShape<Shape_t>::DebugShape(GameObject* parent, const glm::vec3& color)
 
 template<typename Shape_t>
 void DebugShape<Shape_t>::render() {
-  prog_->use();
+  gl::Use(*prog_);
   const auto& cam = *scene_->camera();
   uCameraMatrix_->set(cam.cameraMatrix());
   uProjectionMatrix_->set(cam.projectionMatrix());

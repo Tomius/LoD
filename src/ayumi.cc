@@ -46,14 +46,13 @@ Ayumi::Ayumi(engine::GameObject* parent)
     , was_left_click_(false)
     , charmove_(nullptr)
     , bsphere_(mesh_.bSphere()) {
-  shadow_prog_.validate();
-  prog_.use();
+  gl::Use(prog_);
 
   mesh_.setupPositions(prog_ | "aPosition");
   mesh_.setupTexCoords(prog_ | "aTexCoord");
   mesh_.setupNormals(prog_ | "aNormal");
-  gl::LazyVertexAttribArray boneIDs(prog_, "aBoneIDs", false);
-  gl::LazyVertexAttribArray weights(prog_, "aWeights", false);
+  gl::LazyVertexAttrib boneIDs(prog_, "aBoneIDs", false);
+  gl::LazyVertexAttrib weights(prog_, "aWeights", false);
   mesh_.setupBones(boneIDs, weights, false);
 
   mesh_.setupDiffuseTextures(1);
@@ -162,7 +161,7 @@ void Ayumi::update() {
 }
 
 void Ayumi::shadowRender() {
-  shadow_prog_.use();
+  gl::Use(shadow_prog_);
   shadow_uMCP_ =
     scene_->shadow()->modelCamProjMat(bsphere_, transform()->matrix(),
                                      mesh_.worldTransform());
@@ -182,7 +181,7 @@ void Ayumi::shadowRender() {
 }
 
 void Ayumi::render() {
-  prog_.use();
+  gl::Use(prog_);
   prog_.update();
   const auto& cam = *scene_->camera();
   uCameraMatrix_ = cam.cameraMatrix();

@@ -62,12 +62,12 @@ class QuadTree {
     return node_dimension_;
   }
 
-  void setupPositions(gl::VertexAttribArray attrib) {
+  void setupPositions(gl::VertexAttrib attrib) {
     mesh_.setupPositions(attrib);
   }
 
   // Uses vertex attrib divisor!
-  void setupRenderData(gl::VertexAttribArray attrib) {
+  void setupRenderData(gl::VertexAttrib attrib) {
     mesh_.setupRenderData(attrib);
   }
 

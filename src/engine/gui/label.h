@@ -32,7 +32,8 @@ class Label : public GameObject {
     gl::VertexShader vs("engine/text.vert");
     gl::FragmentShader fs("engine/text.frag");
 
-    (prog_ << vs << fs).link().use();
+    (prog_ << vs << fs).link();
+    gl::Use(prog_);
     gl::Uniform<glm::vec4>(prog_, "uColor") = font.color();
 
     set_text(text, cursor_pos);
@@ -63,7 +64,7 @@ class Label : public GameObject {
       actual_pos.y += size().y;
     }
 
-    prog_.use();
+    gl::Use(prog_);
     gl::Uniform<glm::vec2>(prog_, "uOffset") = actual_pos;
   }
 
@@ -145,15 +146,15 @@ class Label : public GameObject {
     // Update the length of the text
     size_.x = x1;
 
-    prog_.use();
-    vao_.bind();
-    attribs_.bind();
+    gl::Use(prog_);
+    gl::Bind(vao_);
+    gl::Bind(attribs_);
     attribs_.data(attribs_vec);
     (prog_ | "aPosition").pointer(2, gl::kFloat, false,
                                   4*sizeof(GLfloat), 0).enable();
     (prog_ | "aTexCoord").pointer(2, gl::kFloat, false, 4*sizeof(GLfloat),
                                   (const void*)(2*sizeof(GLfloat))).enable();
-    vao_.unbind();
+    gl::Unbind(vao_);
 
     vertex_count_ = attribs_vec.size();
   }
@@ -161,7 +162,7 @@ class Label : public GameObject {
   const Font& font() const { return font_; }
   const glm::vec4& color() const { return font_.color(); }
   void set_color(const glm::vec4& color) {
-    prog_.use();
+    gl::Use(prog_);
     gl::Uniform<glm::vec4>(prog_, "uColor") = color;
     font_.set_color(color);
   }
@@ -191,21 +192,21 @@ class Label : public GameObject {
   }
 
   virtual void screenResized(size_t width, size_t height) override {
-    prog_.use();
+    gl::Use(prog_);
     gl::Uniform<glm::mat4>(prog_, "uProjectionMatrix") =
       glm::ortho<float>(-int(width)/2, width/2, -int(height)/2, height/2, -1, 1);
     set_position(pos_);
   }
 
   virtual void render2D() override {
-    prog_.use();
-    vao_.bind();
+    gl::Use(prog_);
+    gl::Bind(vao_);
 
-    gl::Texture2D::Active(0);
+    gl::ActiveTexture(0);
     font_.bindTexture();
     gl::DrawArrays(gl::kTriangles, 0, vertex_count_);
 
-    vao_.unbind();
+    gl::Unbind(vao_);
   }
 };
 

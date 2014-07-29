@@ -22,7 +22,7 @@ TerrainMesh::TerrainMesh(engine::ShaderManager* manager,
 }
 
 void TerrainMesh::setup(const gl::Program& program, int tex_unit) {
-  program.use();
+  gl::Use(program);
 
   mesh_.setupPositions(program | "CDLODTerrain_aPosition");
 
@@ -44,12 +44,11 @@ void TerrainMesh::setup(const gl::Program& program, int tex_unit) {
   gl::Uniform<glm::vec2>(program, "CDLODTerrain_uTexSize") =
       glm::vec2(height_map_.w(), height_map_.h());
 
-  height_map_tex_.active(tex_unit);
-  height_map_tex_.bind();
+  gl::BindToTexUnit(height_map_tex_, tex_unit);
   height_map_.upload(height_map_tex_);
   height_map_tex_.minFilter(gl::kLinear);
   height_map_tex_.magFilter(gl::kLinear);
-  height_map_tex_.unbind();
+  gl::Unbind(height_map_tex_);
 }
 
 void TerrainMesh::render(const Camera& cam) {
@@ -58,8 +57,7 @@ void TerrainMesh::render(const Camera& cam) {
                            "before the use of the render() function.");
   }
 
-  height_map_tex_.active(tex_unit_);
-  height_map_tex_.bind();
+  gl::BindToTexUnit(height_map_tex_, tex_unit_);
 
   uCamPos_->set(cam.transform()->pos());
 
@@ -73,8 +71,7 @@ void TerrainMesh::render(const Camera& cam) {
   #endif
     mesh_.render(cam, *uRenderData_);
 
-  height_map_tex_.active(tex_unit_);
-  height_map_tex_.unbind();
+  gl::UnbindFromTexUnit(height_map_tex_, tex_unit_);
 }
 
 }  // namespace cdlod

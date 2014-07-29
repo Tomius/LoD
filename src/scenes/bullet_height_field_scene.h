@@ -304,7 +304,7 @@ class BulletTree : public engine::GameObject {
       , uNormalMatrix_(prog_, "uNormalMatrix") {
     transform()->set_pos(pos);
 
-    prog_.use();
+    gl::Use(prog_);
     mesh_.setupPositions(prog_ | "aPosition");
     mesh_.setupTexCoords(prog_ | "aTexCoord");
     mesh_.setupNormals(prog_ | "aNormal");
@@ -330,7 +330,7 @@ class BulletTree : public engine::GameObject {
   std::unique_ptr<btTriangleIndexVertexArray> triangles_;
 
   virtual void render() override {
-    prog_.use();
+    gl::Use(prog_);
     prog_.update();
 
     const auto& cam = *scene_->camera();
@@ -356,6 +356,76 @@ class BulletTree : public engine::GameObject {
     mesh_.render();
   }
 };
+
+// class BulletForest {
+//   class BulletTree : public engine::GameObject {
+//  public:
+//   BulletTree(GameObject *parent, const Transform& transform)
+//       : GameObject(parent, transform)
+//       , mesh_("models/trees/massive_swamptree_01_a.obj",
+//               aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
+//               aiProcess_PreTransformVertices)
+//       , collision_mesh_("models/trees/massive_swamptree_01_a_collider.obj",
+//                         aiProcess_PreTransformVertices)
+//       , prog_(scene_->shader_manager()->get("tree.vert"),
+//               scene_->shader_manager()->get("tree.frag"))
+//       , uProjectionMatrix_(prog_, "uProjectionMatrix")
+//       , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
+//       , uNormalMatrix_(prog_, "uNormalMatrix") {
+
+//     gl::Use(prog_);
+//     mesh_.setupPositions(prog_ | "aPosition");
+//     mesh_.setupTexCoords(prog_ | "aTexCoord");
+//     mesh_.setupNormals(prog_ | "aNormal");
+//     mesh_.setupDiffuseTextures(0);
+//     gl::UniformSampler(prog_, "uDiffuseTexture").set(0);
+//     bbox_ = mesh_.boundingBox(transform()->matrix());
+
+//     triangles_ = std::unique_ptr<btTriangleIndexVertexArray>{
+//       new btTriangleIndexVertexArray()};
+//     indices_ = collision_mesh_.btTriangles(triangles_.get());
+
+//     btCollisionShape* shape = new btBvhTriangleMeshShape(triangles_.get(), true);
+//     addComponent<BulletRigidBody>(0, shape);
+//   }
+
+//  private:
+//   engine::MeshRenderer mesh_, collision_mesh_;
+//   engine::ShaderProgram prog_;
+//   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
+//   gl::LazyUniform<glm::mat3> uNormalMatrix_;
+//   engine::BoundingBox bbox_;
+//   std::vector<int> indices_;
+//   std::unique_ptr<btTriangleIndexVertexArray> triangles_;
+
+//   virtual void render() override {
+//     gl::Use(prog_);
+//     prog_.update();
+
+//     const auto& cam = *scene_->camera();
+//     uProjectionMatrix_ = cam.projectionMatrix();
+
+//     gl::TemporarySet capabilities{{{gl::kBlend, true},
+//                                    {gl::kCullFace, false}}};
+//     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
+
+//     auto campos = cam.transform()->pos();
+//     auto cam_mx = cam.cameraMatrix();
+//     auto frustum = cam.frustum();
+
+//     // Check for visibility
+//     if (!bbox_.collidesWithFrustum(frustum) ||
+//         glm::length(transform()->pos() - campos) > 1500) {
+//       return;
+//     }
+
+//     glm::mat4 model_mx = transform()->matrix();
+//     uModelCameraMatrix_.set(cam_mx * model_mx);
+//     uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
+//     mesh_.render();
+//   }
+// };
+// };
 
 class BulletHeightFieldScene : public engine::Scene {
   void shootSphere(float speed = 20.0f) {

@@ -41,15 +41,15 @@ class GridMesh {
 
  public:
   GridMesh(GLubyte dimension);
-  void setupPositions(gl::VertexAttribArray attrib);
-  void setupRenderData(gl::VertexAttribArray attrib);
+  void setupPositions(gl::VertexAttrib attrib);
+  void setupRenderData(gl::VertexAttrib attrib);
 
   // xy: offset, z: scale, w: level
   void addToRenderList(const glm::vec4& render_data);
   void clearRenderList();
 
   // render with vertex attrib divisor
-  void render() const;
+  void render();
 
   // render with uniforms
   void render(gl::UniformObject<glm::vec4> uRenderData) const;

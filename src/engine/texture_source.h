@@ -48,7 +48,7 @@ class TextureSource {
   virtual gl::PixelDataFormat format() const;
 
   // Returns the default internal-format for this format.
-  virtual gl::PixelDataInternalFormat internalFormat() const;
+  virtual gl::PixelDataInternalFormat internal_format() const;
 
   // Returns the type of the height data
   virtual gl::PixelDataType type() const;

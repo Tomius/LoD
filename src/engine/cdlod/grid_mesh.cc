@@ -14,7 +14,7 @@ GLushort GridMesh::indexOf(int x, int y) {
   return (dimension_ + 1) * y + x;
 }
 
-void GridMesh::setupPositions(gl::VertexAttribArray attrib) {
+void GridMesh::setupPositions(gl::VertexAttrib attrib) {
   std::vector<svec2> positions;
   positions.reserve((dimension_+1) * (dimension_+1));
 
@@ -40,24 +40,25 @@ void GridMesh::setupPositions(gl::VertexAttribArray attrib) {
     indices.push_back(indexOf(-dim2, y+1));
   }
 
-  vao_.bind();
-  aPositions_.bind();
+  gl::Bind(vao_);
+  gl::Bind(aPositions_);
   aPositions_.data(positions);
   attrib.pointer(2, gl::DataType::kShort).enable();
+  gl::Unbind(aPositions_);
 
-  aIndices_.bind();
+  gl::Bind(aIndices_);
   aIndices_.data(indices);
-  vao_.unbind();
+  gl::Unbind(vao_);
 }
 
-void GridMesh::setupRenderData(gl::VertexAttribArray attrib) {
+void GridMesh::setupRenderData(gl::VertexAttrib attrib) {
 #ifdef glVertexAttribDivisor
   if (glVertexAttribDivisor) {
-    vao_.bind();
-    aRenderData_.bind();
+    gl::Bind(vao_);
+    gl::Bind(aRenderData_);
     attrib.setup<glm::vec4>().enable();
     attrib.divisor(1);
-    vao_.unbind();
+    gl::Unbind(vao_);
   }
 #endif
 }
@@ -70,22 +71,21 @@ void GridMesh::clearRenderList() {
   render_data_.erase(render_data_.begin(), render_data_.end());
 }
 
-void GridMesh::render() const {
+void GridMesh::render() {
 #if defined(glDrawElementsInstanced) && defined(glVertexAttribDivisor)
   if (glVertexAttribDivisor) {
     using gl::PrimType;
     using gl::IndexType;
 
-    vao_.bind();
-
-    aRenderData_.bind();
+    gl::Bind(vao_);
+    gl::Bind(aRenderData_);
     aRenderData_.data(render_data_);
 
     gl::DrawElementsInstanced(PrimType::kTriangleStrip,
                               index_count_,
                               IndexType::kUnsignedShort,
                               render_data_.size());   // instance count
-    vao_.unbind();
+    gl::Unbind(vao_);
   }
 #endif
 }
@@ -94,14 +94,14 @@ void GridMesh::render(gl::UniformObject<glm::vec4> uRenderData) const {
   using gl::PrimType;
   using gl::IndexType;
 
-  vao_.bind();
+  gl::Bind(vao_);
   for(auto& data : render_data_) {
     uRenderData = data;
     gl::DrawElements(PrimType::kTriangleStrip,
                     index_count_,
                     IndexType::kUnsignedShort);
   }
-  vao_.unbind();
+  gl::Unbind(vao_);
 }
 
 } // namespace cdlod

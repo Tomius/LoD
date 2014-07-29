@@ -23,15 +23,14 @@ public:
       : rect_({gl::RectangleShape::kPosition, gl::RectangleShape::kTexCoord}) {
     gl::VertexShader vs("loading.vert");
     gl::FragmentShader fs("loading.frag");
-    prog_ << vs << fs;
-    prog_.link().use();
+    (prog_ << vs << fs).link();
+    gl::Use(prog_);
 
-    tex_.active(0);
-    tex_.bind();
+    gl::Bind(tex_);
     tex_.loadTexture("textures/loading.png");
     tex_.minFilter(gl::kLinear);
     tex_.magFilter(gl::kLinear);
-    tex_.unbind();
+    gl::Unbind(tex_);
 
     gl::UniformSampler(prog_, "uTex").set(0);
 
@@ -42,15 +41,14 @@ public:
   }
 
   void render() {
-    prog_.use();
-    tex_.active(0);
-    tex_.bind();
+    gl::Use(prog_);
+    gl::BindToTexUnit(tex_, 0);
 
     gl::TemporarySet capabilies{{{gl::kCullFace, false},
                                  {gl::kDepthTest, false}}};
 
     rect_.render();
-    tex_.unbind();
+    gl::Unbind(tex_);
   }
 };
 

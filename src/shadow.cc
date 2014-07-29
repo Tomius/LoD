@@ -18,7 +18,7 @@ Shadow::Shadow(GameObject* parent, Skybox* skybox, int shadow_map_size,
     , max_depth_(xsize_*ysize_)
     , cp_matrices_(max_depth_)
     , skybox_(skybox)  {
-  tex_.bind();
+  gl::Bind(tex_);
   tex_.upload(gl::kDepthComponent, size_*xsize_, size_*ysize_,
               gl::kDepthComponent, gl::kFloat, nullptr);
   tex_.maxAnisotropy();
@@ -27,15 +27,15 @@ Shadow::Shadow(GameObject* parent, Skybox* skybox, int shadow_map_size,
   tex_.wrapS(gl::kClampToBorder);
   tex_.wrapT(gl::kClampToBorder);
   tex_.borderColor(glm::vec4(1.0f));
-  tex_.unbind();
+  gl::Unbind(tex_);
 
   // Setup the FBO
-  fbo_.bind();
+  gl::Bind(fbo_);
   fbo_.attachTexture(gl::kDepthAttachment, tex_, 0);
   // No color output in the bound framebuffer, only depth.
   gl::DrawBuffer(gl::kNone);
   fbo_.validate();
-  fbo_.unbind();
+  gl::Unbind(fbo_);
 }
 
 void Shadow::screenResized(size_t width, size_t height) {
@@ -87,7 +87,7 @@ const gl::Texture2D& Shadow::shadowTex() const {
 }
 
 void Shadow::begin() {
-  fbo_.bind();
+  gl::Bind(fbo_);
   curr_depth_ = 0;
 
   // Clear the shadowmap atlas
@@ -119,9 +119,9 @@ size_t Shadow::getMaxDepth() const {
 
 void Shadow::end() {
   if (default_fbo_) {
-    default_fbo_->bind();
+    gl::Bind(*default_fbo_);
   } else {
-    fbo_.unbind();
+    gl::Unbind(fbo_);
   }
   gl::Viewport(w_, h_);
 }

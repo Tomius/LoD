@@ -18,7 +18,8 @@ Skybox::Skybox(engine::GameObject* parent)
     gl::Uniform<glm::vec3>(prog, "uSunPos") = getSunPos();
   });
 
-  prog_.use().validate();
+  gl::Use(prog_);
+  prog_.validate();
   (prog_ | "aPosition").bindLocation(cube_.kPosition);
 }
 
@@ -41,7 +42,7 @@ void Skybox::update() {
 void Skybox::render() {
   auto cam = scene_->camera();
 
-  prog_.use();
+  gl::Use(prog_);
   prog_.update();
   uCameraMatrix_ = glm::mat3(cam->cameraMatrix());
   uProjectionMatrix_ = cam->projectionMatrix();

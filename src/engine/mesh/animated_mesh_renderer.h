@@ -8,6 +8,7 @@
 
 #include "../oglwrap_config.h"
 #include "../../oglwrap/uniform.h"
+#include "../../oglwrap/smart_enums.h"
 
 #include "./mesh_renderer.h"
 #include "./anim_state.h"
@@ -82,8 +83,8 @@ class AnimatedMeshRenderer : public MeshRenderer {
    *                       for bone weights.
    * @param integerIDs     If true, boneIDs are uploaded as integers
    *                       (#version 130+) else they are uploaded as floats */
-  void setupBones(gl::LazyVertexAttribArray boneIDs,
-                  gl::LazyVertexAttribArray bone_weights,
+  void setupBones(gl::LazyVertexAttrib boneIDs,
+                  gl::LazyVertexAttrib bone_weights,
                   bool integerIDs = true);
 
   // -------------------------------- Animation --------------------------------
@@ -195,8 +196,8 @@ class AnimatedMeshRenderer : public MeshRenderer {
    * @param integerIDs     If true, boneIDs are uploaded as integers
    *                       (#version 130+) else they are uploaded as floats */
   void shaderPlumbBones(gl::IndexType idx_t,
-                        gl::LazyVertexAttribArray boneIDs,
-                        gl::LazyVertexAttribArray bone_weights,
+                        gl::LazyVertexAttrib boneIDs,
+                        gl::LazyVertexAttrib bone_weights,
                         bool integerWeights = true);
 
   /**

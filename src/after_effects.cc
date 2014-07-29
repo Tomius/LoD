@@ -13,7 +13,7 @@ AfterEffects::AfterEffects(GameObject *parent, Skybox* skybox)
     , uZNear_(prog_, "uZNear")
     , uZFar_(prog_, "uZFar")
     , skybox_(skybox) {
-  prog_.use();
+  gl::Use(prog_);
 
   gl::UniformSampler(prog_, "uTex").set(0);
   gl::UniformSampler(prog_, "uDepthTex").set(1);
@@ -21,54 +21,55 @@ AfterEffects::AfterEffects(GameObject *parent, Skybox* skybox)
 
   prog_.validate();
 
-  color_tex_.bind();
+  gl::Bind(color_tex_);
   color_tex_.upload(gl::kRgb, 1, 1, gl::kRgb, gl::kFloat, nullptr);
   color_tex_.minFilter(gl::kLinearMipmapLinear);
   color_tex_.magFilter(gl::kLinear);
-  color_tex_.unbind();
+  gl::Unbind(color_tex_);
 
-  depth_tex_.bind();
+  gl::Bind(depth_tex_);
   depth_tex_.upload(gl::kDepthComponent, 1, 1,
                     gl::kDepthComponent, gl::kFloat, nullptr);
   depth_tex_.minFilter(gl::kLinear);
   depth_tex_.magFilter(gl::kLinear);
-  depth_tex_.unbind();
+  gl::Unbind(depth_tex_);
 
-  fbo_.bind();
+  gl::Bind(fbo_);
   fbo_.attachTexture(gl::kColorAttachment0, color_tex_);
   fbo_.attachTexture(gl::kDepthAttachment, depth_tex_);
   fbo_.validate();
-  fbo_.unbind();
+  gl::Unbind(fbo_);
 }
 
 void AfterEffects::screenResized(size_t w, size_t h) {
   width_ = w;
   height_ = h;
-  prog_.use();
+  gl::Use(prog_);
   uScreenSize_ = glm::vec2(w, h);
 
-  color_tex_.bind();
+  gl::Bind(color_tex_);
   color_tex_.upload(gl::kRgb, width_, height_, gl::kRgb, gl::kFloat, nullptr);
-  color_tex_.unbind();
+  gl::Unbind(color_tex_);
 
-  depth_tex_.bind();
+  gl::Bind(depth_tex_);
   depth_tex_.upload(gl::kDepthComponent, width_, height_,
                     gl::kDepthComponent, gl::kFloat, nullptr);
-  depth_tex_.unbind();
+  gl::Unbind(depth_tex_);
 }
 
 void AfterEffects::update() {
-  fbo_.bind();
+  gl::Bind(fbo_);
   gl::Clear().Color().Depth();
 }
 
 void AfterEffects::render() {
-  fbo_.Unbind();
-  color_tex_.bind(0);
-  color_tex_.generateMipmap();
-  depth_tex_.bind(1);
+  gl::Unbind(gl::kFramebuffer);
 
-  prog_.use();
+  gl::BindToTexUnit(color_tex_, 0);
+  color_tex_.generateMipmap();
+  gl::BindToTexUnit(depth_tex_, 1);
+
+  gl::Use(prog_);
   prog_.update();
 
   auto cam = scene_->camera();
@@ -83,6 +84,6 @@ void AfterEffects::render() {
 
   rect_.render();
 
-  depth_tex_.unbind(1);
-  color_tex_.unbind(0);
+  gl::UnbindFromTexUnit(depth_tex_, 1);
+  gl::UnbindFromTexUnit(color_tex_, 0);
 }

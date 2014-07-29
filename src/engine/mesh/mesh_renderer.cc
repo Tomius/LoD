@@ -1,6 +1,5 @@
 // Copyright (c) 2014, Tamas Csala
 
-
 #include <vector>
 #include "./mesh_renderer.h"
 #include "../../oglwrap/context.h"
@@ -105,7 +104,7 @@ void MeshRenderer::setIndices(size_t index) {
                  "This might result in rendering artifacts." << std::endl;
   }
 
-  entries_[index].indices.bind();
+  gl::Bind(entries_[index].indices);
   entries_[index].indices.data(indices_vector);
   entries_[index].idx_count = indices_vector.size();
 }
@@ -115,7 +114,7 @@ void MeshRenderer::setIndices(size_t index) {
   * Calling this function changes the currently active VAO, ArrayBuffer and IndexBuffer.
   * The mesh cannot be drawn without calling this function.
   * @param attrib - The attribute array to use as destination. */
-void MeshRenderer::setupPositions(gl::VertexAttribArray attrib) {
+void MeshRenderer::setupPositions(gl::VertexAttrib attrib) {
   if (!is_setup_positions_) {
     is_setup_positions_ = true;
   } else {
@@ -132,11 +131,11 @@ void MeshRenderer::setupPositions(gl::VertexAttribArray attrib) {
 
   for (size_t i = 0; i < entries_.size(); i++) {
     const aiMesh* mesh = scene_->mMeshes[i];
-    entries_[i].vao.bind();
+    gl::Bind(entries_[i].vao);
 
     // ~~~~~~<{ Load the vertices }>~~~~~~
 
-    entries_[i].verts.bind();
+    gl::Bind(entries_[i].verts);
     entries_[i].verts.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mVertices);
     attrib.setup<glm::vec3>().enable();
 
@@ -154,15 +153,15 @@ void MeshRenderer::setupPositions(gl::VertexAttribArray attrib) {
     }
   }
 
-  gl::VertexArray::Unbind();
-  gl::ArrayBuffer::Unbind();
+  gl::Unbind(gl::kArrayBuffer);
+  gl::Unbind(gl::kVertexArray);
 }
 
 /// Loads in vertex normals, and uploads it to an attribute array.
 /** Uploads the vertex normals data to an attribute array, and sets it up for use.
   * Calling this function changes the currently active VAO and ArrayBuffer.
   * @param attrib - The attribute array to use as destination. */
-void MeshRenderer::setupNormals(gl::VertexAttribArray attrib) {
+void MeshRenderer::setupNormals(gl::VertexAttrib attrib) {
   if (!is_setup_normals_) {
     is_setup_normals_ = true;
   } else {
@@ -179,15 +178,15 @@ void MeshRenderer::setupNormals(gl::VertexAttribArray attrib) {
 
   for (size_t i = 0; i < entries_.size(); i++) {
     const aiMesh* mesh = scene_->mMeshes[i];
-    entries_[i].vao.bind();
+    gl::Bind(entries_[i].vao);
 
-    entries_[i].normals.bind();
+    gl::Bind(entries_[i].normals);
     entries_[i].normals.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mNormals);
     attrib.setup<float>(3).enable();
   }
 
-  gl::VertexArray::Unbind();
-  gl::ArrayBuffer::Unbind();
+  gl::Unbind(gl::kArrayBuffer);
+  gl::Unbind(gl::kVertexArray);
 }
 
 /// Checks if every mesh in the scene has tex_coords
@@ -213,7 +212,7 @@ bool MeshRenderer::hasTexCoords(unsigned char tex_coord_set) {
   * @param attrib - The attribute array to use as destination.
   * @param tex_coord_set  Specifies the index of the texture coordinate set
   *                     that should be used */
-void MeshRenderer::setupTexCoords(gl::VertexAttribArray attrib,
+void MeshRenderer::setupTexCoords(gl::VertexAttrib attrib,
                                   unsigned char tex_coord_set) {
   if (!is_setup_tex_coords_) {
     is_setup_tex_coords_ = true;
@@ -247,15 +246,15 @@ void MeshRenderer::setupTexCoords(gl::VertexAttribArray attrib,
       tex_coords_vector.resize(vert_num);
     }
 
-    entries_[i].vao.bind();
+    gl::Bind(entries_[i].vao);
 
-    entries_[i].tex_coords.bind();
+    gl::Bind(entries_[i].tex_coords);
     entries_[i].tex_coords.data(tex_coords_vector);
     attrib.setup<float>(2).enable();
   }
 
-  gl::VertexArray::Unbind();
-  gl::ArrayBuffer::Unbind();
+  gl::Unbind(gl::kArrayBuffer);
+  gl::Unbind(gl::kVertexArray);
 }
 
 #if OGLWRAP_USE_IMAGEMAGICK
@@ -280,10 +279,10 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
                                  unsigned int type,
                                  unsigned int idx,
                                  bool srgb) {
-  gl::Texture2D::Active(texture_unit);
+  gl::ActiveTexture(texture_unit);
 
   materials_[tex_type].active = true;
-  materials_[tex_type].texUnit = texture_unit;
+  materials_[tex_type].tex_unit = texture_unit;
   materials_[tex_type].textures.resize(scene_->mNumMaterials);
 
   if (scene_->mNumMaterials) {
@@ -306,7 +305,7 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
 
       aiString filepath;
       if (mat->GetTexture(tex_type, 0, &filepath) == AI_SUCCESS) {
-        materials_[tex_type].textures[i].bind();
+        gl::Bind(materials_[tex_type].textures[i]);
         materials_[tex_type].textures[i].loadTexture(dir + filepath.data,
                                                      srgb ? "CSRGBA" : "CRGBA");
         materials_[tex_type].textures[i].minFilter(gl::kLinear);
@@ -315,7 +314,7 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
         aiColor4D color(0.f, 0.f, 0.f, 1.0f);
         mat->Get(pKey, type, idx, color);
 
-        materials_[tex_type].textures[i].bind();
+        gl::Bind(materials_[tex_type].textures[i]);
         materials_[tex_type].textures[i].upload(gl::kRgba32F, 1, 1, gl::kRgba,
                                                 gl::kFloat, &color.r);
         materials_[tex_type].textures[i].minFilter(gl::kNearest);
@@ -324,7 +323,7 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
     }
   }
 
-  gl::Texture2D::Unbind();
+  gl::Unbind(gl::kTexture2D);
 }
 #endif
 
@@ -351,7 +350,7 @@ void MeshRenderer::render() {
     return;  // we can't render the mesh, if we don't have any vertex.
   }
   for (size_t i = 0 ; i < entries_.size(); i++) {
-    entries_[i].vao.bind();
+    gl::Bind(entries_[i].vao);
 
     const size_t material_index = entries_[i].material_index;
 
@@ -359,9 +358,9 @@ void MeshRenderer::render() {
       for (auto iter = materials_.begin(); iter != materials_.end(); iter++) {
         auto& material = iter->second;
         if (material.active == true && material_index < scene_->mNumMaterials) {
-          material.textures[material_index].active(material.texUnit);
+          gl::ActiveTexture(material.tex_unit);
         }
-        material.textures[material_index].bind();
+        gl::Bind(material.textures[material_index]);
       }
     }
 
@@ -371,14 +370,14 @@ void MeshRenderer::render() {
       for (auto iter = materials_.begin(); iter != materials_.end(); iter++) {
         auto& material = iter->second;
         if (material.active == true && material_index < scene_->mNumMaterials) {
-          material.textures[material_index].active(material.texUnit);
+          gl::ActiveTexture(material.tex_unit);
         }
-        material.textures[material_index].unbind();
+        gl::Unbind(material.textures[material_index]);
       }
     }
   }
 
-  gl::VertexArray::Unbind();
+  gl::Unbind(gl::kVertexArray);
 }
 
 /// The transformation that takes the model's world coordinates to the OpenGL style world coordinates.

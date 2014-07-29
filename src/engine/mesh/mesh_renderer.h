@@ -56,7 +56,8 @@ class MeshRenderer {
   struct MaterialInfo {
     bool active;
     int tex_unit;
-    std::vector<gl::Texture2D> textures;
+    // Texture2Ds are non-copyable, so we need to store pointers of them
+    std::vector<std::unique_ptr<gl::Texture2D>> textures;
 
     MaterialInfo() : active(false), tex_unit(0) {}
   };

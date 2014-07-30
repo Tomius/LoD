@@ -4,7 +4,7 @@
 
 #export float VisibilityRangeAlpha(vec3 c_pos);
 
-uniform float uMaxOpaqueDist = 1400, uMaxVisibleDist = 1500;
+uniform float uMaxOpaqueDist = 900, uMaxVisibleDist = 1000;
 
 float VisibilityRangeAlpha(vec3 c_pos) {
   float l = length(c_pos);

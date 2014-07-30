@@ -28,6 +28,14 @@
 class BulletRigidBody : public engine::Behaviour, public btMotionState {
  public:
   BulletRigidBody(GameObject* parent, float mass,
+                  std::unique_ptr<btCollisionShape>&& shape,
+                  bool ignore_rotation = false)
+      : Behaviour(parent), shape_(std::move(shape))
+      , ignore_rotation_(ignore_rotation), up_to_date_(true) {
+    init(mass, shape_.get());
+  }
+
+  BulletRigidBody(GameObject* parent, float mass,
                   btCollisionShape* shape, bool ignore_rotation = false)
       : Behaviour(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
     init(mass, shape);
@@ -40,12 +48,33 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
     init(mass, shape);
   }
 
+  BulletRigidBody(GameObject* parent, float mass,
+                  std::unique_ptr<btCollisionShape>&& shape,
+                  const glm::vec3& pos, bool ignore_rotation = false)
+      : Behaviour(parent), shape_(std::move(shape))
+      , ignore_rotation_(ignore_rotation), up_to_date_(true) {
+    transform()->set_pos(pos);
+    init(mass, shape_.get());
+  }
+
   BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
-                  const glm::vec3& pos, const glm::fquat& rot)
-      : Behaviour(parent), ignore_rotation_(false), up_to_date_(true) {
+                  const glm::vec3& pos, const glm::fquat& rot,
+                  bool ignore_rotation = false)
+      : Behaviour(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
     transform()->set_pos(pos);
     transform()->set_rot(rot);
     init(mass, shape);
+  }
+
+  BulletRigidBody(GameObject* parent, float mass,
+                  std::unique_ptr<btCollisionShape>&& shape,
+                  const glm::vec3& pos, const glm::fquat& rot,
+                  bool ignore_rotation = false)
+      : Behaviour(parent), shape_(std::move(shape))
+      , ignore_rotation_(ignore_rotation), up_to_date_(true) {
+    transform()->set_pos(pos);
+    transform()->set_rot(rot);
+    init(mass, shape.get());
   }
 
   virtual ~BulletRigidBody() {
@@ -62,11 +91,9 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
   btTransform new_transform_;
 
   void init(float mass, btCollisionShape* shape) {
-    shape_ = std::unique_ptr<btCollisionShape>(shape);
     btVector3 inertia(0, 0, 0);
-    shape_->calculateLocalInertia(mass, inertia);
-    btRigidBody::btRigidBodyConstructionInfo
-        info{mass, this, shape_.get(), inertia};
+    shape->calculateLocalInertia(mass, inertia);
+    btRigidBody::btRigidBodyConstructionInfo info{mass, this, shape, inertia};
     bt_rigid_body_ = engine::make_unique<btRigidBody>(info);
     bt_rigid_body_->setUserPointer(parent_);
     if (mass == 0.0f) { bt_rigid_body_->setRestitution(1.0f); }
@@ -123,9 +150,11 @@ class HeightField : public engine::GameObject {
         1, 0, 256, 1, PHY_UCHAR, true};
 
     glm::vec3 pos{height_map.w()/2.0f, 128, height_map.h()/2.0f};
-    addComponent<BulletRigidBody>(0.0f, shape, pos);
+    addComponent<BulletRigidBody>(
+        0.0f, std::unique_ptr<btCollisionShape>{shape}, pos);
   }
- Terrain* terrain_;
+
+  Terrain* terrain_;
 };
 
 class BulletCube : public engine::Behaviour {
@@ -137,7 +166,8 @@ class BulletCube : public engine::Behaviour {
     transform()->set_rot(rot);
     btVector3 half_extents(0.5f, 0.5f, 0.5f);
     btCollisionShape* shape = new btBoxShape(half_extents);
-    auto rbody = addComponent<BulletRigidBody>(1.0f, shape);
+    auto rbody = addComponent<BulletRigidBody>(
+        1.0f, std::unique_ptr<btCollisionShape>{shape});
     auto bt_rigid_body = rbody->bt_rigid_body();
     bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
     bt_rigid_body->setRestitution(0.3f);
@@ -145,7 +175,7 @@ class BulletCube : public engine::Behaviour {
     // than half their extents (0.5f) in a frame, or otherwise, they would
     // fall through other objects
     bt_rigid_body->setCcdMotionThreshold(0.5f);
-    bt_rigid_body->setCcdSweptSphereRadius(0.25f);
+    bt_rigid_body->setCcdSweptSphereRadius(0.2f);
     mesh_ = addComponent<engine::debug::Cube>(glm::vec3(0.5, 0.0, 0.0));
   }
 
@@ -176,12 +206,13 @@ class BulletSphere : public engine::Behaviour {
       : Behaviour(parent) {
     transform()->set_pos(pos);
     btCollisionShape* shape = new btSphereShape(0.5f);
-    auto rbody = addComponent<BulletRigidBody>(1.0f, shape);
+    auto rbody = addComponent<BulletRigidBody>(
+        1.0f, std::unique_ptr<btCollisionShape>{shape});
     auto bt_rigid_body = rbody->bt_rigid_body();
     bt_rigid_body->setLinearVelocity(btVector3(v.x, v.y, v.z));
     bt_rigid_body->setRestitution(0.5f);
     bt_rigid_body->setCcdMotionThreshold(0.5f);
-    bt_rigid_body->setCcdSweptSphereRadius(0.4f);
+    bt_rigid_body->setCcdSweptSphereRadius(0.2f);
     mesh_ = addComponent<engine::debug::Sphere>(glm::vec3(0.5, 0.0, 0.0));
   }
 
@@ -216,7 +247,8 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
                       speed_per_sec, mouse_sensitivity) {
     float radius = 2.0f * z_near;
     btCollisionShape* shape = new btSphereShape(radius);
-    auto rbody = addComponent<BulletRigidBody>(0.001f, shape, true);
+    auto rbody = addComponent<BulletRigidBody>(
+      0.001f, std::unique_ptr<btCollisionShape>{shape}, true);
     bt_rigid_body_ = rbody->bt_rigid_body();
     bt_rigid_body_->setGravity(btVector3{0, 0, 0});
     bt_rigid_body_->setActivationState(DISABLE_DEACTIVATION);
@@ -285,12 +317,93 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
 
     // Update the "position"
     bt_rigid_body_->setLinearVelocity(btVector3{offset.x, offset.y, offset.z});
+
+    update_cache();
   }
 };
 
-class BulletTree : public engine::GameObject {
+class BulletForest : public engine::GameObject {
+ private:
+  class BulletTree : public engine::Behaviour {
+   public:
+    BulletTree(GameObject *parent, const engine::Transform& transform,
+               engine::MeshRenderer *mesh, btCollisionShape *shape,
+               const engine::BoundingBox& bbox,
+               const glm::vec4& bsphere,
+               const engine::ShaderProgram& prog,
+               const engine::ShaderProgram& shadow_prog)
+        : Behaviour(parent, transform)
+        , model_matrix_(transform.matrix())
+        , mesh_(mesh)
+        , uModelCameraMatrix_(prog, "uModelCameraMatrix")
+        , shadow_uMCP_(shadow_prog, "uMCP")
+        , uNormalMatrix_(prog, "uNormalMatrix")
+        , bsphere_(bsphere)
+        , bbox_(bbox) {
+      rbody_ = addComponent<BulletRigidBody>(0, shape);
+    }
+
+   private:
+    const glm::mat4 model_matrix_;
+    engine::MeshRenderer *mesh_;
+    gl::LazyUniform<glm::mat4> uModelCameraMatrix_, shadow_uMCP_;
+    gl::LazyUniform<glm::mat3> uNormalMatrix_;
+    const glm::vec4 bsphere_;
+    const engine::BoundingBox bbox_;
+    BulletRigidBody *rbody_;
+
+    virtual void update() override {
+      auto cam = scene_->camera();
+      const auto& campos = cam->transform()->pos();
+
+      if (glm::length(transform()->pos() - campos) < 1000) {
+        if (!enabled()) {
+          set_enabled(true);
+          scene_->world()->addRigidBody(rbody_->bt_rigid_body());
+        }
+      } else if (enabled()) {
+        set_enabled(false);
+        scene_->world()->removeCollisionObject(rbody_->bt_rigid_body());
+      }
+    }
+
+    virtual void shadowRender() override {
+      auto shadow = scene_->shadow();
+      const auto& cam = *scene_->camera();
+      auto campos = cam.transform()->pos();
+      if (shadow->getDepth() < shadow->getMaxDepth() &&
+          glm::length(glm::vec3(model_matrix_[3]) - campos) < 150) {
+        shadow_uMCP_ = shadow->modelCamProjMat(
+            bsphere_, model_matrix_, glm::mat4{});
+        mesh_->render();
+        shadow->push();
+      }
+    }
+
+    virtual void render() override {
+      auto cam = scene_->camera();
+      const auto& cam_mx = cam->cameraMatrix();
+      const auto& frustum = cam->frustum();
+
+      // Check for visibility
+      if (!bbox_.collidesWithFrustum(frustum)) {
+        return;
+      }
+
+      uModelCameraMatrix_.set(cam_mx * model_matrix_);
+      uNormalMatrix_.set(glm::inverse(glm::mat3(model_matrix_)));
+      mesh_->render();
+    }
+  };
+
+  engine::MeshRenderer mesh_, collision_mesh_;
+  std::vector<int> indices_;
+  std::unique_ptr<btTriangleIndexVertexArray> triangles_;
+  engine::ShaderProgram prog_, shadow_prog_;
+  gl::LazyUniform<glm::mat4> uProjectionMatrix_;
+
  public:
-  BulletTree(GameObject *parent, const glm::vec3& pos)
+  BulletForest(GameObject *parent, const engine::HeightMapInterface& hmap)
       : GameObject(parent)
       , mesh_("models/trees/massive_swamptree_01_a.obj",
               aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
@@ -299,133 +412,66 @@ class BulletTree : public engine::GameObject {
                         aiProcess_PreTransformVertices)
       , prog_(scene_->shader_manager()->get("tree.vert"),
               scene_->shader_manager()->get("tree.frag"))
-      , uProjectionMatrix_(prog_, "uProjectionMatrix")
-      , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
-      , uNormalMatrix_(prog_, "uNormalMatrix") {
-    transform()->set_pos(pos);
-
+      , shadow_prog_(scene_->shader_manager()->get("tree_shadow.vert"),
+                   scene_->shader_manager()->get("tree_shadow.frag"))
+      , uProjectionMatrix_(prog_, "uProjectionMatrix") {
     gl::Use(prog_);
     mesh_.setupPositions(prog_ | "aPosition");
     mesh_.setupTexCoords(prog_ | "aTexCoord");
     mesh_.setupNormals(prog_ | "aNormal");
     mesh_.setupDiffuseTextures(0);
     gl::UniformSampler(prog_, "uDiffuseTexture").set(0);
-    bbox_ = mesh_.boundingBox(transform()->matrix());
 
     triangles_ = std::unique_ptr<btTriangleIndexVertexArray>{
       new btTriangleIndexVertexArray()};
     indices_ = collision_mesh_.btTriangles(triangles_.get());
 
     btCollisionShape* shape = new btBvhTriangleMeshShape(triangles_.get(), true);
-    addComponent<BulletRigidBody>(0, shape);
+
+    glm::vec4 bsphere = mesh_.bSphere();
+    bsphere.w *= 1.2;  // removes peter panning (but decreases quality)
+
+    const int kTreeDist = 150;
+    glm::vec2 extent = hmap.extent();
+    for (int i = kTreeDist; i + kTreeDist < extent.x; i += kTreeDist) {
+      for (int j = kTreeDist; j + kTreeDist < extent.y; j += kTreeDist) {
+        glm::ivec2 coord = glm::ivec2(i + rand()%(kTreeDist/2) - kTreeDist/4,
+                                      j + rand()%(kTreeDist/2) - kTreeDist/4);
+        glm::vec3 pos =
+          glm::vec3(coord.x, hmap.heightAt(coord.x, coord.y)-1, coord.y);
+
+        float rotation = 2*M_PI * rand() / RAND_MAX;
+
+        glm::fquat rot = glm::rotate(glm::fquat(), rotation, glm::vec3(0, 1, 0));
+
+        engine::Transform t;
+        t.set_pos(pos);
+        t.set_rot(rot);
+        engine::BoundingBox bbox = mesh_.boundingBox(t.matrix());
+
+        addComponent<BulletTree>(t, &mesh_, shape, bbox, bsphere, prog_, shadow_prog_);
+      }
+    }
   }
 
- private:
-  engine::MeshRenderer mesh_, collision_mesh_;
-  engine::ShaderProgram prog_;
-  gl::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
-  gl::LazyUniform<glm::mat3> uNormalMatrix_;
-  engine::BoundingBox bbox_;
-  std::vector<int> indices_;
-  std::unique_ptr<btTriangleIndexVertexArray> triangles_;
+  virtual void shadowRender() override {
+    gl::Use(shadow_prog_);
+    gl::TemporaryDisable cullface{gl::kCullFace};
+  }
 
   virtual void render() override {
     gl::Use(prog_);
     prog_.update();
-
-    const auto& cam = *scene_->camera();
-    uProjectionMatrix_ = cam.projectionMatrix();
+    uProjectionMatrix_ = scene_->camera()->projectionMatrix();
 
     gl::TemporarySet capabilities{{{gl::kBlend, true},
                                    {gl::kCullFace, false}}};
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
-    auto campos = cam.transform()->pos();
-    auto cam_mx = cam.cameraMatrix();
-    auto frustum = cam.frustum();
 
-    // Check for visibility
-    if (!bbox_.collidesWithFrustum(frustum) ||
-        glm::length(transform()->pos() - campos) > 1500) {
-      return;
-    }
-
-    glm::mat4 model_mx = transform()->matrix();
-    uModelCameraMatrix_.set(cam_mx * model_mx);
-    uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
-    mesh_.render();
+    // The tree's render will run here
   }
 };
-
-// class BulletForest {
-//   class BulletTree : public engine::GameObject {
-//  public:
-//   BulletTree(GameObject *parent, const Transform& transform)
-//       : GameObject(parent, transform)
-//       , mesh_("models/trees/massive_swamptree_01_a.obj",
-//               aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
-//               aiProcess_PreTransformVertices)
-//       , collision_mesh_("models/trees/massive_swamptree_01_a_collider.obj",
-//                         aiProcess_PreTransformVertices)
-//       , prog_(scene_->shader_manager()->get("tree.vert"),
-//               scene_->shader_manager()->get("tree.frag"))
-//       , uProjectionMatrix_(prog_, "uProjectionMatrix")
-//       , uModelCameraMatrix_(prog_, "uModelCameraMatrix")
-//       , uNormalMatrix_(prog_, "uNormalMatrix") {
-
-//     gl::Use(prog_);
-//     mesh_.setupPositions(prog_ | "aPosition");
-//     mesh_.setupTexCoords(prog_ | "aTexCoord");
-//     mesh_.setupNormals(prog_ | "aNormal");
-//     mesh_.setupDiffuseTextures(0);
-//     gl::UniformSampler(prog_, "uDiffuseTexture").set(0);
-//     bbox_ = mesh_.boundingBox(transform()->matrix());
-
-//     triangles_ = std::unique_ptr<btTriangleIndexVertexArray>{
-//       new btTriangleIndexVertexArray()};
-//     indices_ = collision_mesh_.btTriangles(triangles_.get());
-
-//     btCollisionShape* shape = new btBvhTriangleMeshShape(triangles_.get(), true);
-//     addComponent<BulletRigidBody>(0, shape);
-//   }
-
-//  private:
-//   engine::MeshRenderer mesh_, collision_mesh_;
-//   engine::ShaderProgram prog_;
-//   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uModelCameraMatrix_;
-//   gl::LazyUniform<glm::mat3> uNormalMatrix_;
-//   engine::BoundingBox bbox_;
-//   std::vector<int> indices_;
-//   std::unique_ptr<btTriangleIndexVertexArray> triangles_;
-
-//   virtual void render() override {
-//     gl::Use(prog_);
-//     prog_.update();
-
-//     const auto& cam = *scene_->camera();
-//     uProjectionMatrix_ = cam.projectionMatrix();
-
-//     gl::TemporarySet capabilities{{{gl::kBlend, true},
-//                                    {gl::kCullFace, false}}};
-//     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
-
-//     auto campos = cam.transform()->pos();
-//     auto cam_mx = cam.cameraMatrix();
-//     auto frustum = cam.frustum();
-
-//     // Check for visibility
-//     if (!bbox_.collidesWithFrustum(frustum) ||
-//         glm::length(transform()->pos() - campos) > 1500) {
-//       return;
-//     }
-
-//     glm::mat4 model_mx = transform()->matrix();
-//     uModelCameraMatrix_.set(cam_mx * model_mx);
-//     uNormalMatrix_.set(glm::inverse(glm::mat3(model_mx)));
-//     mesh_.render();
-//   }
-// };
-// };
 
 class BulletHeightFieldScene : public engine::Scene {
   void shootSphere(float speed = 20.0f) {
@@ -470,12 +516,14 @@ class BulletHeightFieldScene : public engine::Scene {
     auto skybox = addComponent<Skybox>();
     skybox->set_group(-1);
 
+    Shadow *shadow = addComponent<Shadow>(skybox, 2048, 2, 2);
+    set_shadow(shadow);
+
     auto hf = addComponent<HeightField>();
-    glm::vec2 center = hf->terrain_->height_map().center();
-    float height = hf->terrain_->height_map().heightAt(center.x, center.y);
-    addComponent<BulletTree>(glm::vec3{center.x, height, center.y});
+    addComponent<BulletForest>(hf->terrain_->height_map());
 
     auto after_effects = addComponent<AfterEffects>(skybox);
+    shadow->set_default_fbo(after_effects->fbo());
     after_effects->set_group(1);
 
     auto cam = addComponent<BulletFreeFlyCamera>(M_PI/3, 1, 3000,

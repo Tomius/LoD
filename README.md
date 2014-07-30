@@ -35,6 +35,7 @@ How to build (Linux):
 
 How to build (Windows):
 -----------------------
+* if you downloaded LoD using git, but you didn't use git clone --recursive, then you have to initilaize oglwrap with git submodule init && git submodule update. If you download it via http, you will have to download [oglwrap](https://github.com/Tomius/oglwrap) too, and paste it into src/oglwrap
 * dowload all the third party libraries pre-compiled from [here](https://dl.dropboxusercontent.com/u/37129007/LoD/thirdparty.zip)
 * add thirdparty/include to compiler search path
 * add thirdparty/lib to linker search path

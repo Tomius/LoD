@@ -55,6 +55,8 @@ void FreeFlyCamera::update() {
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
     transform()->local_pos() -= transform()->right() * ds;
   }
+
+  update_cache();
 }
 
 void ThirdPersonalCamera::update() {
@@ -139,6 +141,8 @@ void ThirdPersonalCamera::update() {
   fwd = transform()->forward();
   pos = tpos - fwd*curr_dist_mod_*initial_distance_;
   transform()->set_pos(pos);
+
+  update_cache();
 }
 
 }  // namespace engine

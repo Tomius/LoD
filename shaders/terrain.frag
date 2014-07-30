@@ -60,7 +60,7 @@ float Visibility() {
 
     if (isValid(shadowCoord.xy)) {
       // shadow coeffecient - change this to affect shadow darkness/fade
-      float c = 2.5;
+      float c = 3;
       float texel = texture2D(uShadowMap, AtlasLookup(shadowCoord.xy, i)).r;
       if (texel < 0.999) {
 	      visibility -= modifier*(1 - clamp(exp(-c * (shadowCoord.z - texel)), 0.0, 1.0));

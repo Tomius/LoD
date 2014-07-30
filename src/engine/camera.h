@@ -40,8 +40,6 @@ class CameraTransform : public Transform {
 
 /// The base class for all cameras
 class Camera : public Behaviour {
-  float fovy_, z_near_, z_far_, width_, height_;
-
  public:
   Camera(GameObject* parent, float fovy, float z_near, float z_far)
       : Behaviour(parent, CameraTransform{}), fovy_(fovy), z_near_(z_near)
@@ -53,14 +51,9 @@ class Camera : public Behaviour {
     height_ = height;
   }
 
-  glm::mat4 cameraMatrix() const {
-    const Transform* t = transform();
-    return glm::lookAt(t->pos(), t->pos()+t->forward(), t->up());
-  }
-
-  glm::mat4 projectionMatrix() const {
-    return glm::perspectiveFov<float>(fovy_, width_, height_, z_near_, z_far_);
-  }
+  const glm::mat4& cameraMatrix() const { return cam_mat_; }
+  const glm::mat4& projectionMatrix() const { return proj_mat_; }
+  const Frustum& frustum() const { return frustum_; }
 
   float fovx() const { return fovy_*width_/height_;}
   void set_fovx(float fovx) { fovy_ = fovx*height_/width_; }
@@ -71,12 +64,44 @@ class Camera : public Behaviour {
   float z_far() const { return z_far_;}
   void set_z_far(float z_far) { z_far_ = z_far; }
 
-  Frustum frustum() const {
-    glm::mat4 m = projectionMatrix() * cameraMatrix();
+  bool isPointInsideFrustum(const glm::vec3& p) const {
+    glm::mat4 mat = projectionMatrix() * cameraMatrix();
+    glm::vec4 proj = mat * glm::vec4(p, 1);
+    proj /= proj.w;
+
+    return -1 < proj.x && proj.x < 1 && -1 < proj.y && proj.y < 1 &&
+            0 < proj.z && proj.z < 1;
+  }
+
+ protected:
+  // it must be called through update()
+  void update_cache() {
+    updateCameraMatrix();
+    updateProjectionMatrix();
+    updateFrustum();
+  }
+
+ private:
+  float fovy_, z_near_, z_far_, width_, height_;
+
+  glm::mat4 cam_mat_, proj_mat_;
+  Frustum frustum_;
+
+  void updateCameraMatrix() {
+    const Transform* t = transform();
+    cam_mat_ = glm::lookAt(t->pos(), t->pos()+t->forward(), t->up());
+  }
+
+  void updateProjectionMatrix() {
+    proj_mat_ = glm::perspectiveFov<float>(fovy_, width_, height_, z_near_, z_far_);
+  }
+
+  void updateFrustum() {
+    glm::mat4 m = proj_mat_ * cam_mat_;
 
     // REMEMBER: m[i][j] is j-th row, i-th column!!!
 
-    return {{
+    frustum_ = Frustum{{
       // left
      {m[0][3] + m[0][0],
       m[1][3] + m[1][0],
@@ -115,15 +140,6 @@ class Camera : public Behaviour {
     }};
 
     // Note: there's no need to normalize the plane parameters
-  }
-
-  bool isPointInsideFrustum(const glm::vec3& p) const {
-    glm::mat4 mat = projectionMatrix() * cameraMatrix();
-    glm::vec4 proj = mat * glm::vec4(p, 1);
-    proj /= proj.w;
-
-    return -1 < proj.x && proj.x < 1 && -1 < proj.y && proj.y < 1 &&
-            0 < proj.z && proj.z < 1;
   }
 };
 

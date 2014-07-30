@@ -9,9 +9,11 @@
 struct Plane {
   glm::vec3 normal;
   float dist;
+  Plane() = default;
   Plane(float nx, float ny, float nz, float dist)
-    : normal(nx, ny, nz), dist(dist) { }
-  Plane(const glm::vec3& normal, float dist) : normal(normal), dist(dist) { }
+      : normal(nx, ny, nz), dist(dist) { }
+  Plane(const glm::vec3& normal, float dist)
+      : normal(normal), dist(dist) { }
 
   void normalize() {
     float l = glm::length(normal);

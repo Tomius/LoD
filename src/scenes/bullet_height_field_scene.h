@@ -323,34 +323,48 @@ class BulletFreeFlyCamera : public engine::FreeFlyCamera {
 };
 
 class BulletForest : public engine::GameObject {
+ public:
+  struct TreeInfo {
+    engine::MeshRenderer mesh_, collision_mesh_;
+    std::vector<int> indices_;
+    std::unique_ptr<btTriangleIndexVertexArray> triangles_;
+    std::unique_ptr<btCollisionShape> shape_;
+    glm::vec4 bsphere_;
+
+    explicit TreeInfo(const std::string& file_base_name)
+      : mesh_(file_base_name + ".obj",
+              aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
+              aiProcess_PreTransformVertices)
+      , collision_mesh_(file_base_name + "_collider.obj",
+                        aiProcess_PreTransformVertices) {}
+  };
+
  private:
   class BulletTree : public engine::Behaviour {
    public:
-    BulletTree(GameObject *parent, const engine::Transform& transform,
-               engine::MeshRenderer *mesh, btCollisionShape *shape,
+    BulletTree(GameObject *parent,
+               const engine::Transform& transform,
+               TreeInfo* tree_info,
                const engine::BoundingBox& bbox,
-               const glm::vec4& bsphere,
                const engine::ShaderProgram& prog,
                const engine::ShaderProgram& shadow_prog)
         : Behaviour(parent, transform)
         , model_matrix_(transform.matrix())
-        , mesh_(mesh)
+        , tree_info_(tree_info)
+        , bbox_(bbox)
         , uModelCameraMatrix_(prog, "uModelCameraMatrix")
         , shadow_uMCP_(shadow_prog, "uMCP")
-        , uNormalMatrix_(prog, "uNormalMatrix")
-        , bsphere_(bsphere)
-        , bbox_(bbox) {
-      rbody_ = addComponent<BulletRigidBody>(0, shape);
+        , uNormalMatrix_(prog, "uNormalMatrix") {
+      rbody_ = addComponent<BulletRigidBody>(0, tree_info->shape_.get());
     }
 
    private:
     const glm::mat4 model_matrix_;
-    engine::MeshRenderer *mesh_;
+    TreeInfo *tree_info_;
+    BulletRigidBody *rbody_;
+    const engine::BoundingBox bbox_;
     gl::LazyUniform<glm::mat4> uModelCameraMatrix_, shadow_uMCP_;
     gl::LazyUniform<glm::mat3> uNormalMatrix_;
-    const glm::vec4 bsphere_;
-    const engine::BoundingBox bbox_;
-    BulletRigidBody *rbody_;
 
     virtual void update() override {
       auto cam = scene_->camera();
@@ -374,8 +388,8 @@ class BulletForest : public engine::GameObject {
       if (shadow->getDepth() < shadow->getMaxDepth() &&
           glm::length(glm::vec3(model_matrix_[3]) - campos) < 150) {
         shadow_uMCP_ = shadow->modelCamProjMat(
-            bsphere_, model_matrix_, glm::mat4{});
-        mesh_->render();
+            tree_info_->bsphere_, model_matrix_, glm::mat4{});
+        tree_info_->mesh_.render();
         shadow->push();
       }
     }
@@ -386,50 +400,52 @@ class BulletForest : public engine::GameObject {
       const auto& frustum = cam->frustum();
 
       // Check for visibility
-      if (!bbox_.collidesWithFrustum(frustum)) {
-        return;
-      }
+      if (!bbox_.collidesWithFrustum(frustum)) { return; }
 
       uModelCameraMatrix_.set(cam_mx * model_matrix_);
       uNormalMatrix_.set(glm::inverse(glm::mat3(model_matrix_)));
-      mesh_->render();
+      tree_info_->mesh_.render();
     }
   };
 
-  engine::MeshRenderer mesh_, collision_mesh_;
-  std::vector<int> indices_;
-  std::unique_ptr<btTriangleIndexVertexArray> triangles_;
   engine::ShaderProgram prog_, shadow_prog_;
   gl::LazyUniform<glm::mat4> uProjectionMatrix_;
+  std::array<std::unique_ptr<TreeInfo>, 3> tree_infos_;
 
  public:
   BulletForest(GameObject *parent, const engine::HeightMapInterface& hmap)
       : GameObject(parent)
-      , mesh_("models/trees/massive_swamptree_01_a.obj",
-              aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
-              aiProcess_PreTransformVertices)
-      , collision_mesh_("models/trees/massive_swamptree_01_a_collider.obj",
-                        aiProcess_PreTransformVertices)
       , prog_(scene_->shader_manager()->get("tree.vert"),
               scene_->shader_manager()->get("tree.frag"))
       , shadow_prog_(scene_->shader_manager()->get("tree_shadow.vert"),
                    scene_->shader_manager()->get("tree_shadow.frag"))
       , uProjectionMatrix_(prog_, "uProjectionMatrix") {
     gl::Use(prog_);
-    mesh_.setupPositions(prog_ | "aPosition");
-    mesh_.setupTexCoords(prog_ | "aTexCoord");
-    mesh_.setupNormals(prog_ | "aNormal");
-    mesh_.setupDiffuseTextures(0);
     gl::UniformSampler(prog_, "uDiffuseTexture").set(0);
 
-    triangles_ = std::unique_ptr<btTriangleIndexVertexArray>{
-      new btTriangleIndexVertexArray()};
-    indices_ = collision_mesh_.btTriangles(triangles_.get());
+    tree_infos_[0] = engine::make_unique<TreeInfo>(
+        "models/trees/massive_swamptree_01_a");
+    tree_infos_[1] = engine::make_unique<TreeInfo>(
+        "models/trees/massive_swamptree_01_b");
+    tree_infos_[2] = engine::make_unique<TreeInfo>(
+        "models/trees/cedar_01_a_source");
+    for (int i = 0; i != tree_infos_.size(); ++i) {
+      tree_infos_[i]->mesh_.setupPositions(prog_ | "aPosition");
+      tree_infos_[i]->mesh_.setupTexCoords(prog_ | "aTexCoord");
+      tree_infos_[i]->mesh_.setupNormals(prog_ | "aNormal");
+      tree_infos_[i]->mesh_.setupDiffuseTextures(0);
 
-    btCollisionShape* shape = new btBvhTriangleMeshShape(triangles_.get(), true);
+      tree_infos_[i]->triangles_ = engine::make_unique<btTriangleIndexVertexArray>();
+      tree_infos_[i]->indices_ =
+        tree_infos_[i]->collision_mesh_.btTriangles(tree_infos_[i]->triangles_.get());
 
-    glm::vec4 bsphere = mesh_.bSphere();
-    bsphere.w *= 1.2;  // removes peter panning (but decreases quality)
+      tree_infos_[i]->shape_ = engine::make_unique<btBvhTriangleMeshShape>(
+          tree_infos_[i]->triangles_.get(), true);
+
+      tree_infos_[i]->bsphere_ = tree_infos_[i]->mesh_.bSphere();
+      // removes peter panning (but decreases shadow quality)
+      tree_infos_[i]->bsphere_.w *= 1.2;
+    }
 
     const int kTreeDist = 150;
     glm::vec2 extent = hmap.extent();
@@ -441,15 +457,16 @@ class BulletForest : public engine::GameObject {
           glm::vec3(coord.x, hmap.heightAt(coord.x, coord.y)-1, coord.y);
 
         float rotation = 2*M_PI * rand() / RAND_MAX;
-
         glm::fquat rot = glm::rotate(glm::fquat(), rotation, glm::vec3(0, 1, 0));
+
+        int type = rand() % tree_infos_.size();
 
         engine::Transform t;
         t.set_pos(pos);
         t.set_rot(rot);
-        engine::BoundingBox bbox = mesh_.boundingBox(t.matrix());
+        engine::BoundingBox bbox = tree_infos_[type]->mesh_.boundingBox(t.matrix());
 
-        addComponent<BulletTree>(t, &mesh_, shape, bbox, bsphere, prog_, shadow_prog_);
+        addComponent<BulletTree>(t, tree_infos_[type].get(), bbox, prog_, shadow_prog_);
       }
     }
   }
@@ -468,8 +485,7 @@ class BulletForest : public engine::GameObject {
                                    {gl::kCullFace, false}}};
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
-
-    // The tree's render will run here
+    // The trees' render will run here
   }
 };
 
@@ -527,7 +543,7 @@ class BulletHeightFieldScene : public engine::Scene {
     after_effects->set_group(1);
 
     auto cam = addComponent<BulletFreeFlyCamera>(M_PI/3, 1, 3000,
-        glm::vec3(2050, 200, 2050), glm::vec3(2048, 200, 2048), 20, 5);
+        glm::vec3(2050, 200, 2050), glm::vec3(2048, 200, 2048), 20, 2);
     set_camera(cam);
 
     auto label = addComponent<engine::gui::Label>(

@@ -12,9 +12,9 @@ uniform vec3 s_uSunPos;
 vec3 LensFlare(vec2 uv, vec2 pos) {
   vec2 uvd = uv * length(uv);
 
-  float f21 = max(1.0/(1.0+32.0*pow(length(uvd+0.8*pos),2.0)),.0)*00.25;
-  float f22 = max(1.0/(1.0+32.0*pow(length(uvd+0.85*pos),2.0)),.0)*00.23;
-  float f23 = max(1.0/(1.0+32.0*pow(length(uvd+0.9*pos),2.0)),.0)*00.21;
+  float f21 = max(0.5/(1.0+32.0*pow(length(uvd+0.8*pos),2.0)),.0)*0.25;
+  float f22 = max(0.5/(1.0+32.0*pow(length(uvd+0.85*pos),2.0)),.0)*0.23;
+  float f23 = max(0.5/(1.0+32.0*pow(length(uvd+0.9*pos),2.0)),.0)*0.21;
 
   vec2 uvx = mix(uv,uvd,-0.5);
   float f41 = max(0.01-pow(length(uvx+0.4*pos),2.4),.0)*6.0;

@@ -114,16 +114,14 @@ void CharacterMovement::update() {
                                    glm::vec3(0, 1, 0));
   transform_.set_rot(glm::quat_cast(rotation));
 
-  {
-    auto pos = transform_.pos_proxy();
-
+  glm::vec3 pos = transform_.pos();
+  pos += glm::mat3(rotation) *
+         glm::vec3(character_offset.x, 0, character_offset.y);
+  if (jumping_) {
     pos += glm::mat3(rotation) *
-           glm::vec3(character_offset.x, 0, character_offset.y);
-    if (jumping_) {
-      pos += glm::mat3(rotation) *
-             glm::vec3(0, 0, horiz_speed_ * horiz_speed_factor_ * dt);
-    }
+           glm::vec3(0, 0, horiz_speed_ * horiz_speed_factor_ * dt);
   }
+  transform_.set_pos(pos);
 
   updateHeight(time);
 }
@@ -135,7 +133,7 @@ void CharacterMovement::keyAction(int key, int scancode, int action, int mods) {
 }
 
 void CharacterMovement::updateHeight(float time) {
-  auto& pos = transform_.local_pos();
+  glm::vec3 local_pos = transform_.local_pos();
 
   static float prevTime = 0;
   float diff_time = time - prevTime;
@@ -146,29 +144,31 @@ void CharacterMovement::updateHeight(float time) {
     float dt = std::min(time_step, diff_time);
     diff_time -= time_step;
 
-    if (pos.y < 0 && jumping_ && vert_speed_ < 0) {
+    if (local_pos.y < 0 && jumping_ && vert_speed_ < 0) {
       jumping_ = false;
       flip_ = false;
       can_flip_ = true;
-      pos.y = 0;
+      local_pos.y = 0;
       return;
     }
 
     if (!jumping_) {
       const float offs =
-          std::max<float>(fabs(pos.y / 2.0f), 0.05f) * dt * 20.0f;
-      if (fabs(pos.y) > offs) {
-        pos.y -= pos.y / fabs(pos.y) * offs;
+          std::max<float>(fabs(local_pos.y / 2.0f), 0.05f) * dt * 20.0f;
+      if (fabs(local_pos.y) > offs) {
+        local_pos.y -= local_pos.y / fabs(local_pos.y) * offs;
       }
     } else {
-      if (pos.y < 0) {
-        pos.y += std::max(pos.y, vert_speed_) * dt;
+      if (local_pos.y < 0) {
+        local_pos.y += std::max(local_pos.y, vert_speed_) * dt;
       } else {
-        pos.y += vert_speed_ * dt;
+        local_pos.y += vert_speed_ * dt;
       }
       vert_speed_ -= dt * scene_->gravity();
     }
   }
+
+  transform_.set_local_pos(local_pos);
 }
 
 bool CharacterMovement::isJumping() const {

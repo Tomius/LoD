@@ -35,19 +35,20 @@ void FetchNeighbours() {
 
 // Faster than pow(v, 2)
 vec3 sqr(vec3 v) { return v*v; }
-float sqr(float v) { return v*v; }
 
 // This should be two nested for cycles if performance wasn't an issue...
 vec3 Glow() {
-  return (sqr(neighbours[0])
-        + sqr(neighbours[1]) * 2
-        + sqr(neighbours[2])
-        + sqr(neighbours[3]) * 2
-        + sqr(neighbours[4]) * 4
-        + sqr(neighbours[5]) * 2
-        + sqr(neighbours[6])
-        + sqr(neighbours[7]) * 2
-        + sqr(neighbours[8])) / 8;
+  vec3 sum = sqr(neighbours[0])
+           + sqr(neighbours[1]) * 2
+           + sqr(neighbours[2])
+           + sqr(neighbours[3]) * 2
+           + sqr(neighbours[4]) * 4
+           + sqr(neighbours[5]) * 2
+           + sqr(neighbours[6])
+           + sqr(neighbours[7]) * 2
+           + sqr(neighbours[8]);
+
+  return sum / 8;
 }
 
 vec3 FilmicToneMap(vec3 color) {
@@ -58,9 +59,9 @@ vec3 FilmicToneMap(vec3 color) {
 void main() {
   FetchNeighbours();
   vec3 color = Glow() + DoF(neighbours[4]);
+  color = FilmicToneMap(color);
   if (SunPos().y > 0) {
     color += LensFlare();
   }
-  color = FilmicToneMap(color);
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(clamp(color, vec3(0), vec3(1)), 1);
 }

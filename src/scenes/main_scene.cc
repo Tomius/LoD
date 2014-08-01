@@ -79,8 +79,8 @@ MainScene::MainScene() {
     engine::Transform *cam_offset = cam_offset_go->transform();
 
     glm::vec2 center = height_map.center();
-    ayumi->transform()->local_pos() =
-        glm::vec3 {center.x, height_map.heightAt(center.x, center.y), center.y};
+    ayumi->transform()->set_local_pos(
+        glm::vec3{center.x, height_map.heightAt(center.x, center.y), center.y});
     cam_offset->set_local_pos(ayumi->getMesh().bSphereCenter());
 
     engine::ThirdPersonalCamera *cam =

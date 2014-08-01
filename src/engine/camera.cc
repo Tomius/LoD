@@ -43,18 +43,20 @@ void FreeFlyCamera::update() {
 
   // Update the position
   float ds = dt * speed_per_sec_;
+  glm::vec3 local_pos = transform()->local_pos();
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    transform()->local_pos() += transform()->forward() * ds;
+    local_pos += transform()->forward() * ds;
   }
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    transform()->local_pos() -= transform()->forward() * ds;
+    local_pos -= transform()->forward() * ds;
   }
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    transform()->local_pos() += transform()->right() * ds;
+    local_pos += transform()->right() * ds;
   }
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    transform()->local_pos() -= transform()->right() * ds;
+    local_pos -= transform()->right() * ds;
   }
+  transform()->set_local_pos(local_pos);
 
   update_cache();
 }

@@ -44,24 +44,9 @@ class Transformation {
   void set_parent(Transformation* parent) { parent_ = parent; }
   Transformation* parent() const { return parent_; }
 
-  class WorldSpacePositionProxy : public vec3 {
-    Transformation& tf;
-   public:
-    WorldSpacePositionProxy(Transformation& tf)
-      : vec3(tf.pos()), tf(tf) { }
-
-    ~WorldSpacePositionProxy() { tf.set_pos(*this); }
-  };
-
-  WorldSpacePositionProxy pos_proxy() {
-    return WorldSpacePositionProxy(*this);
-  }
-
   virtual const vec3 pos() const {
     if (parent_) {
-      return vec3(
-        parent_->localToWorldMatrix() * vec4(pos_, 1)
-      );
+      return vec3{parent_->localToWorldMatrix() * vec4{pos_, 1}};
     } else {
       return pos_;
     }
@@ -69,36 +54,19 @@ class Transformation {
 
   virtual void set_pos(const vec3& new_pos) {
     if (parent_) {
-      pos_ = vec3(parent_->worldToLocalMatrix() *
-                  vec4(new_pos - parent_->pos(), 0));
+      pos_ = vec3{parent_->worldToLocalMatrix() *
+                  vec4{new_pos - parent_->pos(), 0}};
     } else {
       pos_ = new_pos;
     }
-  }
-
-  vec3& local_pos() {
-    return pos_;
   }
 
   const vec3& local_pos() const {
     return pos_;
   }
 
-  void set_local_pos(const vec3& new_pos) {
+  virtual void set_local_pos(const vec3& new_pos) {
     pos_ = new_pos;
-  }
-
-  class WorldSpaceScaleProxy : public vec3 {
-    Transformation& tf;
-   public:
-    WorldSpaceScaleProxy(Transformation& tf)
-      : vec3(tf.scale()), tf(tf) { }
-
-    ~WorldSpaceScaleProxy() { tf.set_scale(*this); }
-  };
-
-  WorldSpaceScaleProxy scale_proxy() {
-    return WorldSpaceScaleProxy(*this);
   }
 
   virtual const vec3 scale() const {
@@ -117,29 +85,12 @@ class Transformation {
     }
   }
 
-  vec3& local_scale() {
-    return scale_;
-  }
-
   const vec3& local_scale() const {
     return scale_;
   }
 
-  void set_local_scale(const vec3& new_scale) {
+  virtual void set_local_scale(const vec3& new_scale) {
     scale_ = new_scale;
-  }
-
-  class WorldSpaceRotationProxy : public quat {
-    Transformation& tf;
-   public:
-    WorldSpaceRotationProxy(Transformation& tf)
-      : quat(tf.rot()), tf(tf) { }
-
-    ~WorldSpaceRotationProxy() { tf.set_rot(*this); }
-  };
-
-  WorldSpaceRotationProxy rot_proxy() {
-    return WorldSpaceRotationProxy(*this);
   }
 
   virtual const quat rot() const {
@@ -158,16 +109,12 @@ class Transformation {
     }
   }
 
-  quat& local_rot() {
-    return rot_;
-  }
-
   const quat& local_rot() const {
     return rot_;
   }
 
-  void set_local_rot(const quat& new_rot) {
-    return rot_ = new_rot;
+  virtual void set_local_rot(const quat& new_rot) {
+    rot_ = new_rot;
   }
 
   // Sets the rotation, so that 'local_space_vec' in local space will be
@@ -214,9 +161,6 @@ class Transformation {
   vec3 rotateAndScale() const {
     if (parent_) {
       return parent_->rotateAndScale() * scale_ * rot_;
-
-      // Same as:
-      // return mat3(localToWorldMatrix()) * vec3(1, 1, 1);
     } else {
       return scale_ * rot_;
     }
@@ -261,9 +205,13 @@ class Transformation {
     }
   }
 
-  // To help the users a little
+  // To help the users to decide which matrix they need, in case of confusion
   mat4 matrix() const {
     return localToWorldMatrix();
+  }
+
+  mat4 inverse_matrix() const {
+    return worldToLocalMatrix();
   }
 
   operator mat4() const {

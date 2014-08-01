@@ -40,8 +40,13 @@ class RigidBody : public Behaviour {
     float diff = new_height - last_height_;
     last_height_ = new_height;
 
-    transform()->local_pos().y += diff;
-    target_->local_pos().y -= diff;
+    glm::vec3 my_local_pos = transform()->local_pos();
+    my_local_pos.y += diff;
+    transform()->set_local_pos(my_local_pos);
+
+    glm::vec3 target_local_pos = target_->local_pos();
+    target_local_pos.y -= diff;
+    target_->set_local_pos(target_local_pos);
   }
 };
 

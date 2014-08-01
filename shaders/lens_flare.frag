@@ -12,9 +12,9 @@ uniform vec3 s_uSunPos;
 vec3 LensFlare(vec2 uv, vec2 pos) {
   vec2 uvd = uv * length(uv);
 
-  float f21 = max(0.5/(1.0+32.0*pow(length(uvd+0.8*pos),2.0)),.0)*0.25;
-  float f22 = max(0.5/(1.0+32.0*pow(length(uvd+0.85*pos),2.0)),.0)*0.23;
-  float f23 = max(0.5/(1.0+32.0*pow(length(uvd+0.9*pos),2.0)),.0)*0.21;
+  float f21 = max(0.75/(1.0+32.0*pow(length(uvd+0.8*pos),2.0)),.0)*0.25;
+  float f22 = max(0.75/(1.0+32.0*pow(length(uvd+0.85*pos),2.0)),.0)*0.23;
+  float f23 = max(0.75/(1.0+32.0*pow(length(uvd+0.9*pos),2.0)),.0)*0.21;
 
   vec2 uvx = mix(uv,uvd,-0.5);
   float f41 = max(0.01-pow(length(uvx+0.4*pos),2.4),.0)*6.0;
@@ -36,7 +36,7 @@ vec3 LensFlare(vec2 uv, vec2 pos) {
   c.g += f22 + f42 + f52 + f62;
   c.b += f23 + f43 + f53 + f63;
 
-  return 2.0*c;
+  return 1.25*c;
 }
 
 vec3 LensFlare() {
@@ -45,10 +45,9 @@ vec3 LensFlare() {
   }
 
   vec2 uv = gl_FragCoord.xy / uScreenSize - 0.5;
-  uv.x *= uScreenSize.x/uScreenSize.y; //fix aspect ratio
+  uv.x *= uScreenSize.x/uScreenSize.y; // fix aspect ratio
   vec2 s_sun_pos = s_uSunPos.xy/2;
-  s_sun_pos.x *= uScreenSize.x/uScreenSize.y; //fix aspect ratio
+  s_sun_pos.x *= uScreenSize.x/uScreenSize.y; // fix aspect ratio
 
-  vec3 color = vec3(1.4, 1.2, 1.0) * pow(LensFlare(uv, s_sun_pos.xy), vec3(2.2));
-  return color;
+  return vec3(1.4, 1.2, 1.0) * LensFlare(uv, s_sun_pos.xy);
 }

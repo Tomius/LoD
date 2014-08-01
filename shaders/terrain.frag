@@ -51,7 +51,7 @@ float Visibility() {
   float visibility = 1.0;
   int num_shadow_casters = min(uNumUsedShadowMaps, SHADOW_MAP_NUM);
   float length_from_camera = length(c_vPos);
-  float modifier = max((300.0 - length_from_camera) / 300.0, 0.0);
+  float modifier = max((150 - length_from_camera) / 150, 0);
   modifier *= kMaxShadow;
 
   // For every shadow casters

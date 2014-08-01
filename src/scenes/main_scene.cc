@@ -53,7 +53,7 @@ MainScene::MainScene() {
   PrintDebugTime();
 
   PrintDebugText("Initializing the shadow maps");
-    Shadow *shadow = addComponent<Shadow>(skybox, 32, 2, 2);
+    Shadow *shadow = addComponent<Shadow>(skybox, 32, 4, 4);
     set_shadow(shadow);
   PrintDebugTime();
 

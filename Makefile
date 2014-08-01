@@ -178,5 +178,5 @@ $(FREETYPE2_FOUND):
 	@if `pkg-config --atleast-version=15.0 freetype2`; then touch $(FREETYPE2_FOUND); else /bin/echo -e "$(RED)FreeType2 version 15.0 or newer is required $(NORMAL)"; exit 1; fi;
 
 $(BULLET_FOUND):
-	@if `pkg-config --atleast-version=2.83 bullet`; then touch $(BULLET_FOUND); else /bin/echo -e "$(RED)Bullet version 2.5 or newer is required $(NORMAL)"; exit 1; fi;
+	@if `pkg-config --atleast-version=2.8 bullet`; then touch $(BULLET_FOUND); else /bin/echo -e "$(RED)Bullet version 2.8 or newer is required $(NORMAL)"; exit 1; fi;
 

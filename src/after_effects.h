@@ -8,7 +8,7 @@
 #include "oglwrap/uniform.h"
 #include "oglwrap/framebuffer.h"
 #include "oglwrap/shapes/rectangle_shape.h"
-#include "oglwrap/textures/texture_2D.h"
+#include "oglwrap/textures/texture2D.h"
 
 #include "engine/behaviour.h"
 #include "engine/shader_manager.h"

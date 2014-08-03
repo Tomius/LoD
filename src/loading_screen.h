@@ -7,7 +7,7 @@
 #include "oglwrap/shader.h"
 #include "oglwrap/uniform.h"
 #include "oglwrap/shapes/rectangle_shape.h"
-#include "oglwrap/textures/texture_2D.h"
+#include "oglwrap/textures/texture2D.h"
 #include "oglwrap/smart_enums.h"
 
 #include "engine/game_object.h"

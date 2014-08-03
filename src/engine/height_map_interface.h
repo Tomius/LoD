@@ -4,7 +4,7 @@
 #define ENGINE_HEIGHT_MAP_INTERFACE_H_
 
 #include "./oglwrap_config.h"
-#include "../oglwrap/textures/texture_2D.h"
+#include "../oglwrap/textures/texture2D.h"
 
 namespace engine {
 

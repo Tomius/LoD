@@ -99,7 +99,7 @@ void AnimatedMeshRenderer::loadBones() {
     // -------======{[ Upload the bone data ]}======-------
 
     gl::Bind(entries_[entry].vao);
-    gl::Bind(skinning_data_.vertex_bone_data_buffers[entry]);
+    gl::BoundBuffer bound_buffer{skinning_data_.vertex_bone_data_buffers[entry]};
 
     // I can't just upload to the buffer with .data(), as bones aren't stored
     // in a continuous buffer, and it is an array of not fixed sized arrays,
@@ -145,11 +145,10 @@ void AnimatedMeshRenderer::loadBones() {
     }
 
     // upload
-    skinning_data_.vertex_bone_data_buffers[entry].data(buffer_size, data.get());
+    bound_buffer.data(buffer_size, data.get());
   }
 
   // Unbind our things, so they won't be modified from outside
-  gl::Unbind(gl::kArrayBuffer);
   gl::Unbind(gl::kVertexArray);
 }
 
@@ -198,7 +197,7 @@ void AnimatedMeshRenderer::shaderPlumbBones(
 
   for (size_t entry = 0; entry < entries_.size(); entry++) {
     gl::Bind(entries_[entry].vao);
-    gl::Bind(skinning_data_.vertex_bone_data_buffers[entry]);
+    gl::BoundBuffer bound_buffer{skinning_data_.vertex_bone_data_buffers[entry]};
     unsigned char current_attrib_max = skinning_data_.per_mesh_attrib_max[entry];
 
     for (unsigned char boneAttribSet = 0;
@@ -236,7 +235,6 @@ void AnimatedMeshRenderer::shaderPlumbBones(
   }
 
   // Unbind our things, so they won't be modified from outside
-  gl::Unbind(gl::kArrayBuffer);
   gl::Unbind(gl::kVertexArray);
 }
 

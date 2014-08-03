@@ -12,7 +12,7 @@
 #include "../../oglwrap/buffer.h"
 #include "../../oglwrap/enums/index_type.h"
 #include "../../oglwrap/vertex_attrib.h"
-#include "../../oglwrap/textures/texture_2D.h"
+#include "../../oglwrap/textures/texture2D.h"
 
 #include "../assimp.h"
 #include "../collision/bounding_box.h"

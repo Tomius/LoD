@@ -43,7 +43,7 @@ vec2 AtlasLookup(vec2 tc, int i) {
   return (tc + GetShadowAtlasOffset(i)) / uShadowAtlasSize;
 }
 
-bool isValid(vec2 tc) {
+bool IsValid(vec2 tc) {
   return 0 <= tc.x && tc.x <= 1 && 0 <= tc.y && tc.y <= 1;
 }
 
@@ -58,7 +58,7 @@ float Visibility() {
   for (int i = 0; i < num_shadow_casters; ++i) {
     vec4 shadowCoord = uShadowCP[i] * vec4(w_vPos, 1.0);
 
-    if (isValid(shadowCoord.xy)) {
+    if (IsValid(shadowCoord.xy)) {
       // shadow coeffecient - change this to affect shadow darkness/fade
       float c = 3;
       float texel = texture2D(uShadowMap, AtlasLookup(shadowCoord.xy, i)).r;

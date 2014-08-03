@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "./oglwrap_config.h"
-#include "../oglwrap/textures/texture_2D.h"
+#include "../oglwrap/textures/texture2D.h"
 #include "../oglwrap/context.h"
 
 namespace engine {

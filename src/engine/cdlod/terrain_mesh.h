@@ -8,7 +8,7 @@
 #include "../../oglwrap/shader.h"
 #include "../../oglwrap/uniform.h"
 #include "../../oglwrap/context.h"
-#include "../../oglwrap/textures/texture_2D.h"
+#include "../../oglwrap/textures/texture2D.h"
 
 #include "./quad_tree.h"
 #include "../shader_manager.h"

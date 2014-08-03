@@ -148,8 +148,8 @@ class Label : public GameObject {
 
     gl::Use(prog_);
     gl::Bind(vao_);
-    gl::Bind(attribs_);
-    attribs_.data(attribs_vec);
+    gl::BoundBuffer bound_buffer{attribs_};
+    bound_buffer.data(attribs_vec);
     (prog_ | "aPosition").pointer(2, gl::kFloat, false,
                                   4*sizeof(GLfloat), 0).enable();
     (prog_ | "aTexCoord").pointer(2, gl::kFloat, false, 4*sizeof(GLfloat),

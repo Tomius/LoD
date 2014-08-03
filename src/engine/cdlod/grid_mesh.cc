@@ -41,13 +41,11 @@ void GridMesh::setupPositions(gl::VertexAttrib attrib) {
   }
 
   gl::Bind(vao_);
-  gl::Bind(aPositions_);
-  aPositions_.data(positions);
+  gl::BoundBuffer bound_buffer{aPositions_};
+  bound_buffer.data(positions);
   attrib.pointer(2, gl::DataType::kShort).enable();
-  gl::Unbind(aPositions_);
 
-  gl::Bind(aIndices_);
-  aIndices_.data(indices);
+  gl::BoundBuffer{aIndices_}.data(indices);
   gl::Unbind(vao_);
 }
 
@@ -55,7 +53,7 @@ void GridMesh::setupRenderData(gl::VertexAttrib attrib) {
 #ifdef glVertexAttribDivisor
   if (glVertexAttribDivisor) {
     gl::Bind(vao_);
-    gl::Bind(aRenderData_);
+    gl::BoundBuffer bound_buffer{aRenderData_};
     attrib.setup<glm::vec4>().enable();
     attrib.divisor(1);
     gl::Unbind(vao_);
@@ -78,8 +76,7 @@ void GridMesh::render() {
     using gl::IndexType;
 
     gl::Bind(vao_);
-    gl::Bind(aRenderData_);
-    aRenderData_.data(render_data_);
+    gl::BoundBuffer{aRenderData_}.data(render_data_);
 
     gl::DrawElementsInstanced(PrimType::kTriangleStrip,
                               index_count_,

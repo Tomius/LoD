@@ -99,13 +99,12 @@ void MeshRenderer::setIndices(size_t index) {
     }
   }
 
-  if(invalid_triangles) {
+  if (invalid_triangles) {
     std::cerr << "Mesh '" << filename_ << "' contains non-triangle faces. "
                  "This might result in rendering artifacts." << std::endl;
   }
 
-  gl::Bind(entries_[index].indices);
-  entries_[index].indices.data(indices_vector);
+  gl::BoundBuffer{entries_[index].indices}.data(indices_vector);
   entries_[index].idx_count = indices_vector.size();
 }
 
@@ -135,8 +134,8 @@ void MeshRenderer::setupPositions(gl::VertexAttrib attrib) {
 
     // ~~~~~~<{ Load the vertices }>~~~~~~
 
-    gl::Bind(entries_[i].verts);
-    entries_[i].verts.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mVertices);
+    gl::BoundBuffer bound_buffer{entries_[i].verts};
+    bound_buffer.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mVertices);
     attrib.setup<glm::vec3>().enable();
 
     // ~~~~~~<{ Load the indices }>~~~~~~
@@ -153,7 +152,6 @@ void MeshRenderer::setupPositions(gl::VertexAttrib attrib) {
     }
   }
 
-  gl::Unbind(gl::kArrayBuffer);
   gl::Unbind(gl::kVertexArray);
 }
 
@@ -180,12 +178,11 @@ void MeshRenderer::setupNormals(gl::VertexAttrib attrib) {
     const aiMesh* mesh = scene_->mMeshes[i];
     gl::Bind(entries_[i].vao);
 
-    gl::Bind(entries_[i].normals);
-    entries_[i].normals.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mNormals);
+    gl::BoundBuffer bound_buffer{entries_[i].normals};
+    bound_buffer.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mNormals);
     attrib.setup<float>(3).enable();
   }
 
-  gl::Unbind(gl::kArrayBuffer);
   gl::Unbind(gl::kVertexArray);
 }
 
@@ -248,12 +245,11 @@ void MeshRenderer::setupTexCoords(gl::VertexAttrib attrib,
 
     gl::Bind(entries_[i].vao);
 
-    gl::Bind(entries_[i].tex_coords);
-    entries_[i].tex_coords.data(tex_coords_vector);
+    gl::BoundBuffer bound_buffer{entries_[i].tex_coords};
+    bound_buffer.data(tex_coords_vector);
     attrib.setup<float>(2).enable();
   }
 
-  gl::Unbind(gl::kArrayBuffer);
   gl::Unbind(gl::kVertexArray);
 }
 

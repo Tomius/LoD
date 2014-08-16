@@ -18,35 +18,36 @@ Terrain::Terrain(engine::GameObject* parent)
     , uNumUsedShadowMaps_(prog_, "uNumUsedShadowMaps")
     , uShadowAtlasSize_(prog_, "uShadowAtlasSize") {
   gl::Use(prog_);
-  mesh_.setup(prog_, 1);
-  gl::UniformSampler(prog_, "uGrassMap0").set(2);
-  gl::UniformSampler(prog_, "uGrassMap1").set(3);
+  mesh_.setup(prog_, layout_);
+  gl::UniformSampler(prog_, "uGrassMap0").set(layout_.add(grassMaps_[0]));
+  gl::UniformSampler(prog_, "uGrassMap1").set(layout_.add(grassMaps_[1]));
   for (int i = 0; i < 2; ++i) {
-    gl::Bind(grassMaps_[i]);
+    gl::BoundTexture2D tex{grassMaps_[i]};
     // no alpha channel here
-    grassMaps_[i].loadTexture(
+    tex.loadTexture(
       i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg", "CSRGB");
-    grassMaps_[i].generateMipmap();
-    grassMaps_[i].maxAnisotropy();
-    grassMaps_[i].minFilter(gl::kLinearMipmapLinear);
-    grassMaps_[i].magFilter(gl::kLinear);
-    grassMaps_[i].wrapS(gl::kRepeat);
-    grassMaps_[i].wrapT(gl::kRepeat);
+    tex.generateMipmap();
+    tex.maxAnisotropy();
+    tex.minFilter(gl::kLinearMipmapLinear);
+    tex.magFilter(gl::kLinear);
+    tex.wrapS(gl::kRepeat);
+    tex.wrapT(gl::kRepeat);
   }
 
-  gl::UniformSampler(prog_, "uGrassNormalMap").set(4);
-  gl::Bind(grassNormalMap_);
-  {
-    // the normal map doesn't have an alpha channel, and is not is srgb space
-    grassNormalMap_.loadTexture("textures/grass_normal.jpg", "CRGB");
-    grassNormalMap_.generateMipmap();
-    grassNormalMap_.minFilter(gl::kLinearMipmapLinear);
-    grassNormalMap_.magFilter(gl::kLinear);
-    grassNormalMap_.wrapS(gl::kRepeat);
-    grassNormalMap_.wrapT(gl::kRepeat);
-  }
+  gl::UniformSampler(prog_, "uGrassNormalMap").set(layout_.add(grassNormalMap_));
+  gl::BoundTexture2D tex{grassNormalMap_};
+  // the normal map doesn't have an alpha channel, and is not is srgb space
+  tex.loadTexture("textures/grass_normal.jpg", "CRGB");
+  tex.generateMipmap();
+  tex.minFilter(gl::kLinearMipmapLinear);
+  tex.magFilter(gl::kLinear);
+  tex.wrapS(gl::kRepeat);
+  tex.wrapT(gl::kRepeat);
 
-  gl::UniformSampler(prog_, "uShadowMap").set(5);
+  Shadow *shadow = scene_->shadow();
+  if (shadow) {
+    gl::UniformSampler(prog_, "uShadowMap").set(layout_.add(shadow->shadowTex()));
+  }
 
   prog_.validate();
 }
@@ -68,21 +69,11 @@ void Terrain::render() {
     uShadowAtlasSize_ = shadow->getAtlasDimensions();
   }
 
-  gl::BindToTexUnit(grassMaps_[0], 2);
-  gl::BindToTexUnit(grassMaps_[1], 3);
-  gl::BindToTexUnit(grassNormalMap_, 4);
-  if (shadow) {
-    gl::BindToTexUnit(shadow->shadowTex(), 5);
-  }
+  layout_.bind();
 
   mesh_.render(cam);
 
-  if (shadow) {
-    gl::UnbindFromTexUnit(shadow->shadowTex(), 5);
-  }
-  gl::UnbindFromTexUnit(grassNormalMap_, 4);
-  gl::UnbindFromTexUnit(grassMaps_[1], 3);
-  gl::UnbindFromTexUnit(grassMaps_[0], 2);
+  layout_.unbind();
 }
 
 

@@ -75,7 +75,7 @@ class HeightMap : public HeightMapInterface {
     return tex_.type();
   }
 
-  virtual void upload(gl::Texture2D& tex) const override {
+  virtual void upload(gl::BoundTexture2D& tex) const override {
     tex_.upload(tex);
   }
 

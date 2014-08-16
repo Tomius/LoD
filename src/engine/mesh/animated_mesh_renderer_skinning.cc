@@ -30,13 +30,6 @@ void AnimatedMeshRenderer::mapBones() {
   }
 }
 
-/**
- * @brief A recursive functions that should be started from the root node, and
- *        it returns the first bone under it.
- *
- * @param node   The current root node.
- * @param anim   The animation to seek the root bone in.
- */
 const aiNodeAnim* AnimatedMeshRenderer::getRootBone(const aiNode* node,
                                                     const aiScene* anim) {
   std::string node_name(node->mName.data);
@@ -68,10 +61,6 @@ const aiNodeAnim* AnimatedMeshRenderer::getRootBone(const aiNode* node,
 
 template <typename Index_t>
 /// Creates bone attributes data.
-/** It is a template, as the type of boneIDs shouldn't be fix. Most of the times,
-  * a skeleton won't contain more than 256 bones, but that doesn't mean boneIDs
-  * should be forced to GLubyte, it works with shorts and even ints too. Although
-  * I really doubt anyone would be using a skeleton with more than 65535 bones... */
 void AnimatedMeshRenderer::loadBones() {
   const size_t per_attrib_size =
       sizeof(SkinningData::VertexBoneData_PerAttribute<Index_t>);
@@ -98,7 +87,7 @@ void AnimatedMeshRenderer::loadBones() {
 
     // -------======{[ Upload the bone data ]}======-------
 
-    gl::Bind(entries_[entry].vao);
+    gl::BoundVertexArray bound_vao{entries_[entry].vao};
     gl::BoundBuffer bound_buffer{skinning_data_.vertex_bone_data_buffers[entry]};
 
     // I can't just upload to the buffer with .data(), as bones aren't stored
@@ -147,17 +136,8 @@ void AnimatedMeshRenderer::loadBones() {
     // upload
     bound_buffer.data(buffer_size, data.get());
   }
-
-  // Unbind our things, so they won't be modified from outside
-  gl::Unbind(gl::kVertexArray);
 }
 
-/**
- * @brief Creates the bone attributes data (the skinning.)
- *
- * It actually just calls the loadBones function
- * with the appropriate template parameter
- */
 void AnimatedMeshRenderer::createBonesData() {
   mapBones();
 
@@ -171,22 +151,6 @@ void AnimatedMeshRenderer::createBonesData() {
 }
 
 template <typename Index_t>
-/**
- * @brief Shader plumbs the bone data.
- *
- * It is a template, as the type of boneIDs shouldn't be fix. Most of the times,
- * a skeleton won't contain more than 256 bones, but that doesn't mean boneIDs
- * should be forced to GLubyte, it works with shorts and even ints too. Although
- * I really doubt anyone would be using a skeleton with more than 65535 bones...
- * @param idx_t           The oglwrap enum, naming the data type that should be
- *                        used.
- * @param boneIDs         Should be an array of attributes, that will be shader
- *                        plumbed for the boneIDs data.
- * @param bone_weights    Should be an array of attributes, that will be shader
- *                        plumbed for the bone_weights data.
- * @param integerIDs      If true, boneIDs are uploaded as integers
- *                        (#version 130+) else they are uploaded as floats
- */
 void AnimatedMeshRenderer::shaderPlumbBones(
     gl::IndexType idx_t,
     gl::LazyVertexAttrib boneIDs,
@@ -196,7 +160,7 @@ void AnimatedMeshRenderer::shaderPlumbBones(
       sizeof(SkinningData::VertexBoneData_PerAttribute<Index_t>);
 
   for (size_t entry = 0; entry < entries_.size(); entry++) {
-    gl::Bind(entries_[entry].vao);
+    gl::BoundVertexArray bound_vao{entries_[entry].vao};
     gl::BoundBuffer bound_buffer{skinning_data_.vertex_bone_data_buffers[entry]};
     unsigned char current_attrib_max = skinning_data_.per_mesh_attrib_max[entry];
 
@@ -233,21 +197,8 @@ void AnimatedMeshRenderer::shaderPlumbBones(
       bone_weights[i].static_setup(glm::vec4(0, 0, 0, 0));
     }
   }
-
-  // Unbind our things, so they won't be modified from outside
-  gl::Unbind(gl::kVertexArray);
 }
 
-/**
- * @brief Returns the first node called \a name, who is under \a currentRoot
- *        in the bone hierarchy.
- *
- * Note: this function is recursive
- *
- * @param currentRoot   The bone under which to search.
- * @param name          The name of the bone that is to be found.
- * @return the handle to the bone that is called name, or nullptr.
- */
 aiNode* AnimatedMeshRenderer::findNode(aiNode* currentRoot,
                                        const std::string& name) {
   if (currentRoot->mName.data == name)
@@ -262,14 +213,6 @@ aiNode* AnimatedMeshRenderer::findNode(aiNode* currentRoot,
   return nullptr;
 }
 
-/**
- * @brief Marks all of a bone's child external recursively.
- *
- * @param parent               A pointer to the parent ExternalBone struct.
- * @param node                 The current node.
- * @param should_be_external   Should be false if called from outside, true
- *                             if called recursively.
- */
 ExternalBone AnimatedMeshRenderer::markChildExternal(ExternalBone* parent,
                                                      aiNode* node,
                                                      bool should_be_external) {
@@ -290,8 +233,6 @@ ExternalBone AnimatedMeshRenderer::markChildExternal(ExternalBone* parent,
 }
 
 /// Marks a bone to be modified from outside.
-/** @return A structure, which through the bone, and all of its child can be moved.
-  * @param bone_name - The name of the bone. */
 ExternalBoneTree AnimatedMeshRenderer::markBoneExternal(
     const std::string& bone_name) {
   if (skinning_data_.bone_mapping.find(bone_name) ==
@@ -319,7 +260,6 @@ ExternalBoneTree AnimatedMeshRenderer::markBoneExternal(
 }
 
 /// Returns the number of bones this scene has.
-/** May change the currently active VAO and ArrayBuffer at the first call. */
 size_t AnimatedMeshRenderer::getNumBones() {
   // If loadBones hasn't been called yet, than have to create
   // the bones data first to know the number of bones.
@@ -331,7 +271,6 @@ size_t AnimatedMeshRenderer::getNumBones() {
 }
 
 /// Returns the size that boneIds and BoneWeights attribute arrays should be.
-/** May change the currently active VAO and ArrayBuffer at the first call. */
 size_t AnimatedMeshRenderer::getBoneAttribNum() {
   // If loadBones hasn't been called yet, than have to create
   // the bones data first to know max_bone_attrib_num.
@@ -342,22 +281,6 @@ size_t AnimatedMeshRenderer::getBoneAttribNum() {
   return skinning_data_.max_bone_attrib_num;
 }
 
-/**
- * @brief Loads in bone weight and id information to the given array of
- *        attribute arrays.
- *
- * Uploads the bone weight and id to an array of attribute arrays, and sets it
- * up for use. For example if you specified "in vec4 boneIds[3]" you have to
- * give "prog | boneIds". Calling this function changes the currently active
- * VAO and ArrayBuffer.
- *
- * @param boneIDs        The array of attributes array to use as destination
- *                       for bone IDs.
- * @param bone_weights   The array of attributes array to use as destination
- *                       for bone weights.
- * @param integerIDs     If true, boneIDs are uploaded as integers
- *                       (#version 130+) else they are uploaded as floats
- */
 void AnimatedMeshRenderer::setupBones(gl::LazyVertexAttrib boneIDs,
                                       gl::LazyVertexAttrib bone_weights,
                                       bool integerIDs) {

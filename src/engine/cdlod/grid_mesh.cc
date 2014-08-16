@@ -40,23 +40,22 @@ void GridMesh::setupPositions(gl::VertexAttrib attrib) {
     indices.push_back(indexOf(-dim2, y+1));
   }
 
-  gl::Bind(vao_);
+  gl::BoundVertexArray bound_vao{vao_};
   gl::BoundBuffer bound_buffer{aPositions_};
   bound_buffer.data(positions);
   attrib.pointer(2, gl::DataType::kShort).enable();
 
+  bound_vao.setIndexBuffer(aIndices_);
   gl::BoundBuffer{aIndices_}.data(indices);
-  gl::Unbind(vao_);
 }
 
 void GridMesh::setupRenderData(gl::VertexAttrib attrib) {
 #ifdef glVertexAttribDivisor
   if (glVertexAttribDivisor) {
-    gl::Bind(vao_);
+    gl::BoundVertexArray bound_vao{vao_};
     gl::BoundBuffer bound_buffer{aRenderData_};
     attrib.setup<glm::vec4>().enable();
     attrib.divisor(1);
-    gl::Unbind(vao_);
   }
 #endif
 }
@@ -75,14 +74,13 @@ void GridMesh::render() {
     using gl::PrimType;
     using gl::IndexType;
 
-    gl::Bind(vao_);
+    gl::BoundVertexArray bound_vao{vao_};
     gl::BoundBuffer{aRenderData_}.data(render_data_);
 
     gl::DrawElementsInstanced(PrimType::kTriangleStrip,
                               index_count_,
                               IndexType::kUnsignedShort,
                               render_data_.size());   // instance count
-    gl::Unbind(vao_);
   }
 #endif
 }
@@ -91,14 +89,13 @@ void GridMesh::render(gl::UniformObject<glm::vec4> uRenderData) const {
   using gl::PrimType;
   using gl::IndexType;
 
-  gl::Bind(vao_);
+  gl::BoundVertexArray bound_vao{vao_};
   for(auto& data : render_data_) {
     uRenderData = data;
     gl::DrawElements(PrimType::kTriangleStrip,
                     index_count_,
                     IndexType::kUnsignedShort);
   }
-  gl::Unbind(vao_);
 }
 
 } // namespace cdlod

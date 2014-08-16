@@ -147,15 +147,13 @@ class Label : public GameObject {
     size_.x = x1;
 
     gl::Use(prog_);
-    gl::Bind(vao_);
+    gl::BoundVertexArray bound_vao{vao_};
     gl::BoundBuffer bound_buffer{attribs_};
     bound_buffer.data(attribs_vec);
     (prog_ | "aPosition").pointer(2, gl::kFloat, false,
                                   4*sizeof(GLfloat), 0).enable();
     (prog_ | "aTexCoord").pointer(2, gl::kFloat, false, 4*sizeof(GLfloat),
                                   (const void*)(2*sizeof(GLfloat))).enable();
-    gl::Unbind(vao_);
-
     vertex_count_ = attribs_vec.size();
   }
 
@@ -200,13 +198,10 @@ class Label : public GameObject {
 
   virtual void render2D() override {
     gl::Use(prog_);
-    gl::Bind(vao_);
-
-    gl::ActiveTexture(0);
+    gl::BoundVertexArray bound_vao{vao_};
+    glActiveTexture(0);
     font_.bindTexture();
     gl::DrawArrays(gl::kTriangles, 0, vertex_count_);
-
-    gl::Unbind(vao_);
   }
 };
 

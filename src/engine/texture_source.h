@@ -75,8 +75,8 @@ class TextureSource {
   }
 
   // Uploads it to a texture object
-  virtual void upload(gl::Texture2D& tex) const;
-  virtual void upload(gl::Texture2D& tex,
+  virtual void upload(gl::BoundTexture2D& tex) const;
+  virtual void upload(gl::BoundTexture2D& tex,
                       gl::PixelDataInternalFormat internal_format) const;
 };
 

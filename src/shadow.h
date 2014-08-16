@@ -23,8 +23,8 @@ class Shadow : public engine::GameObject {
                             glm::mat4 modelMatrix,
                             glm::mat4 worldTransform = glm::mat4());
 
-  const std::vector<glm::mat4>& shadowCPs() const;
-  const gl::Texture2D& shadowTex() const;
+  const std::vector<glm::mat4>& shadowCPs() const { return cp_matrices_; }
+  gl::Texture2D& shadowTex() { return tex_; }
   glm::ivec2 getAtlasDimensions() const {
     return glm::ivec2(xsize_, ysize_);
   }
@@ -34,14 +34,12 @@ class Shadow : public engine::GameObject {
   void push();
   size_t getDepth() const;
   size_t getMaxDepth() const;
-  void set_default_fbo(gl::Framebuffer *default_fbo) {
-    default_fbo_ = default_fbo;
-  }
   void end();
 
  private:
   gl::Texture2D tex_;
-  gl::Framebuffer fbo_, *default_fbo_;
+  gl::Framebuffer fbo_;
+  gl::BoundFramebuffer *bound_fbo_;
 
   size_t w_, h_, size_;
   size_t xsize_, ysize_, curr_depth_, max_depth_;

@@ -37,7 +37,7 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
     meshes_[i]->setupPositions(prog_ | "aPosition");
     meshes_[i]->setupTexCoords(prog_ | "aTexCoord");
     meshes_[i]->setupNormals(prog_ | "aNormal");
-    meshes_[i]->setupDiffuseTextures(0);
+    meshes_[i]->setupDiffuseTextures();
   }
 
   gl::UniformSampler(prog_, "uDiffuseTexture").set(0);

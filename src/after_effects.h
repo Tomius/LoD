@@ -9,6 +9,7 @@
 #include "oglwrap/framebuffer.h"
 #include "oglwrap/shapes/rectangle_shape.h"
 #include "oglwrap/textures/texture2D.h"
+#include "oglwrap/textures/texture_layout.h"
 
 #include "engine/behaviour.h"
 #include "engine/shader_manager.h"
@@ -19,17 +20,17 @@ class AfterEffects : public engine::Behaviour {
  public:
   explicit AfterEffects(GameObject *parent, Skybox* skybox);
 
-  gl::Framebuffer* fbo() { return &fbo_; }
-
  private:
   engine::ShaderProgram prog_;
 
   gl::Framebuffer fbo_;
+  gl::BoundFramebuffer *fbo_binding_;
   gl::Texture2D color_tex_, depth_tex_;
   gl::LazyUniform<glm::vec2> uScreenSize_;
   gl::LazyUniform<glm::vec3> s_uSunPos_;
   gl::LazyUniform<float> uZNear_, uZFar_;
   gl::RectangleShape rect_;
+  gl::TextureLayout layout_;
 
   GLuint width_, height_;
 

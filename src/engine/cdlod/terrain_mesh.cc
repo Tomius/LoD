@@ -21,7 +21,7 @@ TerrainMesh::TerrainMesh(engine::ShaderManager* manager,
   manager->publish("engine/cdlod_terrain.vert", vs_src);
 }
 
-void TerrainMesh::setup(const gl::Program& program, int tex_unit) {
+void TerrainMesh::setup(const gl::Program& program, gl::TextureLayout& layout) {
   gl::Use(program);
 
   mesh_.setupPositions(program | "CDLODTerrain_aPosition");
@@ -39,26 +39,18 @@ void TerrainMesh::setup(const gl::Program& program, int tex_unit) {
   uCamPos_ = engine::make_unique<gl::LazyUniform<glm::vec3>>(
       program, "CDLODTerrain_uCamPos");
 
-  tex_unit_ = tex_unit;
-  gl::UniformSampler(program, "CDLODTerrain_uHeightMap") = tex_unit;
+  gl::UniformSampler(program, "CDLODTerrain_uHeightMap") =
+    layout.add(height_map_tex_);
   gl::Uniform<glm::vec2>(program, "CDLODTerrain_uTexSize") =
       glm::vec2(height_map_.w(), height_map_.h());
 
-  gl::BindToTexUnit(height_map_tex_, tex_unit);
-  height_map_.upload(height_map_tex_);
-  height_map_tex_.minFilter(gl::kLinear);
-  height_map_tex_.magFilter(gl::kLinear);
-  gl::Unbind(height_map_tex_);
+  gl::BoundTexture2D tex{height_map_tex_};
+  height_map_.upload(tex);
+  tex.minFilter(gl::kLinear);
+  tex.magFilter(gl::kLinear);
 }
 
 void TerrainMesh::render(const Camera& cam) {
-  if (!uCamPos_) {
-    throw std::logic_error("engine::cdlod::terrain requires a setup() call, "
-                           "before the use of the render() function.");
-  }
-
-  gl::BindToTexUnit(height_map_tex_, tex_unit_);
-
   uCamPos_->set(cam.transform()->pos());
 
   gl::FrontFace(gl::kCcw);
@@ -70,8 +62,6 @@ void TerrainMesh::render(const Camera& cam) {
     else
   #endif
     mesh_.render(cam, *uRenderData_);
-
-  gl::UnbindFromTexUnit(height_map_tex_, tex_unit_);
 }
 
 }  // namespace cdlod

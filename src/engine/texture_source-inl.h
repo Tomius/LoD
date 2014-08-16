@@ -215,12 +215,12 @@ gl::PixelDataType TextureSource<T, NUM_COMPONENTS>::type() const {
 }
 
 template<typename T, char NUM_COMPONENTS>
-void TextureSource<T, NUM_COMPONENTS>::upload(gl::Texture2D& tex) const {
+void TextureSource<T, NUM_COMPONENTS>::upload(gl::BoundTexture2D& tex) const {
   upload(tex, internal_format());
 }
 
 template<typename T, char NUM_COMPONENTS>
-void TextureSource<T, NUM_COMPONENTS>::upload(gl::Texture2D& tex,
+void TextureSource<T, NUM_COMPONENTS>::upload(gl::BoundTexture2D& tex,
                       gl::PixelDataInternalFormat internal_format) const {
   bool bad_alignment = (w_ * sizeof(T) * NUM_COMPONENTS) % 4 != 0;
   GLint unpack_aligment;

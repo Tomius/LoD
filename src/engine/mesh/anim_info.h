@@ -58,15 +58,12 @@ struct AnimMetaInfo {
   float transition_time;
 
   /// The time of when did the last animation end.
-  /** It is needed to know the time in the current animation. */
   float end_of_last_anim;
 
   /// The animation of time the previous animation.
-  /** It is needed to make the transition between two animations. */
   float last_period_time;
 
   /// It is used to detect when did the animation start a new cycle.
-  /** For animations that have AnimFlag::Repeat flag specified only, of course. */
   unsigned last_loop_count;
 
   AnimMetaInfo()

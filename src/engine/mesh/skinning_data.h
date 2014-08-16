@@ -13,13 +13,6 @@ namespace engine {
 
 struct SkinningData {
   template<typename Index_t>
-  /**
-   * @brief A struct containing an "ivec4" for the boneIDs, and a vec4 for
-   *        bone weights.
-   *
-   * The boneIDs part is not fixed to be int (unsigned), it becomes the
-   * smallest type that can store all the ids of the bones.
-   */
   struct VertexBoneData_PerAttribute {
     Index_t ids[4];
     float weights[4];
@@ -32,7 +25,6 @@ struct SkinningData {
 
   template<class Index_t>
   /// Contains an array of VertexBoneData_PerAttribute.
-  /** The size of that vector varies per vertex. */
   struct VertexBoneData {
     std::vector<VertexBoneData_PerAttribute<Index_t>> data;
 
@@ -77,9 +69,6 @@ struct SkinningData {
   std::vector<BoneInfo> bone_info;
 
   /// Maps a bone name to its index.
-  /** It is needed as usually multiply meshes share the same bone, but with
-    * different index. The only way to reference it, without getting too much
-    * multiplies, is to reference them by their name */
   std::map<std::string, unsigned> bone_mapping;
 
   /// The number of the bones.

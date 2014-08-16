@@ -539,7 +539,6 @@ class BulletHeightFieldScene : public engine::Scene {
     addComponent<BulletForest>(hf->terrain_->height_map());
 
     auto after_effects = addComponent<AfterEffects>(skybox);
-    shadow->set_default_fbo(after_effects->fbo());
     after_effects->set_group(1);
 
     auto cam = addComponent<BulletFreeFlyCamera>(M_PI/3, 1, 3000,

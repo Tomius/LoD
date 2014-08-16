@@ -55,10 +55,10 @@ Ayumi::Ayumi(engine::GameObject* parent)
   gl::LazyVertexAttrib weights(prog_, "aWeights", false);
   mesh_.setupBones(boneIDs, weights, false);
 
-  mesh_.setupDiffuseTextures(1);
-  mesh_.setupSpecularTextures(2);
-  gl::UniformSampler(prog_, "uDiffuseTexture").set(1);
-  gl::UniformSampler(prog_, "uSpecularTexture").set(2);
+  mesh_.setupDiffuseTextures();
+  gl::UniformSampler(prog_, "uDiffuseTexture").set(0);
+  mesh_.setupSpecularTextures();
+  gl::UniformSampler(prog_, "uSpecularTexture").set(1);
 
   prog_.validate();
 

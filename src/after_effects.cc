@@ -15,30 +15,31 @@ AfterEffects::AfterEffects(GameObject *parent, Skybox* skybox)
     , skybox_(skybox) {
   gl::Use(prog_);
 
-  gl::UniformSampler(prog_, "uTex").set(0);
-  gl::UniformSampler(prog_, "uDepthTex").set(1);
+  gl::UniformSampler(prog_, "uTex").set(layout_.add(color_tex_));
+  gl::UniformSampler(prog_, "uDepthTex").set(layout_.add(depth_tex_));
   (prog_ | "aPosition").bindLocation(rect_.kPosition);
 
   prog_.validate();
 
-  gl::Bind(color_tex_);
-  color_tex_.upload(gl::kRgb, 1, 1, gl::kRgb, gl::kFloat, nullptr);
-  color_tex_.minFilter(gl::kLinearMipmapLinear);
-  color_tex_.magFilter(gl::kLinear);
-  gl::Unbind(color_tex_);
+  {
+    gl::BoundTexture2D tex{color_tex_};
+    tex.upload(gl::kRgb, 1, 1, gl::kRgb, gl::kFloat, nullptr);
+    tex.minFilter(gl::kLinearMipmapLinear);
+    tex.magFilter(gl::kLinear);
+  }
 
-  gl::Bind(depth_tex_);
-  depth_tex_.upload(gl::kDepthComponent, 1, 1,
+  {
+    gl::BoundTexture2D tex{depth_tex_};
+    tex.upload(gl::kDepthComponent, 1, 1,
                     gl::kDepthComponent, gl::kFloat, nullptr);
-  depth_tex_.minFilter(gl::kLinear);
-  depth_tex_.magFilter(gl::kLinear);
-  gl::Unbind(depth_tex_);
+    tex.minFilter(gl::kLinear);
+    tex.magFilter(gl::kLinear);
+  }
 
-  gl::Bind(fbo_);
-  fbo_.attachTexture(gl::kColorAttachment0, color_tex_);
-  fbo_.attachTexture(gl::kDepthAttachment, depth_tex_);
-  fbo_.validate();
-  gl::Unbind(fbo_);
+  gl::BoundFramebuffer fbo{fbo_};
+  fbo.attachTexture(gl::kColorAttachment0, color_tex_);
+  fbo.attachTexture(gl::kDepthAttachment, depth_tex_);
+  fbo.validate();
 }
 
 void AfterEffects::screenResized(size_t w, size_t h) {
@@ -47,27 +48,25 @@ void AfterEffects::screenResized(size_t w, size_t h) {
   gl::Use(prog_);
   uScreenSize_ = glm::vec2(w, h);
 
-  gl::Bind(color_tex_);
-  color_tex_.upload(gl::kRgb, width_, height_, gl::kRgb, gl::kFloat, nullptr);
-  gl::Unbind(color_tex_);
+  gl::BoundTexture2D{color_tex_}.upload(gl::kRgb, width_, height_,
+                                        gl::kRgb, gl::kFloat, nullptr);
 
-  gl::Bind(depth_tex_);
-  depth_tex_.upload(gl::kDepthComponent, width_, height_,
-                    gl::kDepthComponent, gl::kFloat, nullptr);
-  gl::Unbind(depth_tex_);
+  gl::BoundTexture2D{depth_tex_}.upload(gl::kDepthComponent, width_, height_,
+                                        gl::kDepthComponent, gl::kFloat,
+                                        nullptr);
 }
 
 void AfterEffects::update() {
-  gl::Bind(fbo_);
+  fbo_binding_ = new gl::BoundFramebuffer{fbo_};
   gl::Clear().Color().Depth();
 }
 
 void AfterEffects::render() {
-  gl::Unbind(gl::kFramebuffer);
+  delete fbo_binding_;
 
-  gl::BindToTexUnit(color_tex_, 0);
-  color_tex_.generateMipmap();
-  gl::BindToTexUnit(depth_tex_, 1);
+  gl::BoundTexture2D{color_tex_}.generateMipmap();
+
+  layout_.bind();
 
   gl::Use(prog_);
   prog_.update();
@@ -84,6 +83,5 @@ void AfterEffects::render() {
 
   rect_.render();
 
-  gl::UnbindFromTexUnit(depth_tex_, 1);
-  gl::UnbindFromTexUnit(color_tex_, 0);
+  layout_.unbind();
 }

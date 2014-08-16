@@ -16,23 +16,15 @@ enum class AnimFlag : GLbitfield {
   Repeat = 0x1,
 
   /// Repeats the animation, but repeats it like OpenGL's MirroredRepeat.
-  /** You can get this effect by setting repeat to true, and negating the
-    * mirrored and backwards flags after every repetition. */
   MirroredRepeat = 0x3,
 
   /// Mirrors the movement during the animation.
-  /** For example, this flag makes a walk animation become a moonwalk.
-    * (The character will be animated as he/she was moving forwards, but
-    * he/she actually moves backwards.) */
   Mirrored = 0x4,
 
   /// Plays the animation backwards
   Backwards = 0x8,
 
   /// Marks the animation as interruptable by other animations.
-  /** Only affects setCurrentAnimation, forceCurrentAnimation ignores it.
-    * This logically shouldn't be part of the animation loader & player,
-    * but it can help to make your code easier to read. */
   Interruptable = 0x10
 };
 
@@ -80,16 +72,6 @@ struct AnimParams {
   /// The speed multiplier
   float speed;
 
-  /**
-   * @brief Creates a placeholder class for passing AnimationParameters.
-   *
-   * @param name              The name of the animation.
-   * @param transition_time   The transition time between the last, and this
-   *                          animation, in seconds.
-   * @param flags             A bitfield of the animation modifying flags
-   * @param speed             The speed multiplier. Uses the default anim speed
-   *                          if it is zero
-   */
   AnimParams(std::string name,
              float transition_time,
              gl::Bitfield<AnimFlag> flags,
@@ -101,16 +83,6 @@ struct AnimParams {
       , speed(speed)
   { }
 
-  /**
-   * @brief Creates a placeholder class for passing AnimationParameters using the
-   * default animation flags.
-   *
-   * @param name              The name of the animation.
-   * @param transition_time   The transition time between the last, and this
-   *                          animation, in seconds.
-   * @param speed             The speed multiplier. Uses the default anim speed
-   *                          if it is zero
-   */
   AnimParams(std::string name = "",
              float transition_time = 0.1f,
              float speed = 0.0f)

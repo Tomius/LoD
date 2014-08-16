@@ -36,7 +36,7 @@ class HeightMapInterface {
   virtual gl::PixelDataType type() const = 0;
 
   // Uploads the heightmap to a texture object
-  virtual void upload(gl::Texture2D& tex) const = 0;
+  virtual void upload(gl::BoundTexture2D& tex) const = 0;
 
   // Returns a pointer to the heightfield data
   virtual const void* data() const = 0;

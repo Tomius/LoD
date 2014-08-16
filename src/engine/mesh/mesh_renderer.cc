@@ -8,8 +8,6 @@
 namespace engine {
 
 /// Loads in the mesh from a file, and does some post-processing on it.
-/** @param filename - The name of the file to load in.
-  * @param flags - The assimp post-process flags. */
 MeshRenderer::MeshRenderer(const std::string& filename,
                            gl::Bitfield<aiPostProcessSteps> flags)
     : scene_(importer_.ReadFile(filename.c_str(), flags|aiProcess_Triangulate))
@@ -79,9 +77,7 @@ std::vector<float> MeshRenderer::vertices() {
 
 template <typename IdxType>
 /// A template for setting different types (byte/short/int) of indices.
-/** This expect the correct vao to be already bound!
-  * @param index - The index of the entry */
-void MeshRenderer::setIndices(size_t index) {
+void MeshRenderer::setIndices(size_t index, gl::BoundVertexArray& vao) {
   const aiMesh* mesh = scene_->mMeshes[index];
 
   std::vector<IdxType> indices_vector;
@@ -104,15 +100,12 @@ void MeshRenderer::setIndices(size_t index) {
                  "This might result in rendering artifacts." << std::endl;
   }
 
+  vao.setIndexBuffer(entries_[index].indices);
   gl::BoundBuffer{entries_[index].indices}.data(indices_vector);
   entries_[index].idx_count = indices_vector.size();
 }
 
 /// Loads in vertex positions and indices, and uploads the former into an attribute array.
-/** Uploads the vertex positions data to an attribute array, and sets it up for use.
-  * Calling this function changes the currently active VAO, ArrayBuffer and IndexBuffer.
-  * The mesh cannot be drawn without calling this function.
-  * @param attrib - The attribute array to use as destination. */
 void MeshRenderer::setupPositions(gl::VertexAttrib attrib) {
   if (!is_setup_positions_) {
     is_setup_positions_ = true;
@@ -130,7 +123,7 @@ void MeshRenderer::setupPositions(gl::VertexAttrib attrib) {
 
   for (size_t i = 0; i < entries_.size(); i++) {
     const aiMesh* mesh = scene_->mMeshes[i];
-    gl::Bind(entries_[i].vao);
+    gl::BoundVertexArray bound_vao{entries_[i].vao};
 
     // ~~~~~~<{ Load the vertices }>~~~~~~
 
@@ -142,23 +135,18 @@ void MeshRenderer::setupPositions(gl::VertexAttrib attrib) {
 
     if (mesh->mNumFaces * 3 < UCHAR_MAX) {
       entries_[i].idx_type = gl::kUnsignedByte;
-      setIndices<unsigned char>(i);
+      setIndices<unsigned char>(i, bound_vao);
     } else if (mesh->mNumFaces * 3 < USHRT_MAX) {
       entries_[i].idx_type = gl::kUnsignedShort;
-      setIndices<unsigned short>(i);
+      setIndices<unsigned short>(i, bound_vao);
     } else {
       entries_[i].idx_type = gl::kUnsignedInt;
-      setIndices<unsigned int>(i);
+      setIndices<unsigned int>(i, bound_vao);
     }
   }
-
-  gl::Unbind(gl::kVertexArray);
 }
 
 /// Loads in vertex normals, and uploads it to an attribute array.
-/** Uploads the vertex normals data to an attribute array, and sets it up for use.
-  * Calling this function changes the currently active VAO and ArrayBuffer.
-  * @param attrib - The attribute array to use as destination. */
 void MeshRenderer::setupNormals(gl::VertexAttrib attrib) {
   if (!is_setup_normals_) {
     is_setup_normals_ = true;
@@ -176,21 +164,15 @@ void MeshRenderer::setupNormals(gl::VertexAttrib attrib) {
 
   for (size_t i = 0; i < entries_.size(); i++) {
     const aiMesh* mesh = scene_->mMeshes[i];
-    gl::Bind(entries_[i].vao);
+    gl::BoundVertexArray bound_vao{entries_[i].vao};
 
     gl::BoundBuffer bound_buffer{entries_[i].normals};
     bound_buffer.data(mesh->mNumVertices*sizeof(aiVector3D), mesh->mNormals);
     attrib.setup<float>(3).enable();
   }
-
-  gl::Unbind(gl::kVertexArray);
 }
 
 /// Checks if every mesh in the scene has tex_coords
-/** Returns true if all of the meshes in the scene have texture
-  * coordinates in the specified texture coordinate set.
-  * @param tex_coord_set  Specifies the index of the texture coordinate
-  *                     set that should be inspected */
 bool MeshRenderer::hasTexCoords(unsigned char tex_coord_set) {
   for (size_t i = 0; i < entries_.size(); i++) {
     if (!scene_->mMeshes[i]->HasTextureCoords(tex_coord_set)) {
@@ -202,13 +184,6 @@ bool MeshRenderer::hasTexCoords(unsigned char tex_coord_set) {
 }
 
 /// Loads in vertex texture coordinates (the 0th set), and the materials.
-/** Uploads the vertex textures coordinates data to an attribute array,
-  * and sets it up for use. Also loads in the materials (textures) for
-  * the mesh. May write to the stderr if a material is missing.
-  * Calling this function changes the currently active VAO and ArrayBuffer.
-  * @param attrib - The attribute array to use as destination.
-  * @param tex_coord_set  Specifies the index of the texture coordinate set
-  *                     that should be used */
 void MeshRenderer::setupTexCoords(gl::VertexAttrib attrib,
                                   unsigned char tex_coord_set) {
   if (!is_setup_tex_coords_) {
@@ -243,43 +218,19 @@ void MeshRenderer::setupTexCoords(gl::VertexAttrib attrib,
       tex_coords_vector.resize(vert_num);
     }
 
-    gl::Bind(entries_[i].vao);
-
+    gl::BoundVertexArray bound_vao{entries_[i].vao};
     gl::BoundBuffer bound_buffer{entries_[i].tex_coords};
     bound_buffer.data(tex_coords_vector);
     attrib.setup<float>(2).enable();
   }
-
-  gl::Unbind(gl::kVertexArray);
 }
 
 #if OGLWRAP_USE_IMAGEMAGICK
-/**
- * @brief Loads in a specified type of texture for every mesh. If no texture but
- *        a single color is specified, then sets up an 1x1 texture with that
- *        color (so you can use the same shader).
- *
- * Changes the currently active texture unit and Texture2D binding.
- * @param texture_unit      Specifies the texture unit to use for the textures.
- * @param tex_type          The type of the texture to load in. For ex
- *                          aiTextureType_DIFFUSE.
- * @param pKey, type, idx   These parameters identify the color parameter to
- *                          load in case there isn't any texture specified.
- *                          Use the assimp macros to fill these 3 parameters
- *                          all at once, for ex: AI_MATKEY_COLOR_DIFFUSE
- * @param srgb              Specifies weather the image is in srgb colorspace
- */
-void MeshRenderer::setupTextures(unsigned short texture_unit,
-                                 aiTextureType tex_type,
+void MeshRenderer::setupTextures(aiTextureType tex_type,
                                  const char *pKey,
                                  unsigned int type,
                                  unsigned int idx,
                                  bool srgb) {
-  gl::ActiveTexture(texture_unit);
-
-  materials_[tex_type].active = true;
-  materials_[tex_type].tex_unit = texture_unit;
-
   if (scene_->mNumMaterials) {
     // Extract the directory part from the file name
     std::string::size_type slash_idx = filename_.find_last_of("/");
@@ -297,88 +248,61 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
     for (unsigned int i = 0; i < scene_->mNumMaterials; ++i) {
       const aiMaterial* mat = scene_->mMaterials[i];
       materials_[tex_type].textures.emplace_back(new gl::Texture2D{});
+      layouts_[i].add(*materials_[tex_type].textures.back());
 
       aiString filepath;
       if (mat->GetTexture(tex_type, 0, &filepath) == AI_SUCCESS) {
-        gl::Bind(*materials_[tex_type].textures[i]);
-        materials_[tex_type].textures[i]->loadTexture(dir + filepath.data,
-                                                     srgb ? "CSRGBA" : "CRGBA");
-        materials_[tex_type].textures[i]->minFilter(gl::kLinear);
-        materials_[tex_type].textures[i]->magFilter(gl::kLinear);
+
+        gl::BoundTexture2D tex{*materials_[tex_type].textures[i]};
+        tex.loadTexture(dir + filepath.data, srgb ? "CSRGBA" : "CRGBA");
+        tex.minFilter(gl::kLinear);
+        tex.magFilter(gl::kLinear);
       } else {
         aiColor4D color(0.f, 0.f, 0.f, 1.0f);
         mat->Get(pKey, type, idx, color);
 
-        gl::Bind(*materials_[tex_type].textures[i]);
-        materials_[tex_type].textures[i]->upload(gl::kRgba32F, 1, 1, gl::kRgba,
-                                                gl::kFloat, &color.r);
-        materials_[tex_type].textures[i]->minFilter(gl::kNearest);
-        materials_[tex_type].textures[i]->magFilter(gl::kNearest);
+        gl::BoundTexture2D tex{*materials_[tex_type].textures[i]};
+        tex.upload(gl::kRgba32F, 1, 1, gl::kRgba, gl::kFloat, &color.r);
+        tex.minFilter(gl::kNearest);
+        tex.magFilter(gl::kNearest);
       }
     }
   }
-
-  gl::Unbind(gl::kTexture2D);
 }
 #endif
 
 /// Sets the diffuse textures up to a specified texture unit.
-/** Changes the currently active texture unit and Texture2D binding.
-  * @param texture_unit Specifies the texture unit to use for the diffuse textures. */
-void MeshRenderer::setupDiffuseTextures(unsigned short texture_unit, bool srbg) {
-  setupTextures(texture_unit, aiTextureType_DIFFUSE,
-                AI_MATKEY_COLOR_DIFFUSE, srbg);
+void MeshRenderer::setupDiffuseTextures(bool srbg) {
+  setupTextures(aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE, srbg);
 }
 
 /// Sets the specular textures up to a specified texture unit.
-/** Changes the currently active texture unit and Texture2D binding.
-  * @param texture_unit Specifies the texture unit to use for the specular textures. */
-void MeshRenderer::setupSpecularTextures(unsigned short texture_unit) {
-  setupTextures(texture_unit, aiTextureType_SPECULAR,
-                AI_MATKEY_COLOR_SPECULAR, false);
+void MeshRenderer::setupSpecularTextures() {
+  setupTextures(aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR, false);
 }
 
 /// Renders the mesh.
-/** Changes the currently active VAO and may change the Texture2D binding */
 void MeshRenderer::render() {
   if (!is_setup_positions_) {
     return;  // we can't render the mesh, if we don't have any vertex.
   }
   for (size_t i = 0 ; i < entries_.size(); i++) {
-    gl::Bind(entries_[i].vao);
+    gl::BoundVertexArray bound_vao{entries_[i].vao};
 
     const size_t material_index = entries_[i].material_index;
-
-    if (textures_enabled_) {
-      for (auto iter = materials_.begin(); iter != materials_.end(); iter++) {
-        auto& material = iter->second;
-        if (material.active == true && material_index < scene_->mNumMaterials) {
-          gl::ActiveTexture(material.tex_unit);
-        }
-        gl::Bind(*material.textures[material_index]);
-      }
+    if (textures_enabled_ && material_index < scene_->mNumMaterials) {
+      layouts_[material_index].bind();
     }
 
     gl::DrawElements(gl::kTriangles, entries_[i].idx_count, entries_[i].idx_type);
 
-    if (textures_enabled_) {
-      for (auto iter = materials_.begin(); iter != materials_.end(); iter++) {
-        auto& material = iter->second;
-        if (material.active == true && material_index < scene_->mNumMaterials) {
-          gl::ActiveTexture(material.tex_unit);
-        }
-        gl::Unbind(*material.textures[material_index]);
-      }
+    if (textures_enabled_ && material_index < scene_->mNumMaterials) {
+      layouts_[material_index].unbind();
     }
   }
-
-  gl::Unbind(gl::kVertexArray);
 }
 
 /// The transformation that takes the model's world coordinates to the OpenGL style world coordinates.
-/** i.e if you see that a character is laying on ground instead of standing, it is probably
-  * because the character is defined in a space where XY is flat, and Z is up. Right
-  * multiplying your model matrix with this matrix will solve that problem. */
 glm::mat4 MeshRenderer::worldTransform() const {
   return world_transformation_;
 }
@@ -427,7 +351,6 @@ glm::vec4 MeshRenderer::bSphere(const BoundingBox& bbox) const {
 }
 
 /// Returns the center offseted by the model matrix (as xyz) and radius (as w) of the bounding sphere.
-/** @param model_matrix - The matrix to use to offset the center of the bounding sphere. */
 glm::vec4 MeshRenderer::bSphere(const glm::mat4& model_matrix) const {
   return bSphere(boundingBox(model_matrix));
 }

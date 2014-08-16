@@ -11,6 +11,7 @@
 #include "engine/game_object.h"
 #include "engine/shader_manager.h"
 #include "engine/cdlod/terrain_mesh.h"
+#include "oglwrap/textures/texture_layout.h"
 
 class Terrain : public engine::GameObject {
  public:
@@ -25,6 +26,7 @@ class Terrain : public engine::GameObject {
   engine::ShaderProgram prog_;  // has to be inited after mesh_
 
   gl::Texture2D grassMaps_[2], grassNormalMap_;
+  gl::TextureLayout layout_;
   gl::LazyUniform<glm::mat4> uProjectionMatrix_, uCameraMatrix_,
                              uModelMatrix_, uShadowCP_;
   gl::LazyUniform<int> uNumUsedShadowMaps_;

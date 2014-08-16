@@ -26,11 +26,10 @@ public:
     (prog_ << vs << fs).link();
     gl::Use(prog_);
 
-    gl::Bind(tex_);
-    tex_.loadTexture("textures/loading.png");
-    tex_.minFilter(gl::kLinear);
-    tex_.magFilter(gl::kLinear);
-    gl::Unbind(tex_);
+    gl::BoundTexture2D tex{tex_};
+    tex.loadTexture("textures/loading.png");
+    tex.minFilter(gl::kLinear);
+    tex.magFilter(gl::kLinear);
 
     gl::UniformSampler(prog_, "uTex").set(0);
 
@@ -42,13 +41,13 @@ public:
 
   void render() {
     gl::Use(prog_);
-    gl::BindToTexUnit(tex_, 0);
+    glActiveTexture(0);
+    gl::BoundTexture2D tex{tex_};
 
     gl::TemporarySet capabilies{{{gl::kCullFace, false},
                                  {gl::kDepthTest, false}}};
 
     rect_.render();
-    gl::Unbind(tex_);
   }
 };
 

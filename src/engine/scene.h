@@ -119,9 +119,9 @@ class Scene : public Behaviour {
 
   virtual void shadowRenderAll() override {
     if (camera_ && shadow_) {
-      shadow_->begin(); {
-        Behaviour::shadowRenderAll();
-      } shadow_->end();
+      shadow_->begin();
+      Behaviour::shadowRenderAll();
+      shadow_->end();
     }
   }
 

@@ -11,8 +11,10 @@
 #include "../oglwrap_config.h"
 #include "../../oglwrap/buffer.h"
 #include "../../oglwrap/enums/index_type.h"
+#include "../../oglwrap/vertex_array.h"
 #include "../../oglwrap/vertex_attrib.h"
 #include "../../oglwrap/textures/texture2D.h"
+#include "../../oglwrap/textures/texture_layout.h"
 
 #include "../assimp.h"
 #include "../collision/bounding_box.h"
@@ -22,10 +24,6 @@ namespace engine {
 /// A class that can load in and draw meshes using assimp.
 class MeshRenderer {
  protected:
-  /**
-   * @brief A class to store per mesh data (the class loads in a scene, that
-   *        might contain multiply meshes).
-   */
   struct MeshEntry {
     gl::VertexArray vao;
     gl::ArrayBuffer verts, normals, tex_coords;
@@ -54,16 +52,15 @@ class MeshRenderer {
 
   /// A struct containin the state and data of a material type.
   struct MaterialInfo {
-    bool active;
     int tex_unit;
     // Texture2Ds are non-copyable, so we need to store pointers of them
     std::vector<std::unique_ptr<gl::Texture2D>> textures;
 
-    MaterialInfo() : active(false), tex_unit(0) {}
+    MaterialInfo() : tex_unit(0) {}
   };
 
-  /// The materials.
   std::map<aiTextureType, MaterialInfo> materials_;
+  std::vector<gl::TextureLayout> layouts_;
 
   /// Stores if the setupPositions function is called (they shouldn't be called more than once).
   bool is_setup_positions_;
@@ -81,8 +78,6 @@ class MeshRenderer {
 
 public:
   /// Loads in the mesh from a file, and does some post-processing on it.
-  /** @param filename - The name of the file to load in.
-    * @param flags - The assimp post-process flags. */
   MeshRenderer(const std::string& filename,
                gl::Bitfield<aiPostProcessSteps> flags);
 
@@ -100,83 +95,41 @@ public:
 private:
   template <typename IdxType>
   /// A template for setting different types (byte/short/int) of indices.
-  /** This expects the correct vao to be already bound!
-    * @param index - The index of the entry */
-  void setIndices(size_t index);
+  void setIndices(size_t index, gl::BoundVertexArray& vao);
 
 public:
   /// Loads in vertex positions and indices, and uploads the former into an attribute array.
-  /** Uploads the vertex positions data to an attribute array, and sets it up for use.
-    * Calling this function changes the currently active VAO, ArrayBuffer and IndexBuffer.
-    * The mesh cannot be drawn without calling this function.
-    * @param attrib - The attribute array to use as destination. */
   void setupPositions(gl::VertexAttrib attrib);
 
   /// Loads in vertex normals, and uploads it to an attribute array.
-  /** Uploads the vertex normals data to an attribute array, and sets it up for use.
-    * Calling this function changes the currently active VAO and ArrayBuffer.
-    * @param attrib - The attribute array to use as destination. */
   void setupNormals(gl::VertexAttrib attrib);
 
   /// Checks if every mesh in the scene has tex_coords
-  /** Returns true if all of the meshes in the scene have texture
-    * coordinates in the specified texture coordinate set.
-    * @param tex_coord_set - Specifies the index of the texture coordinate set that should be inspected */
   bool hasTexCoords(unsigned char tex_coord_set = 0);
 
   /// Loads in vertex texture coordinates (the 0th set), and the materials.
-  /** Uploads the vertex textures coordinates data to an attribute array,
-    * and sets it up for use. Also loads in the materials (textures) for
-    * the mesh. May write to the stderr if a material is missing.
-    * Calling this function changes the currently active VAO and ArrayBuffer.
-    * @param attrib - The attribute array to use as destination.
-    * @param tex_coord_set Specifies the index of the texture coordinate set that should be used */
   void setupTexCoords(gl::VertexAttrib attrib,
                       unsigned char tex_coord_set = 0);
 
-  /**
-   * @brief Loads in a specified type of texture for every mesh. If no texture
-   *        but a single color is specified, then sets up an 1x1 texture with
-   *        that color (so you can use the same shader).
-   *
-   * Changes the currently active texture unit and Texture2D binding.
-   * @param texture_unit      Specifies the texture unit to use for the textures.
-   * @param tex_type          The type of the texture to load in. For ex
-   *                          aiTextureType_DIFFUSE.
-   * @param pKey, type, idx   These parameters identify the color parameter to
-   *                          load in case there isn't any texture specified.
-   *                          Use the assimp macros to fill these 3 parameters
-   *                          all at once, for ex: AI_MATKEY_COLOR_DIFFUSE
-   * @param srgb              Specifies weather the image is in srgb colorspace
-   */
-  void setupTextures(unsigned short texture_unit,
-                     aiTextureType tex_type,
+  void setupTextures(aiTextureType tex_type,
                      const char *pKey,
                      unsigned int type,
                      unsigned int idx,
                      bool srgb = true);
 
   /// Sets the diffuse textures up to a specified texture unit.
-  /** Changes the currently active texture unit and Texture2D binding.
-    * @param texture_unit - Specifies the texture unit to use for the diffuse textures. */
-  void setupDiffuseTextures(unsigned short texture_unit, bool srbg = true);
+  void setupDiffuseTextures(bool srbg = true);
 
   /// Sets the specular textures up to a specified texture unit.
-  /** Changes the currently active texture unit and Texture2D binding.
-    * @param texture_unit - Specifies the texture unit to use for the specular textures. */
-  void setupSpecularTextures(unsigned short texture_unit);
+  void setupSpecularTextures();
 
   /// Renders the mesh.
-  /** Changes the currently active VAO and may change the Texture2D binding */
   void render();
 
   /// Gives information about the mesh's bounding cuboid.
   BoundingBox boundingBox(const glm::mat4& matrix = glm::mat4{}) const;
 
   /// Returns the transformation that takes the model's world coordinates to the OpenGL style world coordinates.
-  /** i.e if you see that a character is laying on ground instead of standing, it is probably
-    * because the character is defined in a space where Z is up not Y. Right multiplying your
-    * model matrix with this matrix will solve that problem. */
   glm::mat4 worldTransform() const;
 
   /// Returns the bounding sphere from the bounding box

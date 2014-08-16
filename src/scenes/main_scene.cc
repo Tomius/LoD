@@ -99,7 +99,6 @@ MainScene::MainScene() {
 
   PrintDebugText("Initializing the resources for the after effects");
     AfterEffects *after_effects = addComponent<AfterEffects>(skybox);
-    shadow->set_default_fbo(after_effects->fbo());
     after_effects->set_group(1);
   PrintDebugTime();
 

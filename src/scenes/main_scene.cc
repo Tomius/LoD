@@ -47,20 +47,26 @@ MainScene::MainScene() {
     glfwSwapBuffers(window);
   PrintDebugTime();
 
-  PrintDebugText("Initializing the skybox");
-    Skybox *skybox = addComponent<Skybox>();
-    skybox->set_group(-1);
-  PrintDebugTime();
+  Skybox *skybox = engine::GameEngine::scene()->findComponent<Skybox>();
+  if (!stealComponent(skybox)) {
+    PrintDebugText("Initializing the skybox");
+      skybox = addComponent<Skybox>();
+      skybox->set_group(-1);
+    PrintDebugTime();
+  }
 
-  PrintDebugText("Initializing the shadow maps");
-    Shadow *shadow = addComponent<Shadow>(skybox, 32, 4, 4);
-    set_shadow(shadow);
-  PrintDebugTime();
+  Shadow *shadow = engine::GameEngine::scene()->findComponent<Shadow>();
+  if (!stealComponent(shadow)) {
+    PrintDebugText("Initializing the shadow maps");
+      shadow = addComponent<Shadow>(skybox, 2048, 4, 4);
+    PrintDebugTime();
+  }
+  set_shadow(shadow);
 
   Terrain *terrain = engine::GameEngine::scene()->findComponent<Terrain>();
   if (!stealComponent(terrain)) {
     PrintDebugText("Initializing the terrain");
-     terrain = addComponent<Terrain>();
+      terrain = addComponent<Terrain>();
     PrintDebugTime();
   }
   const engine::HeightMapInterface& height_map = terrain->height_map();

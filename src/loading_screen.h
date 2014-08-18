@@ -41,7 +41,7 @@ public:
 
   void render() {
     gl::Use(prog_);
-    glActiveTexture(0);
+    glActiveTexture(GL_TEXTURE0);
     gl::BoundTexture2D tex{tex_};
 
     gl::TemporarySet capabilies{{{gl::kCullFace, false},

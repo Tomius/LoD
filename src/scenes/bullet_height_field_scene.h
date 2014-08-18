@@ -382,6 +382,7 @@ class BulletForest : public engine::GameObject {
     }
 
     virtual void shadowRender() override {
+      gl::TemporaryDisable cullface{gl::kCullFace};
       auto shadow = scene_->shadow();
       const auto& cam = *scene_->camera();
       auto campos = cam.transform()->pos();
@@ -395,6 +396,8 @@ class BulletForest : public engine::GameObject {
     }
 
     virtual void render() override {
+      gl::TemporarySet capabilities{{{gl::kBlend, true},
+                                     {gl::kCullFace, false}}};
       auto cam = scene_->camera();
       const auto& cam_mx = cam->cameraMatrix();
       const auto& frustum = cam->frustum();
@@ -433,7 +436,7 @@ class BulletForest : public engine::GameObject {
       tree_infos_[i]->mesh_.setupPositions(prog_ | "aPosition");
       tree_infos_[i]->mesh_.setupTexCoords(prog_ | "aTexCoord");
       tree_infos_[i]->mesh_.setupNormals(prog_ | "aNormal");
-      tree_infos_[i]->mesh_.setupDiffuseTextures(0);
+      tree_infos_[i]->mesh_.setupDiffuseTextures();
 
       tree_infos_[i]->triangles_ = engine::make_unique<btTriangleIndexVertexArray>();
       tree_infos_[i]->indices_ =
@@ -473,7 +476,6 @@ class BulletForest : public engine::GameObject {
 
   virtual void shadowRender() override {
     gl::Use(shadow_prog_);
-    gl::TemporaryDisable cullface{gl::kCullFace};
   }
 
   virtual void render() override {
@@ -481,8 +483,6 @@ class BulletForest : public engine::GameObject {
     prog_.update();
     uProjectionMatrix_ = scene_->camera()->projectionMatrix();
 
-    gl::TemporarySet capabilities{{{gl::kBlend, true},
-                                   {gl::kCullFace, false}}};
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
     // The trees' render will run here

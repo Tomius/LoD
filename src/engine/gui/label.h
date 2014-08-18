@@ -199,7 +199,7 @@ class Label : public GameObject {
   virtual void render2D() override {
     gl::Use(prog_);
     gl::BoundVertexArray bound_vao{vao_};
-    glActiveTexture(0);
+    glActiveTexture(GL_TEXTURE0);
     font_.bindTexture();
     gl::DrawArrays(gl::kTriangles, 0, vertex_count_);
   }

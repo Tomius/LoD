@@ -244,6 +244,11 @@ void MeshRenderer::setupTextures(aiTextureType tex_type,
       dir = filename_.substr(0, slash_idx + 1);
     }
 
+    // init layouts if this is the first setupTextures call
+    if (layouts_.empty()) {
+      layouts_.resize(scene_->mNumMaterials);
+    }
+
     // Initialize the materials
     for (unsigned int i = 0; i < scene_->mNumMaterials; ++i) {
       const aiMaterial* mat = scene_->mMaterials[i];

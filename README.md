@@ -24,12 +24,12 @@ Dependencies:
 How to build (Debian/Ubuntu):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev libglm-dev && git clone https://github.com/glfw/glfw.git && cd glfw && cmake . && sudo make -j4 install && cd .. && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD && make -j4 && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev libglm-dev cmake xorg-dev libglu1-mesa-dev libglfw3-dev && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD && make -j4 && ./LoD
 ```
 
 How to build (Linux):
 ---------------------
-* get the external dependencies: libmagick++-dev libglew-dev libassimp-dev libbullet-dev libglm-dev [libglfw3-dev](https://github.com/glfw/glfw)
+* get the external dependencies: libmagick++-dev libglew-dev libassimp-dev libbullet-dev libglm-dev libglfw3-dev cmake xorg-dev libglu1-mesa-dev
 * initialize the oglwrap submodule: git submodule init && git submodule update
 * build with make (uses clang++), run with ./LoD
 

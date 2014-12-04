@@ -52,7 +52,7 @@ class QuadTree {
   QuadTree(const HeightMapInterface& hmap, int node_dimension = 128)
       : mesh_(node_dimension), node_dimension_(node_dimension)
       , root_(hmap.w()/2, hmap.h()/2,
-        std::max(log2(std::max(hmap.w()-1, hmap.h()-1)) - log2(node_dimension), 0.0),
+        std::max(log2(std::max(hmap.w(), hmap.h())) - log2(node_dimension), 0.0),
         node_dimension, true) {
     double min, max;
     root_.countMinMaxOfArea(hmap, &min, &max, true);

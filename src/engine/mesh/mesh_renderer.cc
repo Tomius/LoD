@@ -300,24 +300,24 @@ void MeshRenderer::setupTextures(unsigned short texture_unit,
     // Initialize the materials
     for (unsigned int i = 0; i < scene_->mNumMaterials; ++i) {
       const aiMaterial* mat = scene_->mMaterials[i];
-      materials_[tex_type].textures.emplace_back(new gl::Texture2D{});
+      materials_[tex_type].textures.push_back(gl::Texture2D{});
 
       aiString filepath;
       if (mat->GetTexture(tex_type, 0, &filepath) == AI_SUCCESS) {
-        gl::Bind(*materials_[tex_type].textures[i]);
-        materials_[tex_type].textures[i]->loadTexture(dir + filepath.data,
+        gl::Bind(materials_[tex_type].textures[i]);
+        materials_[tex_type].textures[i].loadTexture(dir + filepath.data,
                                                      srgb ? "CSRGBA" : "CRGBA");
-        materials_[tex_type].textures[i]->minFilter(gl::kLinear);
-        materials_[tex_type].textures[i]->magFilter(gl::kLinear);
+        materials_[tex_type].textures[i].minFilter(gl::kLinear);
+        materials_[tex_type].textures[i].magFilter(gl::kLinear);
       } else {
         aiColor4D color(0.f, 0.f, 0.f, 1.0f);
         mat->Get(pKey, type, idx, color);
 
-        gl::Bind(*materials_[tex_type].textures[i]);
-        materials_[tex_type].textures[i]->upload(gl::kRgba32F, 1, 1, gl::kRgba,
+        gl::Bind(materials_[tex_type].textures[i]);
+        materials_[tex_type].textures[i].upload(gl::kRgba32F, 1, 1, gl::kRgba,
                                                 gl::kFloat, &color.r);
-        materials_[tex_type].textures[i]->minFilter(gl::kNearest);
-        materials_[tex_type].textures[i]->magFilter(gl::kNearest);
+        materials_[tex_type].textures[i].minFilter(gl::kNearest);
+        materials_[tex_type].textures[i].magFilter(gl::kNearest);
       }
     }
   }
@@ -359,7 +359,7 @@ void MeshRenderer::render() {
         if (material.active == true && material_index < scene_->mNumMaterials) {
           gl::ActiveTexture(material.tex_unit);
         }
-        gl::Bind(*material.textures[material_index]);
+        gl::Bind(material.textures[material_index]);
       }
     }
 
@@ -371,7 +371,7 @@ void MeshRenderer::render() {
         if (material.active == true && material_index < scene_->mNumMaterials) {
           gl::ActiveTexture(material.tex_unit);
         }
-        gl::Unbind(*material.textures[material_index]);
+        gl::Unbind(material.textures[material_index]);
       }
     }
   }

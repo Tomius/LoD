@@ -82,12 +82,12 @@ class Scene : public Behaviour {
   }
 
   virtual void turn() {
+    physics_finished_.waitOne();
     updateAll();
     physics_can_run_.set();
     shadowRenderAll();
     renderAll();
     render2DAll();
-    physics_finished_.waitOne();
   }
 
  protected:
@@ -99,7 +99,7 @@ class Scene : public Behaviour {
   std::unique_ptr<btDynamicsWorld> world_;
 
   // physics thread data
-  AutoResetEvent physics_can_run_, physics_finished_;
+  AutoResetEvent physics_can_run_{false}, physics_finished_{true};
   bool physics_thread_should_quit_;
   std::thread physics_thread_;
 

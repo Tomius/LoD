@@ -389,6 +389,7 @@ class BulletForest : public engine::GameObject {
           glm::length(glm::vec3(model_matrix_[3]) - campos) < 150) {
         shadow_uMCP_ = shadow->modelCamProjMat(
             tree_info_->bsphere_, model_matrix_, glm::mat4{});
+        gl::TemporaryDisable cullface{gl::kCullFace};
         tree_info_->mesh_.render();
         shadow->push();
       }
@@ -401,6 +402,9 @@ class BulletForest : public engine::GameObject {
 
       // Check for visibility
       if (!bbox_.collidesWithFrustum(frustum)) { return; }
+
+      gl::TemporarySet capabilities{{{gl::kBlend, true},
+                                   {gl::kCullFace, false}}};
 
       uModelCameraMatrix_.set(cam_mx * model_matrix_);
       uNormalMatrix_.set(glm::inverse(glm::mat3(model_matrix_)));
@@ -473,7 +477,6 @@ class BulletForest : public engine::GameObject {
 
   virtual void shadowRender() override {
     gl::Use(shadow_prog_);
-    gl::TemporaryDisable cullface{gl::kCullFace};
   }
 
   virtual void render() override {
@@ -481,8 +484,6 @@ class BulletForest : public engine::GameObject {
     prog_.update();
     uProjectionMatrix_ = scene_->camera()->projectionMatrix();
 
-    gl::TemporarySet capabilities{{{gl::kBlend, true},
-                                   {gl::kCullFace, false}}};
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
     // The trees' render will run here
@@ -543,7 +544,7 @@ class BulletHeightFieldScene : public engine::Scene {
     after_effects->set_group(1);
 
     auto cam = addComponent<BulletFreeFlyCamera>(M_PI/3, 1, 3000,
-        glm::vec3(2050, 200, 2050), glm::vec3(2048, 200, 2048), 20, 2);
+        glm::vec3(1030, 200, 1030), glm::vec3(1024, 200, 1024), 20, 2);
     set_camera(cam);
 
     auto label = addComponent<engine::gui::Label>(

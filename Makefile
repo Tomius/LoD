@@ -39,7 +39,7 @@ endif
 CXXFLAG_PRECOMPILED_HEADER = -include $(PRECOMPILED_HEADER_SRC)
 
 PKG_CONFIG_LDFLAGS := `pkg-config --libs $(PKG_CONFIG_LIB_NAMES)`
-GLFW_X11_LDFALGS = -lXxf86vm -lX11 -lXrandr -lXi -lXcursor -lpthread
+GLFW_X11_LDFALGS = -lXxf86vm -lX11 -lXrandr -lXi -lXcursor -lXinerama -lpthread
 FREETYPE_GL_LDFLAGS = -L$(FREETYPE_GL_DIR) -lfreetype-gl
 
 BASE_LDFLAGS = -lm $(PKG_CONFIG_LDFLAGS) $(GLFW_X11_LDFALGS) $(FREETYPE_GL_LDFLAGS)

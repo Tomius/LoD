@@ -428,11 +428,11 @@ class BulletForest : public engine::GameObject {
     gl::UniformSampler(prog_, "uDiffuseTexture").set(0);
 
     tree_infos_[0] = engine::make_unique<TreeInfo>(
-        "models/trees/massive_swamptree_01_a");
+        "src/resources/models/trees/massive_swamptree_01_a");
     tree_infos_[1] = engine::make_unique<TreeInfo>(
-        "models/trees/massive_swamptree_01_b");
+        "src/resources/models/trees/massive_swamptree_01_b");
     tree_infos_[2] = engine::make_unique<TreeInfo>(
-        "models/trees/cedar_01_a_source");
+        "src/resources/models/trees/cedar_01_a_source");
     for (int i = 0; i != tree_infos_.size(); ++i) {
       tree_infos_[i]->mesh_.setupPositions(prog_ | "aPosition");
       tree_infos_[i]->mesh_.setupTexCoords(prog_ | "aTexCoord");

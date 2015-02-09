@@ -7,7 +7,7 @@
 
 Terrain::Terrain(engine::GameObject* parent)
     : engine::GameObject(parent)
-    , height_map_("terrain/terrain.png")
+    , height_map_("src/resources/terrain/terrain.png")
     , mesh_(scene_->shader_manager(), height_map_)
     , prog_(scene_->shader_manager()->get("terrain.vert"),
             scene_->shader_manager()->get("terrain.frag"))
@@ -24,8 +24,8 @@ Terrain::Terrain(engine::GameObject* parent)
   for (int i = 0; i < 2; ++i) {
     gl::Bind(grassMaps_[i]);
     // no alpha channel here
-    grassMaps_[i].loadTexture(
-      i == 0 ? "textures/grass.jpg" : "textures/grass_2.jpg", "CSRGB");
+    grassMaps_[i].loadTexture(std::string{"src/resources/textures/"} +
+        (i == 0 ? "grass.jpg" : "grass_2.jpg"), "CSRGB");
     grassMaps_[i].generateMipmap();
     grassMaps_[i].maxAnisotropy();
     grassMaps_[i].minFilter(gl::kLinearMipmapLinear);
@@ -38,7 +38,7 @@ Terrain::Terrain(engine::GameObject* parent)
   gl::Bind(grassNormalMap_);
   {
     // the normal map doesn't have an alpha channel, and is not is srgb space
-    grassNormalMap_.loadTexture("textures/grass_normal.jpg", "CRGB");
+    grassNormalMap_.loadTexture("src/resources/textures/grass_normal.jpg", "CRGB");
     grassNormalMap_.generateMipmap();
     grassNormalMap_.minFilter(gl::kLinearMipmapLinear);
     grassNormalMap_.magFilter(gl::kLinear);

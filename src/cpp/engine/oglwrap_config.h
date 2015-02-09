@@ -4,7 +4,7 @@
 #define LOD_OGLWRAP_CONFIG_H_
 
 #define OGLWRAP_USE_IMAGEMAGICK 1
-#define OGLWRAP_DEFAULT_SHADER_PATH "shaders/"
+#define OGLWRAP_DEFAULT_SHADER_PATH "src/glsl/"
 
 #include "../oglwrap/glew.h"
 

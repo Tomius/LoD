@@ -25,10 +25,9 @@ engine::ShaderFile* Ayumi::loadShadowVertexShader(
   return manager->publish("ayumi_shadow.vert", shadow_vs_src);
 }
 
-
 Ayumi::Ayumi(engine::GameObject* parent)
     : engine::Behaviour(parent)
-    , mesh_("models/ayumi/ayumi.dae",
+    , mesh_("src/resources/models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs)
     , anim_(mesh_.getAnimData())
     , prog_(loadVertexShader(scene_->shader_manager()),
@@ -64,38 +63,38 @@ Ayumi::Ayumi(engine::GameObject* parent)
 
   using engine::AnimFlag;
 
-  mesh_.addAnimation("models/ayumi/ayumi_idle.dae", "Stand",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_idle.dae", "Stand",
                      {AnimFlag::Repeat, AnimFlag::Interruptable});
 
-  mesh_.addAnimation("models/ayumi/ayumi_walk.dae", "Walk",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_walk.dae", "Walk",
                      {AnimFlag::Repeat, AnimFlag::Interruptable});
 
-  mesh_.addAnimation("models/ayumi/ayumi_walk.dae", "MoonWalk",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_walk.dae", "MoonWalk",
                      {AnimFlag::Repeat, AnimFlag::Mirrored,
                      AnimFlag::Interruptable});
 
-  mesh_.addAnimation("models/ayumi/ayumi_run.dae", "Run",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_run.dae", "Run",
                      {AnimFlag::Repeat, AnimFlag::Interruptable});
 
-  mesh_.addAnimation("models/ayumi/ayumi_jump_rise.dae", "JumpRise",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_jump_rise.dae", "JumpRise",
                      {AnimFlag::MirroredRepeat, AnimFlag::Interruptable}, 0.5f);
 
-  mesh_.addAnimation("models/ayumi/ayumi_jump_fall.dae", "JumpFall",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_jump_fall.dae", "JumpFall",
                      {AnimFlag::MirroredRepeat, AnimFlag::Interruptable}, 0.5f);
 
-  mesh_.addAnimation("models/ayumi/ayumi_flip.dae", "Flip",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_flip.dae", "Flip",
                      AnimFlag::None, 1.5f);
 
-  mesh_.addAnimation("models/ayumi/ayumi_attack.dae", "Attack",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_attack.dae", "Attack",
                      AnimFlag::None, 2.5f);
 
-  mesh_.addAnimation("models/ayumi/ayumi_attack2.dae", "Attack2",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_attack2.dae", "Attack2",
                      AnimFlag::None, 1.4f);
 
-  mesh_.addAnimation("models/ayumi/ayumi_attack3.dae", "Attack3",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_attack3.dae", "Attack3",
                      AnimFlag::None, 3.0f);
 
-  mesh_.addAnimation("models/ayumi/ayumi_attack_chain0.dae", "Attack_Chain0",
+  mesh_.addAnimation("src/resources/models/ayumi/ayumi_attack_chain0.dae", "Attack_Chain0",
                      AnimFlag::None, 0.9f);
 
   anim_.setDefaultAnimation("Stand", 0.3f);

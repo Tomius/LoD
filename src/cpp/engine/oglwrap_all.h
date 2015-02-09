@@ -12,7 +12,7 @@
 #endif
 
 #ifndef OGLWRAP_DEFAULT_SHADER_PATH
-  #define OGLWRAP_DEFAULT_SHADER_PATH "shaders/"
+  #define OGLWRAP_DEFAULT_SHADER_PATH "src/glsl/"
 #endif
 
 #include "../oglwrap/glew.h"

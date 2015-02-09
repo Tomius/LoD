@@ -41,7 +41,7 @@ struct GuiTestScene : public engine::Scene {
     params.extent = glm::vec2{0.5f, 0.5f};
     params.label_pos = params.center + glm::vec2(0, 0.8f) * params.extent;
     params.label_text = L"Choose your destiny!";
-    params.label_font = Font{"src/engine/gui/freetype-gl/fonts/ObelixPro.ttf", 40};
+    params.label_font = Font{"src/resources/fonts/ObelixPro.ttf", 40};
     params.label_font.set_color(glm::vec4{0, 1, 0, 0.5});
     params.label_font.set_vertical_alignment(Font::VerticalAlignment::kBottom);
     params.style = engine::gui::BoxParams::Style::kShaded;

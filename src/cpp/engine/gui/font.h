@@ -39,8 +39,7 @@ class FontData {
   }
 
  public:
-  FontData(const std::string& filename
-              = "src/engine/gui/freetype-gl/fonts/Vera.ttf", float size = 12)
+  FontData(const std::string& filename = "src/resources/fonts/Vera.ttf", float size = 12)
       : filename_(filename), atlas_(texture_atlas_new(1024, 1024, 1))
       , font_(texture_font_new_from_file(atlas_, size, filename.c_str()))
       , size_(size) {
@@ -93,7 +92,7 @@ class Font {
   VerticalAlignment vertical_alignment_;
 
  public:
-  Font(const std::string& filename = "src/engine/gui/freetype-gl/fonts/Vera.ttf",
+  Font(const std::string& filename = "src/resources/fonts/Vera.ttf",
        float size = 12,  glm::vec4 color = glm::vec4{1},
        HorizontalAlignment xalign = HorizontalAlignment::kCenter,
        VerticalAlignment yalign = VerticalAlignment::kCenter)

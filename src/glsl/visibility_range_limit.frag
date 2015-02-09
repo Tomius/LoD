@@ -13,6 +13,6 @@ float VisibilityRangeAlpha(vec3 c_pos) {
   } else if (l > uMaxOpaqueDist) {
     return 1 - (l - uMaxOpaqueDist) / (uMaxVisibleDist - uMaxOpaqueDist);
   } else {
-    return 1;
+    return 1.0;
   }
 }

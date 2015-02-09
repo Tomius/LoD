@@ -27,7 +27,7 @@ class Button : public Behaviour {
     params.bg_top_mid_color = glm::vec4{top, color.a};
     params.bg_bottom_mid_color = color;
     params.label_text = text;
-    params.label_font = Font{"src/engine/gui/freetype-gl/fonts/VeraMoBd.ttf", 15};
+    params.label_font = Font{"src/resources/fonts/VeraMoBd.ttf", 15};
     params.label_font.set_vertical_alignment(Font::VerticalAlignment::kBottom);
     params.label_font.set_color(font_color);
     params.label_pos = pos + glm::vec2(0.0f, -0.4f) * params.extent;

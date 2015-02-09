@@ -21,15 +21,15 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
   gl::Use(prog_);
 
   meshes_[0] = engine::make_unique<engine::MeshRenderer>(
-    "models/trees/massive_swamptree_01_a.obj",
+    "src/resources/models/trees/massive_swamptree_01_a.obj",
     aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
     aiProcess_PreTransformVertices);
   meshes_[1] = engine::make_unique<engine::MeshRenderer>(
-    "models/trees/massive_swamptree_01_b.obj",
+    "src/resources/models/trees/massive_swamptree_01_b.obj",
     aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
     aiProcess_PreTransformVertices);
   meshes_[2] = engine::make_unique<engine::MeshRenderer>(
-    "models/trees/cedar_01_a_source.obj",
+    "src/resources/models/trees/cedar_01_a_source.obj",
     aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
     aiProcess_PreTransformVertices);
 

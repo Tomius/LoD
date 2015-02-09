@@ -1,4 +1,4 @@
-SRC_DIR = src
+SRC_DIR = src/cpp
 OBJ_DIR = .obj
 PRECOMPILED_HEADER_SRC = $(SRC_DIR)/engine/oglwrap_all.h
 CXX_PRECOMPILED_HEADER_EXTENSION = pch
@@ -17,7 +17,7 @@ $(shell echo 0 > $(OBJ_DIR)/objs_total)
 
 .PHONY: all
 
-all: $(PRECOMPILED_HEADER) $(OBJECTS) $(FREETYPE_GL_ARCHIVE) .MakefileObjsTotal
+all: $(PRECOMPILED_HEADER) $(OBJECTS) $(FREETYPE_GL_ARCHIVE) progress_counter.make
 
 $(OBJECTS):
 	@echo $$((`cat $(OBJ_DIR)/objs_total` + 1)) > $(OBJ_DIR)/objs_total

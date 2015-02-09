@@ -1,7 +1,7 @@
 # Copyright (c) 2014, Tamas Csala
 
 BINARY = LoD
-SRC_DIR = src
+SRC_DIR = src/cpp
 OBJ_DIR = .obj
 PRECOMPILED_HEADER_SRC = $(SRC_DIR)/engine/oglwrap_all.h
 FREETYPE_GL_DIR = $(SRC_DIR)/engine/gui/freetype-gl
@@ -81,16 +81,16 @@ clean_deps:
 update:
 	@git pull && git submodule update
 
-ifneq ($(MAKECMDGOALS),clean) 						 # don't create .d files just to remove them...
+ifneq ($(MAKECMDGOALS),clean) 						 						# don't create .d files just to remove them...
 ifneq ($(MAKECMDGOALS),clean_deps)
 ifneq ($(MAKECMDGOALS),update)
-$(shell mkdir -p $(OBJ_DIR))							 # make OBJ_DIR for a helper file
-$(shell mkdir -p $(THIRD_PARTY_DIR))			 # make the dir for third party libs
-$(shell echo 0 > $(OBJ_DIR)/objs_current)  # reset the built object counter
-$(shell touch .MakefileObjsTotal) 				 # force the helper makefile to always run
-$(shell $(MAKE) -f .MakefileObjsTotal all) # count the number of objects to be built
-$(shell rm -rf $(OBJ_DIR)/deps)						 # remove the dir used to sign the first .d file
-$(shell rm -rf .lockdir)									 # reset the lock for .make_get_progress.sh
+$(shell mkdir -p $(OBJ_DIR))							 						# make OBJ_DIR for a helper file
+$(shell mkdir -p $(THIRD_PARTY_DIR))			 						# make the dir for third party libs
+$(shell echo 0 > $(OBJ_DIR)/objs_current)  						# reset the built object counter
+$(shell touch scripts/progress_counter.make) 				  # force the helper makefile to always run
+$(shell $(MAKE) -f scripts/progress_counter.make all) # count the number of objects to be built
+$(shell rm -rf $(OBJ_DIR)/deps)						 						# remove the dir used to sign the first .d file
+$(shell rm -rf .lockdir)									 						# reset the lock for scripts/get_build_progress.sh
 
 # include the dependency files
 -include $(DEPS)
@@ -121,7 +121,7 @@ $(PRECOMPILED_HEADER_DEP):
 	@ $(CXX) $(CXXFLAGS) -x c++-header -MM $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION).d=)) -MT $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.d=)) -MF $@
 
 %.o:
-	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building object $@,$(GREEN))
+	@ $(call printf,$(shell scripts/get_build_progress.sh) ,Building object $@,$(GREEN))
 
 	@ # One of the depencies changed, which probably introduced new dependencies,
 	@ # that we don't depend on now. So if a new header is included from a header,
@@ -140,13 +140,13 @@ $(PRECOMPILED_HEADER_DEP):
 	@ $(CXX) $(CXXFLAGS) $(CXXFLAG_PRECOMPILED_HEADER) -c $(subst $(OBJ_DIR),$(SRC_DIR),$(@:.o=.cc)) -o $@
 
 $(PRECOMPILED_HEADER):
-	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building precompiled header $@,$(CYAN))
+	@ $(call printf,$(shell scripts/get_build_progress.sh) ,Building precompiled header $@,$(CYAN))
 	@ rm -f $(PRECOMPILED_HEADER)-*
 	@ if [ -f $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2 ]; then rm $(subst $(SRC_DIR),$(OBJ_DIR),$@).d2;	else $(CXX) $(CXXFLAGS) -x c++-header -MM $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -MT $@ -MF $(subst $(SRC_DIR),$(OBJ_DIR),$@).d; fi;
 	@ $(CXX) $(CXXFLAGS) -x c++-header $(@:.$(CXX_PRECOMPILED_HEADER_EXTENSION)=) -o $@
 
 $(FREETYPE_GL_ARCHIVE):
-	@ $(call printf,$(shell ./.make_get_progress.sh) ,Building archive $@,$(GREEN))
+	@ $(call printf,$(shell scripts/get_build_progress.sh) ,Building archive $@,$(GREEN))
 	@ cd $(FREETYPE_GL_DIR) && cmake . > /dev/null && $(MAKE) all > /dev/null
 
 $(BINARY): $(THIRD_PARTY_LIBS_FOUND) $(OBJECTS) $(FREETYPE_GL_ARCHIVE)

@@ -1,3 +1,6 @@
 [submodule "src/oglwrap"]
 	path = src/oglwrap
 	url = https://github.com/Tomius/oglwrap.git
+[submodule "src/cpp/oglwrap"]
+	path = src/cpp/oglwrap
+	url = https://github.com/Tomius/oglwrap.git

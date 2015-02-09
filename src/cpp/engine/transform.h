@@ -24,11 +24,11 @@ namespace engine {
 template<typename T, glm::precision P = glm::precision::highp>
 class Transformation {
  protected:
-  using vec3 = glm::detail::tvec3<T, P>;
-  using vec4 = glm::detail::tvec4<T, P>;
-  using mat3 = glm::detail::tmat3x3<T, P>;
-  using mat4 = glm::detail::tmat4x4<T, P>;
-  using quat = glm::detail::tquat<T, P>;
+  using vec3 = glm::tvec3<T, P>;
+  using vec4 = glm::tvec4<T, P>;
+  using mat3 = glm::tmat3x3<T, P>;
+  using mat4 = glm::tmat4x4<T, P>;
+  using quat = glm::tquat<T, P>;
 
   Transformation* parent_;
   vec3 pos_, scale_;

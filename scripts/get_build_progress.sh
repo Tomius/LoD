@@ -1,5 +1,5 @@
 #!/bin/bash
-while ! mkdir .lockdir 2> /dev/null; do sleep 0.001s; done;
+while ! mkdir .lockdir 2> /dev/null; do sleep 0.01s; done;
 CURRENT=`cat .obj/objs_current`
 TOTAL=`cat .obj/objs_total`
 echo $(($CURRENT + 1)) > .obj/objs_current

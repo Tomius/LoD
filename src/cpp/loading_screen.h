@@ -27,7 +27,7 @@ public:
     gl::Use(prog_);
 
     gl::Bind(tex_);
-    tex_.loadTexture("textures/loading.png");
+    tex_.loadTexture("src/resources/textures/loading.png");
     tex_.minFilter(gl::kLinear);
     tex_.magFilter(gl::kLinear);
     gl::Unbind(tex_);

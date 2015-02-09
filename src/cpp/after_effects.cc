@@ -2,17 +2,24 @@
 
 #include "./after_effects.h"
 #include "engine/scene.h"
+#include "engine/misc.h"
 #include "oglwrap/smart_enums.h"
 
 AfterEffects::AfterEffects(GameObject *parent, Skybox* skybox)
     : Behaviour(parent)
-    , prog_(scene_->shader_manager()->get("after_effects.vert"),
-            scene_->shader_manager()->get("after_effects.frag"))
     , uScreenSize_(prog_, "uScreenSize")
     , s_uSunPos_(prog_, "s_uSunPos")
     , uZNear_(prog_, "uZNear")
     , uZFar_(prog_, "uZFar")
     , skybox_(skybox) {
+  engine::ShaderFile *vs = scene_->shader_manager()->get("after_effects.vert");
+  engine::ShaderFile *fs = scene_->shader_manager()->get("after_effects_dof.frag");
+  if (fs->state() != gl::Shader::kCompileSuccessful) {
+    // intel doesn't support textureLoD, so no DoF :(
+    fs = scene_->shader_manager()->get("after_effects_no_dof.frag");
+  }
+
+  prog_.attachShaders(vs, fs).link();
   gl::Use(prog_);
 
   gl::UniformSampler(prog_, "uTex").set(0);

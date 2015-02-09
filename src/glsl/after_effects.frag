@@ -3,8 +3,12 @@
 #version 120
 
 #include "sky.frag"
-#include "depth_of_field.frag"
 #include "lens_flare.frag"
+
+#export void FetchNeighbours();
+#export vec3 Glow();
+#export vec3 FilmicToneMap(vec3 color);
+#export vec3 CurrentPixel();
 
 uniform sampler2D uTex;
 uniform vec2 uScreenSize;
@@ -56,12 +60,6 @@ vec3 FilmicToneMap(vec3 color) {
   return (x*(6.2*x+0.5)) / (x*(6.2*x+1.7)+0.06);
 }
 
-void main() {
-  FetchNeighbours();
-  vec3 color = Glow() + DoF(neighbours[4]);
-  color = FilmicToneMap(color);
-  if (SunPos().y > 0) {
-    color += LensFlare();
-  }
-  gl_FragColor = vec4(clamp(color, vec3(0), vec3(1)), 1);
+vec3 CurrentPixel() {
+  return neighbours[4];
 }

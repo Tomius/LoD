@@ -11,7 +11,7 @@ namespace engine {
 template<typename... Args>
 ShaderFile* ShaderManager::load(Args&&... args) {
   auto shader = new ShaderFile{std::forward<Args>(args)...};
-  shaders_[shader->filename()] = std::unique_ptr<ShaderFile>{shader};
+  shaders_[shader->source_file()] = std::unique_ptr<ShaderFile>{shader};
   return shader;
 }
 

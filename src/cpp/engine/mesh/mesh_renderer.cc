@@ -34,7 +34,7 @@ MeshRenderer::MeshRenderer(const std::string& filename,
 std::vector<int> MeshRenderer::btTriangles(btTriangleIndexVertexArray* triangles) {
   std::vector<int> indices_vector;
 
-  for (int mesh_idx = 0; mesh_idx < scene_->mNumMeshes; ++mesh_idx) {
+  for (unsigned mesh_idx = 0; mesh_idx < scene_->mNumMeshes; ++mesh_idx) {
     const aiMesh* mesh = scene_->mMeshes[mesh_idx];
     btIndexedMesh btMesh;
     btMesh.m_numVertices = mesh->mNumVertices;
@@ -68,7 +68,7 @@ std::vector<float> MeshRenderer::vertices() {
   std::vector<float> verts_vector;
   assert(3*sizeof(float) == sizeof(aiVector3D));
 
-  for (int mesh_idx = 0; mesh_idx < scene_->mNumMeshes; ++mesh_idx) {
+  for (unsigned mesh_idx = 0; mesh_idx < scene_->mNumMeshes; ++mesh_idx) {
     const aiMesh* mesh = scene_->mMeshes[mesh_idx];
     verts_vector.insert(verts_vector.end(), (float*)mesh->mVertices,
                         (float*)(mesh->mVertices+mesh->mNumVertices));

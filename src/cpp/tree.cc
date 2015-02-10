@@ -33,7 +33,7 @@ Tree::Tree(GameObject *parent, const engine::HeightMapInterface& height_map)
     aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs |
     aiProcess_PreTransformVertices);
 
-  for (int i = 0; i < meshes_.size(); ++i) {
+  for (unsigned i = 0; i < meshes_.size(); ++i) {
     meshes_[i]->setupPositions(prog_ | "aPosition");
     meshes_[i]->setupTexCoords(prog_ | "aTexCoord");
     meshes_[i]->setupNormals(prog_ | "aNormal");

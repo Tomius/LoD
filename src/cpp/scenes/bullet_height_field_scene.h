@@ -433,7 +433,7 @@ class BulletForest : public engine::GameObject {
         "src/resources/models/trees/massive_swamptree_01_b");
     tree_infos_[2] = engine::make_unique<TreeInfo>(
         "src/resources/models/trees/cedar_01_a_source");
-    for (int i = 0; i != tree_infos_.size(); ++i) {
+    for (size_t i = 0; i != tree_infos_.size(); ++i) {
       tree_infos_[i]->mesh_.setupPositions(prog_ | "aPosition");
       tree_infos_[i]->mesh_.setupTexCoords(prog_ | "aTexCoord");
       tree_infos_[i]->mesh_.setupNormals(prog_ | "aNormal");

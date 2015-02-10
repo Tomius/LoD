@@ -1,7 +1,7 @@
 Land of Dreams
 ==============
 
-A simple OpenGL 2.1 game engine, written in C++. It features a CDLOD terrain renderer, a mesh loader and render using assimp, GPU skinning animation built on top of that, as well as exponential shadowmaps and several aftereffects (gamma correction, tone mapping, bloom, depth of field, lens flare)
+A simple OpenGL 2.1 game engine, written in C++. It features a CDLOD terrain renderer, a mesh loader and render using assimp, GPU skinning animation built on top of that, as well as exponential shadowmaps and several aftereffects (tone mapping, bloom, depth of field, lens flare)
 
 **This is just an educational project.** I don't own the rights for every media in the application.
 
@@ -10,21 +10,23 @@ Some screenshots (might not be up to date):
 
 Dependencies:
 -------------
-* C++11 compiler.
-* OpenGL 2.1, Shader model 120
+* C++11 compiler. (clang recommended)
+* OpenGL 2.1, Shader model 120 (But uses 3.3 features if available)
 * GLEW - for loading OpenGL extensions
-* [oglwrap](https://github.com/Tomius/oglwrap) - my C++ OpenGL wrapper.
-* GLFW3 - for window handling
 * Magick++ - for image loading.
 * Assimp - for loading 3D models.
 * FreeType2 - for text rendering (via freetype-gl).
 * Bullet - for physics (isn't fully integrated yet).
-
+* Included dependencies:
+  * [oglwrap](https://github.com/Tomius/oglwrap) - my C++ OpenGL wrapper.
+  * freetype-gl - for GUI texts
+  * GLFW3 - for window handling
+  * glm - for linear algebra
 
 How to build (Debian/Ubuntu):
 --------------------
 ```
-mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev libglm-dev cmake xorg-dev libglu1-mesa-dev libglfw3-dev && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD && make -j4 && ./LoD
+mkdir LandOfDreams && cd LandOfDreams && sudo apt-get install libmagick++-dev libglew-dev libassimp-dev libbullet-dev cmake xorg-dev libglu1-mesa-dev && git clone --recursive https://github.com/Tomius/LoD.git && cd LoD && make -j4 && ./LoD
 ```
 
 How to build (Linux):
@@ -33,7 +35,7 @@ How to build (Linux):
 * initialize the oglwrap submodule: git submodule init && git submodule update
 * build with make (uses clang++), run with ./LoD
 
-How to build (Windows):
+How to build (Windows): OUTDATED
 -----------------------
 * if you downloaded LoD using git, but you didn't use git clone --recursive, then you have to initilaize oglwrap with git submodule init && git submodule update. If you download it via http, you will have to download [oglwrap](https://github.com/Tomius/oglwrap) too, and paste it into src/oglwrap
 * dowload all the third party libraries pre-compiled from [here](https://dl.dropboxusercontent.com/u/37129007/LoD/thirdparty.zip)

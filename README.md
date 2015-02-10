@@ -5,7 +5,7 @@ A simple OpenGL 2.1 game engine, written in C++. It features a CDLOD terrain ren
 
 **This is just an educational project.** I don't own the rights for every media in the application.
 
-Some screenshots (might not be up to date):
+A screenshot of the engine:
 ![screenshot](screenshot.png)
 
 Dependencies:

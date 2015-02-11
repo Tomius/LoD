@@ -41,7 +41,7 @@ void GameEngine::InitContext() {
     }
 
     // Window creation
-    const GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode *vidmode = glfwGetVideoMode(monitor);
 #if ENGINE_NO_FULLSCREEN
     window_ = glfwCreateWindow(vidmode->width, vidmode->height,

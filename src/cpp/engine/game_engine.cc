@@ -36,55 +36,37 @@ void GameEngine::InitContext() {
   PrintDebugText("Creating the OpenGL context");
     glfwSetErrorCallback(ErrorCallback);
 
-    // GLFW init
     if (!glfwInit()) {
       std::terminate();
     }
 
-    // First try to open a 3.3 context (for VertexAttribDivisor)
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
     // Window creation
+    const GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *vidmode = glfwGetVideoMode(monitor);
 #if ENGINE_NO_FULLSCREEN
-    window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
-                               nullptr, nullptr);
+    window_ = glfwCreateWindow(vidmode->width, vidmode->height,
+                               "Land of Dreams", nullptr, nullptr);
 #else
-    window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
-                               glfwGetPrimaryMonitor(), nullptr);
+    window_ = glfwCreateWindow(vidmode->width, vidmode->height,
+                               "Land of Dreams", monitor, nullptr);
 #endif
 
-    if (!window_){
-      // If it failed, try a 2.1 context
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-
-#if ENGINE_NO_FULLSCREEN
-    window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
-                               nullptr, nullptr);
-#else
-    window_ = glfwCreateWindow(1920, 1080, "Land of Dreams",
-                               glfwGetPrimaryMonitor(), nullptr);
-#endif
-
-      // If that one fails too, we can't do much...
-      if (!window_) {
-        glfwTerminate();
-        std::terminate();
-      }
+    if (!window_) {
+      std::cerr << "FATAL: Couldn't create a glfw window. Aborting now." << std::endl;
+      glfwTerminate();
+      std::terminate();
     }
   PrintDebugTime();
 
   // Check the created OpenGL context's version
-  double ogl_version =
-      glfwGetWindowAttrib(window_, GLFW_CONTEXT_VERSION_MAJOR) +
-      glfwGetWindowAttrib(window_, GLFW_CONTEXT_VERSION_MINOR) / 10.0;
-  std::cout << " - OpenGL version: "  << ogl_version << std::endl;
+  int ogl_major_version = glfwGetWindowAttrib(window_, GLFW_CONTEXT_VERSION_MAJOR);
+  int ogl_minor_version = glfwGetWindowAttrib(window_, GLFW_CONTEXT_VERSION_MINOR);
+  std::cout << " - OpenGL version: "  << ogl_major_version << '.' << ogl_minor_version << std::endl;
   int width, height;
   glfwGetFramebufferSize(window_, &width, &height);
   std::cout << " - Resolution: "  << width << " x " << height << std::endl;
 
-  if (ogl_version < 2.1) {
+  if (ogl_major_version < 2 || (ogl_major_version == 2 && ogl_minor_version < 1)) {
     std::cerr << "At least OpenGL version 2.1 is required to run this program\n";
     std::terminate();
   }

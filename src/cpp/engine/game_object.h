@@ -19,7 +19,7 @@ class GameObject {
  public:
   template<typename Transform_t = Transform>
   explicit GameObject(GameObject* parent,
-                      const Transform_t& transform = Transform_t{});
+                      const Transform_t& initial_transform = Transform_t{});
   virtual ~GameObject() {}
 
   template<typename T, typename... Args>

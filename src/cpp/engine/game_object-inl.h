@@ -12,9 +12,8 @@ template<typename Transform_t>
 GameObject::GameObject(GameObject* parent, const Transform_t& transform)
     : scene_(parent ? parent->scene_ : nullptr), parent_(parent)
     , transform_(new Transform_t{transform})
-    , group_(0), enabled_(true) {
+    , enabled_(true) {
   if (parent) { transform_->set_parent(parent_->transform()); }
-  sorted_components_.insert(this);
 }
 
 template<typename T, typename... Args>
@@ -23,9 +22,13 @@ T* GameObject::addComponent(Args&&... args) {
 
   try {
     T *obj = new T(this, std::forward<Args>(args)...);
-    obj->uid_ = NextUid();
     components_.push_back(std::unique_ptr<GameObject>(obj));
-    components_just_enabled_.push_back(obj);
+    GameObject *go = obj;
+    go->parent_ = this;
+    go->transform_->set_parent(transform_.get());
+    go->scene_ = scene_;
+    // make sure that the object is aware of the screen's size
+    go->InitScreenSize();
 
     return obj;
   } catch (const std::exception& ex) {
@@ -82,37 +85,36 @@ inline bool GameObject::stealComponent(GameObject* go) {
        iter != parent->components_.end(); ++iter) {
     GameObject* comp = iter->get();
     if (comp == go) {
-      components_.push_back(std::unique_ptr<GameObject>(iter->release()));
-      components_just_enabled_.push_back(comp);
-      parent->components_just_disabled_.push_back(comp);
-      // The iter->release() leaves a nullptr in the parent->components_
-      // that should be removed, as it decrases performance
-      parent->removeComponent(nullptr);
+      components_.push_back(*iter);
+      parent->components_.erase(iter);
       comp->parent_ = this;
       comp->transform_->set_parent(transform_.get());
       comp->scene_ = scene_;
-      comp->uid_ = NextUid();
       return true;
     }
   }
   return false;
 }
 
-inline int GameObject::NextUid() {
-  static int uid = 0;
-  return uid++;
+inline std::shared_ptr<GameObject> GameObject::removeComponent(GameObject* component_to_remove) {
+  if (component_to_remove == nullptr) {
+    return nullptr;
+  }
+
+  for (auto iter = components_.begin();
+       iter != components_.end(); ++iter) {
+    if (iter->get() == component_to_remove) {
+      std::shared_ptr<GameObject> ret = *iter;
+      components_.erase(iter);
+      return ret;
+    }
+  }
+
+  return nullptr;
 }
 
-inline void GameObject::removeComponent(GameObject* component_to_remove) {
-  if (component_to_remove == nullptr) { return; }
-  components_just_disabled_.push_back(component_to_remove);
-  remove_predicate_.components_.insert(component_to_remove);
-}
-
-template <typename T>
-void GameObject::removeComponents(T begin, T end) {
-  components_just_disabled_.insert(components_just_disabled_.end(), begin, end);
-  remove_predicate_.components_.insert(begin, end);
+inline void GameObject::ClearComponents() {
+  components_.clear();
 }
 
 }  // namespace engine

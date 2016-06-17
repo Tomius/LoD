@@ -32,6 +32,9 @@ class Scene : public Behaviour {
     for (auto& comp_ptr : components_) {
       comp_ptr.reset();
     }
+    for (auto& comp_ptr : components_copy_) {
+      comp_ptr.reset();
+    }
 
     // close the physics thread
     physics_thread_should_quit_ = true;

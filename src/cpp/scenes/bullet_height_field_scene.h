@@ -494,7 +494,7 @@ class BulletHeightFieldScene : public engine::Scene {
   void shootSphere(float speed = 20.0f) {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
-    addComponent<BulletSphere>(pos, speed*cam->transform()->forward());
+    dynamic_objects->addComponent<BulletSphere>(pos, speed*cam->transform()->forward());
   }
 
   void dropCubes() {
@@ -502,10 +502,12 @@ class BulletHeightFieldScene : public engine::Scene {
     glm::vec3 base_pos = cam->transform()->pos() - 3.0f*cam->transform()->up();
     for (int x = -2; x <= 2; ++x) {
       for (int y = -2; y <= 2; ++y) {
-        addComponent<BulletCube>(base_pos + 1.02f*glm::vec3(x, 0, y), glm::vec3());
+        dynamic_objects->addComponent<BulletCube>(base_pos + 1.02f*glm::vec3(x, 0, y), glm::vec3());
       }
     }
   }
+
+  GameObject* dynamic_objects = nullptr;
 
  public:
   BulletHeightFieldScene() {
@@ -531,7 +533,7 @@ class BulletHeightFieldScene : public engine::Scene {
     world_->getSolverInfo().m_numIterations /= 2; // ++performance
 
     auto skybox = addComponent<Skybox>();
-    skybox->set_group(-1);
+    //skybox->set_group(-1);
 
     Shadow *shadow = addComponent<Shadow>(skybox, 2048, 2, 2);
     set_shadow(shadow);
@@ -539,9 +541,11 @@ class BulletHeightFieldScene : public engine::Scene {
     auto hf = addComponent<HeightField>();
     addComponent<BulletForest>(hf->terrain_->height_map());
 
+    dynamic_objects = addComponent<GameObject>();
+
     auto after_effects = addComponent<AfterEffects>(skybox);
     shadow->set_default_fbo(after_effects->fbo());
-    after_effects->set_group(1);
+    //after_effects->set_group(1);
 
     auto cam = addComponent<BulletFreeFlyCamera>(M_PI/3, 1, 3000,
         glm::vec3(1030, 200, 1030), glm::vec3(1024, 200, 1024), 20, 2);
@@ -551,23 +555,23 @@ class BulletHeightFieldScene : public engine::Scene {
         L"Press left click to shoot a slow, or right click to shoot a fast sphere.", glm::vec2(0, -0.85));
     label->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label->set_font_size(16);
-    label->set_group(2);
+    //label->set_group(2);
 
     auto label2 = addComponent<engine::gui::Label>(
         L"Press space to drop a bunch of cubes.", glm::vec2(0, -0.9));
     label2->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label2->set_font_size(20);
-    label2->set_group(2);
+    //label2->set_group(2);
 
 
     auto label3 = addComponent<engine::gui::Label>(L"You can load the main "
       L"scene by pressing the home button.", glm::vec2(0, -0.95));
     label3->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label3->set_font_size(14);
-    label3->set_group(2);
+    //label3->set_group(2);
 
     auto fps = addComponent<FpsDisplay>();
-    fps->set_group(2);
+    //fps->set_group(2);
   }
 
   void findCollisions() {
@@ -610,10 +614,7 @@ class BulletHeightFieldScene : public engine::Scene {
       } else if (key == GLFW_KEY_HOME) {
         engine::GameEngine::LoadScene<MainScene>();
       } else if (key == GLFW_KEY_DELETE) {
-        auto v0 = findComponents<BulletSphere>();
-        removeComponents(v0.begin(), v0.end());
-        auto v1 = findComponents<BulletCube>();
-        removeComponents(v1.begin(), v1.end());
+        dynamic_objects->ClearComponents ();
       }
     }
   }

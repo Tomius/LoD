@@ -24,7 +24,7 @@ class GameObject {
 
   template<typename T, typename... Args>
   T* addComponent(Args&&... contructor_args);
-  GameObject* addComponent(std::unique_ptr<GameObject>&& component);
+  GameObject* addComponent(const std::shared_ptr<GameObject>& component);
 
   // Returns the first component found by depth first search in the
   // GameObject hierarchy whose type is T
@@ -38,11 +38,8 @@ class GameObject {
   // Detaches a componenent from its parent, and adopts it.
   // Returns true on success.
   bool stealComponent(GameObject* component_to_steal);
-
-  void removeComponent(GameObject* component_to_remove);
-
-  template <typename T>
-  void removeComponents(T begin, T end);
+  std::shared_ptr<GameObject> removeComponent(GameObject* component_to_delete);
+  void ClearComponents();
 
   Transform* transform() { return transform_.get(); }
   const Transform* transform() const { return transform_.get(); }
@@ -57,9 +54,6 @@ class GameObject {
 
   bool enabled() const { return enabled_; }
   void set_enabled(bool value);
-
-  int group() const { return group_; }
-  void set_group(int value);
 
   virtual void shadowRender() {}
   virtual void render() {}
@@ -83,37 +77,18 @@ class GameObject {
   Scene* scene_;
   GameObject* parent_;
   std::unique_ptr<Transform> transform_;
-  std::vector<std::unique_ptr<GameObject>> components_;
-  std::vector<GameObject*> components_just_enabled_, components_just_disabled_;
-
-  struct CompareGameObjects {
-    bool operator() (GameObject* x, GameObject* y) const;
-  };
-
-  std::set<GameObject*, CompareGameObjects> sorted_components_;
-  int uid_, group_;
+  std::vector<std::shared_ptr<GameObject>> components_;
+  std::vector<std::shared_ptr<GameObject>> components_copy_;
   bool enabled_;
 
-  void internalUpdate();
-
  private:
+  void InitScreenSize();
+
   template<typename T>
   static T* FindComponent(const GameObject* obj);
 
   template<typename T>
   static void FindComponents(const GameObject* obj, std::vector<T*> *found);
-
-  static int NextUid();
-
-  struct ComponentRemoveHelper {
-    std::set<GameObject*> components_;
-    bool operator()(const std::unique_ptr<GameObject>& go_ptr) {
-      return components_.find(go_ptr.get()) != components_.end();
-    }
-  } remove_predicate_;
-
-  void updateSortedComponents();
-  void removeComponents();
 };
 
 }  // namespace engine

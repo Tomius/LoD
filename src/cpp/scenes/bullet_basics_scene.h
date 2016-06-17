@@ -154,7 +154,7 @@ class BulletBasicsScene : public engine::Scene {
     auto skybox = addComponent<Skybox>();
     addComponent<StaticPlane>();
     auto after_effects = addComponent<AfterEffects>(skybox);
-    after_effects->set_group(1);
+    //after_effects->set_group(1);
 
     auto cam = addComponent<engine::FreeFlyCamera>(
         M_PI/3, 1, 500, glm::vec3(20, 5, 0), glm::vec3(), 15, 10);

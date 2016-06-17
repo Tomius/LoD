@@ -9,7 +9,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 #include "./timer.h"
-#include "./behaviour.h"
+#include "./game_object.h"
 #include "./height_map_interface.h"
 #include "collision/frustum.h"
 
@@ -39,10 +39,10 @@ class CameraTransform : public Transform {
 };
 
 /// The base class for all cameras
-class Camera : public Behaviour {
+class Camera : public GameObject {
  public:
   Camera(GameObject* parent, float fovy, float z_near, float z_far)
-      : Behaviour(parent, CameraTransform{}), fovy_(fovy), z_near_(z_near)
+      : GameObject(parent, CameraTransform{}), fovy_(fovy), z_near_(z_near)
       , z_far_(z_far), width_(0), height_(0) { }
   virtual ~Camera() {}
 

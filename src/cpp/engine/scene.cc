@@ -6,7 +6,7 @@
 namespace engine {
 
 Scene::Scene()
-    : Behaviour(nullptr)
+    : GameObject(nullptr)
     , physics_thread_should_quit_(false)
     , physics_thread_{[this](){
       while (true) {

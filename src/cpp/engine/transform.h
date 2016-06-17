@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <vector>
+#include <cassert>
 #include <algorithm>
 
 #define GLM_FORCE_RADIANS
@@ -37,7 +38,9 @@ class Transformation {
  public:
   Transformation(Transformation* parent = nullptr)
       : parent_(parent)
-      , scale_(1, 1, 1) { }
+      , scale_(1, 1, 1) {
+    assert(parent != this);
+  }
 
   virtual ~Transformation() {}
 

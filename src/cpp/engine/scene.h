@@ -13,7 +13,6 @@
 #include "./timer.h"
 #include "./camera.h"
 #include "./game_object.h"
-#include "./behaviour.h"
 #include "./shader_manager.h"
 #include "./auto_reset_event.h"
 
@@ -23,16 +22,13 @@ namespace engine {
 
 class GameObject;
 
-class Scene : public Behaviour {
+class Scene : public GameObject {
  public:
   Scene();
   virtual ~Scene() {
     // The GameObject's destructor have to run here
     // as they might use the scene ptr in their destructor
     for (auto& comp_ptr : components_) {
-      comp_ptr.reset();
-    }
-    for (auto& comp_ptr : components_copy_) {
       comp_ptr.reset();
     }
 
@@ -117,19 +113,19 @@ class Scene : public Behaviour {
     environment_time_.tick();
     camera_time_.tick();
 
-    Behaviour::updateAll();
+    GameObject::updateAll();
   }
 
   virtual void shadowRenderAll() override {
     if (camera_ && shadow_) {
       shadow_->begin(); {
-        Behaviour::shadowRenderAll();
+        GameObject::shadowRenderAll();
       } shadow_->end();
     }
   }
 
   virtual void renderAll() override {
-    if (camera_) { Behaviour::renderAll(); }
+    if (camera_) { GameObject::renderAll(); }
   }
 
   virtual void render2DAll() override {
@@ -138,7 +134,7 @@ class Scene : public Behaviour {
                                    {gl::kDepthTest, false}}};
     gl::BlendFunc(gl::kSrcAlpha, gl::kOneMinusSrcAlpha);
 
-    Behaviour::render2DAll();
+    GameObject::render2DAll();
   }
 
   virtual void updatePhysics() {

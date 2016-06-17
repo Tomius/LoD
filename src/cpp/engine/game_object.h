@@ -24,7 +24,7 @@ class GameObject {
 
   template<typename T, typename... Args>
   T* addComponent(Args&&... contructor_args);
-  GameObject* addComponent(const std::shared_ptr<GameObject>& component);
+  GameObject* addComponent(std::unique_ptr<GameObject>&& component);
 
   // Returns the first component found by depth first search in the
   // GameObject hierarchy whose type is T
@@ -35,10 +35,8 @@ class GameObject {
   template<typename T>
   std::vector<T*> findComponents() const;
 
-  // Detaches a componenent from its parent, and adopts it.
-  // Returns true on success.
-  bool stealComponent(GameObject* component_to_steal);
-  std::shared_ptr<GameObject> removeComponent(GameObject* component_to_delete);
+  std::unique_ptr<GameObject> removeComponent(GameObject* component_to_remove);
+
   void ClearComponents();
 
   Transform* transform() { return transform_.get(); }
@@ -59,12 +57,19 @@ class GameObject {
   virtual void render() {}
   virtual void render2D() {}
   virtual void screenResized(size_t width, size_t height) {}
+  virtual void update() {}
+  virtual void keyAction(int key, int scancode, int action, int mods) {}
+  virtual void charTyped(unsigned codepoint) {}
+  virtual void mouseScrolled(double xoffset, double yoffset) {}
+  virtual void mouseButtonPressed(int button, int action, int mods) {}
+  virtual void mouseMoved(double xpos, double ypos) {}
+  virtual void collision(const GameObject* other) {}
+
 
   virtual void shadowRenderAll();
   virtual void renderAll();
   virtual void render2DAll();
   virtual void screenResizedAll(size_t width, size_t height);
-
   virtual void updateAll();
   virtual void keyActionAll(int key, int scancode, int action, int mods);
   virtual void charTypedAll(unsigned codepoint);
@@ -77,8 +82,7 @@ class GameObject {
   Scene* scene_;
   GameObject* parent_;
   std::unique_ptr<Transform> transform_;
-  std::vector<std::shared_ptr<GameObject>> components_;
-  std::vector<std::shared_ptr<GameObject>> components_copy_;
+  std::vector<std::unique_ptr<GameObject>> components_;
   bool enabled_;
 
  private:

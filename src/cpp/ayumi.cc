@@ -26,7 +26,7 @@ engine::ShaderFile* Ayumi::loadShadowVertexShader(
 }
 
 Ayumi::Ayumi(engine::GameObject* parent)
-    : engine::Behaviour(parent)
+    : engine::GameObject(parent)
     , mesh_("src/resources/models/ayumi/ayumi.dae",
             aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs)
     , anim_(mesh_.getAnimData())

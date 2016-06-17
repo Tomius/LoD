@@ -15,7 +15,7 @@
 #include "../engine/misc.h"
 #include "../engine/scene.h"
 #include "../engine/camera.h"
-#include "../engine/behaviour.h"
+#include "../engine/game_object.h"
 #include "../engine/debug/debug_shape.h"
 #include "../engine/gui/label.h"
 
@@ -25,25 +25,25 @@
 #include "../loading_screen.h"
 #include "./main_scene.h"
 
-class BulletRigidBody : public engine::Behaviour, public btMotionState {
+class BulletRigidBody : public engine::GameObject, public btMotionState {
  public:
   BulletRigidBody(GameObject* parent, float mass,
                   std::unique_ptr<btCollisionShape>&& shape,
                   bool ignore_rotation = false)
-      : Behaviour(parent), shape_(std::move(shape))
+      : GameObject(parent), shape_(std::move(shape))
       , ignore_rotation_(ignore_rotation), up_to_date_(true) {
     init(mass, shape_.get());
   }
 
   BulletRigidBody(GameObject* parent, float mass,
                   btCollisionShape* shape, bool ignore_rotation = false)
-      : Behaviour(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
+      : GameObject(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
     init(mass, shape);
   }
 
   BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
                   const glm::vec3& pos, bool ignore_rotation = false)
-      : Behaviour(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
+      : GameObject(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
     transform()->set_pos(pos);
     init(mass, shape);
   }
@@ -51,7 +51,7 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
   BulletRigidBody(GameObject* parent, float mass,
                   std::unique_ptr<btCollisionShape>&& shape,
                   const glm::vec3& pos, bool ignore_rotation = false)
-      : Behaviour(parent), shape_(std::move(shape))
+      : GameObject(parent), shape_(std::move(shape))
       , ignore_rotation_(ignore_rotation), up_to_date_(true) {
     transform()->set_pos(pos);
     init(mass, shape_.get());
@@ -60,7 +60,7 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
   BulletRigidBody(GameObject* parent, float mass, btCollisionShape* shape,
                   const glm::vec3& pos, const glm::fquat& rot,
                   bool ignore_rotation = false)
-      : Behaviour(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
+      : GameObject(parent), ignore_rotation_(ignore_rotation), up_to_date_(true) {
     transform()->set_pos(pos);
     transform()->set_rot(rot);
     init(mass, shape);
@@ -70,7 +70,7 @@ class BulletRigidBody : public engine::Behaviour, public btMotionState {
                   std::unique_ptr<btCollisionShape>&& shape,
                   const glm::vec3& pos, const glm::fquat& rot,
                   bool ignore_rotation = false)
-      : Behaviour(parent), shape_(std::move(shape))
+      : GameObject(parent), shape_(std::move(shape))
       , ignore_rotation_(ignore_rotation), up_to_date_(true) {
     transform()->set_pos(pos);
     transform()->set_rot(rot);
@@ -157,11 +157,11 @@ class HeightField : public engine::GameObject {
   Terrain* terrain_;
 };
 
-class BulletCube : public engine::Behaviour {
+class BulletCube : public engine::GameObject {
  public:
   explicit BulletCube(GameObject* parent, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot = glm::quat{})
-      : Behaviour(parent) {
+      : GameObject(parent) {
     transform()->set_pos(pos);
     transform()->set_rot(rot);
     btVector3 half_extents(0.5f, 0.5f, 0.5f);
@@ -199,11 +199,11 @@ class BulletCube : public engine::Behaviour {
   }
 };
 
-class BulletSphere : public engine::Behaviour {
+class BulletSphere : public engine::GameObject {
  public:
   explicit BulletSphere(GameObject* parent, const glm::vec3& pos,
                         const glm::vec3& v)
-      : Behaviour(parent) {
+      : GameObject(parent) {
     transform()->set_pos(pos);
     btCollisionShape* shape = new btSphereShape(0.5f);
     auto rbody = addComponent<BulletRigidBody>(
@@ -340,7 +340,7 @@ class BulletForest : public engine::GameObject {
   };
 
  private:
-  class BulletTree : public engine::Behaviour {
+  class BulletTree : public engine::GameObject {
    public:
     BulletTree(GameObject *parent,
                const engine::Transform& transform,
@@ -348,7 +348,7 @@ class BulletForest : public engine::GameObject {
                const engine::BoundingBox& bbox,
                const engine::ShaderProgram& prog,
                const engine::ShaderProgram& shadow_prog)
-        : Behaviour(parent, transform)
+        : GameObject(parent, transform)
         , model_matrix_(transform.matrix())
         , tree_info_(tree_info)
         , bbox_(bbox)
@@ -533,7 +533,6 @@ class BulletHeightFieldScene : public engine::Scene {
     world_->getSolverInfo().m_numIterations /= 2; // ++performance
 
     auto skybox = addComponent<Skybox>();
-    //skybox->set_group(-1);
 
     Shadow *shadow = addComponent<Shadow>(skybox, 2048, 2, 2);
     set_shadow(shadow);
@@ -545,7 +544,6 @@ class BulletHeightFieldScene : public engine::Scene {
 
     auto after_effects = addComponent<AfterEffects>(skybox);
     shadow->set_default_fbo(after_effects->fbo());
-    //after_effects->set_group(1);
 
     auto cam = addComponent<BulletFreeFlyCamera>(M_PI/3, 1, 3000,
         glm::vec3(1030, 200, 1030), glm::vec3(1024, 200, 1024), 20, 2);
@@ -555,23 +553,18 @@ class BulletHeightFieldScene : public engine::Scene {
         L"Press left click to shoot a slow, or right click to shoot a fast sphere.", glm::vec2(0, -0.85));
     label->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label->set_font_size(16);
-    //label->set_group(2);
 
     auto label2 = addComponent<engine::gui::Label>(
         L"Press space to drop a bunch of cubes.", glm::vec2(0, -0.9));
     label2->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label2->set_font_size(20);
-    //label2->set_group(2);
-
 
     auto label3 = addComponent<engine::gui::Label>(L"You can load the main "
       L"scene by pressing the home button.", glm::vec2(0, -0.95));
     label3->set_vertical_alignment(engine::gui::Font::VerticalAlignment::kCenter);
     label3->set_font_size(14);
-    //label3->set_group(2);
 
-    auto fps = addComponent<FpsDisplay>();
-    //fps->set_group(2);
+    addComponent<FpsDisplay>();
   }
 
   void findCollisions() {

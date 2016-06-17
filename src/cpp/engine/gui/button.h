@@ -4,18 +4,18 @@
 #define ENGINE_GUI_BUTTON_H_
 
 #include <vector>
-#include "../behaviour.h"
+#include "../game_object.h"
 #include "./box.h"
 
 namespace engine {
 namespace gui {
 
-class Button : public Behaviour {
+class Button : public GameObject {
  public:
   Button(GameObject* parent, glm::vec2 pos, glm::vec2 extent,
          const std::wstring& text, glm::vec4 color, glm::vec4 font_color,
          int roundness = 7)
-      : Behaviour(parent), pos_(pos)
+      : GameObject(parent), pos_(pos)
       , extent_(extent), mouse_over_(false) {
     BoxParams params;
     params.center = pos;

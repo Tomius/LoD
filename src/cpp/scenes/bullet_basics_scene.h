@@ -8,7 +8,7 @@
 #include "../engine/misc.h"
 #include "../engine/scene.h"
 #include "../engine/camera.h"
-#include "../engine/behaviour.h"
+#include "../engine/GameObject.h"
 #include "../engine/shapes/cube_mesh.h"
 #include "../engine/gui/label.h"
 
@@ -17,11 +17,11 @@
 
 using engine::shapes::CubeMesh;
 
-class BulletRigidBody : public engine::Behaviour {
+class BulletRigidBody : public engine::GameObject {
  public:
   BulletRigidBody(GameObject* parent, const glm::vec3& pos, float mass,
                   btCollisionShape* shape, const glm::quat& rot = glm::quat())
-      : engine::Behaviour(parent), static_(mass == 0.0f) {
+      : engine::GameObject(parent), static_(mass == 0.0f) {
     shape_ = std::unique_ptr<btCollisionShape>(shape);
     btVector3 inertia(0, 0, 0);
     if (!static_) {
@@ -76,12 +76,12 @@ class StaticPlane : public engine::GameObject {
   }
 };
 
-class RedCube : public engine::Behaviour {
+class RedCube : public engine::GameObject {
   CubeMesh* cube_mesh_;
  public:
   explicit RedCube(GameObject* parent, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot)
-      : Behaviour(parent) {
+      : GameObject(parent) {
     btVector3 half_extents(0.5f, 0.5f, 0.5f);
     btCollisionShape* shape = new btBoxShape(half_extents);
     auto rbody = addComponent<BulletRigidBody>(pos, 1.0f, shape, rot);
@@ -154,7 +154,6 @@ class BulletBasicsScene : public engine::Scene {
     auto skybox = addComponent<Skybox>();
     addComponent<StaticPlane>();
     auto after_effects = addComponent<AfterEffects>(skybox);
-    //after_effects->set_group(1);
 
     auto cam = addComponent<engine::FreeFlyCamera>(
         M_PI/3, 1, 500, glm::vec3(20, 5, 0), glm::vec3(), 15, 10);

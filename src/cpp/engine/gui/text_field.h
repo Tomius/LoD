@@ -11,16 +11,15 @@
 #include "./box.h"
 #include "./font.h"
 #include "../scene.h"
-#include "../behaviour.h"
 
 namespace engine {
 namespace gui {
 
-class TextField : public Behaviour {
+class TextField : public GameObject {
  public:
   TextField(GameObject* parent, glm::vec2 center,
             glm::vec2 extent, const std::wstring& text)
-      : Behaviour(parent), pos_(center), extent_(extent)
+      : GameObject(parent), pos_(center), extent_(extent)
       , cursor_pos_(text.size()), text_(text), cursor_visible_(false)
       , modified_(false), focused_(false) {
     BoxParams params;

@@ -10,12 +10,12 @@
 #include "oglwrap/shapes/rectangle_shape.h"
 #include "oglwrap/textures/texture_2D.h"
 
-#include "engine/behaviour.h"
+#include "engine/game_engine.h"
 #include "engine/shader_manager.h"
 
 #include "./skybox.h"
 
-class AfterEffects : public engine::Behaviour {
+class AfterEffects : public engine::GameObject {
  public:
   explicit AfterEffects(GameObject *parent, Skybox* skybox);
 

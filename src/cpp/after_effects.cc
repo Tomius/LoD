@@ -6,7 +6,7 @@
 #include "oglwrap/smart_enums.h"
 
 AfterEffects::AfterEffects(GameObject *parent, Skybox* skybox)
-    : Behaviour(parent)
+    : GameObject(parent)
     , uScreenSize_(prog_, "uScreenSize")
     , s_uSunPos_(prog_, "s_uSunPos")
     , uZNear_(prog_, "uZNear")

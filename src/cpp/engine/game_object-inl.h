@@ -3,6 +3,7 @@
 #ifndef ENGINE_GAME_OBJECT_INL_H_
 #define ENGINE_GAME_OBJECT_INL_H_
 
+#include <cassert>
 #include <iostream>
 #include "./game_object.h"
 
@@ -13,6 +14,7 @@ GameObject::GameObject(GameObject* parent, const Transform_t& transform)
     : scene_(parent ? parent->scene_ : nullptr), parent_(parent)
     , transform_(new Transform_t{transform})
     , enabled_(true) {
+  assert(parent != this);
   if (parent) { transform_->set_parent(parent_->transform()); }
 }
 
@@ -23,12 +25,8 @@ T* GameObject::addComponent(Args&&... args) {
   try {
     T *obj = new T(this, std::forward<Args>(args)...);
     components_.push_back(std::unique_ptr<GameObject>(obj));
-    GameObject *go = obj;
-    go->parent_ = this;
-    go->transform_->set_parent(transform_.get());
-    go->scene_ = scene_;
     // make sure that the object is aware of the screen's size
-    go->InitScreenSize();
+    obj->InitScreenSize();
 
     return obj;
   } catch (const std::exception& ex) {
@@ -76,27 +74,7 @@ std::vector<T*> GameObject::findComponents() const {
   return found;
 }
 
-inline bool GameObject::stealComponent(GameObject* go) {
-  if (!go) { return false; }
-  GameObject* parent = go->parent();
-  if (!parent) {return false; }
-
-  for (auto iter = parent->components_.begin();
-       iter != parent->components_.end(); ++iter) {
-    GameObject* comp = iter->get();
-    if (comp == go) {
-      components_.push_back(*iter);
-      parent->components_.erase(iter);
-      comp->parent_ = this;
-      comp->transform_->set_parent(transform_.get());
-      comp->scene_ = scene_;
-      return true;
-    }
-  }
-  return false;
-}
-
-inline std::shared_ptr<GameObject> GameObject::removeComponent(GameObject* component_to_remove) {
+inline std::unique_ptr<GameObject> GameObject::removeComponent(GameObject* component_to_remove) {
   if (component_to_remove == nullptr) {
     return nullptr;
   }
@@ -104,9 +82,11 @@ inline std::shared_ptr<GameObject> GameObject::removeComponent(GameObject* compo
   for (auto iter = components_.begin();
        iter != components_.end(); ++iter) {
     if (iter->get() == component_to_remove) {
-      std::shared_ptr<GameObject> ret = *iter;
+      auto ptr = iter->release();
+      ptr->scene_ = nullptr;
+      ptr->set_parent(nullptr);
       components_.erase(iter);
-      return ret;
+      return std::unique_ptr<GameObject>{ptr};
     }
   }
 

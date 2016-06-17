@@ -7,12 +7,12 @@
 #include "engine/scene.h"
 #include "engine/camera.h"
 #include "engine/transform.h"
-#include "engine/behaviour.h"
+#include "engine/game_object.h"
 #include "engine/mesh/animation.h"
 
 #include "./terrain.h"
 
-class CharacterMovement : public engine::Behaviour {
+class CharacterMovement : public engine::GameObject {
  public:
   CharacterMovement(engine::GameObject *parent,
                     float horizontal_speed = 10.0f,

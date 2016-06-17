@@ -4,17 +4,16 @@
 #define ENGINE_RIGID_BODY_H_
 
 #include "./transform.h"
-#include "./behaviour.h"
 #include "./height_map_interface.h"
 
 namespace engine {
 
-class RigidBody : public Behaviour {
+class RigidBody : public GameObject {
  public:
   RigidBody(GameObject* parent, Transform* target,
             const HeightMapInterface& height_map,
             double starting_height = NAN)
-      : Behaviour(parent)
+      : GameObject(parent)
       , target_(target)
       , height_map_(height_map) {
     Transform* targets_parent = target_->parent();

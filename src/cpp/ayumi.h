@@ -3,7 +3,7 @@
 #ifndef LOD_INCLUDE_AYUMI_H_
 #define LOD_INCLUDE_AYUMI_H_
 
-#include "engine/behaviour.h"
+#include "engine/game_object.h"
 #include "engine/shader_manager.h"
 #include "engine/mesh/animated_mesh_renderer.h"
 
@@ -11,7 +11,7 @@
 #include "./skybox.h"
 #include "./shadow.h"
 
-class Ayumi : public engine::Behaviour {
+class Ayumi : public engine::GameObject {
  public:
   explicit Ayumi(GameObject* parent);
   virtual ~Ayumi() {}

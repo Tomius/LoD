@@ -4,13 +4,13 @@
 #define LOD_FPS_DISPLAY_H_
 
 #include "engine/scene.h"
-#include "engine/behaviour.h"
+#include "engine/game_object.h"
 #include "engine/gui/label.h"
 
-class FpsDisplay : public engine::Behaviour {
+class FpsDisplay : public engine::GameObject {
  public:
   explicit FpsDisplay(engine::GameObject* parent)
-      : engine::Behaviour(parent), kRefreshInterval(0.1f)
+      : engine::GameObject(parent), kRefreshInterval(0.1f)
       , sum_frame_num_(0), sum_time_(0) {
     label_ = addComponent<engine::gui::Label>(L"FPS: ", glm::vec2{0.8f, 0.9f},
              engine::gui::Font{"src/resources/fonts/Vera.ttf", 30,

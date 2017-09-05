@@ -8,14 +8,14 @@
 #include "../engine/misc.h"
 #include "../engine/scene.h"
 #include "../engine/camera.h"
-#include "../engine/GameObject.h"
-#include "../engine/shapes/cube_mesh.h"
+#include "../engine/game_object.h"
+#include "../engine/debug/debug_shape.h"
 #include "../engine/gui/label.h"
 
 #include "../after_effects.h"
 #include "./main_scene.h"
 
-using engine::shapes::CubeMesh;
+using engine::debug::Cube;
 
 class BulletRigidBody : public engine::GameObject {
  public:
@@ -70,14 +70,14 @@ class StaticPlane : public engine::GameObject {
   explicit StaticPlane(GameObject* parent) : GameObject(parent) {
     btCollisionShape* shape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     addComponent<BulletRigidBody>(glm::vec3(), 0.0f, shape);
-    auto plane_mesh = addComponent<CubeMesh>(glm::vec3(0.5, 0.5, 0.5));
+    auto plane_mesh = addComponent<Cube>(glm::vec3(0.5, 0.5, 0.5));
     plane_mesh->transform()->set_local_pos(glm::vec3(0, -0.5f, 0));
     plane_mesh->transform()->set_local_scale(glm::vec3(400, 1, 400));
   }
 };
 
 class RedCube : public engine::GameObject {
-  CubeMesh* cube_mesh_;
+  Cube* cube_mesh_;
  public:
   explicit RedCube(GameObject* parent, const glm::vec3& pos,
                    const glm::vec3& v, const glm::quat& rot)
@@ -90,18 +90,12 @@ class RedCube : public engine::GameObject {
     rigid_body->setCollisionFlags(rigid_body->getCollisionFlags() |
         btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
     rigid_body->setUserPointer(this);
-    cube_mesh_ = addComponent<CubeMesh>(glm::vec3(0.5, 0.0, 0.0));
-  }
-
-  virtual void update() override {
-    glm::vec3 color = cube_mesh_->color();
-    color = glm::vec3(color.r, std::min(0.99f*color.g, 0.9f),
-                               std::min(0.99f*color.b, 0.9f));
-    cube_mesh_->set_color(color);
+    cube_mesh_ = addComponent<Cube>(glm::vec3(0.5, 0.0, 0.0));
+    cube_mesh_->set_color({1.0, 0.0, 0.0});
   }
 
   void addColor(const glm::vec3& color) {
-    cube_mesh_->set_color(cube_mesh_->color() + color);
+    cube_mesh_->set_color(glm::clamp(cube_mesh_->color() + color, glm::vec3(0.0), glm::vec3(1.0)));
   }
 
   void set_color(const glm::vec3& color) {
@@ -129,9 +123,11 @@ class BulletBasicsScene : public engine::Scene {
   void addSmallRedCube() {
     auto cam = camera();
     glm::vec3 pos = cam->transform()->pos() + 3.0f*cam->transform()->forward();
-    addComponent<RedCube>(pos, 20.0f*cam->transform()->forward(),
+    dynamic_objects->addComponent<RedCube>(pos, 20.0f*cam->transform()->forward(),
                           cam->transform()->rot());
   }
+
+  GameObject* dynamic_objects = nullptr;
 
  public:
   BulletBasicsScene() {
@@ -153,7 +149,10 @@ class BulletBasicsScene : public engine::Scene {
 
     auto skybox = addComponent<Skybox>();
     addComponent<StaticPlane>();
-    auto after_effects = addComponent<AfterEffects>(skybox);
+
+    dynamic_objects = addComponent<GameObject>();
+
+    addComponent<AfterEffects>(skybox);
 
     auto cam = addComponent<engine::FreeFlyCamera>(
         M_PI/3, 1, 500, glm::vec3(20, 5, 0), glm::vec3(), 15, 10);
@@ -177,10 +176,10 @@ class BulletBasicsScene : public engine::Scene {
     glm::vec3 pos(cam->pos()),fwd(cam->forward()*1000.0f);
     btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(pos.x,pos.y,pos.z), btVector3(fwd.x,fwd.y,fwd.z));
     world_->rayTest(btVector3(pos.x,pos.y,pos.z), btVector3(fwd.x,fwd.y,fwd.z),rayCallback);
-    if (rayCallback.hasHit()) {
-      auto rcube = dynamic_cast<RedCube*>(static_cast<GameObject*>(rayCallback.m_collisionObject->getUserPointer()));
-      if (rcube) { rcube->set_color(glm::vec3(0.5, 0.5, 0.5)); }
-    }
+    // if (rayCallback.hasHit()) {
+    //   auto rcube = dynamic_cast<RedCube*>(static_cast<GameObject*>(rayCallback.m_collisionObject->getUserPointer()));
+    //   if (rcube) { rcube->set_color(glm::vec3(0.5, 0.5, 0.5)); }
+    // }
   }
 
   virtual void keyAction(int key, int scancode, int action, int mods) override {

@@ -65,7 +65,6 @@ class GameObject {
   virtual void mouseMoved(double xpos, double ypos) {}
   virtual void collision(const GameObject* other) {}
 
-
   virtual void shadowRenderAll();
   virtual void renderAll();
   virtual void render2DAll();
@@ -86,7 +85,7 @@ class GameObject {
   bool enabled_;
 
  private:
-  void InitScreenSize();
+  void initScreenSize();
 
   template<typename T>
   static T* FindComponent(const GameObject* obj);

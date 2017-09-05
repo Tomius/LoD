@@ -26,7 +26,7 @@ T* GameObject::addComponent(Args&&... args) {
     T *obj = new T(this, std::forward<Args>(args)...);
     components_.push_back(std::unique_ptr<GameObject>(obj));
     // make sure that the object is aware of the screen's size
-    obj->InitScreenSize();
+    obj->initScreenSize();
 
     return obj;
   } catch (const std::exception& ex) {

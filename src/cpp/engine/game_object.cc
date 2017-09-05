@@ -25,7 +25,7 @@ GameObject* GameObject::addComponent(std::unique_ptr<GameObject>&& component) {
     obj->transform_->set_parent(transform_.get());
     obj->scene_ = scene_;
     // make sure that the object is aware of the screen's size
-    obj->InitScreenSize();
+    obj->initScreenSize();
 
     return obj;
   } catch (const std::exception& ex) {
@@ -124,7 +124,7 @@ void GameObject::collisionAll(const GameObject* other) {
   }
 }
 
-void GameObject::InitScreenSize() {
+void GameObject::initScreenSize() {
   glm::vec2 window_size = GameEngine::window_size();
   screenResized(window_size.x, window_size.y);
 }

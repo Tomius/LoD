@@ -56,15 +56,9 @@ MainScene::MainScene() {
     set_shadow(shadow);
   PrintDebugTime();
 
-  Terrain *terrain = engine::GameEngine::scene()->findComponent<Terrain>();
-  if (terrain == nullptr) {
-    PrintDebugText("Initializing the terrain");
-    terrain->parent()->removeComponent(terrain);
-    terrain = addComponent<Terrain>();
-    PrintDebugTime();
-  } else {
-    addComponent(terrain->parent()->removeComponent(terrain));
-  }
+  PrintDebugText("Initializing the terrain");
+    Terrain *terrain = addComponent<Terrain>();
+  PrintDebugTime();
   const engine::HeightMapInterface& height_map = terrain->height_map();
 
   PrintDebugText("Initializing Ayumi");

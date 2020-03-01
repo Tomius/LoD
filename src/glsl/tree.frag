@@ -1,16 +1,18 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
 #include "fog.frag"
 #include "visibility_range_limit.frag"
 #include "hemisphere_lighting.frag"
 
-varying vec3 c_vPos;
-varying vec3 w_vNormal;
-varying vec2 vTexCoord;
+in vec3 c_vPos;
+in vec3 w_vNormal;
+in vec2 vTexCoord;
 
 uniform sampler2D uDiffuseTexture;
+
+out vec4 fragColor;
 
 void main() {
   vec4 color = texture2D(uDiffuseTexture, vTexCoord);
@@ -23,5 +25,5 @@ void main() {
   float actual_alpha = min(color.a, VisibilityRangeAlpha(c_vPos));
   if (actual_alpha < 1e-1) { discard; }
 
-  gl_FragColor = vec4(ApplyFog(final_color, c_vPos), actual_alpha);
+  fragColor = vec4(ApplyFog(final_color, c_vPos), actual_alpha);
 }

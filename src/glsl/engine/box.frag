@@ -1,8 +1,8 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 uniform vec4 uBgColor, uBorderColor;
 uniform vec2 uBorderWidth;
@@ -10,6 +10,8 @@ uniform vec2 uCorners[4];
 
 uniform vec4 uBgTopColor, uBgTopMidColor, uBgBottomMidColor, uBgBottomColor;
 uniform float uBorderPixels, uTransitionHeight, uRoundness, uInverted;
+
+out vec4 fragColor;
 
 #define CheckCornerMacro(corner_num)                                      \
   float len = length(gl_FragCoord.xy - uCorners[corner_num]);             \
@@ -58,5 +60,5 @@ vec4 bgColor() {
 }
 
 void main() {
-  gl_FragColor = IsBorder() ? uBorderColor : bgColor();
+  fragColor = IsBorder() ? uBorderColor : bgColor();
 }

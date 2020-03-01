@@ -2,7 +2,7 @@
 // This shader is based on an oglplus example:
 // http://oglplus.org/oglplus/html/oglplus_2023_sky_8cpp-example.html
 
-#version 130
+#version 430
 
 #export vec3 SkyColor(vec3 look_dir);
 #export vec3 SunPos();
@@ -47,7 +47,7 @@ vec3 SkyColor(vec3 look_dir) {
 
   // Counting the day_color
   {
-    float sun_power = clamp(sun_pos.y + 0.12, 0.1, 1);
+    float sun_power = clamp(sun_pos.y + 0.12, 0.1, 1.0);
     float look_dir_sun_dist =
           max(dot(look_dir, sun_pos), 0.0) + 0.003 * sqrt(atm_size);
 
@@ -76,7 +76,7 @@ vec3 SkyColor(vec3 look_dir) {
 
   // Counting the night_color
   {
-    float moon_power = 0.25 * clamp(moon_pos.y + 0.12, 0.1, 1);
+    float moon_power = 0.25 * clamp(moon_pos.y + 0.12, 0.1, 1.0);
     float look_dir_moon_dist = max(dot(look_dir, moon_pos), 0.0)
                               + 0.0005 * sqrt(atm_size);
 
@@ -94,7 +94,7 @@ vec3 SkyColor(vec3 look_dir) {
     night_color = air + vec3(0.4) * moon;
   }
 
-  vec3 final_color = clamp(night_color + day_color, 0, 1);
+  vec3 final_color = clamp(night_color + day_color, 0.0, 1.0);
   return final_color*final_color; // srgb -> linear
 }
 
@@ -102,8 +102,8 @@ vec3 SkyColor(vec3 look_dir) {
 vec3 SunPos() { return sun_pos; }
 vec3 MoonPos() { return moon_pos; }
 
-float SunPower() { return clamp(sun_pos.y, 0, 1); }
-float MoonPower() { return clamp(moon_pos.y, 0, 1); }
+float SunPower() { return clamp(sun_pos.y, 0.0, 1.0); }
+float MoonPower() { return clamp(moon_pos.y, 0.0, 1.0); }
 
 vec3 SunColor() { return vec3(1.0, 0.9, 0.75); }
 vec3 MoonColor() { return vec3(0.4); }

@@ -1,11 +1,13 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
 #include "sky.frag"
 
-varying vec3 vTexCoord;
+in vec3 vTexCoord;
+
+out vec4 fragColor;
 
 void main() {
-  gl_FragColor = vec4(SkyColor(normalize(vTexCoord)), 1.0);
+  fragColor = vec4(SkyColor(normalize(vTexCoord)), 1.0);
 }

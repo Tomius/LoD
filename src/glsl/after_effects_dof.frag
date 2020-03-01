@@ -1,9 +1,11 @@
-#version 130
+#version 430
 
 #include "sky.frag"
 #include "depth_of_field.frag"
 #include "lens_flare.frag"
 #include "after_effects.frag"
+
+out vec4 fragColor;
 
 void main() {
   FetchNeighbours();
@@ -12,5 +14,5 @@ void main() {
   if (SunPos().y > 0) {
     color += LensFlare();
   }
-  gl_FragColor = vec4(clamp(color, vec3(0), vec3(1)), 1);
+  fragColor = vec4(clamp(color, vec3(0), vec3(1)), 1);
 }

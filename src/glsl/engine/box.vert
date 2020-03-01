@@ -1,12 +1,12 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
-attribute vec2 aPosition, aTexCoord;
+in vec2 aPosition, aTexCoord;
 
 uniform vec2 uOffset, uScale;
 
-varying vec2 vTexCoord;
+out vec2 vTexCoord;
 
 void main() {
   vTexCoord = aTexCoord;

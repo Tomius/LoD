@@ -1,17 +1,17 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
 #include "engine/cdlod_terrain.vert"
 
 uniform mat4 uProjectionMatrix, uCameraMatrix, uModelMatrix;
 uniform vec2 CDLODTerrain_uTexSize;
 
-varying vec3  w_vNormal;
-varying vec3  c_vPos, w_vPos;
-varying vec2  vTexCoord;
-varying float vInvalid;
-varying mat3  vNormalMatrix;
+out vec3  w_vNormal;
+out vec3  c_vPos, w_vPos;
+out vec2  vTexCoord;
+out float vInvalid;
+out mat3  vNormalMatrix;
 
 void main() {
   vec3 w_pos = CDLODTerrain_worldPos();

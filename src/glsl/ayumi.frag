@@ -1,16 +1,18 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
 #include "sky.frag"
 #include "hemisphere_lighting.frag"
 
-varying vec3 w_vNormal, c_vNormal;
-varying vec3 w_vPos, c_vPos;
-varying vec2 vTexCoord;
+in vec3 w_vNormal, c_vNormal;
+in vec3 w_vPos, c_vPos;
+in vec2 vTexCoord;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uDiffuseTexture, uSpecularTexture;
+
+out vec4 fragColor;
 
 const float kSpecularShininess = 20.0f;
 
@@ -55,5 +57,5 @@ void main() {
   vec3 diffuse_color = texture2D(uDiffuseTexture, vTexCoord).rgb;
   vec3 final_color = diffuse_color * lighting;
 
-  gl_FragColor = vec4(final_color, 1.0);
+  fragColor = vec4(final_color, 1.0);
 }

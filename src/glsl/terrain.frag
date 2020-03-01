@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
 #include "sky.frag"
 #include "fog.frag"
@@ -9,11 +9,11 @@
 // This might be overwritten by the c++ code.
 #define SHADOW_MAP_NUM 16
 
-varying vec3  w_vNormal;
-varying vec3  c_vPos, w_vPos;
-varying vec2  vTexCoord;
-varying float vInvalid;
-varying mat3  vNormalMatrix;
+in vec3  w_vNormal;
+in vec3  c_vPos, w_vPos;
+in vec2  vTexCoord;
+in float vInvalid;
+in mat3  vNormalMatrix;
 
 uniform mat4 uCameraMatrix;
 uniform sampler2D uGrassMap0, uGrassMap1, uGrassNormalMap;
@@ -23,10 +23,8 @@ uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;
 uniform ivec2 uShadowAtlasSize;
 
-// We love #version 130
-int min(int a, int b) {
-  return a > b ? b : a;
-}
+
+out vec4 fragColor;
 
 // -------======{[ Shadow ]}======-------
 
@@ -141,5 +139,5 @@ void main() {
   }
   vec3 final_color = diffuse_color * (visibility + AmbientPower()) * lighting;
 
-  gl_FragColor = vec4(ApplyFog(final_color, c_vPos), 1);
+  fragColor = vec4(ApplyFog(final_color, c_vPos), 1);
 }

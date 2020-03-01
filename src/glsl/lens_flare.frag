@@ -2,7 +2,7 @@
 // Lens flare based on musk's.
 // See the original at: https://www.shadertoy.com/view/4sX3Rs
 
-#version 130
+#version 430
 
 #export vec3 LensFlare();
 

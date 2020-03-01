@@ -1,12 +1,14 @@
 // Copyright (c) 2014, Tamas Csala
 
-attribute vec4 aPosition;
-attribute vec2 aTexCoord;
+#version 430
+
+in vec4 aPosition;
+in vec2 aTexCoord;
 
 uniform mat4 uProjectionMatrix;
 uniform vec2 uOffset;
 
-varying vec2 vTexCoord;
+out vec2 vTexCoord;
 
 void main() {
   vTexCoord = aTexCoord;

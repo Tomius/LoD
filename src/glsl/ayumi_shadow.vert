@@ -1,44 +1,44 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
 // External macros
 #define BONE_NUM
 #define BONE_ATTRIB_NUM
 
-attribute vec4 aPosition;
+in vec4 aPosition;
 
 #if BONE_ATTRIB_NUM > 0
-attribute vec4 aBoneIDs0;
-attribute vec4 aWeights0;
+in vec4 aBoneIDs0;
+in vec4 aWeights0;
 #endif
 #if BONE_ATTRIB_NUM > 1
-attribute vec4 aBoneIDs1;
-attribute vec4 aWeights1;
+in vec4 aBoneIDs1;
+in vec4 aWeights1;
 #endif
 #if BONE_ATTRIB_NUM > 2
-attribute vec4 aBoneIDs2;
-attribute vec4 aWeights2;
+in vec4 aBoneIDs2;
+in vec4 aWeights2;
 #endif
 #if BONE_ATTRIB_NUM > 3
-attribute vec4 aBoneIDs3;
-attribute vec4 aWeights3;
+in vec4 aBoneIDs3;
+in vec4 aWeights3;
 #endif
 #if BONE_ATTRIB_NUM > 4
-attribute vec4 aBoneIDs4;
-attribute vec4 aWeights4;
+in vec4 aBoneIDs4;
+in vec4 aWeights4;
 #endif
 #if BONE_ATTRIB_NUM > 5
-attribute vec4 aBoneIDs5;
-attribute vec4 aWeights5;
+in vec4 aBoneIDs5;
+in vec4 aWeights5;
 #endif
 #if BONE_ATTRIB_NUM > 6
-attribute vec4 aBoneIDs6;
-attribute vec4 aWeights6;
+in vec4 aBoneIDs6;
+in vec4 aWeights6;
 #endif
 #if BONE_ATTRIB_NUM > 7
-attribute vec4 aBoneIDs7;
-attribute vec4 aWeights7;
+in vec4 aBoneIDs7;
+in vec4 aWeights7;
 #endif
 
 uniform mat4 uMCP;
@@ -73,6 +73,10 @@ mat4 getBoneMatrix() {
   #if BONE_ATTRIB_NUM > 6
     for (int j = 0; j < 4; j++)
       BoneMatrix += uBones[int(aBoneIDs6[j])] * aWeights6[j];
+  #endif
+  #if BONE_ATTRIB_NUM > 7
+    for (int j = 0; j < 4; j++)
+      BoneMatrix += uBones[int(aBoneIDs7[j])] * aWeights7[j];
   #endif
   return BoneMatrix;
 }

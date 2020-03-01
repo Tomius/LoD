@@ -1,11 +1,13 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 uniform sampler2D uTex;
 
+out vec4 fragColor;
+
 void main() {
-  gl_FragColor = vec4(texture2D(uTex, vTexCoord).rgb, 1.0);
+  fragColor = vec4(texture2D(uTex, vTexCoord).rgb, 1.0);
 }

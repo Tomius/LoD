@@ -1,11 +1,11 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
-attribute vec4 aPosition;
-attribute vec2 aTexCoord;
+in vec4 aPosition;
+in vec2 aTexCoord;
 
-varying vec2 vTexCoord;
+out vec2 vTexCoord;
 
 void main() {
   vTexCoord = vec2(aTexCoord.s, 1-aTexCoord.t);

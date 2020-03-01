@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
 #export float VisibilityRangeAlpha(vec3 c_pos);
 

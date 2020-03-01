@@ -1,19 +1,19 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
 #export vec3 CDLODTerrain_worldPos();
 #export vec2 CDLODTerrain_texCoord(vec3 pos);
 #export vec3 CDLODTerrain_normal(vec3 pos);
 #export mat3 CDLODTerrain_normalMatrix(vec3 normal);
 
-attribute vec2 CDLODTerrain_aPosition; // I hate the lack of namespaces
+in vec2 CDLODTerrain_aPosition; // I hate the lack of namespaces
 
 #define VERTEX_ATTRIB_DIVISOR true
 
 #ifdef VERTEX_ATTRIB_DIVISOR
   // Vertex attrib divisor works like a uniform
-  attribute vec4 CDLODTerrain_uRenderData;
+  in vec4 CDLODTerrain_uRenderData;
 #else
   uniform vec4 CDLODTerrain_uRenderData;
 #endif

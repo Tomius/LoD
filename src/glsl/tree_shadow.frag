@@ -1,8 +1,8 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 130
+#version 430
 
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 uniform sampler2D uDiffuseTexture;
 

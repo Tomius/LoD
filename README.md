@@ -11,7 +11,7 @@ A screenshot of the engine:
 Dependencies:
 -------------
 * C++11 compiler. (clang recommended)
-* OpenGL 2.1, Shader model 120 (But uses 3.3 features if available)
+* OpenGL 4.3, Shader model 430
 * GLEW - for loading OpenGL extensions
 * Magick++ - for image loading.
 * Assimp - for loading 3D models.

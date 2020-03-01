@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 120
+#version 130
 
 #include "sky.frag"
 #include "fog.frag"
@@ -23,7 +23,7 @@ uniform mat4 uShadowCP[SHADOW_MAP_NUM];
 uniform int uNumUsedShadowMaps;
 uniform ivec2 uShadowAtlasSize;
 
-// We love #version 120
+// We love #version 130
 int min(int a, int b) {
   return a > b ? b : a;
 }

@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 120
+#version 130
 
 #include "sky.frag"
 #include "hemisphere_lighting.frag"

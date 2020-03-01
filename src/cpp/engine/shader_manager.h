@@ -14,24 +14,6 @@
 
 namespace engine {
 
-inline gl::ShaderType shader_type(const std::string& filename) {
-  size_t dot_position = filename.find_last_of('.');
-  if (dot_position != std::string::npos) {
-    std::string extension = filename.substr(dot_position+1);
-    if (extension == "frag") {
-      return gl::kFragmentShader;
-    } else if (extension == "vert") {
-      return gl::kVertexShader;
-    } else if (extension == "geom") {
-      return gl::kGeometryShader;
-    } else {
-      throw std::invalid_argument("Can't guess the shader type of " + filename);
-    }
-  } else {
-    throw std::invalid_argument("Can't guess the shader type of " + filename);
-  }
-}
-
 class ShaderFile;
 class ShaderProgram;
 class ShaderManager {
@@ -44,6 +26,25 @@ class ShaderManager {
 };
 
 class ShaderFile : public gl::Shader {
+ private:
+  gl::ShaderType shader_type(const std::string& filename) {
+    size_t dot_position = filename.find_last_of('.');
+    if (dot_position != std::string::npos) {
+      std::string extension = filename.substr(dot_position+1);
+      if (extension == "frag") {
+        return gl::kFragmentShader;
+      } else if (extension == "vert") {
+        return gl::kVertexShader;
+      } else if (extension == "geom") {
+        return gl::kGeometryShader;
+      } else {
+        throw std::invalid_argument("Can't guess the shader type of " + filename);
+      }
+    } else {
+      throw std::invalid_argument("Can't guess the shader type of " + filename);
+    }
+  }
+
  public:
   ShaderFile(const std::string& filename)
       : ShaderFile(filename, gl::ShaderSource{filename}) {}
@@ -60,7 +61,7 @@ class ShaderFile : public gl::Shader {
     }
     findExports(src_str);
     set_source(src_str);
-    set_source_file(filename);
+    set_source_file_name(filename);
     compile();
   }
 

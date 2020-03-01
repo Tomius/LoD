@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 120
+#version 130
 
 varying vec2 vTexCoord;
 

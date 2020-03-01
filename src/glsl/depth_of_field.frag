@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 120
+#version 130
 
 #export vec3 DoF(vec3 texel_color);
 
@@ -23,8 +23,8 @@ vec3 DoF(vec3 texel_color) {
   float floor_level = floor(level);
   vec3 color = texel_color;
   for (int i = 1; i <= floor_level; ++i) {
-    color += texture2DLod(uTex, coord, float(i)).rgb;
+    color += textureLod(uTex, coord, float(i)).rgb;
   }
-  color += (level-floor_level) * texture2DLod(uTex, coord, floor_level+1).rgb;
+  color += (level-floor_level) * textureLod(uTex, coord, floor_level+1).rgb;
   return color / (1 + level);
 }

@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 120
+#version 130
 
 #export vec3 CDLODTerrain_worldPos();
 #export vec2 CDLODTerrain_texCoord(vec3 pos);

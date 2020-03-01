@@ -6,7 +6,7 @@
 #include <typeinfo>
 #include "./scene.h"
 
-// #define ENGINE_NO_FULLSCREEN 1
+#define ENGINE_NO_FULLSCREEN 1
 
 namespace engine {
 

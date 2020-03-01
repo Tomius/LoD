@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Tamas Csala
 
-#version 120
+#version 130
 
 #include "fog.frag"
 #include "visibility_range_limit.frag"

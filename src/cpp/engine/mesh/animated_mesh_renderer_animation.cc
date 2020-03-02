@@ -18,8 +18,7 @@ unsigned AnimatedMeshRenderer::findPosition(float anim_time,
          return i;
       }
    }
-   // Should never get here
-   assert(0);
+   return node_anim->mNumPositionKeys - 2;
 }
 
 unsigned AnimatedMeshRenderer::findRotation(float anim_time,
@@ -29,7 +28,7 @@ unsigned AnimatedMeshRenderer::findRotation(float anim_time,
          return i;
       }
    }
-   assert(0);
+   return node_anim->mNumRotationKeys - 2;
 }
 
 unsigned AnimatedMeshRenderer::findScaling(float anim_time,
@@ -39,7 +38,7 @@ unsigned AnimatedMeshRenderer::findScaling(float anim_time,
          return i;
       }
    }
-   assert(0);
+   return node_anim->mNumScalingKeys - 2;
 }
 
 void AnimatedMeshRenderer::calcInterpolatedPosition(
@@ -119,7 +118,7 @@ void AnimatedMeshRenderer::updateBoneTree(Animation& anim,
                                           const aiNode* node,
                                           const glm::mat4& parent_transform) {
    std::string node_name(node->mName.data);
-   const aiAnimation* animation = anim.current_anim_.handle->mAnimations[0];
+   const aiAnimation* animation = anim.current_anim_.handle->mAnimations[anim.current_anim_.handle->mNumAnimations-1];
    const aiNodeAnim* node_anim = findNodeAnim(animation, node_name);
    glm::mat4 local_transform = engine::convertMatrix(node->mTransformation);
 
@@ -177,8 +176,8 @@ void AnimatedMeshRenderer::updateBoneTreeInTransition(
                                              const aiNode* node,
                                              const glm::mat4& parent_transform) {
    std::string node_name(node->mName.data);
-   const aiAnimation* prev_animation = anim.last_anim_.handle->mAnimations[0];
-   const aiAnimation* next_animation = anim.current_anim_.handle->mAnimations[0];
+   const aiAnimation* prev_animation = anim.last_anim_.handle->mAnimations[anim.last_anim_.handle->mNumAnimations - 1];
+   const aiAnimation* next_animation = anim.current_anim_.handle->mAnimations[anim.current_anim_.handle->mNumAnimations - 1];
    const aiNodeAnim* prev_node_anim = findNodeAnim(prev_animation, node_name);
    const aiNodeAnim* next_node_anim = findNodeAnim(next_animation, node_name);
 
@@ -247,29 +246,31 @@ void AnimatedMeshRenderer::updateBoneInfo(Animation& anim,
       || !anim.last_anim_.handle || anim.last_anim_.handle->mAnimations == 0) {
       throw std::runtime_error("Tried to run an invalid animation.");
    }
+   auto last_anim = anim.last_anim_.handle->mAnimations[anim.last_anim_.handle->mNumAnimations - 1];
+   auto current_anim = anim.current_anim_.handle->mAnimations[anim.current_anim_.handle->mNumAnimations - 1];
 
-   float last_ticks_per_second = anim.last_anim_.handle->mAnimations[0]->mTicksPerSecond > 1e-10 ? // != 0
-                                 anim.last_anim_.handle->mAnimations[0]->mTicksPerSecond : 24.0f;
+   float last_ticks_per_second = last_anim->mTicksPerSecond > 1e-10 ? // != 0
+                                 last_anim->mTicksPerSecond : 24.0f;
    float last_time_in_ticks = anim.anim_meta_info_.last_period_time * (anim.last_anim_.speed * last_ticks_per_second);
    float last_anim_time;
    if (anim.last_anim_.flags.test(AnimFlag::Repeat)) {
-      last_anim_time = fmod(last_time_in_ticks, (float)anim.last_anim_.handle->mAnimations[0]->mDuration);
+      last_anim_time = fmod(last_time_in_ticks, (float)last_anim->mDuration);
    } else {
-      last_anim_time = std::min(last_time_in_ticks, (float)anim.last_anim_.handle->mAnimations[0]->mDuration);
+      last_anim_time = std::min(last_time_in_ticks, (float)last_anim->mDuration);
    }
    if (anim.last_anim_.flags.test(AnimFlag::Backwards)) {
-      last_anim_time = (float)anim.last_anim_.handle->mAnimations[0]->mDuration - last_anim_time;
+      last_anim_time = (float)last_anim->mDuration - last_anim_time;
    }
 
-   float current_ticks_per_second = anim.current_anim_.handle->mAnimations[0]->mTicksPerSecond > 1e-10 ? // != 0
-                                    anim.current_anim_.handle->mAnimations[0]->mTicksPerSecond : 24.0f;
+   float current_ticks_per_second = current_anim->mTicksPerSecond > 1e-10 ? // != 0
+                                    current_anim->mTicksPerSecond : 24.0f;
    float current_time_in_ticks =
       (time - anim.anim_meta_info_.end_of_last_anim) * (anim.current_anim_.speed * current_ticks_per_second);
    float current_anim_time;
    if (anim.current_anim_.flags.test(AnimFlag::Repeat)) {
-      current_anim_time = fmod(current_time_in_ticks, (float)anim.current_anim_.handle->mAnimations[0]->mDuration);
+      current_anim_time = fmod(current_time_in_ticks, (float)current_anim->mDuration);
    } else {
-      if (current_time_in_ticks < (float)anim.current_anim_.handle->mAnimations[0]->mDuration) {
+      if (current_time_in_ticks < (float)current_anim->mDuration) {
          current_anim_time = current_time_in_ticks;
       } else {
          anim.animationEnded(time);
@@ -279,7 +280,7 @@ void AnimatedMeshRenderer::updateBoneInfo(Animation& anim,
    }
 
    if (anim.current_anim_.flags.test(AnimFlag::Backwards)) {
-      current_anim_time = (float)anim.current_anim_.handle->mAnimations[0]->mDuration - current_anim_time;
+      current_anim_time = (float)current_anim->mDuration - current_anim_time;
    }
 
    bool in_transition =
@@ -299,7 +300,7 @@ void AnimatedMeshRenderer::updateBoneInfo(Animation& anim,
    // Start a new loop if necessary
    if (anim.current_anim_.flags.test(AnimFlag::Repeat)) {
       unsigned loop_count = current_time_in_ticks /
-                        (float)anim.current_anim_.handle->mAnimations[0]->mDuration;
+                        (float)current_anim->mDuration;
       if (loop_count > anim.anim_meta_info_.last_loop_count) {
          if (anim.current_anim_.flags.test(AnimFlag::MirroredRepeat)) {
             anim.current_anim_.flags ^= AnimFlag::Mirrored;

@@ -41,7 +41,7 @@ const aiNodeAnim* AnimatedMeshRenderer::getRootBone(const aiNode* node,
                                                     const aiScene* anim) {
   std::string node_name(node->mName.data);
 
-  const aiAnimation* animation = anim->mAnimations[0];
+  const aiAnimation* animation = anim->mAnimations[anim->mNumAnimations - 1];
   const aiNodeAnim* node_anim = findNodeAnim(animation, node_name);
 
   if (node_anim) {

@@ -61,6 +61,3 @@ Inspirations, resources and tools:
 * [Gamasutra fast blur artice](http://www.gamasutra.com/view/feature/3102/four_tricks_for_fast_blurring_in_.php) - The mipmap based DoF was inspired by this.
 * [Filip Strugar's CDLOD paper](http://www.vertexasylum.com/downloads/cdlod/cdlod_latest.pdf) - Implemented the current Level of Detail algorithm for the terrain using this paper (with some changes).
 * [Musk's lens flare](https://www.shadertoy.com/view/XdfXRX) - The lens flare I use is based on this.
-
-----------------------
-If you have any problem, please post in the issues tab or mail me at icyplusplus@gmail.com. Any feedback would be appreciated.
